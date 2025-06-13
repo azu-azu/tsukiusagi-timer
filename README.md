@@ -2,6 +2,9 @@
 
 > A poetic Pomodoro timer inspired by the moon and the quiet spirit of TsukiUsagi.
 
+> Started from a moment I almost cried.
+> That’s where TsukiUsagi began.
+
 ## Features
 
 - A gentle user interface built with SwiftUI
