@@ -18,5 +18,5 @@ struct GlitterText: View {
 }
 
 #Preview {
-    GlitterText(text: "Hello")
+    GlitterText(text: "studying")
 }

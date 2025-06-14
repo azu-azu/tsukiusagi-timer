@@ -8,13 +8,18 @@ TsukiUsagi/
 │   ├── Settings/
 │   │   ├── Toolbar.swift
 │   │   └── View.swift
+│   ├── Moon/
+│   ├── Backgrounds/
 │   ├── UsagiView_1.swift
 │   ├── MoonView.swift
 │   ├── ContentView.swift
 │   ├── BackgroundGradientView.swift
-│   ├── CraterView.swift
 │   ├── StarView.swift
-│   └── UsagiView.swift
+│   ├── UsagiView.swift
+│   ├── GlitterText.swift
+│   └── DateDisplayView.swift
+│
+├── Resources/
 │
 ├── Assets.xcassets/
 │   ├── Contents.json
@@ -53,14 +58,20 @@ TsukiUsagiUITests/
   - `MoonView.swift`: 月の表示用ビュー
   - `UsagiView.swift`, `UsagiView_1.swift`: うさぎの表示用ビュー
   - `BackgroundGradientView.swift`: 背景グラデーション用ビュー
-  - `CraterView.swift`: 月のクレーター表示用ビュー
   - `StarView.swift`: 星の表示用ビュー
+  - `GlitterText.swift`: キラキラテキスト表示用ビュー
+  - `DateDisplayView.swift`: 日付表示用ビュー
 - 機能別サブディレクトリ
   - `Timer/`: タイマー機能関連のビュー
     - `TimerPanel.swift`: タイマーパネル表示用ビュー
   - `Settings/`: 設定画面関連のビュー
     - `Toolbar.swift`: ツールバー表示用ビュー
     - `View.swift`: 設定画面のメインビュー
+  - `Moon/`: 月関連のビューコンポーネント
+  - `Backgrounds/`: 背景関連のビューコンポーネント
+
+### Resources/
+- アプリケーションのリソースファイルを格納するディレクトリ
 
 ### Assets.xcassets/
 - アプリケーションのアセット管理
