@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 struct SessionRecord: Codable, Identifiable {
     let id = UUID()
@@ -12,7 +13,7 @@ struct SessionRecord: Codable, Identifiable {
     }
 }
 
-final class HistoryViewModel: ObservableObject {
+class HistoryViewModel: ObservableObject {
     @Published private(set) var history: [SessionRecord] = []
     private let store = HistoryStore()              // 下で定義
 

@@ -1,5 +1,5 @@
 //
-//  TimerViewModel.swift
+//  TimerController.swift
 //  TsukiUsagi
 //
 //  Created by azu-azu on 2025/06/12.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import SwiftUI
 
-final class TimerViewModel: ObservableObject {
+class TimerViewModel: ObservableObject {
     // 完了フラグ
     @Published var isSessionFinished = false
 

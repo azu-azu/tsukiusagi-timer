@@ -12,6 +12,8 @@ struct ContentView: View {
 	@StateObject private var timerVM: TimerViewModel
 	@State private var showingSettings = false
 
+	private let moonOffsetY: CGFloat = -150
+
 	init() {
 		let history = HistoryViewModel()
 		_historyVM = StateObject(wrappedValue: history)
@@ -35,31 +37,31 @@ struct ContentView: View {
                                 .transition(.opacity.combined(with: .scale))
                             Spacer()
                         }
-                        .offset(y: -150)  // 全体のVStackをオフセット
+                        .offset(y: moonOffsetY)  // 全体のVStackをオフセット
                     } else {
-                        MoonView()
+                        MoonView(offsetY: moonOffsetY, glitterText: "studying")
                             .transition(.opacity)
                     }
                 }
                 .zIndex(1)  // 月とメッセージを背面に
+                .animation(.easeInOut(duration: 0.8), value: timerVM.isSessionFinished)
 
                 // centre UI
                 TimerPanel(timerVM: timerVM)
                     .zIndex(2)  // タイマーパネルを前面に
+                }
 
-				// 設定ボタン
-				.settingsToolbar(showing: $showingSettings)
-				.sheet(isPresented: $showingSettings) {
-					SettingsView()
-				}
-				.toolbar {
-					ToolbarItem(placement: .topBarLeading) {
-						DateDisplayView()
-					}
-				}
-				.navigationBarTitleDisplayMode(.inline)   // optional
-				.animation(.easeInOut(duration: 0.8), value: timerVM.isSessionFinished)
-			}
+			// 設定ボタン
+            .settingsToolbar(showing: $showingSettings)
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    DateDisplayView()
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)   // optional
 		}
 	}
 }
