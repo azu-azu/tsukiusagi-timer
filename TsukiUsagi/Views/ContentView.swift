@@ -22,6 +22,7 @@ struct ContentView: View {
 		NavigationStack {
 			ZStack {
 				BackgroundGradientView()
+				StarView()
 				MoonView()
 
 				// centre UI

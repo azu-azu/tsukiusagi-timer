@@ -11,6 +11,10 @@ struct MoonView: View {
 	@State private var animate = false
 	@State private var float = false
 
+	private let nearY: CGFloat = 200     // 上の位置
+	private let farY:  CGFloat = 44    // 下の位置
+	private let duration: Double = 10
+	
 	var body: some View {
 		ZStack {
 			// 🌕 にじみ光（後ろのぼかし）
@@ -41,31 +45,23 @@ struct MoonView: View {
 				Circle()
 					.fill(Color(hex: "#660066").opacity(0.9))
 					.frame(width: 200, height: 200)
-					.offset(y: animate ? 44 : 272) // アニメーションを元に戻す
+					.offset(y: animate ? nearY : farY)
 					.blur(radius: 4)
-					.animation(
-						.easeInOut(duration: 17)
-							.repeatForever(autoreverses: true),
-						value: animate
-					)
+					.onAppear {
+						withAnimation(
+							Animation
+								.timingCurve(0.4, 0, 0.8, 1.0, duration: duration)
+								.repeatForever(autoreverses: true)
+						) {
+							animate.toggle()  // → 動き出す
+						}
+					}
 
 				// 🌑 クレーター（うっすらした内側の模様）
-				Group {
-					Circle()
-						.fill(Color.white.opacity(0.05))
-						.frame(width: 20, height: 20)
-						.offset(x: -30, y: 10)
+				CraterCluster()
+				CraterCluster(scale: 0.7)         // 70% に縮小
+					.offset(x:  30, y: -25)
 
-					Circle()
-						.fill(Color.white.opacity(0.05))
-						.frame(width: 14, height: 14)
-						.offset(x: 20, y: -25)
-
-					Circle()
-						.fill(Color.white.opacity(0.04))
-						.frame(width: 10, height: 10)
-						.offset(x: 10, y: 25)
-				}
 			}
 			.rotationEffect(.degrees(227)) // CSSのrotate(227deg) に相当
 			.mask(
