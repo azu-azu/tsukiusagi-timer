@@ -5,44 +5,49 @@
 //  Created by azu-azu on 2025/06/12.
 //
 
+//
+//  TimerViewModel.swift
+//  TsukiUsagi
+//
+
 import Foundation
 import Combine
 import SwiftUI
 
-class TimerViewModel: ObservableObject {
-    // 完了フラグ
-    @Published var isSessionFinished = false
+/// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
+final class TimerViewModel: ObservableObject {
 
-    // MARK: - User-configurable values
-    @AppStorage("workMinutes")  private var workMinutes: Int = 25
+    // MARK: – Published 状態
+    @Published var timeRemaining: Int      = 0          // 残り秒
+    @Published var isRunning:     Bool     = false      // 走っているか
+    @Published var isWorkSession: Bool     = true       // true = focus, false = break
+    @Published var isSessionFinished       = false      // 終了フラグ（View 切替に使用）
+    @Published private(set) var startTime: Date?        // セッション開始時刻
+
+    // MARK: – User-configurable
+    @AppStorage("workMinutes")  private var workMinutes:  Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
 
-    // MARK: - Published state
-    @Published var timeRemaining: Int = 0
-    @Published var isRunning: Bool = false
-    @Published var isWorkSession: Bool = true   // true = focus, false = break
-
-    // MARK: - Timer internals
+    // MARK: – 内部
     private var timer: Timer?
-    private var sessionStart: Date?
+    private let historyVM: HistoryViewModel
 
-    // MARK: - Dependency
-    let historyVM: HistoryViewModel
-
-    // MARK: - Public API
+    // MARK: – Init
     init(historyVM: HistoryViewModel) {
         self.historyVM = historyVM
     }
 
+    // MARK: – 公開 API
     func startTimer() {
         guard !isRunning else { return }
-        isRunning = true
 
-        // セッションの長さをセット
-        timeRemaining = (isWorkSession ? workMinutes : breakMinutes) * 60
-        sessionStart = Date()
+        isRunning          = true
+        isSessionFinished  = false
+        startTime          = Date()                       // ★ 開始時刻を記録
+        timeRemaining      = (isWorkSession ? workMinutes : breakMinutes) * 60
 
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
+                                    repeats: true) { [weak self] _ in
             self?.tick()
         }
     }
@@ -55,23 +60,29 @@ class TimerViewModel: ObservableObject {
 
     func resetTimer() {
         stopTimer()
-        timeRemaining = (isWorkSession ? workMinutes : breakMinutes) * 60
+        timeRemaining     = (isWorkSession ? workMinutes : breakMinutes) * 60
+        isSessionFinished = false
+        startTime         = nil
     }
 
+    /// “MM:SS” 表示用
     func formatTime() -> String {
-        let minutes = timeRemaining / 60
-        let seconds = timeRemaining % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        let m = timeRemaining / 60, s = timeRemaining % 60
+        return String(format: "%02d:%02d", m, s)
     }
 
-    // MARK: - Private helpers
+    /// “HH:mm” の開始時刻文字列（開始前は "--:--"）
+    var formattedStartTime: String {
+        guard let start = startTime else { return "--:--" }
+        return TimerViewModel.startFormatter.string(from: start)
+    }
+
+    // MARK: – プライベート
     private func tick() {
-        DispatchQueue.main.async {
-            if self.timeRemaining > 0 {
-                self.timeRemaining -= 1
-            } else {
-                self.sessionCompleted()
-            }
+        if timeRemaining > 0 {
+            timeRemaining -= 1
+        } else {
+            sessionCompleted()
         }
     }
 
@@ -79,22 +90,29 @@ class TimerViewModel: ObservableObject {
         stopTimer()
         isSessionFinished = true
 
-        // Save history
-        if let start = sessionStart {
-            let end = Date()
-            let phase = isWorkSession ? PomodoroPhase.focus : PomodoroPhase.breakTime
-            historyVM.add(start: start, end: end, phase: phase)
+        // 履歴保存
+        if let start = startTime {
+            historyVM.add(
+                start: start,
+                end:   Date(),
+                phase: isWorkSession ? .focus : .breakTime
+            )
         }
 
-        // 次は休憩↔︎作業を切り替える
+        // 次フェーズへトグル
         isWorkSession.toggle()
 
-        // 次のフェーズを通知
-        let nextPhase: PomodoroPhase = isWorkSession ? .focus : .breakTime
-        NotificationManager.shared.sendPhaseChangeNotification(for: nextPhase)
+        // 通知送信
+        NotificationManager.shared
+            .sendPhaseChangeNotification(for: isWorkSession ? .focus : .breakTime)
 
-        // 次のセッションを自動的に開始する
-        // 続けるか判断する時間がほしい場合も多いので、デフォルトでは手動スタートにする
-        // startTimer()
+        // ★ 次セッションはユーザが Start を押すまで待つ
     }
+
+    // MARK: – Static helpers
+    private static let startFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f
+    }()
 }
