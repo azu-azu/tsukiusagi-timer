@@ -24,8 +24,8 @@ struct ContentView: View {
 				BackgroundGradientView()
 				StarView()
 
-                // 月またはメッセージ
                 ZStack {
+                    // 月またはメッセージ
                     if timerVM.isSessionFinished {
                         Text("おつかれさま 🌕")
                             .font(.title3.bold())
@@ -36,10 +36,11 @@ struct ContentView: View {
                             .transition(.opacity)
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .zIndex(1)  // 月とメッセージを背面に
 
-				// centre UI
-				TimerPanel(timerVM: timerVM)
+                // centre UI
+                TimerPanel(timerVM: timerVM)
+                    .zIndex(2)  // タイマーパネルを前面に
 
 				// 設定ボタン
 				.settingsToolbar(showing: $showingSettings)
