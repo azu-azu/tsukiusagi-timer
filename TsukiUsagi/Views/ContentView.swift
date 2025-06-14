@@ -27,10 +27,15 @@ struct ContentView: View {
                 ZStack {
                     // 月またはメッセージ
                     if timerVM.isSessionFinished {
-                        Text("おつかれさま 🌕")
-                            .font(.title3.bold())
-                            .foregroundColor(.white)
-                            .transition(.opacity.combined(with: .scale))
+                        VStack {
+                            Spacer()
+                            Text("おつかれさま 🌕")
+                                .font(.title3.bold())
+                                .foregroundColor(.white)
+                                .transition(.opacity.combined(with: .scale))
+                            Spacer()
+                        }
+                        .offset(y: -150)  // 全体のVStackをオフセット
                     } else {
                         MoonView()
                             .transition(.opacity)

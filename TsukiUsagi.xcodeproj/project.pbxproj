@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3239E1B62DFD7FD9008357CE /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3239E1B52DFD7FD9008357CE /* SDWebImageSwiftUI */; };
+		32AF65F82DFD86DD002B3462 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 32AF65F72DFD86DD002B3462 /* SDWebImageSwiftUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,7 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3239E1B62DFD7FD9008357CE /* SDWebImageSwiftUI in Frameworks */,
+				32AF65F82DFD86DD002B3462 /* SDWebImageSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -117,7 +117,7 @@
 			);
 			name = TsukiUsagi;
 			packageProductDependencies = (
-				3239E1B52DFD7FD9008357CE /* SDWebImageSwiftUI */,
+				32AF65F72DFD86DD002B3462 /* SDWebImageSwiftUI */,
 			);
 			productName = TsukiUsagi;
 			productReference = 32021C782DF97DF200A53A37 /* TsukiUsagi.app */;
@@ -202,7 +202,7 @@
 			mainGroup = 32021C6F2DF97DF200A53A37;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				3239E1B42DFD7FD9008357CE /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				32AF65F62DFD86DD002B3462 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 32021C792DF97DF200A53A37 /* Products */;
@@ -563,7 +563,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3239E1B42DFD7FD9008357CE /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+		32AF65F62DFD86DD002B3462 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
 			requirement = {
@@ -574,9 +574,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3239E1B52DFD7FD9008357CE /* SDWebImageSwiftUI */ = {
+		32AF65F72DFD86DD002B3462 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3239E1B42DFD7FD9008357CE /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			package = 32AF65F62DFD86DD002B3462 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
 			productName = SDWebImageSwiftUI;
 		};
 /* End XCSwiftPackageProductDependency section */
