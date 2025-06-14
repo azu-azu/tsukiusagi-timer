@@ -15,7 +15,7 @@ struct TimerPanel: View {
 			Spacer()
 
 			Text(timerVM.formatTime())
-				.font(.system(size: 48, weight: .bold, design: .rounded))
+				.titleWhiteBold(size: 48, design: .rounded)
 				.foregroundColor(.white)
 				.padding(.top, 100)
 

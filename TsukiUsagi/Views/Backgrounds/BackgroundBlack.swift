@@ -3,14 +3,15 @@ import SwiftUI
 struct BackgroundBlack: View {
 	var body: some View {
 		LinearGradient(
-			gradient: Gradient(colors: [
-				Color(hex: "#000000"),
-				Color(hex: "#333333").opacity(0.8)
+			gradient: Gradient(stops: [
+				.init(color: Color(hex: "#0a0a0a"), location: 0.0), // ほぼ黒
+				.init(color: Color(hex: "#121212"), location: 0.5), // 深い黒
+				.init(color: Color(hex: "#1a1a1a"), location: 1.0)  // やや明るい黒
 			]),
 			startPoint: .top,
 			endPoint: .bottom
 		)
-		.edgesIgnoringSafeArea(.all)
+		.ignoresSafeArea()
 	}
 }
 

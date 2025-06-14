@@ -20,9 +20,9 @@ struct MoonView: View {
 	var body: some View {
 		ZStack {
 			// 🌕 にじみ光（後ろのぼかし）
-			MoonShape(fillColor: Color(hex: "#ffff55").opacity(0.7), radius: 200)
+			MoonShape(fillColor: Color(hex: "#ffff55").opacity(0.3), radius: 200)
 				.compositingGroup()
-				.blur(radius: 100)
+				.blur(radius: 50)
 
 			// 🌕 月の本体（黄色）
 			MoonShape(fillColor: Color(hex: "#ffff55"), radius: 200)

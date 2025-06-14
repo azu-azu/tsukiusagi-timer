@@ -8,6 +8,7 @@ struct StarView: View {
                 Circle()
                     .fill(Color.white.opacity(.random(in: 0.15...0.8)))
                     .frame(width: .random(in: 2...6))
+                    .opacity(0.5)
                     .position(
                         x: .random(in: 0...UIScreen.main.bounds.width),
 						y: .random(in: 0...UIScreen.main.bounds.height * 0.7)
