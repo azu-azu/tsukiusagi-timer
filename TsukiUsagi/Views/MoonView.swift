@@ -28,10 +28,10 @@ struct MoonView: View {
 
 			// 🐇
 			ZStack {
-				UsagiView_1(width: 105, height: 120)
+				UsagiView_1(width: 115, height: 150)
 					.blur(radius: 1)              // ぼかし量
 					.opacity(0.5)                // 透け度を
-					.offset(x: -30)
+					.offset(x: -40)
 			}
 
 

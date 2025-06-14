@@ -8,18 +8,25 @@
 import SwiftUI
 
 struct ContentView: View {
-	@StateObject private var timerVM = TimerViewModel()
+	@StateObject private var historyVM: HistoryViewModel
+	@StateObject private var timerVM: TimerViewModel
 	@State private var showingSettings = false
-	
+
+	init() {
+		let history = HistoryViewModel()
+		_historyVM = StateObject(wrappedValue: history)
+		_timerVM = StateObject(wrappedValue: TimerViewModel(historyVM: history))
+	}
+
 	var body: some View {
 		NavigationStack {
 			ZStack {
 				BackgroundGradientView()
 				MoonView()
-				
+
 				// centre UI
 				TimerPanel(timerVM: timerVM)
-				
+
 				// 設定ボタン
 				.settingsToolbar(showing: $showingSettings)
 				.sheet(isPresented: $showingSettings) {

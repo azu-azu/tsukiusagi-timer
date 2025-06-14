@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct TsukiUsagiApp: App {
+    @StateObject private var historyVM = HistoryViewModel()
+    init() {
+        NotificationManager.shared.requestAuthorization()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(historyVM)
         }
     }
 }
