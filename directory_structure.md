@@ -12,6 +12,8 @@ TsukiUsagi/
 │   ├── MoonView.swift
 │   ├── ContentView.swift
 │   ├── BackgroundGradientView.swift
+│   ├── CraterView.swift
+│   ├── StarView.swift
 │   └── UsagiView.swift
 │
 ├── Assets.xcassets/
@@ -35,7 +37,12 @@ TsukiUsagi/
 ├── Extensions/
 │   └── Color+Hex.swift
 │
-└── TsukiUsagiApp.swift
+├── TsukiUsagiApp.swift
+└── AppDelegate.swift
+
+TsukiUsagi.xcodeproj/
+TsukiUsagiTests/
+TsukiUsagiUITests/
 ```
 
 ## ディレクトリ構造の説明
@@ -46,6 +53,8 @@ TsukiUsagi/
   - `MoonView.swift`: 月の表示用ビュー
   - `UsagiView.swift`, `UsagiView_1.swift`: うさぎの表示用ビュー
   - `BackgroundGradientView.swift`: 背景グラデーション用ビュー
+  - `CraterView.swift`: 月のクレーター表示用ビュー
+  - `StarView.swift`: 星の表示用ビュー
 - 機能別サブディレクトリ
   - `Timer/`: タイマー機能関連のビュー
     - `TimerPanel.swift`: タイマーパネル表示用ビュー
@@ -78,6 +87,11 @@ TsukiUsagi/
 - Swift標準型の拡張機能
   - `Color+Hex.swift`: カラー関連の拡張機能
 
-### TsukiUsagiApp.swift
-- アプリケーションのエントリーポイント
-- アプリケーションの初期化と設定を担当
+### アプリケーション関連ファイル
+- `TsukiUsagiApp.swift`: アプリケーションのエントリーポイント
+- `AppDelegate.swift`: アプリケーションのライフサイクル管理
+
+### テスト関連
+- `TsukiUsagiTests/`: ユニットテスト
+- `TsukiUsagiUITests/`: UIテスト
+- `TsukiUsagi.xcodeproj/`: Xcodeプロジェクト設定
