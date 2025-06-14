@@ -7,10 +7,10 @@
 
 // SettingsToolbar.swift  (TSUKIUSAGI/TsukiUsagi/)
 import SwiftUI
-  
+
 struct SettingsToolbar: ViewModifier {
 	@Binding var showing: Bool
-	  
+
 	func body(content: Content) -> some View {
 		content
 			.toolbar {                       // ← the original toolbar lives here
@@ -24,7 +24,7 @@ struct SettingsToolbar: ViewModifier {
 			}
 	}
 }
-  
+
 // sugary extension so the call site reads nicely
 extension View {
 	func settingsToolbar(showing: Binding<Bool>) -> some View {

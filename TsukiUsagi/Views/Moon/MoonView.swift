@@ -1,5 +1,5 @@
 //
-//  MoonView.swift
+//  View.swift
 //  TsukiUsagi
 //
 //  Created by azu-azu on 2025/06/12.
@@ -11,9 +11,11 @@ struct MoonView: View {
 	@State private var animate = false
 	@State private var float = false
 
-	private let nearY: CGFloat = 200     // 上の位置
-	private let farY:  CGFloat = 44    // 下の位置
+	private let nearY: CGFloat = 200 // 上の位置
+	private let farY:  CGFloat = 44  // 下の位置
 	private let duration: Double = 17
+	let offsetY: CGFloat
+	let glitterText: String
 
 	var body: some View {
 		ZStack {
@@ -36,7 +38,7 @@ struct MoonView: View {
 
 			// 🌘 紫の影（アニメーション）
 			ZStack {
-				MoonShadowView(duration: duration, nearY: nearY, farY: farY)
+				MoonShadow(duration: duration, nearY: nearY, farY: farY)
 
 				// 🌑 クレーター（うっすらした内側の模様）
 				CraterCluster()
@@ -48,8 +50,12 @@ struct MoonView: View {
 				MoonShape(fillColor: .white, radius: 200)
 					.scaleEffect(1.05)
 			)
+
+			// ✨ キラキラ文字
+			GlitterText(text: glitterText)
+				.offset(x: 20)
 		}
-		.offset(y: -150)
+		.offset(y: offsetY)
 		.onAppear {
 			animate = true
 		}

@@ -3,20 +3,26 @@ import SDWebImageSwiftUI
 
 struct GlitterText: View {
     let text: String
+    var font: Font = .system(size: 30, weight: .bold)
 
     var body: some View {
-        AnimatedImage(url: Bundle.main.url(forResource: "blue", withExtension: "gif"))
-            .resizable()
-            .scaledToFill()
-            .mask(
-                Text(text)
-                    .font(.system(size: 48, weight: .bold))
+        // ① ベースとなる Text（レイアウト基準）
+        Text(text)
+            .font(font)
+            .overlay(                // ② 上に GIF を被せ
+                AnimatedImage(
+                    url: Bundle.main.url(forResource: "blue",
+                                        withExtension: "gif"))
+                    .resizable()
+                    .scaledToFill()
+                    .opacity(0.35)
+                    .blur(radius: 0.4)
+                    .saturation(0.85)
+                    .scaledToFill()   // 文字より大きく敷き詰め
             )
-            .frame(width: 300, height: 80)
-            .clipped()
+            .mask(                   // ③ “文字形” をマスクに
+                Text(text).font(font)
+            )
+            .fixedSize()             // ← 文字の実サイズだけに収まる！
     }
-}
-
-#Preview {
-    GlitterText(text: "studying")
 }

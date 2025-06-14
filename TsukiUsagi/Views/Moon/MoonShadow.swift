@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MoonShadowView: View {
+struct MoonShadow: View {
     @State private var animate = false
     let duration: Double
     let nearY: CGFloat
@@ -31,5 +31,5 @@ struct MoonShadowView: View {
 }
 
 #Preview {
-    MoonShadowView()
+    MoonShadow()
 }
