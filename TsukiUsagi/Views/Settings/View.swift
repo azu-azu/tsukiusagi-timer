@@ -22,7 +22,7 @@ struct SettingsView: View {
 		NavigationStack {
 			Form {
 				Section(header: Text("Pomodoro Length")) {
-					Stepper(value: $workMinutes, in: 15...60, step: 5) {
+					Stepper(value: $workMinutes, in: 1...60, step: 5) {
 						Text("\(workMinutes) minutes")
 					}
 				}
