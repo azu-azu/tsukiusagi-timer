@@ -10,6 +10,8 @@ import Combine
 import SwiftUI
 
 final class TimerViewModel: ObservableObject {
+    // 完了フラグ
+    @Published var isSessionFinished = false
 
     // MARK: - User-configurable values
     @AppStorage("workMinutes")  private var workMinutes: Int = 25
@@ -75,6 +77,7 @@ final class TimerViewModel: ObservableObject {
 
     private func sessionCompleted() {
         stopTimer()
+        isSessionFinished = true
 
         // Save history
         if let start = sessionStart {

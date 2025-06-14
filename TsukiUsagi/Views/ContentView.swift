@@ -23,7 +23,20 @@ struct ContentView: View {
 			ZStack {
 				BackgroundGradientView()
 				StarView()
-				MoonView()
+
+                // 月またはメッセージ
+                ZStack {
+                    if timerVM.isSessionFinished {
+                        Text("おつかれさま 🌕")
+                            .font(.title3.bold())
+                            .foregroundColor(.white)
+                            .transition(.opacity.combined(with: .scale))
+                    } else {
+                        MoonView()
+                            .transition(.opacity)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
 				// centre UI
 				TimerPanel(timerVM: timerVM)
@@ -33,7 +46,13 @@ struct ContentView: View {
 				.sheet(isPresented: $showingSettings) {
 					SettingsView()
 				}
+				.toolbar {
+					ToolbarItem(placement: .topBarLeading) {
+						DateDisplayView()
+					}
+				}
 				.navigationBarTitleDisplayMode(.inline)   // optional
+				.animation(.easeInOut(duration: 0.8), value: timerVM.isSessionFinished)
 			}
 		}
 	}
