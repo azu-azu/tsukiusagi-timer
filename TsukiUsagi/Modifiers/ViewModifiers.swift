@@ -5,10 +5,16 @@
 //  フォントを使うための共通モディファイア
 //
 
-// .titleWhite()
-// .titleWhite(design: .rounded)
-// .titleWhite(size: 32, design: .rounded)
-// .titleWhite(size: 18, design: .monospaced)
+// 使い方
+// Text("Hello Avenir!")
+//     .titleWhite()
+//     .titleWhite(design: .rounded)
+//     .titleWhite(size: 32, design: .rounded)
+//     .titleWhite(size: 18, design: .monospaced)
+//
+//     .titleWhiteAvenir(size: 32, weight: .bold)
+//     .titleWhiteAvenir(size: 24, weight: .regular)
+
 
 import SwiftUI
 
@@ -63,12 +69,6 @@ private extension Font.TextStyle {
         }
     }
 }
-
-
-// Text("Hello Avenir!")
-//     .titleWhiteAvenir(size: 32, weight: .bold)
-// Text("Regular Avenir")
-//     .titleWhiteAvenir(size: 24, weight: .regular)
 
 // * AvenirNext White Modifiers
 private struct AvenirNextWhiteModifier: ViewModifier {

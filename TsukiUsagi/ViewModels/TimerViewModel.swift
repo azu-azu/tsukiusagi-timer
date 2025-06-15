@@ -5,47 +5,57 @@
 //  Created by azu-azu on 2025/06/12.
 //
 
-//
-//  TimerViewModel.swift
-//  TsukiUsagi
-//
-
 import Foundation
 import Combine
 import SwiftUI
+import UIKit   // UINotificationFeedbackGeneratorのため
 
 /// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
 final class TimerViewModel: ObservableObject {
 
-    // MARK: – Published 状態
+    // Published 状態
     @Published var timeRemaining: Int      = 0          // 残り秒
     @Published var isRunning:     Bool     = false      // 走っているか
     @Published var isWorkSession: Bool     = true       // true = focus, false = break
     @Published var isSessionFinished       = false      // 終了フラグ（View 切替に使用）
     @Published private(set) var startTime: Date?        // セッション開始時刻
 
-    // MARK: – User-configurable
+    // User-configurable
     @AppStorage("workMinutes")  private var workMinutes:  Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
 
-    // MARK: – 内部
+    // 内部
     private var timer: Timer?
     private let historyVM: HistoryViewModel
 
-    // MARK: – Init
+    // Init
     init(historyVM: HistoryViewModel) {
         self.historyVM = historyVM
     }
 
-    // MARK: – 公開 API
+    // 公開 API
     func startTimer() {
         guard !isRunning else { return }
 
-        isRunning          = true
-        isSessionFinished  = false
-        startTime          = Date()                       // ★ 開始時刻を記録
-        timeRemaining      = (isWorkSession ? workMinutes : breakMinutes) * 60
+        // 1) 裏休憩タイマー or 既存タイマーが残っていても必ず止める
+        stopTimer()
 
+        // 2) これは「新しいセッション」か？ (= 最後のセッションが完了しているか)
+        if isSessionFinished {
+            // 新しい Work を始める
+            isWorkSession     = true
+            timeRemaining     = workMinutes * 60
+            startTime         = Date()            // 新しい開始時刻
+            isSessionFinished = false             // フラグをクリア
+        } else if startTime == nil {
+            // 初回起動やリセット時
+            timeRemaining = (isWorkSession ? workMinutes : breakMinutes) * 60
+            startTime     = Date()
+        }
+        // それ以外 (= ポーズ再開) は timeRemaining や startTime を触らない
+
+        // 3) 走り出す
+        isRunning = true
         timer = Timer.scheduledTimer(withTimeInterval: 1.0,
                                     repeats: true) { [weak self] _ in
             self?.tick()
@@ -77,7 +87,7 @@ final class TimerViewModel: ObservableObject {
         return TimerViewModel.startFormatter.string(from: start)
     }
 
-    // MARK: – プライベート
+    // プライベート
     private func tick() {
         if timeRemaining > 0 {
             timeRemaining -= 1
@@ -86,30 +96,79 @@ final class TimerViewModel: ObservableObject {
         }
     }
 
+    // 終了
     private func sessionCompleted() {
         stopTimer()
-        isSessionFinished = true
 
-        // 履歴保存
+        // 履歴に本フェーズを保存
         if let start = startTime {
-            historyVM.add(
-                start: start,
-                end:   Date(),
-                phase: isWorkSession ? .focus : .breakTime
-            )
+            historyVM.add(start: start, end: Date(), phase: isWorkSession ? .focus : .breakTime)
         }
 
-        // 次フェーズへトグル
-        isWorkSession.toggle()
-
-        // 通知送信
-        NotificationManager.shared
-            .sendPhaseChangeNotification(for: isWorkSession ? .focus : .breakTime)
-
-        // ★ 次セッションはユーザが Start を押すまで待つ
+        // フェーズ別後処理
+        if isWorkSession {
+            finalizeWork()
+        } else {
+            finalizeBreak()
+        }
     }
 
-    // MARK: – Static helpers
+    // Work終了後に呼ぶまとめ関数
+    private func finalizeWork() {
+        // バグ対策 -> 0を拾わないようにする
+        let rawBreak = breakMinutes
+        let safeBreak = max(rawBreak, 3) // 最小でも 3 分に固定
+        print("📝 breakMinutes =", rawBreak, "safe =", safeBreak)
+
+        buzz()
+        NotificationManager.shared.sendPhaseChangeNotification(for: .breakTime)
+
+        isSessionFinished = true
+        isRunning         = false       // ← ボタンは Stop 表示させない
+        isWorkSession     = false       // ← ブレイクモードへ
+
+        // 休憩タイマーを“見えないまま”走らせる
+        var secondsLeft = breakMinutes * 60  // 表示は更新しない
+        print("📝 secondsLeft  =", secondsLeft)
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
+                                    repeats: true) { [weak self] t in
+            guard let self else { return }
+            secondsLeft -= 1
+            if secondsLeft <= 0 {
+                t.invalidate()
+                self.timer = nil
+                self.finalizeBreak()
+            }
+        }
+    }
+
+    // 休憩終了後に呼ぶまとめ関数
+    private func finalizeBreak() {
+        buzz()
+        NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
+
+        isSessionFinished = false
+        isWorkSession     = true            // 作業モードに戻す
+        isRunning         = false           // タイマー停止状態
+        timeRemaining     = workMinutes * 60
+        startTime         = nil
+    }
+
+    // ブルッとさせる
+    private func buzz(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .heavy) {
+        let gen = UIImpactFeedbackGenerator(style: style)
+        gen.prepare()
+        gen.impactOccurred()
+    }
+
+    // コンッとさせる
+    // private func buzz(_ type: UINotificationFeedbackGenerator.FeedbackType = .warning) {
+    //     let generator = UINotificationFeedbackGenerator()
+    //     generator.prepare()
+    //     generator.notificationOccurred(type)
+    // }
+
+    // Static helpers
     private static let startFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "HH:mm"

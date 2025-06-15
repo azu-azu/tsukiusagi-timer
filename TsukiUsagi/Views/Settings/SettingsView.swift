@@ -28,7 +28,7 @@ struct SettingsView: View {
 				}
 
 				Section(header: Text("Break Length")) {
-					Stepper(value: $breakMinutes, in: 3...30, step: 1) {
+					Stepper(value: $breakMinutes, in: 1...30, step: 1) {
 						Text("\(breakMinutes) minutes")
 					}
 				}

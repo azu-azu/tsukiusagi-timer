@@ -12,7 +12,7 @@ struct MoonView: View {
 	@State private var float = false
 
 	var moonSize: CGFloat = 200
-	var offsetY: CGFloat
+	var paddingY: CGFloat
 	var glitterText: String
 
 	// 紫の影（アニメーション）
@@ -23,7 +23,7 @@ struct MoonView: View {
 	// 🐇
 	var usagiWidth:  CGFloat { moonSize * 0.575 }
 	var usagiHeight: CGFloat { moonSize * 0.75  }
-	var usagiOffsetX: CGFloat { (-moonSize / 2) + (usagiWidth / 2)}   // フチ合わせ式
+	var usagiOffsetX: CGFloat { (-moonSize / 2) + (usagiWidth / 2) }   // フチ合わせ式
 
 	var body: some View {
 		ZStack {
@@ -39,8 +39,8 @@ struct MoonView: View {
 			// 🐇
 			ZStack {
 				UsagiView_1(width: usagiWidth, height: usagiHeight)
-					.blur(radius: 1)
-					.opacity(0.5)
+					.blur(radius: 2)
+					.opacity(0.3)
 					.offset(x: usagiOffsetX)
 			}
 
@@ -62,9 +62,9 @@ struct MoonView: View {
 			// ✨ キラキラ文字
 			Text(glitterText)
 				.glitter()
-				.offset(x: 20)
+				.offset(y:20)
 		}
-		.offset(y: offsetY)
+		.padding(.top, paddingY)
 		.onAppear {
 			animate = true
 		}

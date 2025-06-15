@@ -3,7 +3,7 @@ import SwiftUI
 /// 日付用フォーマッタ（再利用）
 private let dateFormatter: DateFormatter = {
     let f = DateFormatter()
-    f.dateFormat = "yyyy-M-d EEE"
+    f.dateFormat = "yyyy/M/d EEE"
     f.locale = Locale(identifier: "en_US")
     return f
 }()

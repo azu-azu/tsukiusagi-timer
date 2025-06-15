@@ -8,10 +8,15 @@ struct ContentView: View {
     @State       private var showingSettings = false
 
     // Const
+	private let moonTitle: String = "Centered"
+
+	private let finalTitle: String = "Good job!"
+	private let finalMessage: String = "Centered means feeling emotionally stable, grounded, and calmly, regardless of what’s happening outside."
+
 	private let moonSize: CGFloat = 200
-    private let moonOffsetY: CGFloat = -150          // 月の高さオフセット
-    private let timerBottomRatio: CGFloat = 0.85     // タイマーパネルの中心を「下端から X %」に
-    private let startTimeGap: CGFloat   = 80         // 「開始 xx:xx」をタイトルとタイマーの“中間”へ
+    private let moonPaddingY: CGFloat = 150          // 月の高さ調節
+    private let timerBottomRatio: CGFloat = 0.85    // タイマーパネルの中心を「下端から X %」に
+    private let startTimeGap: CGFloat   = 80        // 「開始 xx:xx」をタイトルとタイマーの“中間”へ
 
     // Init
     init() {
@@ -25,48 +30,56 @@ struct ContentView: View {
         NavigationStack {
             GeometryReader { geo in
                 ZStack {
-                    // 背景
-                    BackgroundGradientView()
-                    AwakeEnablerView(hidden: true)
-                    StarView()
+                    BackgroundGradientView() // 背景
+                    AwakeEnablerView(hidden: true) // 起動させておくためのダミー画面 ＊背景の次に置かないと色がつかない
+                    StarView() // 固定スター
 
                     // 月 or 終了メッセージ
-                    ZStack {
+                    ZStack(alignment: .top) {
                         if timerVM.isSessionFinished {
-                            // タイトル
-                            Text("おつかれさま 🌕")
-                                .titleWhite()
-                                .offset(y: moonOffsetY)
+                            // タイトル＆メッセージまとめて制御
+                            VStack(spacing: 20) {
+                                Text(finalTitle)
+                                    .glitter(size: 24, resourceName: "gold")
+                                    .frame(maxWidth: .infinity, alignment: .center)
 
-                            // 開始時刻  →  タイマーの上 80pt に配置
-                            VStack(spacing: 2) {
-                                Text("start  ⏳  \(timerVM.formattedStartTime)")
-                                Text("final  ⌛️  \(Date(), style: .time)")
+                                Text(finalMessage)
+                                    .titleWhite(size: 16, weight: .regular, design: .monospaced)
+                                    .multilineTextAlignment(.leading)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 32) // 左右
                             }
-                            .titleWhiteAvenir()
-                            .position(
-                                x: geo.size.width  / 2,
-                                y: geo.size.height * timerBottomRatio - startTimeGap
-                            )
+                            .padding(.top, moonPaddingY)
+
                         } else {
+                            // moving star
+                            FallingStarsView()
+                            RisingStarsView()
+
+                            // 🌕
                             MoonView(moonSize: moonSize,
-                                    offsetY: moonOffsetY,
-                                    glitterText: "studying")
+                                    paddingY: moonPaddingY,
+                                    glitterText: moonTitle)
                         }
                     }
                     .animation(.easeInOut(duration: 0.8),
                             value: timerVM.isSessionFinished)
                     .zIndex(1)
 
+                    // フレーム最大化＋上端配置
+                    .frame(maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .topLeading)
+
                     // タイマー ＆ Start ボタン
+                    let timerHeight = CGFloat(geo.size.height * (1 - timerBottomRatio))
                     TimerPanel(timerVM: timerVM)
-                        .position(
-                            x: geo.size.width / 2,
-                            y: geo.size.height * timerBottomRatio
-                        )
-                        .zIndex(2)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                        .padding(.bottom, timerHeight)
                 }
-                .ignoresSafeArea()    // Safe-Area を含めた高さ基準
+
+                // Safe-Area を含めた高さ基準
+                .ignoresSafeArea()
             }
 
             // ツールバー ＆ シート
