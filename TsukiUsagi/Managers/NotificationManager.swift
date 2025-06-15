@@ -53,23 +53,27 @@ final class NotificationManager {
         switch phase {
         case .focus:
             content.title = "Focus Again!"
-            content.body  = "そろそろ集中モードにもどろか 🌕"
+            content.body  = "そろそろ集中モードにもどろか 🐇"
         case .breakTime:
             content.title = "Break Time!"
-            content.body  = "おつかれさま。少し休憩しよか ☕️"
+            content.body  = "がんばったね。少し休憩しよか ☕️"
         }
 
+        // 音＋バイブ
         content.sound = .default
-        let trigger  = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
-        let request  = UNNotificationRequest(identifier: UUID().uuidString,
-                                             content: content,
-                                             trigger: trigger)
+
+        // 毎回ユニーク ID で通知センターに積む
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
+        )
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("通知送信失敗: \(error.localizedDescription)")
+                print("通知失敗: \(error.localizedDescription)")
             } else {
-                print("通知送信成功")
+                print("通知成功")
             }
         }
     }

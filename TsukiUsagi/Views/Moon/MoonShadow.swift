@@ -12,7 +12,7 @@ struct MoonShadow: View {
         Circle()
             .fill(Color(hex: "#660066").opacity(0.9))
             .frame(width: moonSize, height: moonSize)
-            .offset(y: animate ? nearY : farY)
+            .offset(y: animate ? farY : nearY)
             .blur(radius: 4)
             .onAppear {
                 withAnimation(
