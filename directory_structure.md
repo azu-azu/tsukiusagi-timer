@@ -6,7 +6,6 @@ TsukiUsagi/
 │   ├── Timer/
 │   │   └── TimerPanel.swift
 │   ├── Settings/
-│   │   ├── SettingsToolbar.swift
 │   │   └── SettingsView.swift
 │   ├── Moon/
 │   │   ├── MoonView.swift
@@ -21,10 +20,17 @@ TsukiUsagi/
 │   │   └── BackgroundBlue.swift
 │   ├── ContentView.swift
 │   ├── StarView.swift
-│   ├── UsagiView.swift
 │   ├── UsagiView_1.swift
-│   ├── GlitterText.swift
-│   └── DateDisplayView.swift
+│   └── UsagiView_2.swift
+│
+├── System/
+│   └── AwakeEnablerView.swift
+│
+├── Modifiers/
+│   ├── ViewModifiers.swift
+│   ├── DateToolbar.swift
+│   ├── GlitterTextModifier.swift
+│   └── GearButtonToolbar.swift
 │
 ├── Resources/
 │
@@ -64,13 +70,10 @@ TsukiUsagiUITests/
   - `ContentView.swift`: メインビュー
   - `UsagiView.swift`, `UsagiView_1.swift`: うさぎの表示用ビュー
   - `StarView.swift`: 星の表示用ビュー
-  - `GlitterText.swift`: キラキラテキスト表示用ビュー
-  - `DateDisplayView.swift`: 日付表示用ビュー
 - 機能別サブディレクトリ
   - `Timer/`: タイマー機能関連のビュー
     - `TimerPanel.swift`: タイマーパネル表示用ビュー
   - `Settings/`: 設定画面関連のビュー
-    - `SettingsToolbar.swift`: ツールバー表示用ビュー
     - `SettingsView.swift`: 設定画面のメインビュー
   - `Moon/`: 月関連のビューコンポーネント
     - `MoonView.swift`: 月のメインビュー
@@ -83,6 +86,17 @@ TsukiUsagiUITests/
     - `BackgroundLightPurple.swift`: 薄紫色の背景グラデーション
     - `BackgroundPurple.swift`: 紫色の背景グラデーション
     - `BackgroundBlue.swift`: 青色の背景グラデーション
+
+### System/
+- システム関連の機能を管理するディレクトリ
+  - `AwakeEnablerView.swift`: 画面のスリープを防止する機能を提供するビュー
+
+### Modifiers/
+- SwiftUIのビューモディファイアを格納するディレクトリ
+  - `ViewModifiers.swift`: 共通のビューモディファイアを定義
+  - `DateToolbar.swift`: 日付表示用のツールバーモディファイア
+  - `GlitterTextModifier.swift`: キラキラテキスト表示用のモディファイア
+  - `GearButtonToolbar.swift`: 設定ボタン用のツールバーモディファイア
 
 ### Resources/
 - アプリケーションのリソースファイルを格納するディレクトリ
