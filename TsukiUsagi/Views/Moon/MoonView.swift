@@ -1,5 +1,5 @@
 //
-//  View.swift
+//  MoonView.swift
 //  TsukiUsagi
 //
 //  Created by azu-azu on 2025/06/12.
@@ -11,34 +11,42 @@ struct MoonView: View {
 	@State private var animate = false
 	@State private var float = false
 
-	private let nearY: CGFloat = 200 // 上の位置
-	private let farY:  CGFloat = 44  // 下の位置
-	private let duration: Double = 17
-	let offsetY: CGFloat
-	let glitterText: String
+	var moonSize: CGFloat = 200
+	var offsetY: CGFloat
+	var glitterText: String
+
+	// 紫の影（アニメーション）
+	var nearY: CGFloat { moonSize } // 上の位置
+	var farY:  CGFloat = 44  // 下の位置
+	var duration: Double = 17
+
+	// 🐇
+	var usagiWidth:  CGFloat { moonSize * 0.575 }
+	var usagiHeight: CGFloat { moonSize * 0.75  }
+	var usagiOffsetX: CGFloat { (-moonSize / 2) + (usagiWidth / 2)}   // フチ合わせ式
 
 	var body: some View {
 		ZStack {
 			// 🌕 にじみ光（後ろのぼかし）
-			MoonShape(fillColor: Color(hex: "#ffff55").opacity(0.3), radius: 200)
+			MoonShape(fillColor: Color(hex: "#ffff55").opacity(0.3), radius: moonSize)
 				.compositingGroup()
 				.blur(radius: 50)
 
 			// 🌕 月の本体（黄色）
-			MoonShape(fillColor: Color(hex: "#ffff55"), radius: 200)
+			MoonShape(fillColor: Color(hex: "#ffff55"), radius: moonSize)
 				.blur(radius: 4)
 
 			// 🐇
 			ZStack {
-				UsagiView_1(width: 115, height: 150)
-					.blur(radius: 1)              // ぼかし量
-					.opacity(0.5)                // 透け度を
-					.offset(x: -40)
+				UsagiView_1(width: usagiWidth, height: usagiHeight)
+					.blur(radius: 1)
+					.opacity(0.5)
+					.offset(x: usagiOffsetX)
 			}
 
 			// 🌘 紫の影（アニメーション）
 			ZStack {
-				MoonShadow(duration: duration, nearY: nearY, farY: farY)
+				MoonShadow(moonSize:moonSize, duration: duration, nearY: nearY, farY: farY)
 
 				// 🌑 クレーター（うっすらした内側の模様）
 				CraterCluster()
@@ -47,12 +55,13 @@ struct MoonView: View {
 			}
 			.rotationEffect(.degrees(227)) // CSSのrotate(227deg) に相当
 			.mask(
-				MoonShape(fillColor: .white, radius: 200)
+				MoonShape(fillColor: .white, radius: moonSize)
 					.scaleEffect(1.05)
 			)
 
 			// ✨ キラキラ文字
-			GlitterText(text: glitterText)
+			Text(glitterText)
+				.glitter()
 				.offset(x: 20)
 		}
 		.offset(y: offsetY)

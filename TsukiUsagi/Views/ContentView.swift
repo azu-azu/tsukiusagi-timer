@@ -2,53 +2,55 @@ import SwiftUI
 
 struct ContentView: View {
 
-    // MARK: – State
+    // State
     @StateObject private var historyVM: HistoryViewModel
     @StateObject private var timerVM:   TimerViewModel
     @State       private var showingSettings = false
 
-    // MARK: – Const
+    // Const
+	private let moonSize: CGFloat = 200
     private let moonOffsetY: CGFloat = -150          // 月の高さオフセット
-    private let timerBottomRatio: CGFloat = 0.90     // タイマーパネルの中心を「下端から 10 %」に
+    private let timerBottomRatio: CGFloat = 0.85     // タイマーパネルの中心を「下端から X %」に
     private let startTimeGap: CGFloat   = 80         // 「開始 xx:xx」をタイトルとタイマーの“中間”へ
 
-    // MARK: – Init
+    // Init
     init() {
         let history   = HistoryViewModel()
         _historyVM    = StateObject(wrappedValue: history)
         _timerVM      = StateObject(wrappedValue: TimerViewModel(historyVM: history))
     }
 
-    // MARK: – Body
+    // Body
     var body: some View {
         NavigationStack {
             GeometryReader { geo in
                 ZStack {
                     // 背景
                     BackgroundGradientView()
+                    AwakeEnablerView(hidden: true)
                     StarView()
 
                     // 月 or 終了メッセージ
                     ZStack {
                         if timerVM.isSessionFinished {
-
                             // タイトル
                             Text("おつかれさま 🌕")
-                                .titleWhiteBold()
+                                .titleWhite()
                                 .offset(y: moonOffsetY)
 
                             // 開始時刻  →  タイマーの上 80pt に配置
                             VStack(spacing: 2) {
-                                Text("start/  \(timerVM.formattedStartTime)")
-                                Text("now/    \(Date(), style: .time)")
+                                Text("start  ⏳  \(timerVM.formattedStartTime)")
+                                Text("final  ⌛️  \(Date(), style: .time)")
                             }
-                            .titleWhiteBold()
+                            .titleWhiteAvenir()
                             .position(
                                 x: geo.size.width  / 2,
                                 y: geo.size.height * timerBottomRatio - startTimeGap
                             )
                         } else {
-                            MoonView(offsetY: moonOffsetY,
+                            MoonView(moonSize: moonSize,
+                                    offsetY: moonOffsetY,
                                     glitterText: "studying")
                         }
                     }
@@ -60,7 +62,7 @@ struct ContentView: View {
                     TimerPanel(timerVM: timerVM)
                         .position(
                             x: geo.size.width / 2,
-                            y: geo.size.height * timerBottomRatio    // 下端から 10 %
+                            y: geo.size.height * timerBottomRatio
                         )
                         .zIndex(2)
                 }
@@ -68,13 +70,9 @@ struct ContentView: View {
             }
 
             // ツールバー ＆ シート
-            .settingsToolbar(showing: $showingSettings)
+            .gearButtonToolbar(showing: $showingSettings)
             .sheet(isPresented: $showingSettings) { SettingsView() }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    DateDisplayView()
-                }
-            }
+            .dateToolbar()
             .navigationBarTitleDisplayMode(.inline)
         }
     }

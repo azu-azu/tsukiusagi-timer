@@ -2,20 +2,16 @@ import SwiftUI
 
 struct MoonShadow: View {
     @State private var animate = false
-    let duration: Double
-    let nearY: CGFloat
-    let farY: CGFloat
-
-    init(duration: Double = 2.0, nearY: CGFloat = 10, farY: CGFloat = 30) {
-        self.duration = duration
-        self.nearY = nearY
-        self.farY = farY
-    }
+    // 🔽 公開プロパティ（全部デフォルト付き）
+    var moonSize: CGFloat  = 200
+    var duration: Double = 2.0
+    var nearY: CGFloat   = 10
+    var farY: CGFloat    = 30
 
     var body: some View {
         Circle()
             .fill(Color(hex: "#660066").opacity(0.9))
-            .frame(width: 200, height: 200)
+            .frame(width: moonSize, height: moonSize)
             .offset(y: animate ? nearY : farY)
             .blur(radius: 4)
             .onAppear {
