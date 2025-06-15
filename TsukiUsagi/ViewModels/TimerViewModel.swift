@@ -1,5 +1,5 @@
 //
-//  TimerController.swift
+//  TimerViewModel.swift
 //  TsukiUsagi
 //
 //  Created by azu-azu on 2025/06/12.
