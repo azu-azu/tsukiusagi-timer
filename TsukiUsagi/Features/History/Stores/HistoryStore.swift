@@ -5,7 +5,7 @@ struct HistoryStore {
 
     private var url: URL {
         FileManager.default.urls(for: .documentDirectory,
-                                 in: .userDomainMask)[0]
+                                in: .userDomainMask)[0]
             .appendingPathComponent(file)
     }
 
