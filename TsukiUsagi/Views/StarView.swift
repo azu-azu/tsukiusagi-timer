@@ -49,7 +49,7 @@ struct AnimatedStar: View {
 // 上から下へ
 struct FallingStarsView: View {
     private let screen = UIScreen.main.bounds
-    private let count  = 35        // 個数はお好み
+    private let count  = 40        // 個数はお好み
 
     var body: some View {
         ForEach(0..<count, id: \.self) { _ in
@@ -69,7 +69,7 @@ struct FallingStarsView: View {
 // 下から上へ
 struct RisingStarsView: View {
     private let screen = UIScreen.main.bounds
-    private let count  = 30
+    private let count  = 35
 
     var body: some View {
         ForEach(0..<count, id: \.self) { _ in

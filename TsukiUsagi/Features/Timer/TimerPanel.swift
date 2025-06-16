@@ -11,6 +11,7 @@ import SwiftUI
 
 struct TimerPanel: View {
     @ObservedObject var timerVM: TimerViewModel
+    @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
 
     private let spacingBetween: CGFloat = 180
     private let recordDistance: CGFloat = 100
@@ -21,7 +22,7 @@ struct TimerPanel: View {
         ZStack(alignment: .bottom) {
             VStack(spacing: spacingBetween) {
                 timerText()
-                startStopButton() // ← VStack の最下端 = ボタン下端
+                startPauseButton() // ← VStack の最下端 = ボタン下端
             }
             // 終了後だけ「重ねる」ので高さに影響しない
             if timerVM.isSessionFinished {
@@ -42,15 +43,25 @@ struct TimerPanel: View {
     // 記録時刻（start / final）── 終了時のみ表示される
     private func recordedTimes() -> some View {
         VStack(spacing: 2) {
-            Text("start  ⏳  \(timerVM.formattedStartTime)")
-            Text("final  ⌛️  \(Date(), style: .time)")
+            // --- 上２行：中央寄せ & フォントサイズA ---
+            VStack(spacing: 2) {
+                Text("start ⏳  \(timerVM.formattedStartTime)")
+                Text("final ⏳  \(Date(), style: .time)")
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .font(.system(size: 18, weight: .regular)) // ← 上２行のフォント設定
+
+            // --- ３行目：右寄せ & フォントサイズB ---
+            Text("--  \(timerVM.workLengthMinutes) 分  --")
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .font(.system(size: 16, weight: .light)) // ← ３行目のフォント設定
+                .frame(maxWidth: 110)
         }
-        .titleWhiteAvenir(weight: .regular)
         .padding(.top, 20)
     }
 
     // ▶︎ START / PAUSE ボタン
-    private func startStopButton() -> some View {
+    private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
             timerVM.isRunning ? timerVM.stopTimer() : timerVM.startTimer()
         }

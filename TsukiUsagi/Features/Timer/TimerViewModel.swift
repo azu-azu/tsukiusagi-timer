@@ -14,15 +14,24 @@ import UIKit   // UINotificationFeedbackGeneratorのため
 final class TimerViewModel: ObservableObject {
 
     // Published 状態
-    @Published var timeRemaining: Int      = 0          // 残り秒
+    @Published var timeRemaining: Int        // 残り秒
     @Published var isRunning:     Bool     = false      // 走っているか
     @Published var isWorkSession: Bool     = true       // true = focus, false = break
     @Published var isSessionFinished       = false      // 終了フラグ（View 切替に使用）
     @Published private(set) var startTime: Date?        // セッション開始時刻
 
+    var workLengthMinutes: Int { workMinutes }
+
     // User-configurable
+    @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
     @AppStorage("workMinutes")  private var workMinutes:  Int = 25
-    @AppStorage("breakMinutes") private var breakMinutes: Int = 5
+    @AppStorage("breakMinutes") private var breakMinutes: Int = 5 {
+        didSet {
+            if breakMinutes < 1 {
+                breakMinutes = 1 // ← ここで保証！
+            }
+        }
+    }
 
     // 内部
     private var timer: Timer?
@@ -31,6 +40,10 @@ final class TimerViewModel: ObservableObject {
     // Init
     init(historyVM: HistoryViewModel) {
         self.historyVM = historyVM
+
+        // AppStorage を self にアクセスせず使う方法
+        let minutes = UserDefaults.standard.integer(forKey: "workMinutes")
+        _timeRemaining = Published(initialValue: minutes > 0 ? minutes * 60 : 25 * 60)
     }
 
     // 公開 API
@@ -102,7 +115,7 @@ final class TimerViewModel: ObservableObject {
 
         // 履歴に本フェーズを保存
         if let start = startTime {
-            historyVM.add(start: start, end: Date(), phase: isWorkSession ? .focus : .breakTime)
+			historyVM.add(start: start, end: Date(), phase: isWorkSession ? .focus : .breakTime, label: sessionLabel)
         }
 
         // フェーズ別後処理
@@ -115,11 +128,6 @@ final class TimerViewModel: ObservableObject {
 
     // Work終了後に呼ぶまとめ関数
     private func finalizeWork() {
-        // バグ対策 -> 0を拾わないようにする
-        let rawBreak = breakMinutes
-        let safeBreak = max(rawBreak, 3) // 最小でも 3 分に固定
-        print("📝 breakMinutes =", rawBreak, "safe =", safeBreak)
-
         buzz()
         NotificationManager.shared.sendPhaseChangeNotification(for: .breakTime)
 
@@ -146,12 +154,7 @@ final class TimerViewModel: ObservableObject {
     private func finalizeBreak() {
         buzz()
         NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
-
-        isSessionFinished = false
-        isWorkSession     = true            // 作業モードに戻す
         isRunning         = false           // タイマー停止状態
-        timeRemaining     = workMinutes * 60
-        startTime         = nil
     }
 
     // ブルッとさせる
