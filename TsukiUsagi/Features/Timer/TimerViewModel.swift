@@ -19,6 +19,7 @@ final class TimerViewModel: ObservableObject {
     @Published var isWorkSession: Bool     = true       // true = focus, false = break
     @Published var isSessionFinished       = false      // 終了フラグ（View 切替に使用）
     @Published private(set) var startTime: Date?        // セッション開始時刻
+    @Published var flashStars = false
 
     var workLengthMinutes: Int { workMinutes }
 
@@ -68,11 +69,10 @@ final class TimerViewModel: ObservableObject {
         // それ以外 (= ポーズ再開) は timeRemaining や startTime を触らない
 
         // 3) 走り出す
+        flashStars.toggle()
         isRunning = true
         timer = Timer.scheduledTimer(withTimeInterval: 1.0,
-                                    repeats: true) { [weak self] _ in
-            self?.tick()
-        }
+                        repeats: true) { [weak self] _ in self?.tick() }
     }
 
     func stopTimer() {
