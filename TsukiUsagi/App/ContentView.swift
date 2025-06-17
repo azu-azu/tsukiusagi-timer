@@ -5,6 +5,7 @@ struct ContentView: View {
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM:   TimerViewModel
     @State private var showingSettings = false
+    @State private var showDiamondStars = false
 
     // Const
 	private let moonTitle: String = "Centered"
@@ -26,7 +27,6 @@ struct ContentView: View {
                     BackgroundGradientView() // 背景
                     AwakeEnablerView(hidden: true) // 起動させておくためのダミー画面 ＊背景の次に置かないと色がつかない
                     StarView() // 固定スター
-
                     // 月 or 終了メッセージ
                     ZStack(alignment: .top) {
                         if timerVM.isSessionFinished {
@@ -69,7 +69,23 @@ struct ContentView: View {
                     TimerPanel(timerVM: timerVM)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                         .padding(.bottom, timerHeight)
+
+
+                    if showDiamondStars {
+                        DiamondStarsOnceView()
+                            .onAppear {
+                                // アニメ寿命に合わせて自動非表示（例: 1秒後）
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                                    showDiamondStars = false
+                                }
+                            }
+                    }
                 }
+                // ★ TimerVM からのフラグ変化を拾う
+                .onReceive(timerVM.$flashStars      // ← Publisher
+                            .dropFirst()) { _ in  // ★ 最初の 1 発（起動時）を無視
+                    showDiamondStars = true }
+
 
                 // Safe-Area を含めた高さ基準
                 .ignoresSafeArea()

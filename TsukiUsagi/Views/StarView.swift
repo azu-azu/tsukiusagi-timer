@@ -85,15 +85,3 @@ struct RisingStarsView: View {
         .ignoresSafeArea()
     }
 }
-
-
-
-// 使い方：ZStack で重ねるだけ
-/*
-ZStack {
-    StarView()            // ★ 今までの固定背景
-    FallingStarsView()    // ↓ 降る星
-    RisingStarsView()     // ↑ 浮く星
-    // ここに月・タイマーなど他の UI
-}
-*/

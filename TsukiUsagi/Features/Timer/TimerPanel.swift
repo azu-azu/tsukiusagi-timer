@@ -13,6 +13,9 @@ struct TimerPanel: View {
     @ObservedObject var timerVM: TimerViewModel
     @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
 
+    @State private var flashYellow = false
+    @State private var flashScale  = false
+
     private let spacingBetween: CGFloat = 180
     private let recordDistance: CGFloat = 100
     private let buttonWidth: CGFloat = 160
@@ -35,9 +38,19 @@ struct TimerPanel: View {
     // ⏱ 残り時間表示
     private func timerText() -> some View {
         Text(timerVM.formatTime())
-            .titleWhiteAvenir(size: 65, weight: .bold)
+            // .titleWhiteAvenir(size: 65, weight: .bold)
+            .font(.system(size: 65, weight: .bold, design: .rounded))
             .opacity(timerVM.isSessionFinished ? 0.1 : 1.0)
             .blur(radius: timerVM.isSessionFinished ? 2 : 0)
+
+            .transition(.opacity)                                // ← フェード効果
+            .foregroundColor(flashYellow ? .yellow : .white)     // ← 色切替
+            .scaleEffect(flashScale ? 2.0 : 1.0, anchor: .center)
+            // ← spring：response＝全体時間、dampingFraction＝バウンドの残り具合
+            .animation(.interactiveSpring(response: 1.0,
+                                        dampingFraction: 0.5,
+                                        blendDuration: 0.4),
+                    value: flashScale)
     }
 
     // 記録時刻（start / final）── 終了時のみ表示される
@@ -63,8 +76,19 @@ struct TimerPanel: View {
     // ▶︎ START / PAUSE ボタン
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
+            if !timerVM.isRunning {            // START の時だけ
+                flashYellow = true
+                flashScale  = true             // ★ 拡大 ON
+
+                // 0.3 秒後に両方 OFF
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    flashYellow = false
+                    flashScale  = false
+                }
+            }
             timerVM.isRunning ? timerVM.stopTimer() : timerVM.startTimer()
         }
+
         .padding()
         .frame(width: buttonWidth)
         .background(
