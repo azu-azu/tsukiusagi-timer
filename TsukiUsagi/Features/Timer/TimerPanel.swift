@@ -40,14 +40,13 @@ struct TimerPanel: View {
         Text(timerVM.formatTime())
             // .titleWhiteAvenir(size: 65, weight: .bold)
             .font(.system(size: 65, weight: .bold, design: .rounded))
-            .opacity(timerVM.isSessionFinished ? 0.1 : 1.0)
-            .blur(radius: timerVM.isSessionFinished ? 2 : 0)
+            .opacity(timerVM.isSessionFinished ? 0 : 1.0)
 
             .transition(.opacity)                                // ← フェード効果
             .foregroundColor(flashYellow ? .yellow : .white)     // ← 色切替
             .scaleEffect(flashScale ? 2.0 : 1.0, anchor: .center)
             // ← spring：response＝全体時間、dampingFraction＝バウンドの残り具合
-            .animation(.interactiveSpring(response: 1.0,
+            .animation(.interactiveSpring(response: 1.5,
                                         dampingFraction: 0.5,
                                         blendDuration: 0.4),
                     value: flashScale)
@@ -92,7 +91,7 @@ struct TimerPanel: View {
         .padding()
         .frame(width: buttonWidth)
         .background(
-            Color.white.opacity(0.3),
+            Color.white.opacity(0.2),
             in: RoundedRectangle(cornerRadius: 20)
         )
         .titleWhiteAvenir(weight: .bold)

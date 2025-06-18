@@ -1,19 +1,11 @@
 import SwiftUI
 
-/// 日付用フォーマッタ（再利用）
-private let dateFormatter: DateFormatter = {
-    let f = DateFormatter()
-    f.dateFormat = "yyyy/M/d EEE"
-    f.locale = Locale(identifier: "en_US")
-    return f
-}()
-
 struct DateToolbar: ViewModifier {
     func body(content: Content) -> some View {
         content
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {
-                    Text(dateFormatter.string(from: Date()))
+                    Text(AppFormatters.displayDate.string(from: Date()))
                         .titleWhite(size: 16, weight: .regular, design: .monospaced)
 
                     // 右端に余白（または他のアイテム）
@@ -30,4 +22,3 @@ extension View {
         modifier(DateToolbar())
     }
 }
-
