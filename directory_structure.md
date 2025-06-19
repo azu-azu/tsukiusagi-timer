@@ -10,20 +10,45 @@ TsukiUsagi/
 │   │
 │   ├── Features/
 │   │   ├── Timer/
-│   │   │   ├── TimerPanel.swift
-│   │   │   ├── TimerViewModel.swift
-│   │   │   ├── NotificationManager.swift
-│   │   │   └── PomodoroPhase.swift
+│   │   │   ├── Views/
+│   │   │   │   └── TimerPanel.swift
+│   │   │   ├── ViewModels/
+│   │   │   │   └── TimerViewModel.swift
+│   │   │   ├── Services/
+│   │   │   │   └── NotificationManager.swift
+│   │   │   └── Models/
+│   │   │       └── PomodoroPhase.swift
+│   │   │
 │   │   ├── History/
+│   │   │   ├── Views/
+│   │   │   │   └── HistoryView.swift
 │   │   │   ├── ViewModels/
 │   │   │   │   └── HistoryViewModel.swift
-│   │   │   ├── Stores/
+│   │   │   ├── Services/
 │   │   │   │   └── HistoryStore.swift
-│   │   │   ├── Models/
-│   │   │   └── Views/
-│   │   │       └── HistoryView.swift
+│   │   │   └── Models/
+│   │   │       └── SessionRecord.swift
+│   │   │
 │   │   └── Settings/
-│   │       └── SettingsView.swift
+│   │       ├── Views/
+│   │       │   └── SettingsView.swift
+│   │       ├── ViewModels/
+│   │       │   └── SettingsViewModel.swift
+│   │       └── Models/
+│   │           └── AppSettings.swift
+│   │
+│   ├── Components/
+│   │   ├── Visual/
+│   │   │   ├── Moon/
+│   │   │   ├── Stars/
+│   │   │   ├── Usagi/
+│   │   │   └── Backgrounds/
+│   │   │
+│   │   └── Common/
+│   │       ├── Buttons/
+│   │       ├── Modals/
+│   │       ├── Indicators/
+│   │       └── TextStyles/
 │   │
 │   ├── Views/
 │   │   ├── Moon/
@@ -31,12 +56,14 @@ TsukiUsagi/
 │   │   │   ├── MoonShape.swift
 │   │   │   ├── MoonShadow.swift
 │   │   │   └── CraterView.swift
+│   │   │
 │   │   ├── Backgrounds/
 │   │   │   ├── BackgroundGradientView.swift
 │   │   │   ├── BackgroundBlack.swift
 │   │   │   ├── BackgroundLightPurple.swift
 │   │   │   ├── BackgroundPurple.swift
 │   │   │   └── BackgroundBlue.swift
+│   │   │
 │   │   ├── StarView.swift
 │   │   ├── DiamondStarsView.swift
 │   │   ├── SparkleStarsView.swift
@@ -44,30 +71,44 @@ TsukiUsagi/
 │   │   └── UsagiView_2.swift
 │   │
 │   ├── Core/
-│   │   └── AwakeEnablerView.swift
+│   │   ├── Services/
+│   │   │   └── AwakeEnablerView.swift
+│   │   └── Utilities/
+│   │       └── AppFormatters.swift
 │   │
 │   ├── UI/
 │   │   ├── ViewModifiers.swift
-│   │   ├── DateToolbar.swift
-│   │   ├── AppFormatters.swift
-│   │   ├── GlitterTextModifier.swift
-│   │   └── GearButtonToolbar.swift
+│   │   ├── GearButtonToolbar.swift
+│   │   └── Styles/
+│   │       ├── ColorTheme.swift
+│   │       └── Typography.swift
 │   │
 │   ├── Resources/
-│   │   ├── gif/
+│   │   ├── Animations/
 │   │   │   ├── gold.gif
 │   │   │   ├── black_yellow.gif
 │   │   │   ├── black_red.gif
 │   │   │   └── blue.gif
-│   │   └── Fonts/
+│   │   ├── Fonts/
+│   │   │   └── CustomFonts.swift
+│   │   └── Localization/
+│   │       └── Localizable.strings
 │   │
 │   ├── Assets.xcassets/
 │   │
 │   └── Extensions/
-│       └── Color+Hex.swift
+│       ├── Color+Hex.swift
+│       ├── View+Extensions.swift
+│       └── Date+Extensions.swift
 │
 ├── TsukiUsagi.xcodeproj/
 ├── TsukiUsagiTests/
+│   ├── Features/
+│   │   ├── TimerTests/
+│   │   ├── HistoryTests/
+│   │   └── SettingsTests/
+│   ├── Components/
+│   └── Core/
 ├── TsukiUsagiUITests/
 ├── .build/
 ├── Package.resolved
@@ -75,77 +116,70 @@ TsukiUsagi/
 └── .gitignore
 ```
 
-## ディレクトリ構造の説明
+## 改善されたディレクトリ構造の説明
 
-### TsukiUsagi/
-- メインのアプリケーションコード
-  - `App/`: アプリケーションのエントリーポイントとメインビュー
-    - `ContentView.swift`: メインビュー
-    - `TsukiUsagiApp.swift`: アプリケーションのエントリーポイント
-    - `AppDelegate.swift`: アプリケーションのライフサイクル管理
+### 主な変更点
 
-  - `Features/`: 機能ごとにまとめられたモジュール
-    - `Timer/`: タイマー機能関連
-      - `TimerPanel.swift`: タイマーパネル表示用ビュー
-      - `TimerViewModel.swift`: タイマー機能のビジネスロジック
-      - `NotificationManager.swift`: 通知機能を管理するシングルトンクラス
-      - `PomodoroPhase.swift`: ポモドーロタイマーのフェーズ（集中/休憩）を管理する列挙型
-    - `History/`: 履歴機能関連
-      - `ViewModels/`: 履歴表示用のビューモデル
-        - `HistoryViewModel.swift`: セッション履歴の管理と表示
-      - `Stores/`: データ永続化関連
-        - `HistoryStore.swift`: セッション履歴の永続化を担当
-      - `Models/`: 履歴データモデル（準備中）
-      - `Views/`: 履歴表示用ビュー
-        - `HistoryView.swift`: セッション履歴の表示画面
-    - `Settings/`: 設定機能関連
-      - `SettingsView.swift`: アプリケーション設定画面
+#### 1. **新規追加されたフォルダ構造**
+- `Components/`: 新しいコンポーネント構造
+  - `Visual/`: アプリ世界観を彩る専用コンポーネント（空フォルダ）
+    - `Moon/`
+    - `Stars/`
+    - `Usagi/`
+    - `Backgrounds/`
+  - `Common/`: 汎用 UI（空フォルダ）
+    - `Buttons/`
+    - `Modals/`
+    - `Indicators/`
+    - `TextStyles/`
 
-  - `Views/`: 共通のビューコンポーネント
-    - `UsagiView_1.swift`, `UsagiView_2.swift`: うさぎの表示用ビュー
-    - `StarView.swift`: 星の表示用ビュー
-    - `DiamondStarsView.swift`: ダイヤモンド型の星の表示用ビュー
-    - `SparkleStarsView.swift`: キラキラ星の表示用ビュー
-    - `Moon/`: 月関連のビューコンポーネント
-      - `MoonView.swift`: 月のメインビュー
-      - `MoonShape.swift`: 月の形状を定義するビュー
-      - `MoonShadow.swift`: 月の影を表示するビュー
-      - `CraterView.swift`: 月のクレーターを表示するビュー
-    - `Backgrounds/`: 背景関連のビューコンポーネント
-      - `BackgroundGradientView.swift`: 背景グラデーション用ビュー
-      - `BackgroundBlack.swift`: 黒色の背景グラデーション
-      - `BackgroundLightPurple.swift`: 薄紫色の背景グラデーション
-      - `BackgroundPurple.swift`: 紫色の背景グラデーション
-      - `BackgroundBlue.swift`: 青色の背景グラデーション
+#### 2. **既存のコンポーネント（現在の場所）**
+- `Views/`: 現在のビューコンポーネント
+  - `Moon/`: 月関連のコンポーネント
+  - `Backgrounds/`: 背景関連のコンポーネント
+  - 星関連のコンポーネント（直下）
+  - うさぎ関連のコンポーネント（直下）
 
-  - `Core/`: アプリケーションのコア機能を管理するディレクトリ
-    - `AwakeEnablerView.swift`: 画面のスリープを防止する機能を提供するビュー
+#### 3. **Features ディレクトリの統一**
+各機能（Timer, History, Settings）で以下の構造を統一：
+- `Views/`: ビューコンポーネント
+- `ViewModels/`: ビジネスロジック
+- `Services/`: データアクセス・外部サービス
+- `Models/`: データモデル
 
-  - `UI/`: 共通のUIコンポーネントを格納するディレクトリ
-    - `ViewModifiers.swift`: 共通のビューモディファイアを定義
-    - `DateToolbar.swift`: 日付表示用のツールバーモディファイア
-    - `AppFormatters.swift`: アプリケーション全体で使用するフォーマッター
-    - `GlitterTextModifier.swift`: キラキラテキスト表示用のモディファイア
-    - `GearButtonToolbar.swift`: 設定ボタン用のツールバーモディファイア
+#### 4. **Core ディレクトリの拡張**
+- `Services/`: アプリケーション全体で使用されるサービス
+- `Utilities/`: ユーティリティクラス
 
-  - `Resources/`: アプリケーションのリソースファイルを格納するディレクトリ
-    - `gif/`: GIFアニメーションファイル
-      - `gold.gif`: 金色のアニメーション
-      - `black_yellow.gif`: 黒と黄色のアニメーション
-      - `black_red.gif`: 黒と赤のアニメーション
-      - `blue.gif`: 青色のアニメーション
-    - `Fonts/`: フォントファイル（準備中）
+#### 5. **UI ディレクトリの改善**
+- `Styles/`: デザインシステム関連
+- 共通のUIコンポーネントを整理
 
-  - `Assets.xcassets/`: アプリケーションのアセット管理
+#### 6. **Resources ディレクトリの整理**
+- `Animations/`: GIFファイル
+- `Fonts/`: フォント関連
+- `Localization/`: 多言語対応
 
-  - `Extensions/`: Swift標準型の拡張機能
-    - `Color+Hex.swift`: カラー関連の拡張機能
+#### 7. **Extensions ディレクトリの拡張**
+- 機能別に拡張を整理
 
-### プロジェクト関連ファイル
-- `TsukiUsagi.xcodeproj/`: Xcodeプロジェクト設定
-- `TsukiUsagiTests/`: ユニットテスト
-- `TsukiUsagiUITests/`: UIテスト
-- `.build/`: Swift Package Managerのビルドディレクトリ
-- `Package.resolved`: Swift Package Managerの依存関係管理ファイル
-- `README.md`: プロジェクトの説明ドキュメント
-- `.gitignore`: Gitの除外設定ファイル
+#### 8. **テスト構造の改善**
+- 機能別にテストを整理
+
+### 命名規則の改善
+
+#### Before:
+- `UsagiView_1.swift`, `UsagiView_2.swift`
+
+#### After:
+- `UsagiView.swift`, `UsagiSleepingView.swift`, `UsagiAnimations.swift`
+
+### メリット
+
+1. **一貫性**: 各機能で同じディレクトリ構造を使用
+2. **保守性**: 関連するファイルが近くに配置
+3. **拡張性**: 新しい機能を追加しやすい構造
+4. **可読性**: ファイル名が機能を明確に表現
+5. **テスト容易性**: テストも機能別に整理
+
+この構造により、プロジェクトの成長に合わせて効率的に開発を進めることができます。
