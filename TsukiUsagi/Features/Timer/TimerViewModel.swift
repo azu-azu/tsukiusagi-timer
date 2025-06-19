@@ -24,7 +24,8 @@ final class TimerViewModel: ObservableObject {
     var workLengthMinutes: Int { workMinutes }
 
     // User-configurable
-    @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
+    @AppStorage("activityLabel") private var activityLabel: String = "Work"
+    @AppStorage("detailLabel")   private var detailLabel:   String = ""
     @AppStorage("workMinutes")  private var workMinutes:  Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5 {
         didSet {
@@ -32,6 +33,13 @@ final class TimerViewModel: ObservableObject {
                 breakMinutes = 1 // ← ここで保証！
             }
         }
+    }
+
+    /// 設定変更を即反映（STOP中だけ）
+    func refreshAfterSettingsChange() {
+        guard !isRunning else { return }
+        let minutes = isWorkSession ? workMinutes : breakMinutes
+        timeRemaining = minutes * 60
     }
 
     // 内部
@@ -115,7 +123,13 @@ final class TimerViewModel: ObservableObject {
 
         // 履歴に本フェーズを保存
         if let start = startTime {
-			historyVM.add(start: start, end: Date(), phase: isWorkSession ? .focus : .breakTime, label: sessionLabel)
+			historyVM.add(
+                start:    start,
+                end:      Date(),
+                phase:    isWorkSession ? .focus : .breakTime,
+                activity: activityLabel,
+                detail:   detailLabel
+            )
         }
 
         // フェーズ別後処理

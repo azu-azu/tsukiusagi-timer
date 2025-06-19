@@ -14,13 +14,16 @@ TsukiUsagi/
 │   │   │   ├── TimerViewModel.swift
 │   │   │   ├── NotificationManager.swift
 │   │   │   └── PomodoroPhase.swift
-│   │   └── History/
-│   │       ├── ViewModels/
-│   │       │   └── HistoryViewModel.swift
-│   │       ├── Stores/
-│   │       │   └── HistoryStore.swift
-│   │       ├── Models/
-│   │       └── Views/
+│   │   ├── History/
+│   │   │   ├── ViewModels/
+│   │   │   │   └── HistoryViewModel.swift
+│   │   │   ├── Stores/
+│   │   │   │   └── HistoryStore.swift
+│   │   │   ├── Models/
+│   │   │   └── Views/
+│   │   │       └── HistoryView.swift
+│   │   └── Settings/
+│   │       └── SettingsView.swift
 │   │
 │   ├── Views/
 │   │   ├── Moon/
@@ -35,6 +38,8 @@ TsukiUsagi/
 │   │   │   ├── BackgroundPurple.swift
 │   │   │   └── BackgroundBlue.swift
 │   │   ├── StarView.swift
+│   │   ├── DiamondStarsView.swift
+│   │   ├── SparkleStarsView.swift
 │   │   ├── UsagiView_1.swift
 │   │   └── UsagiView_2.swift
 │   │
@@ -44,10 +49,17 @@ TsukiUsagi/
 │   ├── UI/
 │   │   ├── ViewModifiers.swift
 │   │   ├── DateToolbar.swift
+│   │   ├── AppFormatters.swift
 │   │   ├── GlitterTextModifier.swift
 │   │   └── GearButtonToolbar.swift
 │   │
 │   ├── Resources/
+│   │   ├── gif/
+│   │   │   ├── gold.gif
+│   │   │   ├── black_yellow.gif
+│   │   │   ├── black_red.gif
+│   │   │   └── blue.gif
+│   │   └── Fonts/
 │   │
 │   ├── Assets.xcassets/
 │   │
@@ -84,11 +96,16 @@ TsukiUsagi/
       - `Stores/`: データ永続化関連
         - `HistoryStore.swift`: セッション履歴の永続化を担当
       - `Models/`: 履歴データモデル（準備中）
-      - `Views/`: 履歴表示用ビュー（準備中）
+      - `Views/`: 履歴表示用ビュー
+        - `HistoryView.swift`: セッション履歴の表示画面
+    - `Settings/`: 設定機能関連
+      - `SettingsView.swift`: アプリケーション設定画面
 
   - `Views/`: 共通のビューコンポーネント
-    - `UsagiView.swift`, `UsagiView_1.swift`: うさぎの表示用ビュー
+    - `UsagiView_1.swift`, `UsagiView_2.swift`: うさぎの表示用ビュー
     - `StarView.swift`: 星の表示用ビュー
+    - `DiamondStarsView.swift`: ダイヤモンド型の星の表示用ビュー
+    - `SparkleStarsView.swift`: キラキラ星の表示用ビュー
     - `Moon/`: 月関連のビューコンポーネント
       - `MoonView.swift`: 月のメインビュー
       - `MoonShape.swift`: 月の形状を定義するビュー
@@ -107,10 +124,17 @@ TsukiUsagi/
   - `UI/`: 共通のUIコンポーネントを格納するディレクトリ
     - `ViewModifiers.swift`: 共通のビューモディファイアを定義
     - `DateToolbar.swift`: 日付表示用のツールバーモディファイア
+    - `AppFormatters.swift`: アプリケーション全体で使用するフォーマッター
     - `GlitterTextModifier.swift`: キラキラテキスト表示用のモディファイア
     - `GearButtonToolbar.swift`: 設定ボタン用のツールバーモディファイア
 
   - `Resources/`: アプリケーションのリソースファイルを格納するディレクトリ
+    - `gif/`: GIFアニメーションファイル
+      - `gold.gif`: 金色のアニメーション
+      - `black_yellow.gif`: 黒と黄色のアニメーション
+      - `black_red.gif`: 黒と赤のアニメーション
+      - `blue.gif`: 青色のアニメーション
+    - `Fonts/`: フォントファイル（準備中）
 
   - `Assets.xcassets/`: アプリケーションのアセット管理
 
