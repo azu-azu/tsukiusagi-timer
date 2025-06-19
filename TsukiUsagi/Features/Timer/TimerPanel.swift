@@ -22,7 +22,7 @@ struct TimerPanel: View {
 
     private let spacingBetween: CGFloat = 180
     private let recordDistance: CGFloat = 100
-    private let buttonWidth: CGFloat = 160
+    private let buttonWidth: CGFloat = 120
 
     var body: some View {
         // 高さはボタンとタイマーだけで決まる
@@ -35,10 +35,15 @@ struct TimerPanel: View {
             if timerVM.isSessionFinished {
                 recordedTimes()
                     .padding(.bottom, recordDistance)
+                    .transition(.opacity)
             }
         }
         // 編集シート
         .sheet(isPresented: $isEditing) { editSheetView() }
+
+        // ★ Moon メッセージと同じ 0.8 秒で同期
+        .animation(.easeInOut(duration: 0.8), // ← 追加②
+                    value: timerVM.isSessionFinished)
     }
 
 
@@ -65,8 +70,8 @@ struct TimerPanel: View {
             VStack(spacing: 2) {
                 // 上２行：中央
                 VStack(spacing: 2) {
-                    Text("start ⏳  \(timerVM.formattedStartTime)")
-                    Text("final ⏳  \(Date(), style: .time)")
+                    Text("Start ⏳  \(timerVM.formattedStartTime)")
+                    Text("Final ⏳  \(Date(), style: .time)")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .titleWhiteAvenir(size: 18, weight: .regular)
@@ -78,7 +83,7 @@ struct TimerPanel: View {
                 .titleWhiteAvenir(size: 18, weight: .regular)
                 .frame(maxWidth: 110)
 
-            // 鉛筆アイコン（単体で右寄せ）
+            // ✏️
             HStack {
                 Spacer()
                 Button {
@@ -89,13 +94,14 @@ struct TimerPanel: View {
                     }
                 } label: {
                     Image(systemName: "pencil")
-                        .font(.system(size: 18))
-                        .foregroundColor(.blue)
+                        .font(.system(size: 30))
+                        .foregroundColor(.yellow)
                 }
             }
             .frame(maxWidth: 110)
         }
         .padding(.top, 20)
+        .transition(.opacity)             // 念押しフェード
     }
 
 
@@ -115,7 +121,7 @@ struct TimerPanel: View {
             timerVM.isRunning ? timerVM.stopTimer() : timerVM.startTimer()
         }
 
-        .padding()
+        .padding(.vertical, 12)
         .frame(width: buttonWidth)
         .background(
             Color.white.opacity(0.2),

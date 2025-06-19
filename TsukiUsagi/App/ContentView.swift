@@ -9,15 +9,14 @@ struct ContentView: View {
 
     // Const
 	private let moonTitle: String = "Centered"
-
-	private let finalTitle: String = "Quiet Time"
-	private let finalMessage: String = "Centered means feeling emotionally stable, grounded, and calmly, regardless of what's happening outside."
-
 	private let moonSize: CGFloat = 200
     private let moonPaddingY: CGFloat = 150          // 月の高さ調節
     private let finalPaddingY: CGFloat = 100          // 月の高さ調節
     private let timerBottomRatio: CGFloat = 0.85    // タイマーパネルの中心を「下端から X %」に
     private let startTimeGap: CGFloat   = 80        // 「開始 xx:xx」をタイトルとタイマーの"中間"へ
+
+    private let finalTitle   = MoonMessage.finalTitle
+    private let finalMessage = MoonMessage.random()
 
     // Body
     var body: some View {
