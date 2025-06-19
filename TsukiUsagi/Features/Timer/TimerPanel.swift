@@ -11,10 +11,14 @@ import SwiftUI
 
 struct TimerPanel: View {
     @ObservedObject var timerVM: TimerViewModel
+    @EnvironmentObject private var historyVM: HistoryViewModel
     @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
 
     @State private var flashYellow = false
     @State private var flashScale  = false
+    @State private var isEditing = false
+    @State private var editedActivity: String = ""
+    @State private var editedDetail: String = ""
 
     private let spacingBetween: CGFloat = 180
     private let recordDistance: CGFloat = 100
@@ -30,10 +34,13 @@ struct TimerPanel: View {
             // 終了後だけ「重ねる」ので高さに影響しない
             if timerVM.isSessionFinished {
                 recordedTimes()
-                    .padding(.bottom, recordDistance)  // ← ボタンから X pt 上に表示
+                    .padding(.bottom, recordDistance)
             }
         }
+        // 編集シート
+        .sheet(isPresented: $isEditing) { editSheetView() }
     }
+
 
     // ⏱ 残り時間表示
     private func timerText() -> some View {
@@ -54,23 +61,43 @@ struct TimerPanel: View {
 
     // 記録時刻（start / final）── 終了時のみ表示される
     private func recordedTimes() -> some View {
-        VStack(spacing: 2) {
-            // --- 上２行：中央寄せ & フォントサイズA ---
+        VStack(spacing: 8) {
             VStack(spacing: 2) {
-                Text("start ⏳  \(timerVM.formattedStartTime)")
-                Text("final ⏳  \(Date(), style: .time)")
+                // 上２行：中央
+                VStack(spacing: 2) {
+                    Text("start ⏳  \(timerVM.formattedStartTime)")
+                    Text("final ⏳  \(Date(), style: .time)")
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .titleWhiteAvenir(size: 18, weight: .regular)
             }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .font(.system(size: 18, weight: .regular)) // ← 上２行のフォント設定
 
-            // --- ３行目：右寄せ & フォントサイズB ---
+            // ３行目の分数表示
             Text("--  \(timerVM.workLengthMinutes) 分  --")
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .font(.system(size: 16, weight: .light)) // ← ３行目のフォント設定
+                .titleWhiteAvenir(size: 18, weight: .regular)
                 .frame(maxWidth: 110)
+
+            // 鉛筆アイコン（単体で右寄せ）
+            HStack {
+                Spacer()
+                Button {
+                    if let last = historyVM.history.last {
+                        editedActivity = last.activity
+                        editedDetail   = last.detail ?? ""
+                        isEditing = true
+                    }
+                } label: {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 18))
+                        .foregroundColor(.blue)
+                }
+            }
+            .frame(maxWidth: 110)
         }
         .padding(.top, 20)
     }
+
 
     // ▶︎ START / PAUSE ボタン
     private func startPauseButton() -> some View {
@@ -96,4 +123,42 @@ struct TimerPanel: View {
         )
         .titleWhiteAvenir(weight: .bold)
     }
+
+    @ViewBuilder
+    private func editSheetView() -> some View {
+        NavigationStack {
+            Form {
+                Picker("Activity", selection: $editedActivity) {
+                    ForEach(["Work", "Study", "Read", "Other"], id: \.self) { Text($0) }
+                }
+
+                if editedActivity == "Other" {
+                    TextField("Custom Activity", text: $editedActivity)
+                }
+
+                TextField("Detail", text: $editedDetail)
+                    .textInputAutocapitalization(.never)
+            }
+            .navigationTitle("Edit Record")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        if var last = historyVM.history.last {
+                            last.activity = editedActivity
+                            last.detail   = editedDetail
+                            historyVM.updateLast(activity: editedActivity, detail: editedDetail)
+                            isEditing = false
+                        }
+                    }
+                    .disabled(editedActivity.isEmpty) // Activity 空欄禁止
+                }
+
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { isEditing = false }
+                }
+            }
+        }
+    }
 }
+
+

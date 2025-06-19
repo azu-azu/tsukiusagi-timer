@@ -10,12 +10,11 @@ private enum Granularity: String, CaseIterable, Identifiable {
 struct HistoryView: View {
     @EnvironmentObject var historyVM: HistoryViewModel
 
-    @State private var selectedDate = Calendar.current.startOfDay(for: Date()) // 基準日
-    @State private var mode: Granularity = .day                                // 粒度
+    @State private var selectedDate = Calendar.current.startOfDay(for: Date())  // 基準日
+    @State private var mode: Granularity = .day // 粒度
 
     private let cal = Calendar.current
 
-    // ─────────────────────────────
     var body: some View {
         VStack(spacing: 12) {
 
@@ -50,14 +49,21 @@ struct HistoryView: View {
 
             // ③ リスト（日 or 月）
             List {
-                Section(
-                    footer: Text("total Work \(totalMinutes())分")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                ) {
-                    if mode == .day {
-                        // 日別はこれまで通り
+                if mode == .day {
+                    Section(
+                        footer: Text("total \(totalMinutes())分")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    ) {
                         ForEach(records()) { rec in
+                            let labelText: String = {
+                                if let d = rec.detail, !d.isEmpty {
+                                    return "\(rec.activity) | \(d)"
+                                } else {
+                                    return rec.activity
+                                }
+                            }()
+
                             HStack {
                                 Text(rec.start.formatted(date: .omitted, time: .shortened))
                                 Image(systemName: "arrow.right")
@@ -67,22 +73,18 @@ struct HistoryView: View {
 
                                 Spacer(minLength: 8)
 
-                                Text("\(rec.label) \(durationMinutes(rec))分")
+                                Text("\(labelText) \(durationMinutes(rec))分")
                             }
                             .font(.body)
                             .padding(.vertical, 6)
                         }
-                    } else {
-                        // 月別：ラベルごとの合計を表示
-                        ForEach(groupedSummary(), id: \.label) { summary in
-                            HStack {
-                                Text(summary.label)
-                                Spacer()
-                                Text("\(summary.total)分")
-                            }
-                            .font(.body)
-                            .padding(.vertical, 6)
-                        }
+                    }
+                } else {
+                    Section("By Activity") {
+                        ForEach(byActivity(), id: \.label) { s in rowView(s) }
+                    }
+                    Section("By Detail") {
+                        ForEach(byDetail(), id: \.label) { s in rowView(s) }
                     }
                 }
             }
@@ -91,7 +93,7 @@ struct HistoryView: View {
     }
 
     // ─────────────────────────────
-    // MARK: - 取り出し & 集計
+    // MARK: - Record 抽出・集計
     private func records() -> [SessionRecord] {
         historyVM.history
             .filter { rec in
@@ -110,6 +112,43 @@ struct HistoryView: View {
     }
 
     // ─────────────────────────────
+    // MARK: - 集計構造
+    private struct LabelSummary {
+        let label: String
+        let total: Int
+    }
+
+    private func byActivity() -> [LabelSummary] {
+        groupAndSum(\.activity)
+    }
+
+    private func byDetail() -> [LabelSummary] {
+        groupAndSum { $0.detail?.isEmpty == false ? $0.detail! : "—" }
+    }
+
+    private func groupAndSum<T>(_ key: (SessionRecord) -> T) -> [LabelSummary] where T: Hashable {
+        let grouped = Dictionary(grouping: records(), by: key)
+        return grouped.map { (k, recs) in
+            LabelSummary(
+                label: String(describing: k),
+                total: recs.reduce(0) { $0 + durationMinutes($1) }
+            )
+        }
+        .sorted { $0.total > $1.total }
+    }
+
+    @ViewBuilder
+    private func rowView(_ s: LabelSummary) -> some View {
+        HStack {
+            Text(s.label)
+            Spacer()
+            Text("\(s.total)分")
+        }
+        .font(.body)
+        .padding(.vertical, 6)
+    }
+
+    // ─────────────────────────────
     // MARK: - ナビゲーション
     private func change(by offset: Int) {
         let component: Calendar.Component = (mode == .day) ? .day : .month
@@ -120,10 +159,8 @@ struct HistoryView: View {
 
     private func titleString() -> String {
         switch mode {
-        // 日別
         case .day:
             return AppFormatters.displayDate.string(from: selectedDate)
-        // 月別
         case .month:
             return selectedDate.formatted(.dateTime.year().month())
         }
@@ -146,27 +183,10 @@ struct HistoryView: View {
             return cal.date(from: cal.dateComponents([.year, .month], from: date))!
         }
     }
-    // ラベルごとの合計値を算出
-    private struct LabelSummary {
-        let label: String
-        let total: Int
-    }
-
-    private func groupedSummary() -> [LabelSummary] {
-        let items = records()
-        let grouped = Dictionary(grouping: items, by: { $0.label })
-
-        return grouped.map { (label, recs) in
-            let sum = recs.reduce(0) { $0 + durationMinutes($1) }
-            return LabelSummary(label: label, total: sum)
-        }
-        .sorted { $0.label < $1.label }
-    }
 }
 
-// 既存ヘルパー
+// ⏱ ヘルパー：所要時間を分に変換
 private func durationMinutes(_ rec: SessionRecord) -> Int {
     let sec = rec.end.timeIntervalSince(rec.start)
     return max(Int(sec) / 60, 1)
 }
-

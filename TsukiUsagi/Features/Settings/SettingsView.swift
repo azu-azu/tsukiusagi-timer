@@ -15,10 +15,11 @@ struct SettingsView: View {
     @EnvironmentObject private var timerVM:   TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
 
-    // ポモドーロと休憩の長さ
-    @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
-    @AppStorage("workMinutes")  private var workMinutes:  Int = 25
-    @AppStorage("breakMinutes") private var breakMinutes: Int = 5
+    // 設定値
+    @AppStorage("activityLabel") private var activityLabel: String = "Work"
+    @AppStorage("detailLabel")   private var detailLabel: String = ""
+    @AppStorage("workMinutes")   private var workMinutes: Int = 25
+    @AppStorage("breakMinutes")  private var breakMinutes: Int = 5
 
     var body: some View {
         NavigationStack {
@@ -27,6 +28,9 @@ struct SettingsView: View {
                 Section(header: Text("Work Length")) {
                     Stepper(value: $workMinutes, in: 1...60, step: 5) {
                         Text("\(workMinutes) minutes")
+                    }
+                    .onChange(of: workMinutes) {
+                        timerVM.refreshAfterSettingsChange()   // ← ここ！
                     }
                 }
 
@@ -37,18 +41,20 @@ struct SettingsView: View {
                     }
                 }
 
-                // Session Label
+                // Activity & Detail Labels
                 Section(header: Text("Session Label")) {
-                    Picker("Preset", selection: $sessionLabel) {
+                    Picker("Activity", selection: $activityLabel) {
                         ForEach(["Work", "Study", "Read", "Other"], id: \.self) { label in
                             Text(label)
                         }
                     }
 
-                    // カスタム入力（"Other" を選んだときだけ出す）
-                    if sessionLabel == "Other" {
-                        TextField("Custom Label", text: $sessionLabel)
+                    if activityLabel == "Other" {
+                        TextField("Custom Activity", text: $activityLabel)
                     }
+
+                    TextField("Detail (optional)", text: $detailLabel)
+                        .textInputAutocapitalization(.never)
                 }
 
                 // Reset Timer
