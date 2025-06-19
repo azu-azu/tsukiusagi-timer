@@ -91,7 +91,11 @@ final class TimerViewModel: ObservableObject {
 
     func resetTimer() {
         stopTimer()
-        timeRemaining     = (isWorkSession ? workMinutes : breakMinutes) * 60
+        // ここで必ず Work セッションに戻す
+        isWorkSession = true
+
+        // Work のデフォルト時間にリセット
+        timeRemaining     = workMinutes * 60
         isSessionFinished = false
         startTime         = nil
     }
