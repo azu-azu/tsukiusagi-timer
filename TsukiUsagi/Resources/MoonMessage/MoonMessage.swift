@@ -1,21 +1,126 @@
-//  MoonMessage.swift
-//  TsukiUsagi
-//
-//  “文字列リソース” を一元管理
+// MoonMessage.swift
+
 import Foundation
 
-enum MoonMessage {
-    static let finalTitle   = "Quiet Moon"
-    static let messages: [String] = [
-        "Centered means feeling emotionally stable, grounded, and calmly, regardless of what's happening outside.",
-        "Silence doesn’t mean emptiness. It means space to breathe.",
-        "The moon doesn’t rush. Yet it completes its cycle, every time.",
-        "Your stillness is not a pause. It is power in rest.",
-        "Focus is not tension. It’s the art of being undisturbed."
-    ]
-
-    static func random() -> String {
-        messages.randomElement() ?? ""
-    }
+struct MoonMessageEntry {
+    let lines: [String]
 }
 
+enum MoonMessage {
+    static let messages: [MoonMessageEntry] = [
+        MoonMessageEntry(lines: [
+            "There is no sound in space.",
+            "Stars explode in silence.",
+            "",
+            "At its core, every work is quiet.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "The Moon always shows the same face to Earth.",
+            "",
+            "There’s a side of the Moon we’ll never see—",
+            "There’s a side of you no one will ever see.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "'Joy is not in things;",
+            "it is in us.'",
+            "– Richard Wagner",
+            "",
+            "",
+            "It might come like moonlight—",
+            "soft, slow, ",
+            "and never asking.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "True joy drifts in,",
+            "like the moon—",
+            "",
+            "never loud, never rushed.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "What if",
+            "the Moon were asking—",
+            "",
+            "not what you’ve done,",
+            "but how softly you’ve been?"
+        ]),
+
+        MoonMessageEntry(lines: [
+            "The Moon has no atmosphere, so sound cannot exist there.",
+            "Even if you scream, no sound would ever form.",
+            "",
+            "It’s okay for silence to be the answer.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "The Moon always watches us.",
+            "",
+            "She sees your work.",
+            "You are quietly seen.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "The Moon is always there, in the same place.",
+            "",
+            "You are quietly seen.",
+            "You don’t need to shout to be noticed.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "The Moon’s gravity pulls on Earth's oceans, creating tides.",
+            "",
+            "Even in silence, the Moon moves the sea.",
+            "You don’t need noise to change the world.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "Because there is no wind or water, ",
+            "astronaut footprints on the Moon may last for millions of years.",
+            "",
+            "You’re erased only when something erases you.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "On the Moon, a day is 29.5 Earth days.",
+            "For a human, that's about the speed of a brisk walk.",
+            "",
+            "The Moon moves slowly.",
+            "Yet its influence is vast.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "On the Moon, shadows are sharp.",
+            "",
+            "No air, no blur—",
+            "just clarity from what's absent.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "The Moon moves the tides without a sound.",
+            "But the Moon doesn't intend to pull the sea.",
+            "",
+            "We move each other—silently.",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "The Moon quietly pulls the sea and stirs the waves.",
+            "",
+            "You, too, pull someone—",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "You often feel tired, ",
+            "not because you've done too much,",
+            "",
+            "but because you've done too little of what sparks a light in you.",
+            "— Alexander Den Heijer",
+        ]),
+    ]
+
+    static func random() -> MoonMessageEntry {
+        messages.randomElement() ?? MoonMessageEntry(lines: [""])
+    }
+}

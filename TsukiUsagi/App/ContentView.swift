@@ -10,13 +10,8 @@ struct ContentView: View {
     // Const
 	private let moonTitle: String = "Centered"
 	private let moonSize: CGFloat = 200
-    private let moonPaddingY: CGFloat = 150          // 月の高さ調節
-    private let finalPaddingY: CGFloat = 100          // 月の高さ調節
+    private let moonPaddingY: CGFloat = 150         // 月の高さ調節
     private let timerBottomRatio: CGFloat = 0.85    // タイマーパネルの中心を「下端から X %」に
-    private let startTimeGap: CGFloat   = 80        // 「開始 xx:xx」をタイトルとタイマーの"中間"へ
-
-    private let finalTitle   = MoonMessage.finalTitle
-    private let finalMessage = MoonMessage.random()
 
     // Body
     var body: some View {
@@ -26,25 +21,13 @@ struct ContentView: View {
                     BackgroundGradientView() // 背景
                     AwakeEnablerView(hidden: true) // 起動させておくためのダミー画面 ＊背景の次に置かないと色がつかない
                     StarView() // 固定スター
-                    // 月 or 終了メッセージ
+
+                    // quiet moon or moon
                     ZStack(alignment: .top) {
                         if timerVM.isSessionFinished {
-                            // タイトル＆メッセージまとめて制御
-                            VStack(spacing: 20) {
-                                Text(finalTitle)
-                                    .glitter(size: 24, resourceName: "gold")
-                                    .frame(maxWidth: .infinity, alignment: .center)
-
-                                Text(finalMessage)
-                                    .titleWhite(size: 16, weight: .regular, design: .monospaced)
-                                    .multilineTextAlignment(.leading)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, 32) // 左右
-                            }
-                            .padding(.top, finalPaddingY)
-
+                            QuietMoonView()
                         } else {
-                            // moving star
+                            // ⭐️
                             FallingStarsView()
                             RisingStarsView()
 

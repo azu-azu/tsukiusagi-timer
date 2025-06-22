@@ -21,7 +21,7 @@ struct TimerPanel: View {
     @State private var editedDetail: String = ""
 
     private let spacingBetween: CGFloat = 180
-    private let recordDistance: CGFloat = 100
+    private let recordDistance: CGFloat = 80
     private let buttonWidth: CGFloat = 120
 
     var body: some View {
@@ -67,18 +67,18 @@ struct TimerPanel: View {
     // 記録時刻（start / final）── 終了時のみ表示される
     private func recordedTimes() -> some View {
         VStack(spacing: 8) {
-            VStack(spacing: 2) {
+            VStack(spacing: 4) {
                 // 上２行：中央
-                VStack(spacing: 2) {
-                    Text("Start ⏳  \(timerVM.formattedStartTime)")
-                    Text("Final ⏳  \(Date(), style: .time)")
+                VStack(spacing: 4) {
+                    Text("Start 🌕 \(timerVM.formattedStartTime)")
+                    Text("Final 🌑 \(Date(), style: .time)")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .titleWhiteAvenir(size: 18, weight: .regular)
             }
 
             // ３行目の分数表示
-            Text("--  \(timerVM.workLengthMinutes) 分  --")
+            Text("-- \(timerVM.workLengthMinutes) min.")
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .titleWhiteAvenir(size: 18, weight: .regular)
                 .frame(maxWidth: 110)
