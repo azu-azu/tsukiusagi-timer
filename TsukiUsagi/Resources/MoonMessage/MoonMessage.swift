@@ -39,6 +39,11 @@ enum MoonMessage {
             "like the moon—",
             "",
             "never loud, never rushed.",
+
+            // ほんまもんの喜びは、ふわっと、ただやってくる。
+            // 月みたいに——
+            // 決してうるさくなく、決して急ぐこともなく。
+            // “drift in” ＝「漂うように入ってくる」
         ]),
 
         MoonMessageEntry(lines: [
