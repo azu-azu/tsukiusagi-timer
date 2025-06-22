@@ -20,20 +20,25 @@ struct TimerPanel: View {
     @State private var editedActivity: String = ""
     @State private var editedDetail: String = ""
 
-    private let spacingBetween: CGFloat = 180
-    private let recordDistance: CGFloat = 80
     private let buttonWidth: CGFloat = 120
+    private let recordBottomPadding: CGFloat = 200   // ← 下から何pt に出す？
 
     var body: some View {
-        // 高さはボタンとタイマーだけで決まる
-        ZStack(alignment: .bottom) {
-            VStack(spacing: spacingBetween) {
-                timerText()
-            }
-            // セッション終了 かつ work セッションだったときのみ表示
+        // “タイマー中央” と “記録ブロック下端” を別レイヤーで配置
+        ZStack {
+            // タイマー：常に中央寄り
+            timerText()
+                .frame(maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .center)
+
+            // 記録ブロック：常に下端
             if timerVM.isSessionFinished && !timerVM.isWorkSession {
                 recordedTimes()
-                    .padding(.bottom, recordDistance)
+                    .frame(maxWidth: .infinity,
+                            maxHeight: .infinity,
+                            alignment: .bottom)
+                    .padding(.bottom, recordBottomPadding)
                     .transition(.opacity)
             }
         }

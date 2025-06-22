@@ -3,7 +3,7 @@ import SwiftUI
 struct QuietMoonView: View {
     private let title  = "Quiet Moon"
     private let height: CGFloat = 300
-    private let paddingY: CGFloat = 120
+    private let paddingY: CGFloat = 60
     private let bodyText = MoonMessage.random().lines.joined(separator: "\n")
 
     var body: some View {

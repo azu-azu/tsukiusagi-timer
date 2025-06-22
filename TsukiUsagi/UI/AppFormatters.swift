@@ -1,11 +1,20 @@
 import Foundation
 
 enum AppFormatters {
-    /// 表示用日付：2025/6/17 Tue
+
+    /// yyyy/MM/dd EEE など『年も入った』日付。（既存を残す）
     static let displayDate: DateFormatter = {
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy/M/d EEE"
-        f.locale = Locale(identifier: "en_US")
+        return f
+    }()
+
+    /// M/d EEE  – 年を含まない表示専用
+    static let displayDateNoYear: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "M/d EEE"
         return f
     }()
 }
