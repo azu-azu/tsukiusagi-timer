@@ -47,24 +47,18 @@ struct TimerPanel: View {
     }
 
 
-    // ⏱ 残り時間表示
+    // 🕐 時間表示
     private func timerText() -> some View {
         Text(timerVM.formatTime())
             // .titleWhiteAvenir(size: 65, weight: .bold)
             .font(.system(size: 65, weight: .bold, design: .rounded))
             .opacity(timerVM.isSessionFinished ? 0 : 1.0)
-
             .transition(.opacity)                                // ← フェード効果
             .foregroundColor(flashYellow ? .yellow : .white)     // ← 色切替
-            .scaleEffect(flashScale ? 2.0 : 1.0, anchor: .center)
-            // ← spring：response＝全体時間、dampingFraction＝バウンドの残り具合
-            .animation(.interactiveSpring(response: 1.5,
-                                        dampingFraction: 0.5,
-                                        blendDuration: 0.4),
-                    value: flashScale)
+            .scaleEffect(flashScale ? 1.5 : 1.0, anchor: .center)
     }
 
-    // 記録時刻（start / final）── 終了時のみ表示される
+    // 🌕 🌑 start / final 記録
     private func recordedTimes() -> some View {
         VStack(spacing: 8) {
             VStack(spacing: 4) {
@@ -105,22 +99,26 @@ struct TimerPanel: View {
     }
 
 
-    // ▶︎ START / PAUSE ボタン
+    // 🔘 START / PAUSE ボタン
+    private let expandAnimationDuration: Double = 0.3
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
-            if !timerVM.isRunning {            // START の時だけ
-                flashYellow = true
-                flashScale  = true             // ★ 拡大 ON
-
-                // 0.3 秒後に両方 OFF
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    flashYellow = false
-                    flashScale  = false
+            // START の時だけ
+            if !timerVM.isRunning {
+                withAnimation(.easeInOut(duration: expandAnimationDuration)) {
+                    flashYellow = true
+                    flashScale  = true             // ★ 拡大 ON
+                }
+                // 拡大状態でキープしてから戻す
+                DispatchQueue.main.asyncAfter(deadline: .now() + expandAnimationDuration + 0.3) { // + キープ時間
+                    withAnimation(.easeInOut(duration: 2.0)) {
+                        flashYellow = false
+                        flashScale  = false
+                    }
                 }
             }
             timerVM.isRunning ? timerVM.stopTimer() : timerVM.startTimer()
         }
-
         .padding(.vertical, 12)
         .frame(width: buttonWidth)
         .background(
