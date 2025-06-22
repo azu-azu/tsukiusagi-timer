@@ -1,40 +1,41 @@
 import SwiftUI
 
 struct ContentView: View {
+
+    // Environment
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM:   TimerViewModel
-    @State private var showingSettings = false
+
+    // State
+    @State private var showingSettings  = false
     @State private var showDiamondStars = false
 
-    private let buttonWidth: CGFloat = 120
-    private let expandDuration: Double = 0.3
-    private let moonTitle = "Centered"
-    private let moonSize: CGFloat = 200
-    private let moonPaddingY: CGFloat = 150
-    private let timerBottomRatio: CGFloat = 0.85   // ← TimerPanel の高さバランス
+    // UI Const
+    private let buttonWidth:  CGFloat = 120
+    private let buttonHeight: CGFloat = 40
+    private let moonTitle              = "Centered"
+    private let moonSize:      CGFloat = 200
+    private let moonPaddingY:  CGFloat = 100
+    private let timerBottomRatio: CGFloat = 1.1   // 画面高に対する TimerPanel の比率
 
+    // Body
     var body: some View {
         NavigationStack {
             ZStack {
-                // 背景だけ Safe-Area を無視
+                // 背景レイヤ
                 BackgroundGradientView()
                     .ignoresSafeArea()
 
                 AwakeEnablerView(hidden: true)
                 StarView().allowsHitTesting(false)
 
-                // 月 & 星エフェクト
+                // 月 & 星レイヤ
                 ZStack(alignment: .top) {
                     if timerVM.isSessionFinished {
                         QuietMoonView()
                     } else {
-                        // ⭐️
-                        FallingStarsView()
-                            .allowsHitTesting(false)
-                        RisingStarsView()
-                            .allowsHitTesting(false)
-
-                        // 🌕
+                        FallingStarsView().allowsHitTesting(false)
+                        RisingStarsView().allowsHitTesting(false)
                         MoonView(
                             moonSize: moonSize,
                             paddingY: moonPaddingY,
@@ -43,9 +44,10 @@ struct ContentView: View {
                         .allowsHitTesting(false)
                     }
                 }
-                .animation(.easeInOut(duration: 0.8), value: timerVM.isSessionFinished)
+                .animation(.easeInOut(duration: 0.8),
+                            value: timerVM.isSessionFinished)
 
-                // 中央タイマー
+                // タイマー
                 GeometryReader { geo in
                     let timerHeight = geo.size.height * (1 - timerBottomRatio)
                     TimerPanel(timerVM: timerVM)
@@ -55,15 +57,7 @@ struct ContentView: View {
                         .padding(.bottom, timerHeight)
                 }
             }
-            // ▼▼▼ 最下部フッター ▼▼▼
-            .safeAreaInset(edge: .bottom) {
-                footerBar()
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                    // 少し透過でも OK
-                    .background(.black.opacity(0.0001)) // ← タッチ領域確保
-            }
-            // ▼ ダイヤモンドスター一瞬
+            // ⭐ ダイヤモンドスター演出
             .overlay(alignment: .center) {
                 if showDiamondStars {
                     DiamondStarsOnceView()
@@ -75,56 +69,66 @@ struct ContentView: View {
                         }
                 }
             }
-            // ▼ イベント
+            // フッターを最背面に貼り付け
+            .overlay(alignment: .bottom) {
+                footerBar()
+                    .padding(.horizontal, 16)  // 左右余白
+                    .padding(.bottom, 10)      // 下端から Ypt 浮かす（数字で微調整）
+            }
             .onReceive(timerVM.$flashStars.dropFirst()) { _ in
                 showDiamondStars = true
             }
-            // ▼ シート & ツールバー
-            .sheet(isPresented: $showingSettings) { SettingsView() }
-            // .dateToolbar()
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+            }
             .navigationBarTitleDisplayMode(.inline)
         }
     }
 
-    // --- フッター View ---
+    // Footer
     @ViewBuilder
     private func footerBar() -> some View {
-        HStack {
-            // 日付
-            Text(AppFormatters.displayDate.string(from: Date()))
-                .titleWhite(size: 16,
-                            weight: .regular,
-                            design: .monospaced)
+        ZStack(alignment: .bottom) {
+            HStack {
+                Text(AppFormatters.displayDateNoYear.string(from: Date()))
+                    .titleWhite(size: 16,
+                                weight: .bold,
+                                design: .monospaced)
+                    .frame(height: buttonHeight, alignment: .bottom)
 
-            Spacer(minLength: 24)
+                Spacer(minLength: 0)
 
-            // start pause ボタン
-            startPauseButton()
-
-            Spacer(minLength: 24)
-
-            // gearボタン
-            Button {
-                showingSettings = true
-            } label: {
-                Image(systemName: "gearshape.fill")
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundColor(.white)
+                Button { showingSettings = true } label: {
+                    Image(systemName: "gearshape.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                        .frame(width: buttonHeight,
+                            height: buttonHeight,
+                            alignment: .bottom)
+                        .foregroundColor(.white)
+                }
             }
+
+            startPauseButton()
+                .frame(height: buttonHeight, alignment: .bottom)
+                .offset(y: 6)
         }
+        .frame(height: buttonHeight) // ← 全体フッターの高さ定義
+        .background(Color.black.opacity(0.0001)) // タッチ領域確保
     }
 
-    // --- START/PAUSE ボタン ---
+    // START / PAUSE
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
-            timerVM.isRunning ? timerVM.stopTimer() : timerVM.startTimer()
+            timerVM.isRunning ? timerVM.stopTimer()
+                                : timerVM.startTimer()
         }
-        .padding(.vertical, 12)
-        .frame(width: buttonWidth)
-        .background(.white.opacity(0.2), in: RoundedRectangle(cornerRadius: 20))
+        .frame(width: buttonWidth, height: buttonHeight)
+        .background(Color.white.opacity(0.2),
+                    in: RoundedRectangle(cornerRadius: 20))
         .titleWhiteAvenir(weight: .bold)
         .foregroundColor(.white)
-        .scaleEffect(1.0)
     }
 }
 
