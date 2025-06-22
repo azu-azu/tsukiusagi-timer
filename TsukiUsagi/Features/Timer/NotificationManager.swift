@@ -52,11 +52,11 @@ final class NotificationManager {
 
         switch phase {
         case .focus:
-            content.title = "Focus Again!"
-            content.body  = "そろそろ集中モードにもどろか 🐇"
+            content.title = "Time to Focus 🌕"
+            content.body  = "Let’s begin, quietly centered."
         case .breakTime:
-            content.title = "Break Time!"
-            content.body  = "がんばったね。少し休憩しよか ☕️"
+            content.title = "Time to Rest 🌑"
+            content.body  = "The moon is still. So can you be."
         }
 
         // 音＋バイブ

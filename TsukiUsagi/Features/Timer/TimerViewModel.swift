@@ -20,6 +20,12 @@ final class TimerViewModel: ObservableObject {
     @Published var isSessionFinished       = false      // 終了フラグ（View 切替に使用）
     @Published private(set) var startTime: Date?        // セッション開始時刻
     @Published var flashStars = false
+    @Published private(set) var lastBackgroundDate: Date? = nil
+    private var wasRunningBeforeBackground = false
+
+    // アプリに戻ってきた時にstartアニメを発火しない
+    private var shouldSuppressAnimation = false
+    @Published var shouldSuppressSessionFinishedAnimation = false
 
     var workLengthMinutes: Int { workMinutes }
 
@@ -46,6 +52,9 @@ final class TimerViewModel: ObservableObject {
     private var timer: Timer?
     private let historyVM: HistoryViewModel
 
+    // 🔔 START アニメ用トリガー
+    let startPulse = PassthroughSubject<Void, Never>()
+
     // Init
     init(historyVM: HistoryViewModel) {
         self.historyVM = historyVM
@@ -59,28 +68,34 @@ final class TimerViewModel: ObservableObject {
     func startTimer() {
         guard !isRunning else { return }
 
-        // 1) 裏休憩タイマー or 既存タイマーが残っていても必ず止める
         stopTimer()
 
         // 2) これは「新しいセッション」か？ (= 最後のセッションが完了しているか)
         if isSessionFinished {
-            // 新しい Work を始める
             isWorkSession     = true
             timeRemaining     = workMinutes * 60
-            startTime         = Date()            // 新しい開始時刻
-            isSessionFinished = false             // フラグをクリア
+            startTime         = Date()
+            isSessionFinished = false
         } else if startTime == nil {
-            // 初回起動やリセット時
             timeRemaining = (isWorkSession ? workMinutes : breakMinutes) * 60
             startTime     = Date()
         }
         // それ以外 (= ポーズ再開) は timeRemaining や startTime を触らない
 
         // 3) 走り出す
-        flashStars.toggle()
+        if !shouldSuppressAnimation {
+            flashStars.toggle()
+            DispatchQueue.main.async {
+                self.startPulse.send()
+            }
+        }
+        shouldSuppressAnimation = false
+
         isRunning = true
         timer = Timer.scheduledTimer(withTimeInterval: 1.0,
-                        repeats: true) { [weak self] _ in self?.tick() }
+                                    repeats: true) { [weak self] _ in
+            self?.tick()
+        }
     }
 
     func stopTimer() {
@@ -195,4 +210,26 @@ final class TimerViewModel: ObservableObject {
         f.dateFormat = "HH:mm"
         return f
     }()
+
+    // バックグラウンドへ
+    func appDidEnterBackground() {
+        wasRunningBeforeBackground = isRunning          // ↙︎ 動いてたか保存
+        lastBackgroundDate = Date()
+        stopTimer()                                     // 一旦止める
+    }
+
+    // フォアグラウンド復帰
+    func appWillEnterForeground() {
+        guard let last = lastBackgroundDate,
+            wasRunningBeforeBackground else { return }
+
+        let elapsed = Int(Date().timeIntervalSince(last))
+        timeRemaining = max(timeRemaining - elapsed, 0)
+
+        shouldSuppressAnimation = true
+        shouldSuppressSessionFinishedAnimation = true
+        startTimer()                                    // 再開
+        lastBackgroundDate = nil
+        wasRunningBeforeBackground = false
+    }
 }
