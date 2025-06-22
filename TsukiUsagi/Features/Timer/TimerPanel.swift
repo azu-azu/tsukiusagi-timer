@@ -20,6 +20,7 @@ struct TimerPanel: View {
     @State private var isEditing = false
     @State private var editedActivity: String = ""
     @State private var editedDetail: String = ""
+    @State private var editedMemo: String = ""
 
     private let buttonWidth: CGFloat = 120
     private let recordBottomPadding: CGFloat = 200   // ← 下から何pt に出す？
@@ -121,6 +122,7 @@ struct TimerPanel: View {
                     if let last = historyVM.history.last {
                         editedActivity = last.activity
                         editedDetail   = last.detail ?? ""
+                        editedMemo     = last.memo   ?? ""
                         isEditing = true
                     }
                 } label: {
@@ -149,6 +151,8 @@ struct TimerPanel: View {
 
                 TextField("Detail", text: $editedDetail)
                     .textInputAutocapitalization(.never)
+                TextField("Memo", text: $editedMemo)
+
             }
             .navigationTitle("Edit Record")
             .toolbar {
@@ -157,7 +161,10 @@ struct TimerPanel: View {
                         if var last = historyVM.history.last {
                             last.activity = editedActivity
                             last.detail   = editedDetail
-                            historyVM.updateLast(activity: editedActivity, detail: editedDetail)
+                            last.memo     = editedMemo
+                            historyVM.updateLast(activity: editedActivity,
+                                                    detail: editedDetail,
+                                                    memo: editedMemo)
                             isEditing = false
                         }
                     }

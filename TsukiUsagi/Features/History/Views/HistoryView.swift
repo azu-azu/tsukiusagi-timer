@@ -79,6 +79,22 @@ struct HistoryView: View {
                             .padding(.vertical, 6)
                         }
                     }
+
+                    // ★ まとめてメモ表示
+                    let memos = records()
+                        .compactMap { $0.memo?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                        .filter { !$0.isEmpty }
+
+                    if !memos.isEmpty {
+                        Section("📝 Memos") {
+                            ForEach(memos, id: \.self) { memo in
+                                Text(memo)
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                                    .padding(.vertical, 2)
+                            }
+                        }
+                    }
                 } else {
                     Section("By Activity") {
                         ForEach(byActivity(), id: \.label) { s in rowView(s) }

@@ -8,6 +8,7 @@ struct SessionRecord: Codable, Identifiable {
     var phase: PomodoroPhase
     var activity: String          // 上位
     var detail:   String?         // 下位
+    var memo:     String?         // ←★ new
 }
 
 class HistoryViewModel: ObservableObject {
@@ -19,7 +20,9 @@ class HistoryViewModel: ObservableObject {
     // 保存
     func add(start: Date, end: Date,
             phase: PomodoroPhase,
-            activity: String, detail: String?) {
+            activity: String,
+            detail: String?,
+            memo: String?) {
         guard phase == .focus else { return } // ← 休憩は記録しない
 
         // 3秒未満は記録しない！
@@ -34,7 +37,8 @@ class HistoryViewModel: ObservableObject {
                         end: end,
                         phase: phase,
                         activity: activity,
-                        detail: detail
+                        detail: detail,
+                        memo: memo
         )
 
         history.append(record)
@@ -45,10 +49,13 @@ class HistoryViewModel: ObservableObject {
         store.save(history)
     }
 
-    func updateLast(activity: String, detail: String) {
-        guard history.indices.contains(history.count - 1) else { return }
-        history[history.count - 1].activity = activity
-        history[history.count - 1].detail   = detail
+    func updateLast(activity: String,
+                    detail: String,
+                    memo: String) {
+        guard let i = history.indices.last else { return }
+        history[i].activity = activity
+        history[i].detail   = detail
+        history[i].memo     = memo
         save()
     }
 }
