@@ -100,13 +100,13 @@ final class TimerViewModel: ObservableObject {
         startTime         = nil
     }
 
-    /// “MM:SS” 表示用
+    /// "MM:SS" 表示用
     func formatTime() -> String {
         let m = timeRemaining / 60, s = timeRemaining % 60
         return String(format: "%02d:%02d", m, s)
     }
 
-    /// “HH:mm” の開始時刻文字列（開始前は "--:--"）
+    /// "HH:mm" の開始時刻文字列（開始前は "--:--"）
     var formattedStartTime: String {
         guard let start = startTime else { return "--:--" }
         return TimerViewModel.startFormatter.string(from: start)
@@ -153,7 +153,7 @@ final class TimerViewModel: ObservableObject {
         isRunning         = false       // ← ボタンは Stop 表示させない
         isWorkSession     = false       // ← ブレイクモードへ
 
-        // 休憩タイマーを“見えないまま”走らせる
+        // 休憩タイマーを"見えないまま"走らせる
         var secondsLeft = breakMinutes * 60  // 表示は更新しない
         print("📝 secondsLeft  =", secondsLeft)
         timer = Timer.scheduledTimer(withTimeInterval: 1.0,
@@ -172,7 +172,7 @@ final class TimerViewModel: ObservableObject {
     private func finalizeBreak() {
         buzz()
         NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
-        isRunning         = false           // タイマー停止状態
+        // 状態は何も変更しない
     }
 
     // ブルッとさせる

@@ -19,6 +19,7 @@ enum MoonMessage {
             "The Moon always shows the same face to Earth.",
             "",
             "There’s a side of the Moon we’ll never see—",
+            "",
             "There’s a side of you no one will ever see.",
         ]),
 
@@ -46,6 +47,12 @@ enum MoonMessage {
             "",
             "not what you’ve done,",
             "but how softly you’ve been?"
+
+            // もしかすると、
+            // 月がたずねているのは——
+
+            // あなたが何をしたか、ではなく、
+            // どれだけ優しくあれたか、かもしれない。
         ]),
 
         MoonMessageEntry(lines: [
