@@ -102,3 +102,47 @@ extension View {
         )
     }
 }
+
+// ---
+
+func avenirNextUIFont(size: CGFloat, weight: Font.Weight, design: Font.Design = .default) -> UIFont {
+    // AvenirNextのweight対応
+    let fontName: String
+    switch weight {
+    case .ultraLight: fontName = "AvenirNext-UltraLight"
+    case .thin:       fontName = "AvenirNext-Thin"
+    case .light:      fontName = "AvenirNext-Light"
+    case .regular:    fontName = "AvenirNext-Regular"
+    case .medium:     fontName = "AvenirNext-Medium"
+    case .semibold:   fontName = "AvenirNext-DemiBold"
+    case .bold:       fontName = "AvenirNext-Bold"
+    case .heavy:      fontName = "AvenirNext-Heavy"
+    case .black:      fontName = "AvenirNext-Black"
+    default:          fontName = "AvenirNext-Regular"
+    }
+
+    // デザイン指定
+    if design == .monospaced {
+        // monospaced指定の場合はAvenirNextではなくmonospacedSystemFontを使う
+        return UIFont.monospacedSystemFont(ofSize: size, weight: toUIFontWeight(weight))
+    } else {
+        // 通常のAvenirNext
+        return UIFont(name: fontName, size: size) ?? .systemFont(ofSize: size)
+    }
+}
+
+// Font.Weight → UIFont.Weight 変換
+private func toUIFontWeight(_ weight: Font.Weight) -> UIFont.Weight {
+    switch weight {
+    case .ultraLight: return .ultraLight
+    case .thin:       return .thin
+    case .light:      return .light
+    case .regular:    return .regular
+    case .medium:     return .medium
+    case .semibold:   return .semibold
+    case .bold:       return .bold
+    case .heavy:      return .heavy
+    case .black:      return .black
+    default:          return .regular
+    }
+}
