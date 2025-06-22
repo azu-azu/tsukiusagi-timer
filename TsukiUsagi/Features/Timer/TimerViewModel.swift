@@ -147,7 +147,8 @@ final class TimerViewModel: ObservableObject {
                 end:      Date(),
                 phase:    isWorkSession ? .focus : .breakTime,
                 activity: activityLabel,
-                detail:   detailLabel
+                detail:   detailLabel,
+                memo:     nil
             )
         }
 
