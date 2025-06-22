@@ -31,8 +31,8 @@ struct TimerPanel: View {
                 timerText()
                 startPauseButton() // ← VStack の最下端 = ボタン下端
             }
-            // 終了後だけ「重ねる」ので高さに影響しない
-            if timerVM.isSessionFinished {
+            // セッション終了 かつ work セッションだったときのみ表示
+            if timerVM.isSessionFinished && !timerVM.isWorkSession {
                 recordedTimes()
                     .padding(.bottom, recordDistance)
                     .transition(.opacity)
