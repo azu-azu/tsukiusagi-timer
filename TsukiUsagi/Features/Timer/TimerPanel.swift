@@ -29,7 +29,6 @@ struct TimerPanel: View {
         ZStack(alignment: .bottom) {
             VStack(spacing: spacingBetween) {
                 timerText()
-                startPauseButton() // ← VStack の最下端 = ボタン下端
             }
             // セッション終了 かつ work セッションだったときのみ表示
             if timerVM.isSessionFinished && !timerVM.isWorkSession {
@@ -44,13 +43,27 @@ struct TimerPanel: View {
         // ★ Moon メッセージと同じ 0.8 秒で同期
         .animation(.easeInOut(duration: 0.8), // ← 追加②
                     value: timerVM.isSessionFinished)
+
+        // ★START押下アニメ（追加）
+        .onReceive(timerVM.$isRunning.dropFirst()) { running in
+            guard running else { return }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                flashYellow = true
+                flashScale  = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.easeInOut(duration: 2.0)) {
+                    flashYellow = false
+                    flashScale  = false
+                }
+            }
+        }
     }
 
 
     // 🕐 時間表示
     private func timerText() -> some View {
         Text(timerVM.formatTime())
-            // .titleWhiteAvenir(size: 65, weight: .bold)
             .font(.system(size: 65, weight: .bold, design: .rounded))
             .opacity(timerVM.isSessionFinished ? 0 : 1.0)
             .transition(.opacity)                                // ← フェード効果
@@ -96,36 +109,6 @@ struct TimerPanel: View {
         }
         .padding(.top, 20)
         .transition(.opacity)             // 念押しフェード
-    }
-
-
-    // 🔘 START / PAUSE ボタン
-    private let expandAnimationDuration: Double = 0.3
-    private func startPauseButton() -> some View {
-        Button(timerVM.isRunning ? "PAUSE" : "START") {
-            // START の時だけ
-            if !timerVM.isRunning {
-                withAnimation(.easeInOut(duration: expandAnimationDuration)) {
-                    flashYellow = true
-                    flashScale  = true             // ★ 拡大 ON
-                }
-                // 拡大状態でキープしてから戻す
-                DispatchQueue.main.asyncAfter(deadline: .now() + expandAnimationDuration + 0.3) { // + キープ時間
-                    withAnimation(.easeInOut(duration: 2.0)) {
-                        flashYellow = false
-                        flashScale  = false
-                    }
-                }
-            }
-            timerVM.isRunning ? timerVM.stopTimer() : timerVM.startTimer()
-        }
-        .padding(.vertical, 12)
-        .frame(width: buttonWidth)
-        .background(
-            Color.white.opacity(0.2),
-            in: RoundedRectangle(cornerRadius: 20)
-        )
-        .titleWhiteAvenir(weight: .bold)
     }
 
     @ViewBuilder

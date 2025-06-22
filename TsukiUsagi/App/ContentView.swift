@@ -1,94 +1,137 @@
 import SwiftUI
 
 struct ContentView: View {
-    // State
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM:   TimerViewModel
     @State private var showingSettings = false
     @State private var showDiamondStars = false
 
-    // Const
-	private let moonTitle: String = "Centered"
-	private let moonSize: CGFloat = 200
-    private let moonPaddingY: CGFloat = 150         // 月の高さ調節
-    private let timerBottomRatio: CGFloat = 0.85    // タイマーパネルの中心を「下端から X %」に
+    private let buttonWidth: CGFloat = 120
+    private let expandDuration: Double = 0.3
+    private let moonTitle = "Centered"
+    private let moonSize: CGFloat = 200
+    private let moonPaddingY: CGFloat = 150
+    private let timerBottomRatio: CGFloat = 0.85   // ← TimerPanel の高さバランス
 
-    // Body
     var body: some View {
         NavigationStack {
-            GeometryReader { geo in
-                ZStack {
-                    BackgroundGradientView() // 背景
-                    AwakeEnablerView(hidden: true) // 起動させておくためのダミー画面 ＊背景の次に置かないと色がつかない
-                    StarView() // 固定スター
+            ZStack {
+                // 背景だけ Safe-Area を無視
+                BackgroundGradientView()
+                    .ignoresSafeArea()
 
-                    // quiet moon or moon
-                    ZStack(alignment: .top) {
-                        if timerVM.isSessionFinished {
-                            QuietMoonView()
-                        } else {
-                            // ⭐️
-                            FallingStarsView()
-                            RisingStarsView()
+                AwakeEnablerView(hidden: true)
+                StarView().allowsHitTesting(false)
 
-                            // 🌕
-                            MoonView(moonSize: moonSize,
-                                    paddingY: moonPaddingY,
-                                    glitterText: moonTitle)
-                        }
-                    }
-                    .animation(.easeInOut(duration: 0.8),
-                            value: timerVM.isSessionFinished)
-                    .zIndex(1)
+                // 月 & 星エフェクト
+                ZStack(alignment: .top) {
+                    if timerVM.isSessionFinished {
+                        QuietMoonView()
+                    } else {
+                        // ⭐️
+                        FallingStarsView()
+                            .allowsHitTesting(false)
+                        RisingStarsView()
+                            .allowsHitTesting(false)
 
-                    // フレーム最大化＋上端配置
-                    .frame(maxWidth: .infinity,
-                        maxHeight: .infinity,
-                        alignment: .topLeading)
-
-                    // タイマー ＆ Start ボタン
-                    let timerHeight = CGFloat(geo.size.height * (1 - timerBottomRatio))
-                    TimerPanel(timerVM: timerVM)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                        .padding(.bottom, timerHeight)
-
-
-                    if showDiamondStars {
-                        DiamondStarsOnceView()
-                            .onAppear {
-                                // アニメ寿命に合わせて自動非表示（例: 1秒後）
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                                    showDiamondStars = false
-                                }
-                            }
+                        // 🌕
+                        MoonView(
+                            moonSize: moonSize,
+                            paddingY: moonPaddingY,
+                            glitterText: moonTitle
+                        )
+                        .allowsHitTesting(false)
                     }
                 }
-                // ★ TimerVM からのフラグ変化を拾う
-                .onReceive(timerVM.$flashStars      // ← Publisher
-                            .dropFirst()) { _ in  // ★ 最初の 1 発（起動時）を無視
-                    showDiamondStars = true }
+                .animation(.easeInOut(duration: 0.8), value: timerVM.isSessionFinished)
 
-
-                // Safe-Area を含めた高さ基準
-                .ignoresSafeArea()
+                // 中央タイマー
+                GeometryReader { geo in
+                    let timerHeight = geo.size.height * (1 - timerBottomRatio)
+                    TimerPanel(timerVM: timerVM)
+                        .frame(maxWidth: .infinity,
+                                maxHeight: .infinity,
+                                alignment: .bottom)
+                        .padding(.bottom, timerHeight)
+                }
             }
-
-            // ツールバー ＆ シート
-            .gearButtonToolbar(showing: $showingSettings)
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
+            // ▼▼▼ 最下部フッター ▼▼▼
+            .safeAreaInset(edge: .bottom) {
+                footerBar()
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                    // 少し透過でも OK
+                    .background(.black.opacity(0.0001)) // ← タッチ領域確保
             }
-            .dateToolbar()
+            // ▼ ダイヤモンドスター一瞬
+            .overlay(alignment: .center) {
+                if showDiamondStars {
+                    DiamondStarsOnceView()
+                        .allowsHitTesting(false)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                                showDiamondStars = false
+                            }
+                        }
+                }
+            }
+            // ▼ イベント
+            .onReceive(timerVM.$flashStars.dropFirst()) { _ in
+                showDiamondStars = true
+            }
+            // ▼ シート & ツールバー
+            .sheet(isPresented: $showingSettings) { SettingsView() }
+            // .dateToolbar()
             .navigationBarTitleDisplayMode(.inline)
         }
+    }
+
+    // --- フッター View ---
+    @ViewBuilder
+    private func footerBar() -> some View {
+        HStack {
+            // 日付
+            Text(AppFormatters.displayDate.string(from: Date()))
+                .titleWhite(size: 16,
+                            weight: .regular,
+                            design: .monospaced)
+
+            Spacer(minLength: 24)
+
+            // start pause ボタン
+            startPauseButton()
+
+            Spacer(minLength: 24)
+
+            // gearボタン
+            Button {
+                showingSettings = true
+            } label: {
+                Image(systemName: "gearshape.fill")
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundColor(.white)
+            }
+        }
+    }
+
+    // --- START/PAUSE ボタン ---
+    private func startPauseButton() -> some View {
+        Button(timerVM.isRunning ? "PAUSE" : "START") {
+            timerVM.isRunning ? timerVM.stopTimer() : timerVM.startTimer()
+        }
+        .padding(.vertical, 12)
+        .frame(width: buttonWidth)
+        .background(.white.opacity(0.2), in: RoundedRectangle(cornerRadius: 20))
+        .titleWhiteAvenir(weight: .bold)
+        .foregroundColor(.white)
+        .scaleEffect(1.0)
     }
 }
 
 #Preview {
-    // Preview は App ルートを通らんので自前注入
     let history = HistoryViewModel()
     let timer   = TimerViewModel(historyVM: history)
-    return ContentView()
+    ContentView()
         .environmentObject(history)
         .environmentObject(timer)
 }
