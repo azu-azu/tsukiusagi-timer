@@ -13,6 +13,7 @@ struct TimerPanel: View {
     @ObservedObject var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
     @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var flashYellow = false
     @State private var flashScale  = false
@@ -24,7 +25,7 @@ struct TimerPanel: View {
     private let recordBottomPadding: CGFloat = 200   // ← 下から何pt に出す？
 
     var body: some View {
-        // “タイマー中央” と “記録ブロック下端” を別レイヤーで配置
+        // "タイマー中央" と "記録ブロック下端" を別レイヤーで配置
         ZStack {
             // タイマー：常に中央寄り
             timerText()
@@ -46,12 +47,19 @@ struct TimerPanel: View {
         .sheet(isPresented: $isEditing) { editSheetView() }
 
         // ★ Moon メッセージと同じ 0.8 秒で同期
-        .animation(.easeInOut(duration: 0.8), // ← 追加②
-                    value: timerVM.isSessionFinished)
+        .animation(
+            timerVM.shouldSuppressSessionFinishedAnimation ? nil : .easeInOut(duration: 0.8),
+            value: timerVM.isSessionFinished
+        )
+        // アニメーション抑制フラグをリセット
+        .onChange(of: timerVM.isSessionFinished) { oldValue, newValue in
+            if timerVM.shouldSuppressSessionFinishedAnimation {
+                timerVM.shouldSuppressSessionFinishedAnimation = false
+            }
+        }
 
         // ★START押下アニメ（追加）
-        .onReceive(timerVM.$isRunning.dropFirst()) { running in
-            guard running else { return }
+        .onReceive(timerVM.startPulse) { _ in
             withAnimation(.easeInOut(duration: 0.3)) {
                 flashYellow = true
                 flashScale  = true
@@ -61,6 +69,17 @@ struct TimerPanel: View {
                     flashYellow = false
                     flashScale  = false
                 }
+            }
+        }
+
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            switch newPhase {
+            case .background:
+                timerVM.appDidEnterBackground()
+            case .active:
+                timerVM.appWillEnterForeground()
+            default:
+                break
             }
         }
     }

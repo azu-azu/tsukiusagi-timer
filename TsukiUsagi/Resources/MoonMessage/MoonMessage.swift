@@ -65,6 +65,8 @@ enum MoonMessage {
             "Even if you scream, no sound would ever form.",
             "",
             "It’s okay for silence to be the answer.",
+
+            // 沈黙が答えでも、ほんまに、それでええんやで。
         ]),
 
         MoonMessageEntry(lines: [
@@ -85,6 +87,7 @@ enum MoonMessage {
             "The Moon’s gravity pulls on Earth's oceans, creating tides.",
             "",
             "Even in silence, the Moon moves the sea.",
+            "",
             "You don’t need noise to change the world.",
         ]),
 
@@ -131,6 +134,7 @@ enum MoonMessage {
             "not because you've done too much,",
             "",
             "but because you've done too little of what sparks a light in you.",
+            "",
             "— Alexander Den Heijer",
         ]),
     ]
