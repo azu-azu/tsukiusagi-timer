@@ -61,6 +61,7 @@ struct SettingsView: View {
                 Section {
                     Button(role: .destructive) {
                         timerVM.resetTimer()
+                        dismiss()
                     } label: {
                         Label("Reset to Start", systemImage: "arrow.uturn.backward")
                     }

@@ -121,6 +121,9 @@ enum MoonMessage {
             "The Moon quietly pulls the sea and stirs the waves.",
             "",
             "You, too, pull someone—",
+
+            // あなたの存在が、誰かの心の波を「静かに動かしてる」
+            // 言葉も行動もなくても、「何かを起こしてる」
         ]),
 
         MoonMessageEntry(lines: [
