@@ -176,7 +176,7 @@ struct HistoryView: View {
     private func titleString() -> String {
         switch mode {
         case .day:
-            return AppFormatters.displayDate.string(from: selectedDate)
+            return DateFormatters.displayDate.string(from: selectedDate)
         case .month:
             return selectedDate.formatted(.dateTime.year().month())
         }

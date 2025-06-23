@@ -103,14 +103,14 @@ struct TimerPanel: View {
                 // 上２行：中央
                 VStack(spacing: 4) {
                     Text("Start 🌕 \(timerVM.formattedStartTime)")
-                    Text("Final 🌑 \(Date(), style: .time)")
+                    Text("Final 🌑 \(timerVM.formattedEndTime)")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .titleWhiteAvenir(size: 18, weight: .regular)
             }
 
             // ３行目の分数表示
-            Text("-- \(timerVM.workLengthMinutes) min.")
+            Text("-- \(timerVM.actualSessionMinutes) min.")
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .titleWhiteAvenir(size: 18, weight: .regular)
                 .frame(maxWidth: 110)
@@ -163,8 +163,8 @@ struct TimerPanel: View {
                             last.detail   = editedDetail
                             last.memo     = editedMemo
                             historyVM.updateLast(activity: editedActivity,
-                                                    detail: editedDetail,
-                                                    memo: editedMemo)
+                                                detail: editedDetail,
+                                                memo: editedMemo)
                             isEditing = false
                         }
                     }

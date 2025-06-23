@@ -2,169 +2,81 @@
 
 ```
 TsukiUsagi/
-├── TsukiUsagi/
-│   ├── App/
-│   │   ├── ContentView.swift
-│   │   ├── TsukiUsagiApp.swift
-│   │   └── AppDelegate.swift
-│   │
-│   ├── Features/
-│   │   ├── Timer/
-│   │   │   ├── Views/
-│   │   │   │   └── TimerPanel.swift
-│   │   │   ├── ViewModels/
-│   │   │   │   └── TimerViewModel.swift
-│   │   │   ├── Services/
-│   │   │   │   └── NotificationManager.swift
-│   │   │   └── Models/
-│   │   │       └── PomodoroPhase.swift
-│   │   │
-│   │   ├── History/
-│   │   │   ├── Views/
-│   │   │   │   └── HistoryView.swift
-│   │   │   ├── ViewModels/
-│   │   │   │   └── HistoryViewModel.swift
-│   │   │   ├── Services/
-│   │   │   │   └── HistoryStore.swift
-│   │   │   └── Models/
-│   │   │       └── SessionRecord.swift
-│   │   │
-│   │   └── Settings/
-│   │       ├── Views/
-│   │       │   └── SettingsView.swift
-│   │       ├── ViewModels/
-│   │       │   └── SettingsViewModel.swift
-│   │       └── Models/
-│   │           └── AppSettings.swift
-│   │
-│   ├── Components/
-│   │   ├── Visual/
-│   │   │   ├── Moon/
-│   │   │   ├── Stars/
-│   │   │   ├── Usagi/
-│   │   │   └── Backgrounds/
-│   │   │
-│   │   └── Common/
-│   │       ├── Buttons/
-│   │       ├── Modals/
-│   │       ├── Indicators/
-│   │       └── TextStyles/
-│   │
-│   ├── Views/
-│   │   ├── Moon/
-│   │   │   ├── MoonView.swift
-│   │   │   ├── MoonShape.swift
-│   │   │   ├── MoonShadow.swift
-│   │   │   └── CraterView.swift
-│   │   │
-│   │   ├── Backgrounds/
-│   │   │   ├── BackgroundGradientView.swift
-│   │   │   ├── BackgroundBlack.swift
-│   │   │   ├── BackgroundLightPurple.swift
-│   │   │   ├── BackgroundPurple.swift
-│   │   │   └── BackgroundBlue.swift
-│   │   │
-│   │   ├── StarView.swift
-│   │   ├── DiamondStarsView.swift
-│   │   ├── SparkleStarsView.swift
-│   │   ├── UsagiView_1.swift
-│   │   └── UsagiView_2.swift
-│   │
-│   ├── Core/
-│   │   ├── Services/
-│   │   │   └── AwakeEnablerView.swift
-│   │   └── Utilities/
-│   │       └── AppFormatters.swift
-│   │
-│   ├── UI/
-│   │   ├── ViewModifiers.swift
-│   │   ├── GearButtonToolbar.swift
-│   │   └── Styles/
-│   │       ├── ColorTheme.swift
-│   │       └── Typography.swift
-│   │
-│   ├── Resources/
-│   │   ├── Animations/
-│   │   │   ├── gold.gif
-│   │   │   ├── black_yellow.gif
-│   │   │   ├── black_red.gif
-│   │   │   └── blue.gif
-│   │   ├── Fonts/
-│   │   │   └── CustomFonts.swift
-│   │   └── Localization/
-│   │       └── Localizable.strings
-│   │
-│   ├── Assets.xcassets/
-│   │
-│   └── Extensions/
-│       ├── Color+Hex.swift
-│       ├── View+Extensions.swift
-│       └── Date+Extensions.swift
+├── App/
+│   ├── ContentView.swift
+│   ├── TsukiUsagiApp.swift
+│   └── AppDelegate.swift
 │
-├── TsukiUsagi.xcodeproj/
-├── TsukiUsagiTests/
-│   ├── Features/
-│   │   ├── TimerTests/
-│   │   ├── HistoryTests/
-│   │   └── SettingsTests/
-│   ├── Components/
-│   └── Core/
-├── TsukiUsagiUITests/
-├── .build/
-├── Package.resolved
-├── README.md
-└── .gitignore
+├── Features/
+│   ├── Timer/
+│   │   ├── TimerViewModel.swift
+│   │   ├── TimerPanel.swift
+│   │   ├── NotificationManager.swift
+│   │   └── PomodoroPhase.swift
+│   ├── History/
+│   │   ├── Views/
+│   │   │   └── HistoryView.swift
+│   │   ├── ViewModels/
+│   │   │   └── HistoryViewModel.swift
+│   │   ├── Stores/
+│   │   │   └── HistoryStore.swift
+│   │   └── Models/
+│   │       └── SessionRecord.swift
+│   └── Settings/
+│       └── SettingsView.swift
+│
+├── Components/
+│   ├── Visual/
+│   │   ├── Moon/
+│   │   ├── Stars/
+│   │   ├── Usagi/
+│   │   └── Backgrounds/
+│   └── Common/
+│       ├── Buttons/
+│       ├── Modals/
+│       ├── Indicators/
+│       └── TextStyles/
+│
+├── Core/
+│   ├── Formatters/
+│   │   ├── DateFormatters.swift
+│   │   └── TimeFormatters.swift
+│   ├── Services/
+│   │   └── AwakeEnablerView.swift
+│   ├── Extensions/
+│   │   └── Color+Hex.swift
+│   └── UIKitSupport/
+│       ├── ViewModifiers.swift
+│       ├── GlitterTextModifier.swift
+│       ├── GearButtonToolbar.swift
+│       └── UIKitWrappers/
+│
+├── Resources/
+│   ├── gif/
+│   │   ├── gold.gif
+│   │   ├── black_yellow.gif
+│   │   ├── black_red.gif
+│   │   └── blue.gif
+│   └── MoonMessage/
+│       └── MoonMessage.swift
+│
+├── Assets.xcassets/
+│
+├── .gitignore
+└── README.md
 ```
 
 ## 改善されたディレクトリ構造の説明
 
+- テストディレクトリの記載を現状に合わせて削除
+- その他の構成は現状と一致
+
 ### 主な変更点
 
-#### 1. **新規追加されたフォルダ構造**
-- `Components/`: 新しいコンポーネント構造
-  - `Visual/`: アプリ世界観を彩る専用コンポーネント（空フォルダ）
-    - `Moon/`
-    - `Stars/`
-    - `Usagi/`
-    - `Backgrounds/`
-  - `Common/`: 汎用 UI（空フォルダ）
-    - `Buttons/`
-    - `Modals/`
-    - `Indicators/`
-    - `TextStyles/`
-
-#### 2. **既存のコンポーネント（現在の場所）**
-- `Views/`: 現在のビューコンポーネント
-  - `Moon/`: 月関連のコンポーネント
-  - `Backgrounds/`: 背景関連のコンポーネント
-  - 星関連のコンポーネント（直下）
-  - うさぎ関連のコンポーネント（直下）
-
-#### 3. **Features ディレクトリの統一**
-各機能（Timer, History, Settings）で以下の構造を統一：
-- `Views/`: ビューコンポーネント
-- `ViewModels/`: ビジネスロジック
-- `Services/`: データアクセス・外部サービス
-- `Models/`: データモデル
-
-#### 4. **Core ディレクトリの拡張**
-- `Services/`: アプリケーション全体で使用されるサービス
-- `Utilities/`: ユーティリティクラス
-
-#### 5. **UI ディレクトリの改善**
-- `Styles/`: デザインシステム関連
-- 共通のUIコンポーネントを整理
-
-#### 6. **Resources ディレクトリの整理**
-- `Animations/`: GIFファイル
-- `Fonts/`: フォント関連
-- `Localization/`: 多言語対応
-
-#### 7. **Extensions ディレクトリの拡張**
-- 機能別に拡張を整理
-
-#### 8. **テスト構造の改善**
-- 機能別にテストを整理
+- Resources配下は実際の構成（gif, MoonMessage）に修正
+- Features/Timer, Features/Settingsは実際のファイル直置きに修正
+- 存在しないFonts/Localization等の記載を削除
+- その他、実際のディレクトリ・ファイル構成に合わせて調整
 
 ### 命名規則の改善
 

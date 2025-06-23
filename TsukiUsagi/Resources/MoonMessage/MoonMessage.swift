@@ -24,7 +24,7 @@ enum MoonMessage {
         ]),
 
         MoonMessageEntry(lines: [
-            "'Joy is not in things;",
+            "'Joy is not in things.",
             "it is in us.'",
             "– Richard Wagner",
             "",
@@ -40,24 +40,21 @@ enum MoonMessage {
             "",
             "never loud, never rushed.",
 
-            // ほんまもんの喜びは、ふわっと、ただやってくる。
-            // 月みたいに——
-            // 決してうるさくなく、決して急ぐこともなく。
+            // 喜びは、月明かりのよう。
+            // ふわっと静かにやってくる。
             // “drift in” ＝「漂うように入ってくる」
         ]),
 
         MoonMessageEntry(lines: [
             "What if",
-            "the Moon were asking—",
+            "the Moon simply saw—",
             "",
             "not what you’ve done,",
             "but how softly you’ve been?"
 
-            // もしかすると、
-            // 月がたずねているのは——
-
-            // あなたが何をしたか、ではなく、
-            // どれだけ優しくあれたか、かもしれない。
+            // 月は静かに見ている——
+            // 何をしたか、ではなく、
+            // どれだけ優しくあれたかを。
         ]),
 
         MoonMessageEntry(lines: [
@@ -66,7 +63,8 @@ enum MoonMessage {
             "",
             "It’s okay for silence to be the answer.",
 
-            // 沈黙が答えでも、ほんまに、それでええんやで。
+            // 月には、音が存在しない。
+            // それでも、静かに輝いていられる。
         ]),
 
         MoonMessageEntry(lines: [
@@ -125,8 +123,8 @@ enum MoonMessage {
             "",
             "You, too, pull someone—",
 
-            // あなたの存在が、誰かの心の波を「静かに動かしてる」
-            // 言葉も行動もなくても、「何かを起こしてる」
+            // 僕らは皆、ただここにいるだけで
+            // 誰かの心の波を、静かに動かしているんだ
         ]),
 
         MoonMessageEntry(lines: [
@@ -136,6 +134,15 @@ enum MoonMessage {
             "but because you've done too little of what sparks a light in you.",
             "",
             "— Alexander Den Heijer",
+        ]),
+
+        MoonMessageEntry(lines: [
+            "The Moon doesn’t shine.",
+            "It just stays close to the Sun.",
+            "Sometimes, being near is enough to glow.",
+
+            // 光らなくてもいい
+            // 太陽のそばにいるだけで、輝ける
         ]),
     ]
 

@@ -8,7 +8,7 @@
 ## Features
 
 - A gentle user interface built with SwiftUI
-- Moon Usagi animation (planned with Lottie)
+- Moon Usagi animation
 - Pomodoro-style focus session and break switching
 - Future features may include guided breathing and poetic reflection
 

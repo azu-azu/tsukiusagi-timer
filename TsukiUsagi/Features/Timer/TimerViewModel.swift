@@ -19,6 +19,7 @@ final class TimerViewModel: ObservableObject {
     @Published var isWorkSession: Bool     = true       // true = focus, false = break
     @Published var isSessionFinished       = false      // 終了フラグ（View 切替に使用）
     @Published private(set) var startTime: Date?        // セッション開始時刻
+    @Published private(set) var endTime: Date?          // セッション終了時刻
     @Published var flashStars = false
     @Published private(set) var lastBackgroundDate: Date? = nil
     private var wasRunningBeforeBackground = false
@@ -28,6 +29,15 @@ final class TimerViewModel: ObservableObject {
     @Published var shouldSuppressSessionFinishedAnimation = false
 
     var workLengthMinutes: Int { workMinutes }
+
+    // 実際のセッション時間を分で計算
+    var actualSessionMinutes: Int {
+        guard let start = startTime else { return workMinutes }
+
+        let endTime = self.endTime ?? Date()
+        let duration = endTime.timeIntervalSince(start)
+        return max(Int(duration) / 60, 1) // 最低1分
+    }
 
     // User-configurable
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
@@ -75,10 +85,12 @@ final class TimerViewModel: ObservableObject {
             isWorkSession     = true
             timeRemaining     = workMinutes * 60
             startTime         = Date()
+            endTime           = nil
             isSessionFinished = false
         } else if startTime == nil {
             timeRemaining = (isWorkSession ? workMinutes : breakMinutes) * 60
             startTime     = Date()
+            endTime       = nil
         }
         // それ以外 (= ポーズ再開) は timeRemaining や startTime を触らない
 
@@ -113,19 +125,21 @@ final class TimerViewModel: ObservableObject {
         timeRemaining     = workMinutes * 60
         isSessionFinished = false
         startTime         = nil
+        endTime           = nil
     }
 
     /// "MM:SS" 表示用
     func formatTime() -> String {
-        let m = timeRemaining / 60, s = timeRemaining % 60
-        return String(format: "%02d:%02d", m, s)
+        TimeFormatters.formatTime(seconds: timeRemaining)
     }
 
-    /// "HH:mm" の開始時刻文字列（開始前は "--:--"）
-    var formattedStartTime: String {
-        guard let start = startTime else { return "--:--" }
-        return TimerViewModel.startFormatter.string(from: start)
+    // プライベート
+    private func formatTime(_ date: Date?) -> String {
+        TimeFormatters.formatTime(date: date)
     }
+
+    var formattedStartTime: String { formatTime(startTime) }
+    var formattedEndTime: String { formatTime(endTime) }
 
     // プライベート
     private func tick() {
@@ -139,6 +153,9 @@ final class TimerViewModel: ObservableObject {
     // 終了
     private func sessionCompleted() {
         stopTimer()
+
+        // セッション終了時刻を記録
+        endTime = Date()
 
         // 履歴に本フェーズを保存
         if let start = startTime {
