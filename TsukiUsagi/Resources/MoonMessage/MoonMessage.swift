@@ -59,6 +59,7 @@ enum MoonMessage {
 
         MoonMessageEntry(lines: [
             "The Moon has no atmosphere, so sound cannot exist there.",
+            "",
             "Even if you scream, no sound would ever form.",
             "",
             "It’s okay for silence to be the answer.",
@@ -91,6 +92,7 @@ enum MoonMessage {
 
         MoonMessageEntry(lines: [
             "Because there is no wind or water, ",
+            "",
             "astronaut footprints on the Moon may last for millions of years.",
             "",
             "You’re erased only when something erases you.",
@@ -98,6 +100,7 @@ enum MoonMessage {
 
         MoonMessageEntry(lines: [
             "On the Moon, a day is 29.5 Earth days.",
+            "",
             "For a human, that's about the speed of a brisk walk.",
             "",
             "The Moon moves slowly.",

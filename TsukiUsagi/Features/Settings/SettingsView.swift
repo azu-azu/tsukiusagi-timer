@@ -61,22 +61,28 @@ struct SettingsView: View {
                 }
 
                 // Reset Timer
-                Section {
+                Section("Session Control") {
                     Button(role: .destructive) {
                         timerVM.resetTimer()
                         dismiss()
                     } label: {
                         Label("Reset Timer (No Save)", systemImage: "arrow.uturn.backward")
                     }
-                    // Stopボタン修正
-                    Button(role: .destructive) {
-                        timerVM.forceFinishWorkSession()  // 新しいメソッドを使用
+                    .disabled(!timerVM.isWorkSession)
+                    .foregroundStyle(timerVM.isWorkSession ? .red : Color.gray.opacity(0.6))
+                }
+
+                // Session Progress
+                Section("Session Progress") {
+                    Button {
+                        timerVM.forceFinishWorkSession()
                         dismiss()
                     } label: {
-                        Label("Stop (Go to Break)", systemImage: "stop.circle")
+                        Label("Stop", systemImage: "forward.end")
                     }
-                    .disabled(!timerVM.isRunning)
-                    .foregroundStyle(timerVM.isRunning ? .red : Color.gray.opacity(0.6))
+                    .disabled(!timerVM.isWorkSession)
+                    .tint(.accentColor)
+                    .foregroundStyle(timerVM.isWorkSession ? .blue : Color.gray.opacity(0.6))
                 }
 
                 // Logs

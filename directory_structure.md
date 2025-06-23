@@ -12,7 +12,10 @@ TsukiUsagi/
 │   │   ├── TimerViewModel.swift
 │   │   ├── TimerPanel.swift
 │   │   ├── NotificationManager.swift
-│   │   └── PomodoroPhase.swift
+│   │   ├── PomodoroPhase.swift
+│   │   ├── TimerEditView.swift
+│   │   ├── TimerTextView.swift
+│   │   └── RecordedTimesView.swift
 │   ├── History/
 │   │   ├── Views/
 │   │   │   └── HistoryView.swift
@@ -21,7 +24,6 @@ TsukiUsagi/
 │   │   ├── Stores/
 │   │   │   └── HistoryStore.swift
 │   │   └── Models/
-│   │       └── SessionRecord.swift
 │   └── Settings/
 │       └── SettingsView.swift
 │
@@ -68,13 +70,15 @@ TsukiUsagi/
 
 ## 改善されたディレクトリ構造の説明
 
-- テストディレクトリの記載を現状に合わせて削除
+- テストディレクトリ（TsukiUsagiTests, TsukiUsagiUITests）は省略していますが、実体には存在します。
 - その他の構成は現状と一致
 
 ### 主な変更点
 
 - Resources配下は実際の構成（gif, MoonMessage）に修正
 - Features/Timer, Features/Settingsは実際のファイル直置きに修正
+- Features/TimerにTimerEditView.swift, TimerTextView.swift, RecordedTimesView.swiftを追加
+- Features/History/Models/のSessionRecord.swiftを削除（実体にファイルなし）
 - 存在しないFonts/Localization等の記載を削除
 - その他、実際のディレクトリ・ファイル構成に合わせて調整
 
