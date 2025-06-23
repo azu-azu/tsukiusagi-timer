@@ -77,10 +77,22 @@ struct TimerPanel: View {
             switch newPhase {
             case .background:
                 timerVM.appDidEnterBackground()
+                timerVM.saveTimerState()
             case .active:
                 timerVM.appWillEnterForeground()
             default:
                 break
+            }
+        }
+
+        .onAppear {
+            // 通知の重複防止: 先に必ずremove
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd"])
+            if timerVM.isRunning && timerVM.timeRemaining > 0 {
+                NotificationManager.shared.scheduleSessionEndNotification(
+                    after: timerVM.timeRemaining,
+                    phase: timerVM.isWorkSession ? .focus : .breakTime
+                )
             }
         }
     }

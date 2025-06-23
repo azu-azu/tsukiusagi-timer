@@ -21,6 +21,9 @@ struct SettingsView: View {
     @AppStorage("workMinutes")   private var workMinutes: Int = 25
     @AppStorage("breakMinutes")  private var breakMinutes: Int = 5
 
+    // Stopボタン用
+    @State private var isPresentingBreakView = false
+
     var body: some View {
         NavigationStack {
             Form {
@@ -63,8 +66,17 @@ struct SettingsView: View {
                         timerVM.resetTimer()
                         dismiss()
                     } label: {
-                        Label("Reset to Start", systemImage: "arrow.uturn.backward")
+                        Label("Reset Timer (No Save)", systemImage: "arrow.uturn.backward")
                     }
+                    // Stopボタン修正
+                    Button(role: .destructive) {
+                        timerVM.forceFinishWorkSession()  // 新しいメソッドを使用
+                        dismiss()
+                    } label: {
+                        Label("Stop (Go to Break)", systemImage: "stop.circle")
+                    }
+                    .disabled(!timerVM.isRunning)
+                    .foregroundStyle(timerVM.isRunning ? .red : Color.gray.opacity(0.6))
                 }
 
                 // Logs

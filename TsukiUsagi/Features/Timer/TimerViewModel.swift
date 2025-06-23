@@ -52,6 +52,19 @@ final class TimerViewModel: ObservableObject {
         }
     }
 
+    // --- Persistent timer state for background/kill recovery ---
+    private enum TimerPersistKeys {
+        static let remainingSeconds = "remainingSeconds"
+        static let isRunning        = "isRunning"
+        static let backgroundTimestamp = "backgroundTimestamp"
+        static let isWorkSession    = "isWorkSession"
+    }
+
+    @AppStorage(TimerPersistKeys.remainingSeconds) private var storedRemainingSeconds: Int = 0
+    @AppStorage(TimerPersistKeys.isRunning)        private var storedIsRunning: Bool = false
+    @AppStorage(TimerPersistKeys.backgroundTimestamp) private var storedBackgroundTimestamp: Double = 0
+    @AppStorage(TimerPersistKeys.isWorkSession)    private var storedIsWorkSession: Bool = true
+
     /// 設定変更を即反映（STOP中だけ）
     func refreshAfterSettingsChange() {
         guard !isRunning else { return }
@@ -66,6 +79,27 @@ final class TimerViewModel: ObservableObject {
     // 🔔 START アニメ用トリガー
     let startPulse = PassthroughSubject<Void, Never>()
 
+    // MARK: - State Persistence
+    func saveTimerState() {
+        storedRemainingSeconds = timeRemaining
+        storedIsRunning        = isRunning
+        storedBackgroundTimestamp = Date().timeIntervalSince1970
+        storedIsWorkSession    = isWorkSession
+    }
+
+    func restoreTimerState() {
+        guard storedIsRunning else { return }
+        let elapsed = Int(Date().timeIntervalSince1970 - storedBackgroundTimestamp)
+        let left = max(storedRemainingSeconds - elapsed, 0)
+        isWorkSession = storedIsWorkSession
+        timeRemaining = left
+        isRunning = left > 0
+        if left == 0 {
+            // セッション完了処理を即実行（UI固まり防止）
+            sessionCompleted()
+        }
+    }
+
     // Init
     init(historyVM: HistoryViewModel) {
         self.historyVM = historyVM
@@ -73,6 +107,9 @@ final class TimerViewModel: ObservableObject {
         // AppStorage を self にアクセスせず使う方法
         let minutes = UserDefaults.standard.integer(forKey: "workMinutes")
         _timeRemaining = Published(initialValue: minutes > 0 ? minutes * 60 : 25 * 60)
+
+        // --- Restore timer state if needed ---
+        restoreTimerState()
     }
 
     // 公開 API
@@ -127,6 +164,14 @@ final class TimerViewModel: ObservableObject {
         isSessionFinished = false
         startTime         = nil
         endTime           = nil
+    }
+
+    // Stopボタン用：work終了→break画面へ
+    func forceFinishWorkSession() {
+        stopTimer()
+        endTime = Date()
+        isSessionFinished = true
+        isWorkSession = false
     }
 
     /// "MM:SS" 表示用
