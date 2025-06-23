@@ -316,4 +316,13 @@ final class TimerViewModel: ObservableObject {
         wasRunningBeforeBackground = false
         savedRemainingSeconds = nil
     }
+
+    // 外部からendTimeを更新するためのメソッド
+    func setEndTime(_ date: Date) {
+        endTime = date
+    }
+
+    // 公開getter
+    public var currentActivityLabel: String { activityLabel }
+    public var currentDetailLabel: String { detailLabel }
 }

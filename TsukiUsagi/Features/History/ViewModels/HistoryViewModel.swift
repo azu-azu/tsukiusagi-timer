@@ -51,11 +51,15 @@ class HistoryViewModel: ObservableObject {
 
     func updateLast(activity: String,
                     detail: String,
-                    memo: String) {
+                    memo: String,
+                    end: Date? = nil) {
         guard let i = history.indices.last else { return }
         history[i].activity = activity
         history[i].detail   = detail
         history[i].memo     = memo
+        if let end = end {
+            history[i].end = end
+        }
         save()
     }
 }
