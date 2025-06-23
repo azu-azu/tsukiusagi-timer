@@ -1,8 +1,7 @@
 import Foundation
 
-enum AppFormatters {
-
-    /// yyyy/MM/dd EEE など『年も入った』日付。（既存を残す）
+enum DateFormatters {
+    /// yyyy/MM/dd EEE など『年も入った』日付。
     static let displayDate: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")

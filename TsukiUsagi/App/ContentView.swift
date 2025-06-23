@@ -32,16 +32,20 @@ struct ContentView: View {
                 // 月 & 星レイヤ
                 ZStack(alignment: .top) {
                     if timerVM.isSessionFinished {
+                        // 🌑
                         QuietMoonView()
                     } else {
+                        // ⭐️
                         FallingStarsView().allowsHitTesting(false)
                         RisingStarsView().allowsHitTesting(false)
+
+                        // 🌕
                         MoonView(
                             moonSize: moonSize,
                             paddingY: moonPaddingY,
                             glitterText: moonTitle
                         )
-                        .allowsHitTesting(false)
+                            .allowsHitTesting(false)
                     }
                 }
                 .animation(.easeInOut(duration: 0.8),
@@ -57,7 +61,8 @@ struct ContentView: View {
                         .padding(.bottom, timerHeight)
                 }
             }
-            // ⭐ ダイヤモンドスター演出
+
+            // 💠 ダイヤモンドスター
             .overlay(alignment: .center) {
                 if showDiamondStars {
                     DiamondStarsOnceView()
@@ -69,6 +74,7 @@ struct ContentView: View {
                         }
                 }
             }
+
             // フッターを最背面に貼り付け
             .overlay(alignment: .bottom) {
                 footerBar()
@@ -90,7 +96,7 @@ struct ContentView: View {
     private func footerBar() -> some View {
         ZStack(alignment: .bottom) {
             HStack {
-                Text(AppFormatters.displayDateNoYear.string(from: Date()))
+                Text(DateFormatters.displayDateNoYear.string(from: Date()))
                     .titleWhite(size: 16,
                                 weight: .bold,
                                 design: .monospaced)
