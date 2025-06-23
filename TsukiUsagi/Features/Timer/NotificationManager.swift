@@ -46,6 +46,38 @@ final class NotificationManager {
         }
     }
 
+    // 指定秒後にセッション終了通知をスケジューリング
+    func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
+        checkNotificationStatus { allowed in
+            guard allowed else { return }
+            let content = UNMutableNotificationContent()
+            switch phase {
+            case .focus:
+                content.title = "Time to Rest 🌑"
+                content.body  = "The moon is still. So can you be."
+            case .breakTime:
+                content.title = "Time to Focus 🌕"
+                content.body  = "Let's begin, quietly centered."
+            }
+            content.sound = .default
+
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(seconds), repeats: false)
+            // 追加前に同じIDの通知を削除
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd"])
+            let request = UNNotificationRequest(
+                identifier: "SessionEnd",
+                content: content,
+                trigger: trigger
+            )
+            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        }
+    }
+
+    // セッション終了通知をキャンセル
+    func cancelSessionEndNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd"])
+    }
+
     // 内部: 通知作成
     private func schedule(for phase: PomodoroPhase) {
         let content = UNMutableNotificationContent()
@@ -53,7 +85,7 @@ final class NotificationManager {
         switch phase {
         case .focus:
             content.title = "Time to Focus 🌕"
-            content.body  = "Let’s begin, quietly centered."
+            content.body  = "Let's begin, quietly centered."
         case .breakTime:
             content.title = "Time to Rest 🌑"
             content.body  = "The moon is still. So can you be."

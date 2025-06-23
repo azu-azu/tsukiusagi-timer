@@ -23,6 +23,7 @@ final class TimerViewModel: ObservableObject {
     @Published var flashStars = false
     @Published private(set) var lastBackgroundDate: Date? = nil
     private var wasRunningBeforeBackground = false
+    private var savedRemainingSeconds: Int? = nil
 
     // アプリに戻ってきた時にstartアニメを発火しない
     private var shouldSuppressAnimation = false
@@ -151,17 +152,19 @@ final class TimerViewModel: ObservableObject {
     }
 
     // 終了
-    private func sessionCompleted() {
+    private func sessionCompleted(sendNotification: Bool = true) {
         stopTimer()
 
-        // セッション終了時刻を記録
-        endTime = Date()
+        // セッション終了時刻を記録（既にセットされていれば上書きしない）
+        if endTime == nil {
+            endTime = Date()
+        }
 
         // 履歴に本フェーズを保存
-        if let start = startTime {
-			historyVM.add(
+        if let start = startTime, let end = endTime {
+            historyVM.add(
                 start:    start,
-                end:      Date(),
+                end:      end,
                 phase:    isWorkSession ? .focus : .breakTime,
                 activity: activityLabel,
                 detail:   detailLabel,
@@ -171,16 +174,18 @@ final class TimerViewModel: ObservableObject {
 
         // フェーズ別後処理
         if isWorkSession {
-            finalizeWork()
+            finalizeWork(sendNotification: sendNotification)
         } else {
-            finalizeBreak()
+            finalizeBreak(sendNotification: sendNotification)
         }
     }
 
     // Work終了後に呼ぶまとめ関数
-    private func finalizeWork() {
+    private func finalizeWork(sendNotification: Bool = true) {
         buzz()
-        NotificationManager.shared.sendPhaseChangeNotification(for: .breakTime)
+        if sendNotification {
+            NotificationManager.shared.sendPhaseChangeNotification(for: .breakTime)
+        }
 
         isSessionFinished = true
         isRunning         = false       // ← ボタンは Stop 表示させない
@@ -196,15 +201,17 @@ final class TimerViewModel: ObservableObject {
             if secondsLeft <= 0 {
                 t.invalidate()
                 self.timer = nil
-                self.finalizeBreak()
+                self.finalizeBreak(sendNotification: sendNotification)
             }
         }
     }
 
     // 休憩終了後に呼ぶまとめ関数
-    private func finalizeBreak() {
+    private func finalizeBreak(sendNotification: Bool = true) {
         buzz()
-        NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
+        if sendNotification {
+            NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
+        }
         // 状態は何も変更しない
     }
 
@@ -233,6 +240,10 @@ final class TimerViewModel: ObservableObject {
     func appDidEnterBackground() {
         wasRunningBeforeBackground = isRunning          // ↙︎ 動いてたか保存
         lastBackgroundDate = Date()
+        savedRemainingSeconds = timeRemaining
+        if isRunning {
+            NotificationManager.shared.scheduleSessionEndNotification(after: timeRemaining, phase: isWorkSession ? .focus : .breakTime)
+        }
         stopTimer()                                     // 一旦止める
     }
 
@@ -242,12 +253,22 @@ final class TimerViewModel: ObservableObject {
             wasRunningBeforeBackground else { return }
 
         let elapsed = Int(Date().timeIntervalSince(last))
-        timeRemaining = max(timeRemaining - elapsed, 0)
+        NotificationManager.shared.cancelSessionEndNotification()
+        let originalRemaining = savedRemainingSeconds ?? timeRemaining
+        timeRemaining = max(originalRemaining - elapsed, 0)
 
-        shouldSuppressAnimation = true
-        shouldSuppressSessionFinishedAnimation = true
-        startTimer()                                    // 再開
+        if timeRemaining <= 0 {
+            // 0になった時刻を計算
+            let sessionEndDate = last.addingTimeInterval(TimeInterval(originalRemaining))
+            endTime = sessionEndDate
+            sessionCompleted(sendNotification: false)
+        } else {
+            shouldSuppressAnimation = true
+            shouldSuppressSessionFinishedAnimation = true
+            startTimer()
+        }
         lastBackgroundDate = nil
         wasRunningBeforeBackground = false
+        savedRemainingSeconds = nil
     }
 }
