@@ -86,7 +86,10 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
+        .environmentObject(timerVM)
+        .environmentObject(historyVM)
             }
+
             .navigationBarTitleDisplayMode(.inline)
         }
     }
