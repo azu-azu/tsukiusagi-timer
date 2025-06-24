@@ -79,6 +79,7 @@ enum MoonMessage {
             "The Moon is always there, in the same place.",
             "",
             "You are quietly seen.",
+            "",
             "You don’t need to shout to be noticed.",
         ]),
 

@@ -21,6 +21,7 @@ struct SparkleDiamond: View {
     let lifetime: Double
 
     @State private var scale: CGFloat = 0
+    @State private var opacity: Double = 1   // 追加: フェード用
 
     var body: some View {
         ZStack {
@@ -53,12 +54,15 @@ struct SparkleDiamond: View {
                 .frame(width: size, height: size)
         }
         .scaleEffect(scale)
+        .opacity(opacity) // 追加: フェード用
         .position(position)
         .compositingGroup()           // レイヤーを1枚化
         .onAppear {
             withAnimation(.easeOut(duration: lifetime * 0.3)) { scale = 1 }
             withAnimation(.easeIn(duration: lifetime * 0.7)
                             .delay(lifetime * 0.3)) { scale = 0 }
+            withAnimation(.easeOut(duration: 1.2)
+                            .delay(lifetime * 0.3)) { opacity = 0 } // 余韻を長く
         }
         .blur(radius: 3)
     }
@@ -75,7 +79,8 @@ private struct SparkleSpec: Identifiable {
 
 struct DiamondStarsOnceView: View {
     // ✨ 作りたい総数
-    private let total = 100
+    private let total = 180
+    private let perOnce = 60 // 一回で何個までか
 
     @State private var stars: [SparkleSpec] = []
     @State private var generated = 0      // 今何個作ったか
@@ -101,7 +106,7 @@ struct DiamondStarsOnceView: View {
         // N秒ごとにバラけて出現
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { t in
             // 1 回あたり 何個か
-            let burst = Int.random(in: 2...60)
+            let burst = Int.random(in: 2...perOnce)
             for _ in 0..<burst where generated < total {
                 stars.append(randomSpec())
                 generated += 1
