@@ -27,7 +27,7 @@ struct ContentView: View {
                     .ignoresSafeArea()
 
                 AwakeEnablerView(hidden: true)
-                StarView().allowsHitTesting(false)
+                StaticStarsView().allowsHitTesting(false)
 
                 // 月 & 星レイヤ
                 ZStack(alignment: .top) {
@@ -36,8 +36,8 @@ struct ContentView: View {
                         QuietMoonView()
                     } else {
                         // ⭐️
-                        FallingStarsView().allowsHitTesting(false)
-                        RisingStarsView().allowsHitTesting(false)
+                        FlowingStarsView(mode: .vertical(direction: .down)).allowsHitTesting(false)
+                        FlowingStarsView(mode: .vertical(direction: .up)).allowsHitTesting(false)
 
                         // 🌕
                         MoonView(
