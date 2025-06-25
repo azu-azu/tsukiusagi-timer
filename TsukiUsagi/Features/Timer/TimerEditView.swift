@@ -11,6 +11,9 @@ struct TimerEditView: View {
     @State private var editedEnd      = Date()
     @State private var minEnd         = Date()
 
+    @FocusState private var isDetailFocused: Bool
+    @FocusState private var isMemoFocused: Bool
+
     var body: some View {
         NavigationStack {
             Form {
@@ -24,6 +27,7 @@ struct TimerEditView: View {
 
                 TextField("Detail", text: $editedDetail)
                     .textInputAutocapitalization(.never)
+                    .focused($isDetailFocused)
 
                 DatePicker(
                     "Final Time",
@@ -39,6 +43,7 @@ struct TimerEditView: View {
                         .scrollContentBackground(.hidden)
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
+                        .focused($isMemoFocused)
                 }
             }
             .navigationTitle("Edit Record")
@@ -56,6 +61,13 @@ struct TimerEditView: View {
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("完了") {
+                        isDetailFocused = false
+                        isMemoFocused = false
+                    }
                 }
             }
             .task {

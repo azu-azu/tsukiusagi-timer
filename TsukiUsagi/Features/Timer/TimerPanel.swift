@@ -127,8 +127,7 @@ struct TimerPanel: View {
     }
 
     private var actualSessionMinutes: Int {
-        guard let start = timerVM.startTime, let end = timerVM.endTime else { return 0 }
-        return max(Int(end.timeIntervalSince(start)) / 60, 1)
+        timerVM.actualSessionMinutes
     }
 }
 
