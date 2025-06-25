@@ -31,13 +31,18 @@ final class TimerViewModel: ObservableObject {
 
     var workLengthMinutes: Int { workMinutes }
 
+    // セッションごとのworkMinutesを保存
+    private var sessionWorkMinutes: Int? = nil
+    // 実作業秒数
+    private var actualWorkedSeconds: Int = 0
+    // 最後に再開した時刻
+    private var lastResumedTime: Date? = nil
+
     // 実際のセッション時間を分で計算
     var actualSessionMinutes: Int {
-        guard let start = startTime else { return workMinutes }
-
-        let endTime = self.endTime ?? Date()
-        let duration = endTime.timeIntervalSince(start)
-        return max(Int(duration) / 60, 1) // 最低1分
+        // 実作業秒数を分換算（切り上げ）
+        let minutes = Int(ceil(Double(actualWorkedSeconds) / 60.0))
+        return max(minutes, 1) // 最低1分を保証
     }
 
     // User-configurable
@@ -118,17 +123,30 @@ final class TimerViewModel: ObservableObject {
 
         stopTimer()
 
-        // 2) これは「新しいセッション」か？ (= 最後のセッションが完了しているか)
+        // 新しいセッション開始
         if isSessionFinished {
             isWorkSession     = true
+            // セッション開始時のworkMinutesを保存
+            sessionWorkMinutes = workMinutes
             timeRemaining     = workMinutes * 60
             startTime         = Date()
             endTime           = nil
             isSessionFinished = false
+            actualWorkedSeconds = 0
+            lastResumedTime = Date()
         } else if startTime == nil {
-            timeRemaining = (isWorkSession ? workMinutes : breakMinutes) * 60
+            // セッション初回開始
+            let minutes = isWorkSession ? workMinutes : breakMinutes
+            sessionWorkMinutes = isWorkSession ? workMinutes : breakMinutes
+            timeRemaining = minutes * 60
             startTime     = Date()
             endTime       = nil
+            actualWorkedSeconds = 0
+            lastResumedTime = Date()
+        } else {
+            // ポーズ再開
+            resumeTimer()
+            return
         }
         // それ以外 (= ポーズ再開) は timeRemaining や startTime を触らない
 
@@ -148,22 +166,36 @@ final class TimerViewModel: ObservableObject {
         }
     }
 
+    // Resume用
+    func resumeTimer() {
+        guard !isRunning else { return }
+        guard lastResumedTime == nil else { return } // すでに再開中なら何もしない
+        lastResumedTime = Date()
+        isRunning = true
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
+                                    repeats: true) { [weak self] _ in
+            self?.tick()
+        }
+    }
+
+    func pauseTimer() {
+        guard isRunning else { return }
+        if let resumedAt = lastResumedTime {
+            actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
+            lastResumedTime = nil
+        }
+        stopTimer()
+    }
+
     func stopTimer() {
         timer?.invalidate()
         timer = nil
         isRunning = false
-    }
-
-    func resetTimer() {
-        stopTimer()
-        // ここで必ず Work セッションに戻す
-        isWorkSession = true
-
-        // Work のデフォルト時間にリセット
-        timeRemaining     = workMinutes * 60
-        isSessionFinished = false
-        startTime         = nil
-        endTime           = nil
+        // Pause相当の処理
+        if let resumedAt = lastResumedTime {
+            actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
+            lastResumedTime = nil
+        }
     }
 
     // Stopボタン用：work終了→break画面へ
@@ -199,12 +231,15 @@ final class TimerViewModel: ObservableObject {
     // 終了
     private func sessionCompleted(sendNotification: Bool = true) {
         stopTimer()
-
         // セッション終了時刻を記録（既にセットされていれば上書きしない）
         if endTime == nil {
             endTime = Date()
         }
-
+        // 最後のPause漏れ対策
+        if let resumedAt = lastResumedTime {
+            actualWorkedSeconds += Int(endTime!.timeIntervalSince(resumedAt))
+            lastResumedTime = nil
+        }
         // 履歴に本フェーズを保存
         if let start = startTime, let end = endTime {
             historyVM.add(
@@ -287,6 +322,11 @@ final class TimerViewModel: ObservableObject {
         lastBackgroundDate = Date()
         savedRemainingSeconds = timeRemaining
         if isRunning {
+            // Pause相当の処理
+            if let resumedAt = lastResumedTime {
+                actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
+                lastResumedTime = nil
+            }
             NotificationManager.shared.scheduleSessionEndNotification(after: timeRemaining, phase: isWorkSession ? .focus : .breakTime)
         }
         stopTimer()                                     // 一旦止める
@@ -301,6 +341,8 @@ final class TimerViewModel: ObservableObject {
         NotificationManager.shared.cancelSessionEndNotification()
         let originalRemaining = savedRemainingSeconds ?? timeRemaining
         timeRemaining = max(originalRemaining - elapsed, 0)
+        // 実作業時間に加算
+        actualWorkedSeconds += min(elapsed, originalRemaining)
 
         if timeRemaining <= 0 {
             // 0になった時刻を計算
@@ -310,7 +352,7 @@ final class TimerViewModel: ObservableObject {
         } else {
             shouldSuppressAnimation = true
             shouldSuppressSessionFinishedAnimation = true
-            startTimer()
+            resumeTimer()
         }
         lastBackgroundDate = nil
         wasRunningBeforeBackground = false
@@ -325,4 +367,17 @@ final class TimerViewModel: ObservableObject {
     // 公開getter
     public var currentActivityLabel: String { activityLabel }
     public var currentDetailLabel: String { detailLabel }
+
+    func resetTimer() {
+        stopTimer()
+        isRunning = false   // ← 明示的に止めとくと安心
+        isWorkSession = true
+        let minutes = sessionWorkMinutes ?? workMinutes
+        timeRemaining = minutes * 60
+        isSessionFinished = false
+        startTime = nil
+        endTime = nil
+        actualWorkedSeconds = 0
+        lastResumedTime = nil
+    }
 }
