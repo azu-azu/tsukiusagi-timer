@@ -29,13 +29,25 @@ struct QuietMoonView: View {
                 )
 
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: height)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 8)
-                .frame(height: height)
             }
-
             Spacer()
         }
         .padding(.top, paddingY)
+
+        FlowingStarsView(
+            mode: .diagonal(
+                angle: 3 * .pi / 4,
+                band: CGRect(
+                    x: UIScreen.main.bounds.width - 100,
+                    y: 0,
+                    width: 100,
+                    height: 100
+                )
+            ),
+            count: 20
+        )
     }
 }

@@ -25,7 +25,8 @@ struct SettingsView: View {
         NavigationStack {
             ZStack {
                 Color.moonBackground.ignoresSafeArea()
-                StarView().allowsHitTesting(false)
+                StaticStarsView().allowsHitTesting(false)
+                FlowingStarsView(mode: .diagonal(angle: 3 * .pi / 4))
 
                 GeometryReader { geo in
                     ScrollView {
