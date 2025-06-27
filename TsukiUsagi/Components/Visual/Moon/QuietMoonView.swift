@@ -41,18 +41,11 @@ struct QuietMoonView: View {
         .padding(.top, paddingY)
 
         FlowingStarsView(
-            mode: .diagonal(
-                angle: 3 * .pi / 4,
-                band: CGRect(
-                    x: size.width - 100,
-                    y: 0,
-                    width: 100,
-                    height: 100
-                )
-            ),
-            count: 20,
-            size: size,
-            safeAreaInsets: safeAreaInsets
+            starCount: 20,
+            angle: .degrees(135),
+            durationRange: 24...40,
+            sizeRange: 2...4,
+            band: nil
         )
     }
 }

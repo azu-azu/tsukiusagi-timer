@@ -25,28 +25,29 @@ struct ContentView: View {
             GeometryReader { geo in
                 let size = geo.size
                 let safeAreaInsets = geo.safeAreaInsets
-                let overshoot: CGFloat = 200
 
                 if size.width > 0 && size.height > 0 {
                     ZStack(alignment: .bottom) {
                         // 背景レイヤ
                         BackgroundGradientView().ignoresSafeArea()
                         AwakeEnablerView(hidden: true)
-                        StaticStarsView(size: size, safeAreaInsets: safeAreaInsets).allowsHitTesting(false)
+                        StaticStarsView(starCount: 40)
                         // FlowingStarsViewなどの星エフェクトはタイマー進行中のみ
                         if !timerVM.isSessionFinished {
                             FlowingStarsView(
-                                mode: .vertical(direction: .down),
-                                size: size,
-                                safeAreaInsets: safeAreaInsets,
-                                overshoot: overshoot
-                            ).allowsHitTesting(false)
+                                starCount: 70,
+                                angle: .degrees(90), // 下向き
+                                durationRange: 24...40,
+                                sizeRange: 2...4,
+                                band: nil
+                            )
                             FlowingStarsView(
-                                mode: .vertical(direction: .up),
-                                size: size,
-                                safeAreaInsets: safeAreaInsets,
-                                overshoot: overshoot
-                            ).allowsHitTesting(false)
+                                starCount: 70,
+                                angle: .degrees(-90), // 上向き
+                                durationRange: 24...40,
+                                sizeRange: 2...4,
+                                band: nil
+                            )
                         }
                         // Moon+Timerセット or QuietMoonView
                         GeometryReader { geo2 in
@@ -152,21 +153,24 @@ struct ContentView: View {
         ZStack {
             BackgroundGradientView().ignoresSafeArea()
             AwakeEnablerView(hidden: true)
-            StaticStarsView(size: size, safeAreaInsets: safeAreaInsets)
-                .allowsHitTesting(false)
+            StaticStarsView(starCount: 40)
             FlowingStarsView(
-                mode: .vertical(direction: .down),
-                size: size,
-                safeAreaInsets: safeAreaInsets,
-                overshoot: overshoot
+                starCount: 70,
+                angle: .degrees(90), // 下向き
+                durationRange: 24...40,
+                sizeRange: 2...4,
+                band: nil
             )
+            .id(size)
             .allowsHitTesting(false)
             FlowingStarsView(
-                mode: .vertical(direction: .up),
-                size: size,
-                safeAreaInsets: safeAreaInsets,
-                overshoot: overshoot
+                starCount: 70,
+                angle: .degrees(-90), // 上向き
+                durationRange: 24...40,
+                sizeRange: 2...4,
+                band: nil
             )
+            .id(size)
             .allowsHitTesting(false)
         }
     }
