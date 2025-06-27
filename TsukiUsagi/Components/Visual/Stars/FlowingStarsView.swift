@@ -82,62 +82,75 @@ struct FlowingStarsView: View {
     let maxDelay: Double
     let durationRange: ClosedRange<Double>
     let sizeRange: ClosedRange<CGFloat>
-
-    private let screen = UIScreen.main.bounds
+    let size: CGSize
+    let safeAreaInsets: EdgeInsets
+    let overshoot: CGFloat
 
     init(
         mode: Mode,
         count: Int = 70,
         maxDelay: Double = 20,
         durationRange: ClosedRange<Double> = 24...40,
-        sizeRange: ClosedRange<CGFloat> = 2...4
+        sizeRange: ClosedRange<CGFloat> = 2...4,
+        size: CGSize,
+        safeAreaInsets: EdgeInsets = EdgeInsets(),
+        overshoot: CGFloat = 200
     ) {
         self.mode = mode
         self.count = count
         self.maxDelay = maxDelay
         self.durationRange = durationRange
         self.sizeRange = sizeRange
+        self.size = size
+        self.safeAreaInsets = safeAreaInsets
+        self.overshoot = overshoot
     }
 
     var body: some View {
-        ForEach(0..<count, id: \.self) { _ in
-            let (start, end): (CGPoint, CGPoint) = {
-                switch mode {
-                case .vertical(let direction):
-                    let x = CGFloat.random(in: 0...screen.width)
-                    let startY = direction == .down ? -20 : screen.height + 20
-                    let endY = direction == .down ? screen.height + 20 : -20
-                    return (CGPoint(x: x, y: startY), CGPoint(x: x, y: endY))
-                case .diagonal(let angle, let band):
-                    let startX: CGFloat
-                    let startY: CGFloat
-                    if let band = band {
-                        startX = CGFloat.random(in: band.minX...band.maxX)
-                        startY = CGFloat.random(in: band.minY...band.maxY)
-                    } else {
-                        startX = CGFloat.random(in: 0...screen.width)
-                        startY = CGFloat.random(in: 0...screen.height)
-                    }
-                    let length: CGFloat = 300 // 斜めに進む距離
-                    let endX = startX + cos(angle) * length
-                    let endY = startY + sin(angle) * length
-                    return (CGPoint(x: startX, y: startY), CGPoint(x: endX, y: endY))
-                case .custom(let startPoint, let endPoint):
-                    let s = startPoint()
-                    let e = endPoint(s)
-                    return (s, e)
+        if size.width > 0 && size.height > 0 {
+            let bottomEdge = size.height + safeAreaInsets.bottom + overshoot
+            ZStack {
+                ForEach(0..<count, id: \.self) { _ in
+                    let (start, end): (CGPoint, CGPoint) = {
+                        switch mode {
+                        case .vertical(let direction):
+                            let x = CGFloat.random(in: 0...size.width)
+                            let startY = direction == .down ? -overshoot : bottomEdge
+                            let endY = direction == .down ? bottomEdge : -overshoot
+                            return (CGPoint(x: x, y: startY), CGPoint(x: x, y: endY))
+                        case .diagonal(let angle, let band):
+                            let startX: CGFloat
+                            let startY: CGFloat
+                            if let band = band {
+                                startX = CGFloat.random(in: band.minX...band.maxX)
+                                startY = CGFloat.random(in: band.minY...band.maxY)
+                            } else {
+                                startX = CGFloat.random(in: 0...size.width)
+                                startY = CGFloat.random(in: 0...bottomEdge)
+                            }
+                            let length: CGFloat = 300 // 斜めに進む距離
+                            let endX = startX + cos(angle) * length
+                            let endY = startY + sin(angle) * length
+                            return (CGPoint(x: startX, y: startY), CGPoint(x: endX, y: endY))
+                        case .custom(let startPoint, let endPoint):
+                            let s = startPoint()
+                            let e = endPoint(s)
+                            return (s, e)
+                        }
+                    }()
+                    AnimatedStar(
+                        size: .random(in: sizeRange),
+                        start: start,
+                        end: end,
+                        duration: .random(in: durationRange),
+                        delay: .random(in: -maxDelay...maxDelay)
+                    )
                 }
-            }()
-            AnimatedStar(
-                size: .random(in: sizeRange),
-                start: start,
-                end: end,
-                duration: .random(in: durationRange),
-                delay: .random(in: -maxDelay...maxDelay)
-            )
+            }
+            .ignoresSafeArea()
+        } else {
+            EmptyView()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea()
     }
 }
 
