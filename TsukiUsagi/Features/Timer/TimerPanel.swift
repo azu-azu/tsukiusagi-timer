@@ -39,22 +39,7 @@ struct TimerPanel: View {
                     alignment: .center)
 
             // 記録ブロック：常に下端
-            if timerVM.isSessionFinished && !timerVM.isWorkSession {
-                RecordedTimesView(
-                    formattedStartTime: formattedStartTime,
-                    formattedEndTime: formattedEndTime,
-                    actualSessionMinutes: actualSessionMinutes,
-                    onEdit: {
-                        isEditing = true
-                    }
-                )
-                .frame(maxWidth: .infinity,
-                        maxHeight: .infinity,
-                        alignment: .bottom)
-                .padding(.bottom, recordBottomPadding)
-                .transition(.opacity)
-                .id(lastEditID)
-            }
+            // --- RecordedTimesViewの呼び出しを削除 ---
         }
         // 編集シート
         .sheet(isPresented: $isEditing, onDismiss: {
@@ -62,9 +47,9 @@ struct TimerPanel: View {
             lastEditID = UUID()
         }) { editSheetView() }
 
-        // ★ Moon メッセージと同じ 0.8 秒で同期
+        // ★ Moon メッセージと同じ duration で同期
         .animation(
-            timerVM.shouldSuppressSessionFinishedAnimation ? nil : .easeInOut(duration: 0.8),
+            timerVM.shouldSuppressSessionFinishedAnimation ? nil : .easeInOut(duration: LayoutConstants.sessionEndAnimationDuration),
             value: timerVM.isSessionFinished
         )
         // アニメーション抑制フラグをリセット

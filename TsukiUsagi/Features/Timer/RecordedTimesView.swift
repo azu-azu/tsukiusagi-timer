@@ -36,6 +36,5 @@ struct RecordedTimesView: View {
             .frame(maxWidth: 110)
         }
         .padding(.top, 20)
-        .transition(.opacity) // 念押しフェード
     }
 }
