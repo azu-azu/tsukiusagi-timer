@@ -14,7 +14,7 @@ struct ContentView: View {
 
     // UI Const
     private let buttonWidth: CGFloat = 120
-    private let buttonHeight: CGFloat = 40
+    private let buttonHeight: CGFloat = LayoutConstants.footerBarHeight
     private let moonSize: CGFloat = 200
     private let timerHeight: CGFloat = 60 // TimerPanelの高さ（仮）
     private let timerSpacing: CGFloat = 80 // 月とtimerの間
@@ -85,6 +85,21 @@ struct ContentView: View {
                         footerBar()
                             .padding(.horizontal, 16)
                             .padding(.bottom, safeAreaInsets.bottom)
+                            .zIndex(LayoutConstants.footerZIndex)
+
+                        // --- RecordedTimesViewをfooterBarの直上に追加 ---
+                        if timerVM.isSessionFinished && !timerVM.isWorkSession {
+                            RecordedTimesView(
+                                formattedStartTime: timerVM.formattedStartTime,
+                                formattedEndTime: timerVM.formattedEndTime,
+                                actualSessionMinutes: timerVM.actualSessionMinutes,
+                                onEdit: { showingSettings = true }
+                            )
+                            .sessionVisibility(isVisible: timerVM.isSessionFinished)
+                            .padding(.bottom, LayoutConstants.footerBarHeight + safeAreaInsets.bottom + LayoutConstants.recordedTimesBottomSpacing)
+                            .zIndex(LayoutConstants.overlayZIndex)
+                            .sessionEndTransition(timerVM)
+                        }
                         // 💠 ダイヤモンドスター
                         if showDiamondStars {
                             DiamondStarsOnceView()
@@ -126,7 +141,7 @@ struct ContentView: View {
                 .allowsHitTesting(false)
             }
         }
-        .animation(.easeInOut(duration: 0.8),
+        .animation(.easeInOut(duration: LayoutConstants.sessionEndAnimationDuration),
                     value: timerVM.isSessionFinished)
     }
 
@@ -188,6 +203,7 @@ struct ContentView: View {
         }
         .frame(height: buttonHeight)
         .background(Color.black.opacity(0.0001))
+        .zIndex(LayoutConstants.overlayZIndex)
     }
 
     // MARK: - Start / Pause Button
