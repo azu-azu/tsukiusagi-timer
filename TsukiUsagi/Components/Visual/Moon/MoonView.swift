@@ -14,6 +14,7 @@ struct MoonView: View {
 	var moonSize: CGFloat = 200
 	var paddingY: CGFloat
 	var glitterText: String
+	var size: CGSize
 
 	// 紫の影（アニメーション）
 	var nearY: CGFloat { moonSize } // 上の位置

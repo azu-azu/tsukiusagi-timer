@@ -6,6 +6,9 @@ struct QuietMoonView: View {
     private let paddingY: CGFloat = 60
     private let bodyText = MoonMessage.random().lines.joined(separator: "\n")
 
+    let size: CGSize
+    let safeAreaInsets: EdgeInsets
+
     var body: some View {
         VStack(spacing: 20) {
             Text(title)
@@ -41,13 +44,15 @@ struct QuietMoonView: View {
             mode: .diagonal(
                 angle: 3 * .pi / 4,
                 band: CGRect(
-                    x: UIScreen.main.bounds.width - 100,
+                    x: size.width - 100,
                     y: 0,
                     width: 100,
                     height: 100
                 )
             ),
-            count: 20
+            count: 20,
+            size: size,
+            safeAreaInsets: safeAreaInsets
         )
     }
 }

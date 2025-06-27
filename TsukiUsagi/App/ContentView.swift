@@ -21,76 +21,55 @@ struct ContentView: View {
     // Body
     var body: some View {
         NavigationStack {
-            ZStack {
-                // 背景レイヤ
-                BackgroundGradientView()
-                    .ignoresSafeArea()
-
-                AwakeEnablerView(hidden: true)
-                StaticStarsView().allowsHitTesting(false)
-
-                // 月 & 星レイヤ
-                ZStack(alignment: .top) {
-                    if timerVM.isSessionFinished {
-                        // 🌑
-                        QuietMoonView()
-                    } else {
-                        // ⭐️
-                        FlowingStarsView(mode: .vertical(direction: .down)).allowsHitTesting(false)
-                        FlowingStarsView(mode: .vertical(direction: .up)).allowsHitTesting(false)
-
-                        // 🌕
-                        MoonView(
-                            moonSize: moonSize,
-                            paddingY: moonPaddingY,
-                            glitterText: moonTitle
-                        )
-                            .allowsHitTesting(false)
-                    }
-                }
-                .animation(.easeInOut(duration: 0.8),
-                            value: timerVM.isSessionFinished)
-
-                // タイマー
-                GeometryReader { geo in
-                    let timerHeight = geo.size.height * (1 - timerBottomRatio)
-                    TimerPanel(timerVM: timerVM)
-                        .frame(maxWidth: .infinity,
-                                maxHeight: .infinity,
-                                alignment: .bottom)
-                        .padding(.bottom, timerHeight)
-                }
-            }
-
-            // 💠 ダイヤモンドスター
-            .overlay(alignment: .center) {
-                if showDiamondStars {
-                    DiamondStarsOnceView()
-                        .allowsHitTesting(false)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                                showDiamondStars = false
+            GeometryReader { geo in
+                let size = geo.size
+                let safeAreaInsets = geo.safeAreaInsets
+                let overshoot: CGFloat = 200
+                // Defensive: guard against zero size
+                if size.width > 0 && size.height > 0 {
+                    ZStack {
+                        // 背景レイヤ
+                        BackgroundGradientView().ignoresSafeArea()
+                        AwakeEnablerView(hidden: true)
+                        StaticStarsView(size: size, safeAreaInsets: safeAreaInsets).allowsHitTesting(false)
+                        FlowingStarsView(mode: .vertical(direction: .down), size: size, safeAreaInsets: safeAreaInsets, overshoot: overshoot).allowsHitTesting(false)
+                        FlowingStarsView(mode: .vertical(direction: .up), size: size, safeAreaInsets: safeAreaInsets, overshoot: overshoot).allowsHitTesting(false)
+                        ZStack(alignment: .top) {
+                            if timerVM.isSessionFinished {
+                                QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
+                            } else {
+                                MoonView(
+                                    moonSize: moonSize,
+                                    paddingY: moonPaddingY,
+                                    glitterText: moonTitle,
+                                    size: size
+                                )
+                                .allowsHitTesting(false)
                             }
                         }
+                        .animation(.easeInOut(duration: 0.8),
+                                    value: timerVM.isSessionFinished)
+                        let timerHeight = geo.size.height * (1 - timerBottomRatio)
+                        TimerPanel(timerVM: timerVM)
+                            .frame(maxWidth: .infinity,
+                                    maxHeight: .infinity,
+                                    alignment: .bottom)
+                            .padding(.bottom, timerHeight)
+                        VStack {
+                            Spacer()
+                            footerBar()
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 10)
+                        }
+                    }
+                    .ignoresSafeArea()
+                    .sheet(isPresented: $showingSettings) {
+                        SettingsView(size: size, safeAreaInsets: safeAreaInsets)
+                            .environmentObject(timerVM)
+                            .environmentObject(historyVM)
+                    }
                 }
             }
-
-            // フッターを最背面に貼り付け
-            .overlay(alignment: .bottom) {
-                footerBar()
-                    .padding(.horizontal, 16)  // 左右余白
-                    .padding(.bottom, 10)      // 下端から Ypt 浮かす（数字で微調整）
-            }
-            .onReceive(timerVM.$flashStars.dropFirst()) { _ in
-                showDiamondStars = true
-            }
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
-        .environmentObject(timerVM)
-        .environmentObject(historyVM)
-            }
-
-            .navigationBarTitleDisplayMode(.inline)
         }
     }
 

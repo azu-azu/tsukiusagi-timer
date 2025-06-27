@@ -23,11 +23,17 @@ struct SettingsView: View {
     private let cardCornerRadius: CGFloat = 8
     private let labelCornerRadius: CGFloat = 6
 
+    let size: CGSize
+    let safeAreaInsets: EdgeInsets
+
     private var isCustomActivity: Bool {
         !["Work", "Study", "Read"].contains(activityLabel)
     }
 
     var body: some View {
+        // Defensive: guard against zero size
+        guard size.width > 0 && size.height > 0 else { return AnyView(EmptyView()) }
+        return AnyView(
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 40) {
@@ -172,8 +178,8 @@ struct SettingsView: View {
             .background(
                 ZStack {
                     Color.moonBackground.ignoresSafeArea()
-                    StaticStarsView().allowsHitTesting(false)
-                    FlowingStarsView(mode: .diagonal(angle: 3 * .pi / 4))
+                    StaticStarsView(size: size, safeAreaInsets: safeAreaInsets).allowsHitTesting(false)
+                    FlowingStarsView(mode: .diagonal(angle: 3 * .pi / 4), size: size, safeAreaInsets: safeAreaInsets)
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: 30))
@@ -190,6 +196,7 @@ struct SettingsView: View {
                 }
             }
         }
+        )
     }
 
     @ViewBuilder
