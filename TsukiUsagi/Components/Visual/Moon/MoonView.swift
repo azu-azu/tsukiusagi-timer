@@ -12,7 +12,6 @@ struct MoonView: View {
 	@State private var float = false
 
 	var moonSize: CGFloat = 200
-	var paddingY: CGFloat
 	var glitterText: String
 	var size: CGSize
 
@@ -65,7 +64,6 @@ struct MoonView: View {
 				.glitter()
 				.offset(y:20)
 		}
-		.padding(.top, paddingY)
 		.onAppear {
 			animate = true
 		}
