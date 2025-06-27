@@ -178,8 +178,14 @@ struct SettingsView: View {
             .background(
                 ZStack {
                     Color.moonBackground.ignoresSafeArea()
-                    StaticStarsView(size: size, safeAreaInsets: safeAreaInsets).allowsHitTesting(false)
-                    FlowingStarsView(mode: .diagonal(angle: 3 * .pi / 4), size: size, safeAreaInsets: safeAreaInsets)
+                    StaticStarsView(starCount: 40).allowsHitTesting(false)
+                    FlowingStarsView(
+                        starCount: 40,
+                        angle: .degrees(135),
+                        durationRange: 24...40,
+                        sizeRange: 2...4,
+                        band: nil
+                    )
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: 30))
