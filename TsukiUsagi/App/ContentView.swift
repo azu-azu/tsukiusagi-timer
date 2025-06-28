@@ -39,14 +39,14 @@ struct ContentView: View {
                                 angle: .degrees(90), // 下向き
                                 durationRange: 24...40,
                                 sizeRange: 2...4,
-                                band: nil
+                                spawnArea: nil
                             )
                             FlowingStarsView(
                                 starCount: 70,
                                 angle: .degrees(-90), // 上向き
                                 durationRange: 24...40,
                                 sizeRange: 2...4,
-                                band: nil
+                                spawnArea: nil
                             )
                         }
                         // Moon+Timerセット or QuietMoonView
@@ -159,7 +159,7 @@ struct ContentView: View {
                 angle: .degrees(90), // 下向き
                 durationRange: 24...40,
                 sizeRange: 2...4,
-                band: nil
+                spawnArea: nil
             )
             .id(size)
             .allowsHitTesting(false)
@@ -168,7 +168,7 @@ struct ContentView: View {
                 angle: .degrees(-90), // 上向き
                 durationRange: 24...40,
                 sizeRange: 2...4,
-                band: nil
+                spawnArea: nil
             )
             .id(size)
             .allowsHitTesting(false)
@@ -214,6 +214,7 @@ struct ContentView: View {
 
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
+            HapticManager.shared.buttonTapFeedback() // ハプティックフィードバック
             timerVM.isRunning ? timerVM.stopTimer()
                                 : timerVM.startTimer()
         }

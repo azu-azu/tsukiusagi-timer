@@ -184,7 +184,7 @@ struct SettingsView: View {
                         angle: .degrees(135),
                         durationRange: 24...40,
                         sizeRange: 2...4,
-                        band: nil
+                        spawnArea: nil
                     )
                 }
             )
