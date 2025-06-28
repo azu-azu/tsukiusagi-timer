@@ -22,6 +22,7 @@ struct ContentView: View {
 
     // State
     @State private var showingSettings  = false
+    @State private var showingEditRecord = false
     @State private var showDiamondStars = false
     @State private var cachedIsLandscape: Bool = false
     @FocusState private var isQuietMoonFocused: Bool
@@ -156,7 +157,7 @@ struct ContentView: View {
                                                 formattedStartTime: timerVM.formattedStartTime,
                                                 formattedEndTime: timerVM.formattedEndTime,
                                                 actualSessionMinutes: timerVM.actualSessionMinutes,
-                                                onEdit: { showingSettings = true }
+                                                onEdit: { showingEditRecord = true }
                                             )
                                             .sessionVisibility(isVisible: timerVM.isSessionFinished)
                                             .sessionEndTransition(timerVM)
@@ -225,7 +226,7 @@ struct ContentView: View {
                                 formattedStartTime: timerVM.formattedStartTime,
                                 formattedEndTime: timerVM.formattedEndTime,
                                 actualSessionMinutes: timerVM.actualSessionMinutes,
-                                onEdit: { showingSettings = true }
+                                onEdit: { showingEditRecord = true }
                             )
                             .sessionVisibility(isVisible: timerVM.isSessionFinished)
                             .padding(.bottom, LayoutConstants.footerBarHeight + safeAreaInsets.bottom + LayoutConstants.recordedTimesBottomSpacing)
@@ -250,6 +251,11 @@ struct ContentView: View {
                     }
                     .sheet(isPresented: $showingSettings) {
                         SettingsView(size: size, safeAreaInsets: safeAreaInsets)
+                            .environmentObject(timerVM)
+                            .environmentObject(historyVM)
+                    }
+                    .sheet(isPresented: $showingEditRecord) {
+                        TimerEditView()
                             .environmentObject(timerVM)
                             .environmentObject(historyVM)
                     }
@@ -292,8 +298,8 @@ struct ContentView: View {
                         .scaledToFit()
                         .frame(width: 16, height: 16)
                         .frame(width: buttonHeight,
-                               height: buttonHeight,
-                               alignment: .bottom)
+                                height: buttonHeight,
+                                alignment: .bottom)
                         .foregroundColor(.white)
                 }
             }

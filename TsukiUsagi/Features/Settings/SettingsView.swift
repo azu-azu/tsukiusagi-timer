@@ -152,9 +152,9 @@ struct SettingsView: View {
                         } label: {
                             Label("Stop", systemImage: "forward.end")
                         }
-                        .disabled(!(timerVM.isRunning && timerVM.isWorkSession))
+                        .disabled(!(timerVM.isWorkSession && timerVM.startTime != nil))
                         .tint(.blue)
-                        .foregroundStyle((timerVM.isRunning && timerVM.isWorkSession) ? .blue : Color.gray.opacity(0.6))
+                        .foregroundStyle((timerVM.isWorkSession && timerVM.startTime != nil) ? .blue : Color.gray.opacity(0.6))
                     }
 
                     // Logs
@@ -196,7 +196,7 @@ struct SettingsView: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("完了") {
+                Button("Close") {
                     isActivityFocused = false
                     isDetailFocused = false
                 }

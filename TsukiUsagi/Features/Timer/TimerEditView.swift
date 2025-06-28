@@ -64,7 +64,7 @@ struct TimerEditView: View {
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("完了") {
+                    Button("Close") {
                         isDetailFocused = false
                         isMemoFocused = false
                     }

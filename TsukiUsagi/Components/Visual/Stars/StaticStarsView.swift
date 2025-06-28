@@ -24,7 +24,7 @@ struct StaticStarsView: View {
                     Circle()
                         .fill(star.color.opacity(star.opacity))
                         .frame(width: star.size, height: star.size)
-                        .opacity(0.8)
+                        .opacity(0.6)
                         .position(
                             x: size.width * star.xRatio,
                             y: (safeAreaInsets.top + (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.yRatio)
