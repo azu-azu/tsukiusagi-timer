@@ -74,57 +74,36 @@ struct QuietMoonView: View {
 
     var body: some View {
         ZStack {
-            // 既存のVStack内容
             VStack(spacing: 20) {
                 Text(title)
                     .glitter(size: 24, resourceName: "gold")
                     .frame(maxWidth: .infinity)
 
-                ZStack {
-                    // スクロール可能なテキストビュー
-                    ScrollView(.vertical, showsIndicators: false) {
-                        SelectableTextView(
-                            text: bodyText,
-                            font: avenirNextUIFont(size: 18, weight: .regular, design: .monospaced),
-                            textColor: .white
-                        )
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, leftPadding) // 左側：ノッチ回避
-                        .padding(.trailing, 24) // 右側：従来通り
-                        .padding(.bottom, 8)
-                    }
-                    .frame(height: height)
-                }
+                SelectableTextView(
+                    text: bodyText,
+                    font: avenirNextUIFont(size: 18, weight: .regular, design: .monospaced),
+                    textColor: .white
+                )
+                .frame(height: height)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, leftPadding)
+                .padding(.trailing, 24)
+                .padding(.bottom, 8)
+
                 Spacer()
             }
-            .padding(.top, topPadding) // 向きに応じたパディング
+            .padding(.top, topPadding)
 
-            // FlowingStarsViewをZStackの一番下に配置
             FlowingStarsView(
                 starCount: 20,
                 angle: .degrees(135),
                 durationRange: 24...40,
                 sizeRange: 2...4,
-
-                spawnArea: nil // デフォルト値
-
-                // spawnArea: StarSpawnArea(
-                //     minXRatio: 0.0,  // 左端
-                //     maxXRatio: 1.0,  // 右端
-                //     minYRatio: -0.2, // より上から（画面外）
-                //     maxYRatio: 0.0   // 画面上端
-                // )
-
-                // spawnArea: StarSpawnArea(
-                //     minXRatio: 0.0,  // 左端
-                //     maxXRatio: 1.0,  // 右端
-                //     minYRatio: 0.8,  // 画面下部
-                //     maxYRatio: 1.2   // より下から（画面外）
-                // )
+                spawnArea: nil
             )
             .ignoresSafeArea()
         }
-        .background(Color.clear) // 背景を透明にして親の背景を活かす
-        .accessibilityElement(children: .combine) // グループ化
+        .background(Color.clear)
+        .accessibilityElement(children: .combine)
     }
 }
