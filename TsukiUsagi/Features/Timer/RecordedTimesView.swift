@@ -32,9 +32,13 @@ struct RecordedTimesView: View {
                         .font(.system(size: 30))
                         .foregroundColor(.yellow)
                 }
+                .accessibilityLabel("Edit session record")
+                .accessibilityHint("Tap to edit start time, end time, and session details")
             }
             .frame(maxWidth: 110)
         }
         .padding(.top, 20)
+        .background(Color.clear)
+        .accessibilityElement(children: .combine)
     }
 }

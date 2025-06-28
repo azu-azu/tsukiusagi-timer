@@ -3,7 +3,7 @@ import Combine
 import SwiftUI
 
 struct SessionRecord: Codable, Identifiable {
-    var id: UUID
+    var id: String  // UUID から String に変更（固定値）
     var start, end: Date
     var phase: PomodoroPhase
     var activity: String          // 上位
@@ -32,7 +32,7 @@ class HistoryViewModel: ObservableObject {
         guard duration >= 3 else { return }
 
         let record = SessionRecord(
-                        id: UUID(),
+                        id: generateFixedId(from: start), // 固定値IDを生成
                         start: start,
                         end: end,
                         phase: phase,
@@ -43,6 +43,16 @@ class HistoryViewModel: ObservableObject {
 
         history.append(record)
         store.save(history)
+    }
+
+    // MARK: - Helper Methods
+
+    /// 固定値のIDを生成（日時ベース）
+    private func generateFixedId(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd_HHmmss"
+        formatter.timeZone = TimeZone.current
+        return formatter.string(from: date)
     }
 
     func save() {
