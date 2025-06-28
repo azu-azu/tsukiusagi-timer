@@ -1,14 +1,30 @@
 import SwiftUI
 
+// MARK: - PreferenceKey for Landscape Detection
+struct LandscapePreferenceKey: PreferenceKey {
+    static var defaultValue: Bool = false
+
+    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+        value = nextValue()
+    }
+}
+
 struct ContentView: View {
 
     // Environment
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM:   TimerViewModel
 
+    // Environment for Orientation and Accessibility
+    @Environment(\.horizontalSizeClass) private var horizontalClass
+    @Environment(\.verticalSizeClass) private var verticalClass
+    @Environment(\.sizeCategory) private var sizeCategory
+
     // State
     @State private var showingSettings  = false
     @State private var showDiamondStars = false
+    @State private var cachedIsLandscape: Bool = false
+    @FocusState private var isQuietMoonFocused: Bool
 
     private let moonTitle = "Centered"
 
@@ -24,11 +40,52 @@ struct ContentView: View {
     private let moonPortraitYOffsetRatio: CGFloat = 0.15 // landscape時のmoonは少し下げる
     private let moonLandscapeYOffsetRatio: CGFloat = 0.1 // portrait時のmoonは少し上げる
 
+    // MARK: - Computed Properties
+
+    /// より正確な向き判定（iPad Split View対応）
+    private func safeIsLandscape(size: CGSize) -> Bool {
+        guard size.width > 0, size.height > 0 else { return false }
+        return horizontalClass == .regular ||
+                (size.width > size.height && size.width > 600)
+    }
+
+    /// デバイス別のマージン調整
+    private var landscapeMargin: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return 40 // iPad は余裕を持たせる
+        } else {
+            return 20 // iPhone はコンパクトに
+        }
+    }
+
+    /// Dynamic Type対応のフォントサイズ調整
+    private var adjustedFontSize: CGFloat {
+        switch sizeCategory {
+        case .accessibilityExtraExtraExtraLarge:
+            return 14
+        case .accessibilityExtraExtraLarge:
+            return 16
+        case .accessibilityExtraLarge:
+            return 18
+        default:
+            return 20
+        }
+    }
+
+    /// 向き変更の最適化
+    private func updateOrientation(size: CGSize) {
+        let newIsLandscape = safeIsLandscape(size: size)
+        if cachedIsLandscape != newIsLandscape {
+            cachedIsLandscape = newIsLandscape
+        }
+    }
+
     var body: some View {
         NavigationStack {
             GeometryReader { geo in
                 let size = geo.size
                 let safeAreaInsets = geo.safeAreaInsets
+                let isLandscape = safeIsLandscape(size: size)
 
                 if size.width > 0 && size.height > 0 {
                     ZStack(alignment: .bottom) {
@@ -53,6 +110,7 @@ struct ContentView: View {
                                 spawnArea: nil
                             )
                         }
+
                         // Moon+Timerセット or QuietMoonView
                         GeometryReader { geo2 in
                             let contentSize = geo2.size
@@ -62,21 +120,72 @@ struct ContentView: View {
 
                             // SafeAreaを考慮した中央
                             let centerY = (contentSize.height - safeTop - safeBottom) / 2 + safeTop
-                            let isLandscape = contentSize.width > contentSize.height
 
                             // 縦横別：比率で位置を決定
                             let setCenterY: CGFloat = isLandscape
                                 ? centerY + contentSize.height * moonLandscapeYOffsetRatio
                                 : centerY - contentSize.height * moonPortraitYOffsetRatio
 
-                            // ※アニメーションを加える場合はwithAnimationで包むと良い
                             if timerVM.isSessionFinished {
                                 // 終了時はQuietMoonViewのみ
-                                VStack {
-                                    QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
+                                if isLandscape {
+                                    // 横画面：左右分割（最高品質版）
+                                    HStack(spacing: landscapeMargin) {
+                                        // 左側：QuietMoonView
+                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
+                                            .frame(width: (contentSize.width - landscapeMargin) * 0.5, height: setHeight)
+                                            .background(Color.clear)
+                                            .zIndex(10)
+                                            .layoutPriority(1) // 左側を優先的に表示
+                                            .accessibilityLabel("Quiet Moon Message")
+                                            .accessibilityHint("Displays inspirational messages after session completion")
+                                            .accessibilityAddTraits(.isHeader)
+                                            .focused($isQuietMoonFocused)
+
+                                        // 右側：RecordedTimesView
+                                        VStack {
+                                            Spacer()
+                                            RecordedTimesView(
+                                                formattedStartTime: timerVM.formattedStartTime,
+                                                formattedEndTime: timerVM.formattedEndTime,
+                                                actualSessionMinutes: timerVM.actualSessionMinutes,
+                                                onEdit: { showingSettings = true }
+                                            )
+                                            .sessionVisibility(isVisible: timerVM.isSessionFinished)
+                                            .sessionEndTransition(timerVM)
+                                            Spacer()
+                                        }
+                                        .frame(width: (contentSize.width - landscapeMargin) * 0.5, height: setHeight)
+                                        .background(Color.clear)
+                                        .zIndex(10)
+                                        .layoutPriority(0) // 右側は必要に応じて縮小
+                                        .accessibilityLabel("Session Record")
+                                        .accessibilityHint("Shows start time, end time, and session duration")
+                                    }
+                                    .frame(width: contentSize.width, height: setHeight)
+                                    .position(x: contentSize.width / 2, y: setCenterY)
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .leading).combined(with: .opacity),
+                                        removal: .move(edge: .trailing).combined(with: .opacity)
+                                    ))
+                                    .preference(key: LandscapePreferenceKey.self, value: isLandscape)
+                                } else {
+                                    // 縦画面：従来通り
+                                    VStack {
+                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
+                                            .accessibilityLabel("Quiet Moon Message")
+                                            .accessibilityHint("Displays inspirational messages after session completion")
+                                            .accessibilityAddTraits(.isHeader)
+                                            .focused($isQuietMoonFocused)
+                                    }
+                                    .frame(width: contentSize.width, height: setHeight)
+                                    .position(x: contentSize.width / 2, y: setCenterY)
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .top).combined(with: .opacity),
+                                        removal: .move(edge: .bottom).combined(with: .opacity)
+                                    ))
+                                    .preference(key: LandscapePreferenceKey.self, value: isLandscape)
                                 }
-                                .frame(width: contentSize.width, height: setHeight)
-                                .position(x: contentSize.width / 2, y: setCenterY)
                             } else {
                                 // 進行中はMoon+Timerセット
                                 VStack(spacing: 80) {
@@ -93,14 +202,19 @@ struct ContentView: View {
                                 .position(x: contentSize.width / 2, y: setCenterY)
                             }
                         }
+                        .onPreferenceChange(LandscapePreferenceKey.self) { newValue in
+                            // 親Viewで向き変更を検知
+                            updateOrientation(size: size)
+                        }
+
                         // footerBarはZStackの一番下
                         footerBar()
                             .padding(.horizontal, 16)
                             .padding(.bottom, safeAreaInsets.bottom)
                             .zIndex(LayoutConstants.footerZIndex)
 
-                        // --- RecordedTimesViewをfooterBarの直上に追加 ---
-                        if timerVM.isSessionFinished && !timerVM.isWorkSession {
+                        // --- RecordedTimesViewを縦画面時のみfooterBarの直上に追加 ---
+                        if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
                             RecordedTimesView(
                                 formattedStartTime: timerVM.formattedStartTime,
                                 formattedEndTime: timerVM.formattedEndTime,
@@ -112,6 +226,7 @@ struct ContentView: View {
                             .zIndex(LayoutConstants.overlayZIndex)
                             .sessionEndTransition(timerVM)
                         }
+
                         // 💠 ダイヤモンドスター
                         if showDiamondStars {
                             DiamondStarsOnceView()
@@ -132,6 +247,19 @@ struct ContentView: View {
                             .environmentObject(timerVM)
                             .environmentObject(historyVM)
                     }
+                    .onChange(of: timerVM.isSessionFinished) { oldValue, newValue in
+                        if newValue {
+                            // セッション終了時にQuietMoonViewにフォーカスを飛ばす
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                isQuietMoonFocused = true
+                            }
+                        }
+                    }
+                    .animation(
+                        .easeInOut(duration: 0.3)
+                        .delay(0.1), // 少し遅延させて自然に
+                        value: isLandscape
+                    )
                 }
             }
         }
@@ -172,7 +300,7 @@ struct ContentView: View {
                 sizeRange: 2...4,
                 spawnArea: nil
             )
-            .id(size)
+            .id(roundedSize(size)) // 微差を防ぐため整数に丸める
             .allowsHitTesting(false)
             FlowingStarsView(
                 starCount: 70,
@@ -181,9 +309,19 @@ struct ContentView: View {
                 sizeRange: 2...4,
                 spawnArea: nil
             )
-            .id(size)
+            .id(roundedSize(size)) // 微差を防ぐため整数に丸める
             .allowsHitTesting(false)
         }
+    }
+
+    // MARK: - Helper Methods
+
+    /// CGSize の微差を防ぐため整数に丸める
+    private func roundedSize(_ size: CGSize) -> CGSize {
+        return CGSize(
+            width: round(size.width),
+            height: round(size.height)
+        )
     }
 
     // MARK: - Footer
