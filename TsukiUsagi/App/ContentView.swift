@@ -18,7 +18,11 @@ struct ContentView: View {
     private let moonSize: CGFloat = 200
     private let timerHeight: CGFloat = 60 // TimerPanelの高さ（仮）
     private let timerSpacing: CGFloat = 80 // 月とtimerの間
+
+    // 比率定数
     private let timerBottomRatio: CGFloat = 1.1   // 画面高に対する TimerPanel の比率
+    private let moonPortraitYOffsetRatio: CGFloat = 0.15 // landscape時のmoonは少し下げる
+    private let moonLandscapeYOffsetRatio: CGFloat = 0.1 // portrait時のmoonは少し上げる
 
     var body: some View {
         NavigationStack {
@@ -52,13 +56,20 @@ struct ContentView: View {
                         // Moon+Timerセット or QuietMoonView
                         GeometryReader { geo2 in
                             let contentSize = geo2.size
-                            let moonHeight: CGFloat = moonSize
-                            let timerHeight: CGFloat = 60 // TimerPanelの高さ（仮）
-                            let spacing: CGFloat = 80
-                            let setHeight = moonHeight + spacing + timerHeight
-                            let centerY = contentSize.height / 2
-                            let setCenterY = centerY - 100
+                            let safeTop = geo2.safeAreaInsets.top
+                            let safeBottom = geo2.safeAreaInsets.bottom
+                            let setHeight = moonSize + timerSpacing + timerHeight
 
+                            // SafeAreaを考慮した中央
+                            let centerY = (contentSize.height - safeTop - safeBottom) / 2 + safeTop
+                            let isLandscape = contentSize.width > contentSize.height
+
+                            // 縦横別：比率で位置を決定
+                            let setCenterY: CGFloat = isLandscape
+                                ? centerY + contentSize.height * moonLandscapeYOffsetRatio
+                                : centerY - contentSize.height * moonPortraitYOffsetRatio
+
+                            // ※アニメーションを加える場合はwithAnimationで包むと良い
                             if timerVM.isSessionFinished {
                                 // 終了時はQuietMoonViewのみ
                                 VStack {
@@ -68,7 +79,7 @@ struct ContentView: View {
                                 .position(x: contentSize.width / 2, y: setCenterY)
                             } else {
                                 // 進行中はMoon+Timerセット
-                                VStack(spacing: spacing) {
+                                VStack(spacing: 80) {
                                     MoonView(
                                         moonSize: moonSize,
                                         glitterText: moonTitle,
@@ -76,7 +87,7 @@ struct ContentView: View {
                                     )
                                     .allowsHitTesting(false)
                                     TimerPanel(timerVM: timerVM)
-                                        .frame(height: timerHeight)
+                                        .frame(height: 60)
                                 }
                                 .frame(width: contentSize.width, height: setHeight)
                                 .position(x: contentSize.width / 2, y: setCenterY)
