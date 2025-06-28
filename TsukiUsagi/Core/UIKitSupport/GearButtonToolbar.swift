@@ -18,7 +18,10 @@ struct GearButtonToolbar: ViewModifier {
                     // ─── ② Spacer で右端に押し出す ───
                     HStack {
                         Spacer()
-                        Button { showing = true } label: {
+                        Button {
+                            HapticManager.shared.buttonTapFeedback() // ハプティックフィードバック
+                            showing = true
+                        } label: {
                             Image(systemName: "gearshape.fill")
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundColor(.white)
