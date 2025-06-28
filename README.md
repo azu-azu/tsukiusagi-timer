@@ -2,8 +2,22 @@
 
 > A poetic Pomodoro timer inspired by the moon and the quiet spirit of TsukiUsagi.
 
-> Started from a moment I almost cried.
-> That’s where TsukiUsagi began.
+---
+
+## Concept
+
+When focus starts to fade, gazing at the steadily waxing and waning moon or the flowing stars helps restore concentration, while the word *Centered* reminds users of their inner axis.
+
+## Rhythmic Synchronization
+
+Consistent rhythms induce alpha brain waves, scientifically linked to reduced stress and improved focus.
+
+## Target Users
+
+Minimalists worldwide.
+All text in English, with a clean and simple visual aesthetic.
+
+---
 
 ## Features
 

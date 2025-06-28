@@ -105,10 +105,12 @@ class FlowingStarsGenerator: ObservableObject {
                 let x = CGFloat.random(in: 0.48...0.52)
                 let y = CGFloat.random(in: areaToUse.minYRatio...areaToUse.maxYRatio)
                 let start = CGPoint(x: x, y: y)
-                let angleRad = angle.radians
-                let distance: CGFloat = 1.2
-                let deltaX = cos(angleRad) * distance
-                let deltaY = sin(angleRad) * distance
+                // 角度にランダム性を追加（±5度の範囲でばらつかせる）
+                let angleVariation = CGFloat.random(in: -5...5) * .pi / 180
+                let adjustedAngle = angle.radians + angleVariation
+                let distance: CGFloat = CGFloat.random(in: 1.0...1.4) // 距離もランダム化
+                let deltaX = cos(adjustedAngle) * distance
+                let deltaY = sin(adjustedAngle) * distance
                 let end = CGPoint(x: start.x + deltaX, y: start.y + deltaY)
                 startRatio = start
                 endRatio = end
@@ -120,9 +122,9 @@ class FlowingStarsGenerator: ObservableObject {
                 endRatio: endRatio,
                 size: .random(in: sizeRange),
                 color: Color.white,
-                opacity: .random(in: 0.3...0.7),
+                opacity: .random(in: 0.3...0.8),
                 duration: .random(in: durationRange),
-                delay: .random(in: -10...10)
+                delay: .random(in: -15...15)
             )
         }
     }
@@ -131,15 +133,15 @@ class FlowingStarsGenerator: ObservableObject {
     private static func defaultSpawnArea(for angle: Angle) -> StarSpawnArea {
         let deg = angle.degrees.truncatingRemainder(dividingBy: 360)
         if deg == 90 || deg == -270 { // 下向き
-            return StarSpawnArea(minXRatio: 0.0, maxXRatio: 1.0, minYRatio: -0.1, maxYRatio: 0.0)
+            return StarSpawnArea(minXRatio: -0.1, maxXRatio: 1.1, minYRatio: -0.2, maxYRatio: 0.1)
         } else if deg == -90 || deg == 270 { // 上向き
-            return StarSpawnArea(minXRatio: 0.0, maxXRatio: 1.0, minYRatio: 1.0, maxYRatio: 1.1)
+            return StarSpawnArea(minXRatio: -0.1, maxXRatio: 1.1, minYRatio: 0.9, maxYRatio: 1.2)
         } else if deg == 0 { // 右向き
-            return StarSpawnArea(minXRatio: 0.0, maxXRatio: 0.0, minYRatio: 0.1, maxYRatio: 0.9)
+            return StarSpawnArea(minXRatio: -0.1, maxXRatio: 0.1, minYRatio: 0.0, maxYRatio: 1.0)
         } else if deg == 180 || deg == -180 { // 左向き
-            return StarSpawnArea(minXRatio: 1.0, maxXRatio: 1.0, minYRatio: 0.1, maxYRatio: 0.9)
+            return StarSpawnArea(minXRatio: 0.9, maxXRatio: 1.1, minYRatio: 0.0, maxYRatio: 1.0)
         } else { // 斜めなど
-            return StarSpawnArea(minXRatio: 0.1, maxXRatio: 0.9, minYRatio: 0.1, maxYRatio: 0.9)
+            return StarSpawnArea(minXRatio: -0.1, maxXRatio: 1.1, minYRatio: -0.1, maxYRatio: 1.1)
         }
     }
 
@@ -147,8 +149,16 @@ class FlowingStarsGenerator: ObservableObject {
     private static func generateStartAndEndPoints(for area: StarSpawnArea, angle: CGFloat, distance: CGFloat = 1.2) -> (CGPoint, CGPoint) {
         let startX = CGFloat.random(in: area.minXRatio...area.maxXRatio)
         let startY = CGFloat.random(in: area.minYRatio...area.maxYRatio)
-        let deltaX = cos(angle) * distance
-        let deltaY = sin(angle) * distance
+
+        // 角度にランダム性を追加（±3度の範囲でばらつかせる）
+        let angleVariation = CGFloat.random(in: -3...3) * .pi / 180
+        let adjustedAngle = angle + angleVariation
+
+        // 距離もランダム化
+        let randomDistance = CGFloat.random(in: 0.8...1.6)
+
+        let deltaX = cos(adjustedAngle) * randomDistance
+        let deltaY = sin(adjustedAngle) * randomDistance
         let endX = startX + deltaX
         let endY = startY + deltaY
         return (CGPoint(x: startX, y: startY), CGPoint(x: endX, y: endY))
@@ -223,9 +233,11 @@ struct FlowingStarView: View {
                     y: safeAreaInsets.top + (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.endRatio.y
                 )
                 pos = start
+
                 let animate = {
                     pos = end
                 }
+
                 if star.delay < 0 {
                     let progress = min(max(-star.delay / star.duration, 0), 1)
                     pos = CGPoint(
