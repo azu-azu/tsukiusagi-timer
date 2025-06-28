@@ -1,7 +1,7 @@
 import SwiftUI
 
 // １つの星を直進させる共通ビュー
-struct AnimatedStar: View {
+struct LinearMovingStar: View {
     let size: CGFloat
     let start: CGPoint
     let end: CGPoint
@@ -48,16 +48,18 @@ struct AnimatedStar: View {
     }
 }
 
-struct FlowBand {
+// FlowBand → StarSpawnArea
+struct StarSpawnArea {
     let minXRatio: CGFloat
     let maxXRatio: CGFloat
     let minYRatio: CGFloat
     let maxYRatio: CGFloat
 }
 
-// --- FlowingStarsModel ---
-class FlowingStarsModel: ObservableObject {
-    struct Star: Identifiable {
+// FlowingStarsModel → FlowingStarsGenerator
+class FlowingStarsGenerator: ObservableObject {
+    // Star → FlowingStar
+    struct FlowingStar: Identifiable {
         let id = UUID()
         let startRatio: CGPoint // 0〜1
         let endRatio: CGPoint   // 0〜1
@@ -68,20 +70,20 @@ class FlowingStarsModel: ObservableObject {
         let delay: Double
     }
 
-    @Published var stars: [Star] = []
+    @Published var stars: [FlowingStar] = []
     private let starCount: Int
     private let angle: Angle
     private let durationRange: ClosedRange<Double>
     private let sizeRange: ClosedRange<CGFloat>
-    private let band: FlowBand?
+    private let spawnArea: StarSpawnArea?
     private var lastSize: CGSize = .zero
 
-    init(starCount: Int, angle: Angle, durationRange: ClosedRange<Double>, sizeRange: ClosedRange<CGFloat>, band: FlowBand?) {
+    init(starCount: Int, angle: Angle, durationRange: ClosedRange<Double>, sizeRange: ClosedRange<CGFloat>, spawnArea: StarSpawnArea?) {
         self.starCount = starCount
         self.angle = angle
         self.durationRange = durationRange
         self.sizeRange = sizeRange
-        self.band = band
+        self.spawnArea = spawnArea
         generateStars(for: .zero)
     }
 
@@ -91,14 +93,17 @@ class FlowingStarsModel: ObservableObject {
     }
 
     private func generateStars(for size: CGSize) {
-        let bandToUse = band ?? Self.defaultBand(for: angle)
-        let centerCount = min(10, starCount) // 最初に中央から複数を生成する
+        let areaToUse = spawnArea ?? Self.defaultSpawnArea(for: angle)
+        let centerCount = min(10, starCount) // 最初に中央から生成する星の個数
+
         stars = (0..<starCount).map { i in
             let (startRatio, endRatio): (CGPoint, CGPoint)
+
+            // 呼び出し時の最初のみ、中央からも星を出現させる。中央が空く問題を回避するため
             if i < centerCount {
-                // 中央付近からスタート（x:0.48〜0.52, y:バンドのminYRatio）
+                // 中央付近からスタート（x:0.48〜0.52, y:エリアのminYRatio〜maxYRatio）
                 let x = CGFloat.random(in: 0.48...0.52)
-                let y = bandToUse.minYRatio
+                let y = CGFloat.random(in: areaToUse.minYRatio...areaToUse.maxYRatio)
                 let start = CGPoint(x: x, y: y)
                 let angleRad = angle.radians
                 let distance: CGFloat = 1.2
@@ -108,9 +113,9 @@ class FlowingStarsModel: ObservableObject {
                 startRatio = start
                 endRatio = end
             } else {
-                (startRatio, endRatio) = Self.generateStartAndEndPoints(for: bandToUse, angle: angle.radians)
+                (startRatio, endRatio) = Self.generateStartAndEndPoints(for: areaToUse, angle: angle.radians)
             }
-            return Star(
+            return FlowingStar(
                 startRatio: startRatio,
                 endRatio: endRatio,
                 size: .random(in: sizeRange),
@@ -122,26 +127,26 @@ class FlowingStarsModel: ObservableObject {
         }
     }
 
-    // デフォルトのバンド範囲（angleごとに自動設定）
-    private static func defaultBand(for angle: Angle) -> FlowBand {
+    // デフォルトのスポーンエリア範囲（angleごとに自動設定）
+    private static func defaultSpawnArea(for angle: Angle) -> StarSpawnArea {
         let deg = angle.degrees.truncatingRemainder(dividingBy: 360)
         if deg == 90 || deg == -270 { // 下向き
-            return FlowBand(minXRatio: 0.0, maxXRatio: 1.0, minYRatio: -0.1, maxYRatio: 0.0)
+            return StarSpawnArea(minXRatio: 0.0, maxXRatio: 1.0, minYRatio: -0.1, maxYRatio: 0.0)
         } else if deg == -90 || deg == 270 { // 上向き
-            return FlowBand(minXRatio: 0.0, maxXRatio: 1.0, minYRatio: 1.0, maxYRatio: 1.1)
+            return StarSpawnArea(minXRatio: 0.0, maxXRatio: 1.0, minYRatio: 1.0, maxYRatio: 1.1)
         } else if deg == 0 { // 右向き
-            return FlowBand(minXRatio: 0.0, maxXRatio: 0.0, minYRatio: 0.1, maxYRatio: 0.9)
+            return StarSpawnArea(minXRatio: 0.0, maxXRatio: 0.0, minYRatio: 0.1, maxYRatio: 0.9)
         } else if deg == 180 || deg == -180 { // 左向き
-            return FlowBand(minXRatio: 1.0, maxXRatio: 1.0, minYRatio: 0.1, maxYRatio: 0.9)
+            return StarSpawnArea(minXRatio: 1.0, maxXRatio: 1.0, minYRatio: 0.1, maxYRatio: 0.9)
         } else { // 斜めなど
-            return FlowBand(minXRatio: 0.1, maxXRatio: 0.9, minYRatio: 0.1, maxYRatio: 0.9)
+            return StarSpawnArea(minXRatio: 0.1, maxXRatio: 0.9, minYRatio: 0.1, maxYRatio: 0.9)
         }
     }
 
-    // バンド内で開始・終了点を生成
-    private static func generateStartAndEndPoints(for band: FlowBand, angle: CGFloat, distance: CGFloat = 1.2) -> (CGPoint, CGPoint) {
-        let startX = CGFloat.random(in: band.minXRatio...band.maxXRatio)
-        let startY = CGFloat.random(in: band.minYRatio...band.maxYRatio)
+    // エリア内で開始・終了点を生成
+    private static func generateStartAndEndPoints(for area: StarSpawnArea, angle: CGFloat, distance: CGFloat = 1.2) -> (CGPoint, CGPoint) {
+        let startX = CGFloat.random(in: area.minXRatio...area.maxXRatio)
+        let startY = CGFloat.random(in: area.minYRatio...area.maxYRatio)
         let deltaX = cos(angle) * distance
         let deltaY = sin(angle) * distance
         let endX = startX + deltaX
@@ -155,18 +160,18 @@ struct FlowingStarsView: View {
     let angle: Angle
     let durationRange: ClosedRange<Double>
     let sizeRange: ClosedRange<CGFloat>
-    let band: FlowBand?
+    let spawnArea: StarSpawnArea?
 
-    @StateObject private var model: FlowingStarsModel
+    @StateObject private var generator: FlowingStarsGenerator
     @State private var lastSize: CGSize = .zero
 
-    init(starCount: Int, angle: Angle, durationRange: ClosedRange<Double>, sizeRange: ClosedRange<CGFloat>, band: FlowBand?) {
+    init(starCount: Int, angle: Angle, durationRange: ClosedRange<Double>, sizeRange: ClosedRange<CGFloat>, spawnArea: StarSpawnArea?) {
         self.starCount = starCount
         self.angle = angle
         self.durationRange = durationRange
         self.sizeRange = sizeRange
-        self.band = band
-        _model = StateObject(wrappedValue: FlowingStarsModel(starCount: starCount, angle: angle, durationRange: durationRange, sizeRange: sizeRange, band: band))
+        self.spawnArea = spawnArea
+        _generator = StateObject(wrappedValue: FlowingStarsGenerator(starCount: starCount, angle: angle, durationRange: durationRange, sizeRange: sizeRange, spawnArea: spawnArea))
     }
 
     var body: some View {
@@ -174,8 +179,8 @@ struct FlowingStarsView: View {
             let size = geo.size
             let safeAreaInsets = geo.safeAreaInsets
             ZStack {
-                ForEach(model.stars) { star in
-                    AnimatedFlowingStar(
+                ForEach(generator.stars) { star in
+                    FlowingStarView(
                         star: star,
                         size: size,
                         safeAreaInsets: safeAreaInsets
@@ -186,15 +191,16 @@ struct FlowingStarsView: View {
             .onChange(of: size) { oldSize, newSize in
                 if newSize != lastSize {
                     lastSize = newSize
-                    model.regenerateStars(for: newSize)
+                    generator.regenerateStars(for: newSize)
                 }
             }
         }
     }
 }
 
-struct AnimatedFlowingStar: View {
-    let star: FlowingStarsModel.Star
+// AnimatedFlowingStar → FlowingStarView
+struct FlowingStarView: View {
+    let star: FlowingStarsGenerator.FlowingStar
     let size: CGSize
     let safeAreaInsets: EdgeInsets
     @State private var pos: CGPoint = .zero

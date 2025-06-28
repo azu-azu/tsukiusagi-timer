@@ -262,7 +262,7 @@ final class TimerViewModel: ObservableObject {
 
     // Work終了後に呼ぶまとめ関数
     private func finalizeWork(sendNotification: Bool = true) {
-        buzz()
+        HapticManager.shared.heavyImpact()
         if sendNotification {
             NotificationManager.shared.sendPhaseChangeNotification(for: .breakTime)
         }
@@ -288,26 +288,12 @@ final class TimerViewModel: ObservableObject {
 
     // 休憩終了後に呼ぶまとめ関数
     private func finalizeBreak(sendNotification: Bool = true) {
-        buzz()
+        HapticManager.shared.heavyImpact()
         if sendNotification {
             NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
         }
         // 状態は何も変更しない
     }
-
-    // ブルッとさせる
-    private func buzz(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .heavy) {
-        let gen = UIImpactFeedbackGenerator(style: style)
-        gen.prepare()
-        gen.impactOccurred()
-    }
-
-    // コンッとさせる
-    // private func buzz(_ type: UINotificationFeedbackGenerator.FeedbackType = .warning) {
-    //     let generator = UINotificationFeedbackGenerator()
-    //     generator.prepare()
-    //     generator.notificationOccurred(type)
-    // }
 
     // Static helpers
     private static let startFormatter: DateFormatter = {
