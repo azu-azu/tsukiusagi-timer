@@ -9,7 +9,7 @@ struct SelectableTextView: UIViewRepresentable {
         let tv = UITextView()
         tv.isEditable = false
         tv.isSelectable = true
-        tv.isScrollEnabled = false
+        tv.isScrollEnabled = true
         tv.backgroundColor = .clear
         tv.textContainerInset = .zero
         tv.textContainer.lineFragmentPadding = 0
