@@ -80,6 +80,12 @@ struct ContentView: View {
         }
     }
 
+    /// Gearボタン共通アクション
+    private func gearButtonAction(showing: inout Bool) {
+        HapticManager.shared.buttonTapFeedback()
+        showing = true
+    }
+
     var body: some View {
         NavigationStack {
             GeometryReader { geo in
@@ -93,6 +99,7 @@ struct ContentView: View {
                         BackgroundGradientView().ignoresSafeArea()
                         AwakeEnablerView(hidden: true)
                         StaticStarsView(starCount: 40)
+
                         // FlowingStarsViewなどの星エフェクトはタイマー進行中のみ
                         if !timerVM.isSessionFinished {
                             FlowingStarsView(
@@ -136,7 +143,7 @@ struct ContentView: View {
                                             .frame(width: (contentSize.width - landscapeMargin) * 0.5, height: setHeight)
                                             .background(Color.clear)
                                             .zIndex(10)
-                                            .layoutPriority(1) // 左側を優先的に表示
+                                            .layoutPriority(1)
                                             .accessibilityLabel("Quiet Moon Message")
                                             .accessibilityHint("Displays inspirational messages after session completion")
                                             .accessibilityAddTraits(.isHeader)
@@ -158,7 +165,7 @@ struct ContentView: View {
                                         .frame(width: (contentSize.width - landscapeMargin) * 0.5, height: setHeight)
                                         .background(Color.clear)
                                         .zIndex(10)
-                                        .layoutPriority(0) // 右側は必要に応じて縮小
+                                        .layoutPriority(0)
                                         .accessibilityLabel("Session Record")
                                         .accessibilityHint("Shows start time, end time, and session duration")
                                     }
@@ -203,7 +210,6 @@ struct ContentView: View {
                             }
                         }
                         .onPreferenceChange(LandscapePreferenceKey.self) { newValue in
-                            // 親Viewで向き変更を検知
                             updateOrientation(size: size)
                         }
 
@@ -213,7 +219,7 @@ struct ContentView: View {
                             .padding(.bottom, safeAreaInsets.bottom)
                             .zIndex(LayoutConstants.footerZIndex)
 
-                        // --- RecordedTimesViewを縦画面時のみfooterBarの直上に追加 ---
+                        // RecordedTimesViewを縦画面時のみfooterBarの直上に追加
                         if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
                             RecordedTimesView(
                                 formattedStartTime: timerVM.formattedStartTime,
@@ -227,7 +233,7 @@ struct ContentView: View {
                             .sessionEndTransition(timerVM)
                         }
 
-                        // 💠 ダイヤモンドスター
+                        // ダイヤモンドスター
                         if showDiamondStars {
                             DiamondStarsOnceView()
                                 .allowsHitTesting(false)
@@ -249,7 +255,6 @@ struct ContentView: View {
                     }
                     .onChange(of: timerVM.isSessionFinished) { oldValue, newValue in
                         if newValue {
-                            // セッション終了時にQuietMoonViewにフォーカスを飛ばす
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 isQuietMoonFocused = true
                             }
@@ -257,71 +262,12 @@ struct ContentView: View {
                     }
                     .animation(
                         .easeInOut(duration: 0.3)
-                        .delay(0.1), // 少し遅延させて自然に
+                        .delay(0.1),
                         value: isLandscape
                     )
                 }
             }
         }
-    }
-
-    // MARK: - Moon Layer
-
-    @ViewBuilder
-    private func moonLayer(size: CGSize, safeAreaInsets: EdgeInsets) -> some View {
-        ZStack(alignment: .top) {
-            if timerVM.isSessionFinished {
-                QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
-            } else {
-                MoonView(
-                    moonSize: moonSize,
-                    glitterText: moonTitle,
-                    size: size
-                )
-                .allowsHitTesting(false)
-            }
-        }
-        .animation(.easeInOut(duration: LayoutConstants.sessionEndAnimationDuration),
-                    value: timerVM.isSessionFinished)
-    }
-
-    // MARK: - Background Stars Layer
-
-    @ViewBuilder
-    private func backgroundStarsLayer(size: CGSize, safeAreaInsets: EdgeInsets, overshoot: CGFloat) -> some View {
-        ZStack {
-            BackgroundGradientView().ignoresSafeArea()
-            AwakeEnablerView(hidden: true)
-            StaticStarsView(starCount: 40)
-            FlowingStarsView(
-                starCount: 70,
-                angle: .degrees(90), // 下向き
-                durationRange: 24...40,
-                sizeRange: 2...4,
-                spawnArea: nil
-            )
-            .id(roundedSize(size)) // 微差を防ぐため整数に丸める
-            .allowsHitTesting(false)
-            FlowingStarsView(
-                starCount: 70,
-                angle: .degrees(-90), // 上向き
-                durationRange: 24...40,
-                sizeRange: 2...4,
-                spawnArea: nil
-            )
-            .id(roundedSize(size)) // 微差を防ぐため整数に丸める
-            .allowsHitTesting(false)
-        }
-    }
-
-    // MARK: - Helper Methods
-
-    /// CGSize の微差を防ぐため整数に丸める
-    private func roundedSize(_ size: CGSize) -> CGSize {
-        return CGSize(
-            width: round(size.width),
-            height: round(size.height)
-        )
     }
 
     // MARK: - Footer
@@ -338,14 +284,16 @@ struct ContentView: View {
 
                 Spacer(minLength: 0)
 
-                Button { showingSettings = true } label: {
+                Button {
+                    gearButtonAction(showing: &showingSettings)
+                } label: {
                     Image(systemName: "gearshape.fill")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 16, height: 16)
                         .frame(width: buttonHeight,
-                                height: buttonHeight,
-                                alignment: .bottom)
+                               height: buttonHeight,
+                               alignment: .bottom)
                         .foregroundColor(.white)
                 }
             }
@@ -363,7 +311,7 @@ struct ContentView: View {
 
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
-            HapticManager.shared.buttonTapFeedback() // ハプティックフィードバック
+            HapticManager.shared.buttonTapFeedback()
             timerVM.isRunning ? timerVM.stopTimer()
                                 : timerVM.startTimer()
         }
@@ -372,6 +320,15 @@ struct ContentView: View {
                     in: RoundedRectangle(cornerRadius: 20))
         .titleWhiteAvenir(weight: .bold)
         .foregroundColor(.white)
+    }
+
+    // MARK: - Helper Methods
+
+    private func roundedSize(_ size: CGSize) -> CGSize {
+        return CGSize(
+            width: round(size.width),
+            height: round(size.height)
+        )
     }
 }
 
