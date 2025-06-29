@@ -2,14 +2,19 @@ import SwiftUI
 
 struct QuietMoonView: View {
     private let title  = "Quiet Moon"
-    private let height: CGFloat = 300
     private let paddingY: CGFloat = 60
     private let bodyText = MoonMessage.random().lines.joined(separator: "\n")
 
     let size: CGSize
     let safeAreaInsets: EdgeInsets
+    let moonSize: CGFloat // 動的サイズ対応
 
     // MARK: - Computed Properties
+
+    /// 動的高さ計算（ふじこ式）
+    private var dynamicHeight: CGFloat {
+        return min(moonSize * 1.5, 400)
+    }
 
     /// 横画面判定
     private var isLandscape: Bool {
@@ -84,7 +89,7 @@ struct QuietMoonView: View {
                     font: avenirNextUIFont(size: 18, weight: .regular, design: .monospaced),
                     textColor: .white
                 )
-                .frame(height: height)
+                .frame(height: dynamicHeight)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, leftPadding)
                 .padding(.trailing, 24)

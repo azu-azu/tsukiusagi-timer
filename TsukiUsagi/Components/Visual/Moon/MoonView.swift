@@ -49,9 +49,9 @@ struct MoonView: View {
 				MoonShadow(moonSize:moonSize, duration: duration, nearY: nearY, farY: farY)
 
 				// 🌑 クレーター（うっすらした内側の模様）
-				CraterCluster()
-				CraterCluster(scale: 0.7)         // 70% に縮小
-					.offset(x:  30, y: -25)
+				CraterCluster(scale: 1.0)
+				CraterCluster(scale: 0.7)
+					.offset(x: 30, y: -25)
 			}
 			.rotationEffect(.degrees(227)) // CSSのrotate(227deg) に相当
 			.mask(
@@ -61,8 +61,9 @@ struct MoonView: View {
 
 			// ✨ キラキラ文字
 			Text(glitterText)
-				.glitter()
-				.offset(y:20)
+				.glitter(size: moonSize * 0.18)
+				.minimumScaleFactor(0.5)
+				.offset(y:18)
 		}
 		.onAppear {
 			animate = true

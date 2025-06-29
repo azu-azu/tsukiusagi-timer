@@ -32,9 +32,6 @@ struct ContentView: View {
     // UI Const
     private let buttonWidth: CGFloat = 120
     private let buttonHeight: CGFloat = LayoutConstants.footerBarHeight
-    private let moonSize: CGFloat = 200
-    private let timerHeight: CGFloat = 60 // TimerPanelの高さ（仮）
-    private let timerSpacing: CGFloat = 80 // 月とtimerの間
 
     // 比率定数
     private let timerBottomRatio: CGFloat = 1.1   // 画面高に対する TimerPanel の比率
@@ -124,6 +121,13 @@ struct ContentView: View {
                             let contentSize = geo2.size
                             let safeTop = geo2.safeAreaInsets.top
                             let safeBottom = geo2.safeAreaInsets.bottom
+
+                            // 動的サイズ計算（副作用なし）
+                            let baseMoonSize = min(contentSize.width, contentSize.height) * 0.5
+                            let moonSize = min(max(baseMoonSize, 120), 400)
+                            let timerHeight = moonSize / 3
+                            let timerSpacing = min(moonSize * 0.5, 120)
+
                             let setHeight = moonSize + timerSpacing + timerHeight
 
                             // SafeAreaを考慮した中央
@@ -140,7 +144,7 @@ struct ContentView: View {
                                     // 横画面：左右分割（最高品質版）
                                     HStack(spacing: landscapeMargin) {
                                         // 左側：QuietMoonView
-                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
+                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets, moonSize: moonSize)
                                             .frame(width: (contentSize.width - landscapeMargin) * 0.5, height: setHeight)
                                             .background(Color.clear)
                                             .zIndex(10)
@@ -180,7 +184,7 @@ struct ContentView: View {
                                 } else {
                                     // 縦画面：従来通り
                                     VStack {
-                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
+                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets, moonSize: moonSize)
                                             .accessibilityLabel("Quiet Moon Message")
                                             .accessibilityHint("Displays inspirational messages after session completion")
                                             .accessibilityAddTraits(.isHeader)
@@ -214,7 +218,7 @@ struct ContentView: View {
                                         VStack {
                                             Spacer()
                                             TimerPanel(timerVM: timerVM)
-                                                .frame(height: timerHeight)
+                                                .frame(minWidth: moonSize, maxWidth: moonSize * 1.5, minHeight: timerHeight, maxHeight: timerHeight)
                                             Spacer()
                                         }
                                         .frame(width: (contentSize.width - landscapeMargin) * 0.5,
@@ -236,7 +240,7 @@ struct ContentView: View {
                                         .allowsHitTesting(false)
 
                                         TimerPanel(timerVM: timerVM)
-                                            .frame(height: timerHeight)
+                                            .frame(minWidth: moonSize, maxWidth: moonSize * 1.5, minHeight: timerHeight, maxHeight: timerHeight)
                                     }
                                     .frame(width: contentSize.width,
                                            height: setHeight)
