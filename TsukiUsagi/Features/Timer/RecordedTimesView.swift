@@ -19,7 +19,7 @@ struct RecordedTimesView: View {
             }
 
             // ３行目の分数表示
-            Text("-- \(actualSessionMinutes) min.")
+            Text("-- \(actualSessionMinutes) min")
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .titleWhiteAvenir(size: 18, weight: .regular)
                 .frame(maxWidth: 110)

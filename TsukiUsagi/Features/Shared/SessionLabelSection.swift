@@ -8,6 +8,7 @@ struct SessionLabelSection: View {
     let labelHeight: CGFloat
     let labelCornerRadius: CGFloat
     let inputHeight: CGFloat
+    @Binding var showEmptyError: Bool
     let onDone: (() -> Void)?
 
     private var isCustomActivity: Bool {
@@ -34,7 +35,11 @@ struct SessionLabelSection: View {
                                 .focused($isActivityFocused)
                         }
                         .frame(height: labelHeight)
-                        .background(Color.white.opacity(0.05))
+                        .background(
+                            (showEmptyError && activity.isEmpty) ?
+                                Color.moonErrorBackground.opacity(0.3) :
+                                Color.white.opacity(0.05)
+                        )
                         .cornerRadius(labelCornerRadius)
                         .frame(maxWidth: .infinity)
 

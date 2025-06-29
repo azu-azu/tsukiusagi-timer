@@ -27,6 +27,20 @@ struct TimerEditView: View {
         return !predefinedActivities.contains { $0.lowercased() == editedActivity.lowercased() }
     }
 
+    // バリデーション関数の共通化
+    private func isActivityEmpty() -> Bool {
+        return editedActivity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func shouldDisableSave() -> Bool {
+        return isCustomActivity && isActivityEmpty()
+    }
+
+    // リアルタイムでエラー状態を計算
+    private var currentShowEmptyError: Bool {
+        return isCustomActivity && isActivityEmpty()
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -48,14 +62,14 @@ struct TimerEditView: View {
 
                         Button("Save") {
                             historyVM.updateLast(activity: editedActivity,
-                                                    detail: editedDetail,
-                                                    memo: editedMemo,
-                                                    end: editedEnd)
+                                                detail: editedDetail,
+                                                memo: editedMemo,
+                                                end: editedEnd)
                             timerVM.setEndTime(editedEnd)
                             dismiss()
                         }
-                        .foregroundColor(.moonAccentBlue)
-                        .disabled(editedActivity.isEmpty)
+                        .foregroundColor(shouldDisableSave() ? .gray : .moonAccentBlue)
+                        .disabled(shouldDisableSave())
                     }
                     .padding(.horizontal)
                     .padding(.top, 20)
@@ -70,6 +84,7 @@ struct TimerEditView: View {
                             labelHeight: labelHeight,
                             labelCornerRadius: labelCornerRadius,
                             inputHeight: inputHeight,
+                            showEmptyError: .constant(currentShowEmptyError),
                             onDone: nil
                         )
                     }
@@ -129,7 +144,8 @@ struct TimerEditView: View {
             .presentationDetents([.large])
             .modifier(DismissKeyboardOnTap(
                 isActivityFocused: $isActivityFocused,
-                isDetailFocused: $isDetailFocused
+                isDetailFocused: $isDetailFocused,
+                isMemoFocused: $isMemoFocused
             ))
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {

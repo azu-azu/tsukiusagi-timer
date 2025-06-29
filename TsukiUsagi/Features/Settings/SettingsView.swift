@@ -13,6 +13,11 @@ struct SettingsView: View {
     @FocusState private var isActivityFocused: Bool
     @FocusState private var isDetailFocused: Bool
 
+    // TODO: 将来的に中間バッファを導入する可能性を考慮
+    // 現在は直接AppStorageにBindingしているが、
+    // 複雑なバリデーションや一時保存が必要になった場合は
+    // @State private var tempActivityLabel を導入することを検討
+
     private let workMinutesOptions: [Int] =
         [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
 
@@ -28,6 +33,20 @@ struct SettingsView: View {
 
     private var isCustomActivity: Bool {
         !["Work", "Study", "Read"].contains(activityLabel)
+    }
+
+    // バリデーション関数の共通化
+    private func isActivityEmpty() -> Bool {
+        return activityLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func shouldDisableDone() -> Bool {
+        return isCustomActivity && isActivityEmpty()
+    }
+
+    // リアルタイムでエラー状態を計算
+    private var currentShowEmptyError: Bool {
+        return isCustomActivity && isActivityEmpty()
     }
 
     var body: some View {
@@ -57,7 +76,8 @@ struct SettingsView: View {
                             Button("Done") {
                                 dismiss()
                             }
-                            .foregroundColor(.moonAccentBlue)
+                            .disabled(shouldDisableDone())
+                            .foregroundColor(shouldDisableDone() ? .gray : .moonAccentBlue)
                         }
                         .padding(.horizontal)
                         .padding(.top, 20)
@@ -86,6 +106,7 @@ struct SettingsView: View {
                                 labelHeight: labelHeight,
                                 labelCornerRadius: labelCornerRadius,
                                 inputHeight: inputHeight,
+                                showEmptyError: .constant(currentShowEmptyError),
                                 onDone: nil
                             )
                         }
@@ -109,7 +130,7 @@ struct SettingsView: View {
                                 timerVM.forceFinishWorkSession()
                                 dismiss()
                             } label: {
-                                Label("Stop", systemImage: "forward.end")
+                                Label("Stop (Save)", systemImage: "forward.end")
                             }
                             .disabled(!(timerVM.isWorkSession && timerVM.startTime != nil))
                             .tint(.blue)
@@ -156,7 +177,8 @@ struct SettingsView: View {
                 .presentationDetents([.large])
                 .modifier(DismissKeyboardOnTap(
                     isActivityFocused: $isActivityFocused,
-                    isDetailFocused: $isDetailFocused
+                    isDetailFocused: $isDetailFocused,
+                    isMemoFocused: nil
                 ))
             }
             .toolbar {
@@ -291,12 +313,14 @@ extension UIApplication {
 struct DismissKeyboardOnTap: ViewModifier {
     var isActivityFocused: FocusState<Bool>.Binding
     var isDetailFocused: FocusState<Bool>.Binding
+    var isMemoFocused: FocusState<Bool>.Binding?
 
     func body(content: Content) -> some View {
         content.onTapGesture {
             UIApplication.shared.endEditing()
             isActivityFocused.wrappedValue = false
             isDetailFocused.wrappedValue = false
+            isMemoFocused?.wrappedValue = false
         }
     }
 }
