@@ -60,96 +60,18 @@ struct TimerEditView: View {
                     .padding(.horizontal)
                     .padding(.top, 20)
 
-                    // Activity Selection
-                    section(title: "Activity") {
-                        HStack(alignment: .top) {
-                            if isCustomActivity {
-                                HStack(spacing: 8) {
-                                    TextField("Enter activity name...", text: $editedActivity)
-                                        .foregroundColor(.moonTextPrimary)
-                                        .padding(.horizontal, 12)
-                                        .frame(height: labelHeight)
-                                        .background(Color.white.opacity(0.05))
-                                        .cornerRadius(labelCornerRadius)
-                                        .focused($isActivityFocused)
-                                        .frame(maxWidth: .infinity)
-
-                                    Button {
-                                        editedActivity = "Work"
-                                        isActivityFocused = false
-                                    } label: {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.moonTextMuted)
-                                            .font(.system(size: 16))
-                                    }
-                                }
-                            } else {
-                                Menu {
-                                    ForEach(["Work", "Study", "Read"], id: \.self) { label in
-                                        Button {
-                                            editedActivity = label
-                                        } label: {
-                                            Text(label)
-                                        }
-                                    }
-
-                                    Divider()
-
-                                    Button("Custom Input...") {
-                                        editedActivity = ""
-                                        isActivityFocused = true
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(editedActivity.isEmpty ? "Custom" : editedActivity)
-                                            .foregroundColor(.moonTextPrimary)
-                                        Image(systemName: "chevron.down")
-                                            .foregroundColor(.moonTextMuted)
-                                    }
-                                    .padding(.horizontal, 12)
-                                    .frame(height: labelHeight)
-                                    .cornerRadius(labelCornerRadius)
-                                }
-                            }
-
-                            Spacer(minLength: 8)
-
-                            if isActivityFocused || isDetailFocused || isMemoFocused {
-                                Button("Done") {
-                                    isActivityFocused = false
-                                    isDetailFocused = false
-                                    isMemoFocused = false
-                                }
-                                .foregroundColor(.moonTextPrimary)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.white.opacity(0.15))
-                                )
-                                .transition(.opacity)
-                                .animation(.easeInOut(duration: 0.2), value: isActivityFocused || isDetailFocused || isMemoFocused)
-                            }
-                        }
-                    }
-
-                    // Detail
-                    section(title: "Detail") {
-                        ZStack(alignment: .topLeading) {
-                            if editedDetail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                Text("Detail (optional)")
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 12)
-                            }
-
-                            TextEditor(text: $editedDetail)
-                                .frame(height: inputHeight)
-                                .padding(8)
-                                .scrollContentBackground(.hidden)
-                                .background(Color.white.opacity(0.05))
-                                .focused($isDetailFocused)
-                        }
+                    // Session Label
+                    section(title: "Session Label") {
+                        SessionLabelSection(
+                            activity: $editedActivity,
+                            detail: $editedDetail,
+                            isActivityFocused: $isActivityFocused,
+                            isDetailFocused: $isDetailFocused,
+                            labelHeight: labelHeight,
+                            labelCornerRadius: labelCornerRadius,
+                            inputHeight: inputHeight,
+                            onDone: nil
+                        )
                     }
 
                     // Final Time
@@ -233,16 +155,34 @@ struct TimerEditView: View {
     @ViewBuilder
     private func section<Content: View>(
         title: String,
+        showDone: Bool = false,
+        doneAction: (() -> Void)? = nil,
         isCompact: Bool = false,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: isCompact ? 5 : 10) {
-            Text(title)
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(.moonTextSecondary)
-                .padding(.horizontal, 4)
-
+            HStack {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.moonTextSecondary)
+                    .padding(.horizontal, 4)
+                Spacer()
+                if showDone, let action = doneAction {
+                    Button("Done") {
+                        action()
+                    }
+                    .foregroundColor(.moonTextPrimary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.15))
+                    )
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.2), value: showDone)
+                }
+            }
             VStack(alignment: .leading, spacing: 10) {
                 content()
             }
