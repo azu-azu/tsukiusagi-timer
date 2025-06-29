@@ -31,6 +31,7 @@
 		32021C782DF97DF200A53A37 /* TsukiUsagi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TsukiUsagi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32021C852DF97DF300A53A37 /* TsukiUsagiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TsukiUsagiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		32021C8F2DF97DF300A53A37 /* TsukiUsagiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TsukiUsagiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		32A3E4D52E10E6C100EBD3E2 /* TsukiUsagi.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TsukiUsagi.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -94,6 +95,11 @@
 				32021C852DF97DF300A53A37 /* TsukiUsagiTests.xctest */,
 				32021C8F2DF97DF300A53A37 /* TsukiUsagiUITests.xctest */,
 			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		32A3E4D62E10E6C100EBD3E2 /* Products */ = {
+			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
 		};
@@ -207,6 +213,12 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 32021C792DF97DF200A53A37 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 32A3E4D62E10E6C100EBD3E2 /* Products */;
+					ProjectRef = 32A3E4D52E10E6C100EBD3E2 /* TsukiUsagi.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				32021C772DF97DF200A53A37 /* TsukiUsagi */,
