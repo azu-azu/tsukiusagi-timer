@@ -78,89 +78,16 @@ struct SettingsView: View {
 
                         // Session Label
                         section(title: "Session Label") {
-                            HStack(alignment: .top) {
-                                if isCustomActivity {
-                                    HStack(spacing: 8) {
-                                        TextField("Enter session name...", text: $activityLabel)
-                                            .foregroundColor(.moonTextPrimary)
-                                            .padding(.horizontal, 12)
-                                            .frame(height: labelHeight)
-                                            .background(Color.white.opacity(0.05))
-                                            .cornerRadius(labelCornerRadius)
-                                            .focused($isActivityFocused)
-                                            .frame(maxWidth: .infinity)
-
-                                        Button {
-                                            activityLabel = "Work"
-                                            isActivityFocused = false
-                                        } label: {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .foregroundColor(.moonTextMuted)
-                                                .font(.system(size: 16))
-                                        }
-                                    }
-                                } else {
-                                    Menu {
-                                        ForEach(["Work", "Study", "Read"], id: \.self) { label in
-                                            Button {
-                                                activityLabel = label
-                                            } label: {
-                                                Text(label)
-                                            }
-                                        }
-
-                                        Divider()
-
-                                        Button("Custom Input...") {
-                                            activityLabel = ""
-                                            isActivityFocused = true
-                                        }
-                                    } label: {
-                                        HStack {
-                                            Text(activityLabel.isEmpty ? "Custom" : activityLabel)
-                                                .foregroundColor(.moonTextPrimary)
-                                            Image(systemName: "chevron.down")
-                                                .foregroundColor(.moonTextMuted)
-                                        }
-                                        .padding(.horizontal, 12)
-                                        .frame(height: labelHeight)
-                                        .cornerRadius(labelCornerRadius)
-                                    }
-                                }
-
-                                Spacer(minLength: 8)
-
-                                if isActivityFocused || isDetailFocused {
-                                    Button("Done") {
-                                        isActivityFocused = false
-                                        isDetailFocused = false
-                                    }
-                                    .foregroundColor(.moonTextPrimary)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(Color.white.opacity(0.15))
-                                    )
-                                    .transition(.opacity)
-                                }
-                            }
-
-                            ZStack(alignment: .topLeading) {
-                                if detailLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    Text("Detail (optional)")
-                                        .foregroundColor(.gray)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 12)
-                                }
-
-                                TextEditor(text: $detailLabel)
-                                    .frame(height: inputHeight)
-                                    .padding(8)
-                                    .scrollContentBackground(.hidden)
-                                    .background(Color.white.opacity(0.05))
-                                    .focused($isDetailFocused)
-                            }
+                            SessionLabelSection(
+                                activity: $activityLabel,
+                                detail: $detailLabel,
+                                isActivityFocused: $isActivityFocused,
+                                isDetailFocused: $isDetailFocused,
+                                labelHeight: labelHeight,
+                                labelCornerRadius: labelCornerRadius,
+                                inputHeight: inputHeight,
+                                onDone: nil
+                            )
                         }
 
                         // Session Control
