@@ -131,7 +131,7 @@ struct ContentView: View {
 
                             // 縦横別：比率で位置を決定
                             let setCenterY: CGFloat = isLandscape
-                                ? centerY + contentSize.height * moonLandscapeYOffsetRatio
+                                ? centerY  // Landscape時は中央ジャスト
                                 : centerY - contentSize.height * moonPortraitYOffsetRatio
 
                             if timerVM.isSessionFinished {
@@ -196,18 +196,53 @@ struct ContentView: View {
                                 }
                             } else {
                                 // 進行中はMoon+Timerセット
-                                VStack(spacing: 80) {
-                                    MoonView(
-                                        moonSize: moonSize,
-                                        glitterText: moonTitle,
-                                        size: size
-                                    )
-                                    .allowsHitTesting(false)
-                                    TimerPanel(timerVM: timerVM)
-                                        .frame(height: 60)
+                                if isLandscape {
+                                    // --- Landscape の Moon + Timer 横並び ---
+                                    HStack(spacing: landscapeMargin) {
+                                        // 左側：Moon
+                                        MoonView(
+                                            moonSize: moonSize,
+                                            glitterText: moonTitle,
+                                            size: size
+                                        )
+                                        .allowsHitTesting(false)
+                                        .frame(width: (contentSize.width - landscapeMargin) * 0.5,
+                                               height: moonSize)
+                                        .layoutPriority(1)
+
+                                        // 右側：Timer
+                                        VStack {
+                                            Spacer()
+                                            TimerPanel(timerVM: timerVM)
+                                                .frame(height: timerHeight)
+                                            Spacer()
+                                        }
+                                        .frame(width: (contentSize.width - landscapeMargin) * 0.5,
+                                               height: moonSize)
+                                        .layoutPriority(0)
+                                    }
+                                    .frame(width: contentSize.width,
+                                           height: moonSize)
+                                    .position(x: contentSize.width / 2,
+                                              y: setCenterY)
+                                } else {
+                                    // 縦画面：従来通り
+                                    VStack(spacing: timerSpacing) {
+                                        MoonView(
+                                            moonSize: moonSize,
+                                            glitterText: moonTitle,
+                                            size: size
+                                        )
+                                        .allowsHitTesting(false)
+
+                                        TimerPanel(timerVM: timerVM)
+                                            .frame(height: timerHeight)
+                                    }
+                                    .frame(width: contentSize.width,
+                                           height: setHeight)
+                                    .position(x: contentSize.width / 2,
+                                              y: setCenterY)
                                 }
-                                .frame(width: contentSize.width, height: setHeight)
-                                .position(x: contentSize.width / 2, y: setCenterY)
                             }
                         }
                         .onPreferenceChange(LandscapePreferenceKey.self) { newValue in
