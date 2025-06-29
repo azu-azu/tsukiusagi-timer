@@ -31,11 +31,13 @@ struct HistoryView: View {
                     Image(systemName: "chevron.left")
                 }
                 .buttonStyle(.plain)
+                .foregroundColor(.moonTextSecondary)
 
                 Spacer()
 
                 Text(titleString())
                     .font(.headline)
+                    .foregroundColor(.moonTextPrimary)
 
                 Spacer()
 
@@ -43,69 +45,176 @@ struct HistoryView: View {
                     Image(systemName: "chevron.right")
                 }
                 .buttonStyle(.plain)
+                .foregroundColor(.moonTextSecondary)
                 .disabled(isAtLatest())
             }
             .padding(.horizontal)
 
             // ③ リスト（日 or 月）
-            List {
-                if mode == .day {
-                    Section(
-                        footer: Text("total \(totalMinutes())分")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    ) {
-                        ForEach(records()) { rec in
-                            let labelText: String = {
-                                if let d = rec.detail, !d.isEmpty {
-                                    return "\(rec.activity) | \(d)"
-                                } else {
-                                    return rec.activity
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    if mode == .day {
+                        // Total 表示（日モード）
+                        HStack {
+                            Text("Total")
+                                .font(.subheadline)
+                                .foregroundColor(.moonTextSecondary)
+
+                            Spacer()
+
+                            Text("\(totalMinutes())分")
+                                .font(.headline)
+                                .foregroundColor(.moonTextPrimary)
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.moonCardBackground.opacity(0.15))
+                        )
+
+                        // 日モードのレコード表示
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(records()) { rec in
+                                let labelText: String = {
+                                    if let d = rec.detail, !d.isEmpty {
+                                        return "\(rec.activity) | \(d)"
+                                    } else {
+                                        return rec.activity
+                                    }
+                                }()
+
+                                HStack {
+                                    Text(rec.start.formatted(date: .omitted, time: .shortened))
+                                        .foregroundColor(.moonTextPrimary)
+                                    Image(systemName: "arrow.right")
+                                        .font(.caption)
+                                        .foregroundColor(.moonTextSecondary)
+                                    Text(rec.end.formatted(date: .omitted, time: .shortened))
+                                        .foregroundColor(.moonTextPrimary)
+
+                                    Spacer(minLength: 8)
+
+                                    Text("\(labelText) \(durationMinutes(rec))分")
+                                        .foregroundColor(.moonTextPrimary)
                                 }
-                            }()
-
-                            HStack {
-                                Text(rec.start.formatted(date: .omitted, time: .shortened))
-                                Image(systemName: "arrow.right")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                Text(rec.end.formatted(date: .omitted, time: .shortened))
-
-                                Spacer(minLength: 8)
-
-                                Text("\(labelText) \(durationMinutes(rec))分")
-                            }
-                            .font(.body)
-                            .padding(.vertical, 6)
-                        }
-                    }
-
-                    // ★ まとめてメモ表示
-                    let memos = records()
-                        .compactMap { $0.memo?.trimmingCharacters(in: .whitespacesAndNewlines) }
-                        .filter { !$0.isEmpty }
-
-                    if !memos.isEmpty {
-                        Section("📝 Memos") {
-                            ForEach(memos, id: \.self) { memo in
-                                Text(memo)
-                                    .font(.footnote)
-                                    .foregroundColor(.secondary)
-                                    .padding(.vertical, 2)
+                                .font(.body)
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.moonCardBackground.opacity(0.15))
+                                )
                             }
                         }
-                    }
-                } else {
-                    Section("By Activity") {
-                        ForEach(byActivity(), id: \.label) { s in rowView(s) }
-                    }
-                    Section("By Detail") {
-                        ForEach(byDetail(), id: \.label) { s in rowView(s) }
+
+                        // メモ部分
+                        let memos = records()
+                            .compactMap { $0.memo?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                            .filter { !$0.isEmpty }
+
+                        if !memos.isEmpty {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("📝 Memos")
+                                    .font(.subheadline)
+                                    .foregroundColor(.moonTextSecondary)
+                                    .padding(.bottom, 4)
+
+                                ForEach(memos, id: \.self) { memo in
+                                    Text(memo)
+                                        .font(.footnote)
+                                        .foregroundColor(.moonTextSecondary)
+                                        .padding(8)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(Color.moonCardBackground.opacity(0.15))
+                                        )
+                                }
+                            }
+                            .padding(.top, 16)
+                        }
+                    } else {
+                        // Total 表示（月モード）
+                        HStack {
+                            Text("Total")
+                                .font(.subheadline)
+                                .foregroundColor(.moonTextSecondary)
+
+                            Spacer()
+
+                            Text("\(totalMinutes())分")
+                                .font(.headline)
+                                .foregroundColor(.moonTextPrimary)
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.moonCardBackground.opacity(0.15))
+                        )
+
+                        // 月モードの集計表示
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("By Activity")
+                                .font(.subheadline)
+                                .foregroundColor(.moonTextSecondary)
+                                .padding(.bottom, 4)
+
+                            ForEach(byActivity(), id: \.label) { s in
+                                HStack {
+                                    Text(s.label)
+                                        .foregroundColor(.moonTextPrimary)
+                                    Spacer()
+                                    Text("\(s.total)分")
+                                        .foregroundColor(.moonTextPrimary)
+                                }
+                                .font(.body)
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.moonCardBackground.opacity(0.15))
+                                )
+                            }
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("By Detail")
+                                .font(.subheadline)
+                                .foregroundColor(.moonTextSecondary)
+                                .padding(.bottom, 4)
+
+                            ForEach(byDetail(), id: \.label) { s in
+                                HStack {
+                                    Text(s.label)
+                                        .foregroundColor(.moonTextPrimary)
+                                    Spacer()
+                                    Text("\(s.total)分")
+                                        .foregroundColor(.moonTextPrimary)
+                                }
+                                .font(.body)
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.moonCardBackground.opacity(0.15))
+                                )
+                            }
+                        }
+                        .padding(.top, 16)
                     }
                 }
+                .padding(.horizontal)
             }
-            .listStyle(.plain)
         }
+        .background(
+            ZStack {
+                Color.moonBackground.ignoresSafeArea()
+                StaticStarsView(starCount: 40).allowsHitTesting(false)
+                FlowingStarsView(
+                    starCount: 40,
+                    angle: .degrees(135),
+                    durationRange: 24...40,
+                    sizeRange: 2...4,
+                    spawnArea: nil
+                )
+            }
+        )
     }
 
     // ─────────────────────────────
@@ -151,17 +260,6 @@ struct HistoryView: View {
             )
         }
         .sorted { $0.total > $1.total }
-    }
-
-    @ViewBuilder
-    private func rowView(_ s: LabelSummary) -> some View {
-        HStack {
-            Text(s.label)
-            Spacer()
-            Text("\(s.total)分")
-        }
-        .font(.body)
-        .padding(.vertical, 6)
     }
 
     // ─────────────────────────────
