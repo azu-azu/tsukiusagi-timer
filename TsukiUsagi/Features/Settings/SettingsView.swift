@@ -13,8 +13,8 @@ struct SettingsView: View {
     @FocusState private var isActivityFocused: Bool
     @FocusState private var isDetailFocused: Bool
 
-    // Work minutes options: 1, 3, 5, 10, 15, ... 60
-    private let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
+    private let workMinutesOptions: [Int] =
+        [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
 
     private let topPadding: CGFloat = 8
     private let labelHeight: CGFloat = 28
@@ -31,177 +31,216 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        // Defensive: guard against zero size
-        guard size.width > 0 && size.height > 0 else { return AnyView(EmptyView()) }
+        guard size.width > 0 && size.height > 0 else {
+            return AnyView(EmptyView())
+        }
+
         return AnyView(
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 40) {
-                    // ヘッダー
-                    HStack {
-                        Button("Close") { dismiss() }
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 40) {
+                        // ヘッダー
+                        HStack {
+                            Button("Close") {
+                                dismiss()
+                            }
                             .foregroundColor(.moonTextSecondary)
-                        Spacer()
-                        Text("Settings")
-                            .font(.headline)
-                            .foregroundColor(.moonTextPrimary)
-                        Spacer()
-                        Button("Done") { dismiss() }
+
+                            Spacer()
+
+                            Text("Settings")
+                                .font(.headline)
+                                .foregroundColor(.moonTextPrimary)
+
+                            Spacer()
+
+                            Button("Done") {
+                                dismiss()
+                            }
                             .foregroundColor(.moonAccentBlue)
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 20)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 20)
 
-                    // Work Length
-                    section(title: "Work Length", isCompact: true) {
-                        customStepperForWorkMinutes()
-                    }
+                        // Work Length
+                        section(title: "Work Length", isCompact: true) {
+                            customStepperForWorkMinutes()
+                        }
 
-                    // Break Length
-                    section(title: "Break Length", isCompact: true) {
-                        customStepper(
-                            value: $breakMinutes,
-                            range: 1...30,
-                            step: 1
-                        )
-                    }
+                        // Break Length
+                        section(title: "Break Length", isCompact: true) {
+                            customStepper(
+                                value: $breakMinutes,
+                                range: 1...30,
+                                step: 1
+                            )
+                        }
 
-                    // Session Label
-                    section(title: "Session Label") {
-                        HStack(alignment: .top) {
-                            if isCustomActivity {
-                                TextField("Enter session name...", text: $activityLabel)
-                                    .foregroundColor(.moonTextPrimary)
-                                    .padding(.horizontal, 12)
-                                    .frame(height: labelHeight)
-                                    .frame(minHeight: labelHeight)
-                                    .background(Color.white.opacity(0.05))
-                                    .cornerRadius(labelCornerRadius)
-                                    .focused($isActivityFocused)
-                            } else {
-                                Menu {
-                                    ForEach(["Work", "Study", "Read"], id: \.self) { label in
+                        // Session Label
+                        section(title: "Session Label") {
+                            HStack(alignment: .top) {
+                                if isCustomActivity {
+                                    HStack(spacing: 8) {
+                                        TextField("Enter session name...", text: $activityLabel)
+                                            .foregroundColor(.moonTextPrimary)
+                                            .padding(.horizontal, 12)
+                                            .frame(height: labelHeight)
+                                            .background(Color.white.opacity(0.05))
+                                            .cornerRadius(labelCornerRadius)
+                                            .focused($isActivityFocused)
+                                            .frame(maxWidth: .infinity)
+
                                         Button {
-                                            activityLabel = label
+                                            activityLabel = "Work"
+                                            isActivityFocused = false
                                         } label: {
-                                            Text(label)
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundColor(.moonTextMuted)
+                                                .font(.system(size: 16))
                                         }
                                     }
-                                    Divider()
-                                    Button("Custom Input...") {
-                                        activityLabel = ""
+                                } else {
+                                    Menu {
+                                        ForEach(["Work", "Study", "Read"], id: \.self) { label in
+                                            Button {
+                                                activityLabel = label
+                                            } label: {
+                                                Text(label)
+                                            }
+                                        }
+
+                                        Divider()
+
+                                        Button("Custom Input...") {
+                                            activityLabel = ""
+                                            isActivityFocused = true
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(activityLabel.isEmpty ? "Custom" : activityLabel)
+                                                .foregroundColor(.moonTextPrimary)
+                                            Image(systemName: "chevron.down")
+                                                .foregroundColor(.moonTextMuted)
+                                        }
+                                        .padding(.horizontal, 12)
+                                        .frame(height: labelHeight)
+                                        .cornerRadius(labelCornerRadius)
                                     }
-                                } label: {
-                                    HStack {
-                                        Text(activityLabel)
-                                            .foregroundColor(.moonTextPrimary)
-                                        Image(systemName: "chevron.down")
-                                            .foregroundColor(.moonTextMuted)
+                                }
+
+                                Spacer(minLength: 8)
+
+                                if isActivityFocused || isDetailFocused {
+                                    Button("Done") {
+                                        isActivityFocused = false
+                                        isDetailFocused = false
                                     }
-                                    .padding(.horizontal, 12)
-                                    .frame(height: labelHeight)
-                                    .frame(minHeight: labelHeight)
-                                    .cornerRadius(labelCornerRadius)
-                                }
-                            }
-                            Spacer(minLength: 8)
-                            if isActivityFocused || isDetailFocused {
-                                Button("Done") {
-                                    isActivityFocused = false
-                                    isDetailFocused = false
-                                }
-                                .foregroundColor(.moonTextPrimary)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.white.opacity(0.15))
-                                )
-                                .transition(.opacity)
-                            }
-                        }
-                        ZStack(alignment: .topLeading) {
-                            if detailLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                Text("Detail (optional)")
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 12)
-                            }
-                            TextEditor(text: $detailLabel)
-                                .frame(height: inputHeight)
-                                .padding(8)
-                                .scrollContentBackground(.hidden)
-                                .background(Color.white.opacity(0.05))
-                                .focused($isDetailFocused)
-                        }
-                    }
-
-                    // Session Control
-                    section(title: "Session Control") {
-                        Button(role: .destructive) {
-                            timerVM.resetTimer()
-                            dismiss()
-                        } label: {
-                            Label(timerVM.isWorkSession ? "Reset Timer (No Save)" : "Reset Timer (already saved)", systemImage: "arrow.uturn.backward")
-                        }
-                        .tint(.red)
-
-                        Button {
-                            timerVM.forceFinishWorkSession()
-                            dismiss()
-                        } label: {
-                            Label("Stop", systemImage: "forward.end")
-                        }
-                        .disabled(!(timerVM.isWorkSession && timerVM.startTime != nil))
-                        .tint(.blue)
-                        .foregroundStyle((timerVM.isWorkSession && timerVM.startTime != nil) ? .blue : Color.gray.opacity(0.6))
-                    }
-
-                    // Logs
-                    section(title: "Logs", isCompact: true) {
-                        NavigationLink(destination: HistoryView().environmentObject(historyVM)) {
-                            HStack {
-                                Text("View History")
                                     .foregroundColor(.moonTextPrimary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.moonTextMuted)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Color.white.opacity(0.15))
+                                    )
+                                    .transition(.opacity)
+                                }
                             }
-                            .padding(.vertical, 8)
-                        }
-                    }
 
-                    Spacer(minLength: 40)
+                            ZStack(alignment: .topLeading) {
+                                if detailLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    Text("Detail (optional)")
+                                        .foregroundColor(.gray)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 12)
+                                }
+
+                                TextEditor(text: $detailLabel)
+                                    .frame(height: inputHeight)
+                                    .padding(8)
+                                    .scrollContentBackground(.hidden)
+                                    .background(Color.white.opacity(0.05))
+                                    .focused($isDetailFocused)
+                            }
+                        }
+
+                        // Session Control
+                        section(title: "Session Control") {
+                            Button(role: .destructive) {
+                                timerVM.resetTimer()
+                                dismiss()
+                            } label: {
+                                Label(
+                                    timerVM.isWorkSession
+                                        ? "Reset Timer (No Save)"
+                                        : "Reset Timer (already saved)",
+                                    systemImage: "arrow.uturn.backward"
+                                )
+                            }
+                            .tint(.red)
+
+                            Button {
+                                timerVM.forceFinishWorkSession()
+                                dismiss()
+                            } label: {
+                                Label("Stop", systemImage: "forward.end")
+                            }
+                            .disabled(!(timerVM.isWorkSession && timerVM.startTime != nil))
+                            .tint(.blue)
+                            .foregroundStyle(
+                                (timerVM.isWorkSession && timerVM.startTime != nil)
+                                    ? .blue
+                                    : Color.gray.opacity(0.6)
+                            )
+                        }
+
+                        // Logs
+                        section(title: "Logs", isCompact: true) {
+                            NavigationLink(destination: HistoryView().environmentObject(historyVM)) {
+                                HStack {
+                                    Text("View History")
+                                        .foregroundColor(.moonTextPrimary)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.moonTextMuted)
+                                }
+                                .padding(.vertical, 8)
+                            }
+                        }
+
+                        Spacer(minLength: 40)
+                    }
+                    .padding()
                 }
-                .padding()
+                .background(
+                    ZStack {
+                        Color.moonBackground.ignoresSafeArea()
+                        StaticStarsView(starCount: 40).allowsHitTesting(false)
+                        FlowingStarsView(
+                            starCount: 40,
+                            angle: .degrees(135),
+                            durationRange: 24...40,
+                            sizeRange: 2...4,
+                            spawnArea: nil
+                        )
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 30))
+                .padding(.top, topPadding)
+                .presentationDetents([.large])
+                .modifier(DismissKeyboardOnTap(
+                    isActivityFocused: $isActivityFocused,
+                    isDetailFocused: $isDetailFocused
+                ))
             }
-            .background(
-                ZStack {
-                    Color.moonBackground.ignoresSafeArea()
-                    StaticStarsView(starCount: 40).allowsHitTesting(false)
-                    FlowingStarsView(
-                        starCount: 40,
-                        angle: .degrees(135),
-                        durationRange: 24...40,
-                        sizeRange: 2...4,
-                        spawnArea: nil
-                    )
-                }
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 30))
-            .padding(.top, topPadding)
-            .presentationDetents([.large])
-            .modifier(DismissKeyboardOnTap())
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Close") {
-                    isActivityFocused = false
-                    isDetailFocused = false
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Close") {
+                        isActivityFocused = false
+                        isDetailFocused = false
+                    }
                 }
             }
-        }
         )
     }
 
@@ -271,10 +310,8 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Custom Stepper for Work Minutes
     @ViewBuilder
     private func customStepperForWorkMinutes() -> some View {
-        // 現在値のインデックスを取得
         let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
         HStack {
             Text("\(workMinutes) minutes")
@@ -325,9 +362,14 @@ extension UIApplication {
 }
 
 struct DismissKeyboardOnTap: ViewModifier {
+    var isActivityFocused: FocusState<Bool>.Binding
+    var isDetailFocused: FocusState<Bool>.Binding
+
     func body(content: Content) -> some View {
         content.onTapGesture {
             UIApplication.shared.endEditing()
+            isActivityFocused.wrappedValue = false
+            isDetailFocused.wrappedValue = false
         }
     }
 }

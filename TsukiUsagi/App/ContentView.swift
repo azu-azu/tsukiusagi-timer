@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - PreferenceKey for Landscape Detection
 struct LandscapePreferenceKey: PreferenceKey {
-    static var defaultValue: Bool = false
+    static let defaultValue: Bool = false
 
     static func reduce(value: inout Bool, nextValue: () -> Bool) {
         value = nextValue()
