@@ -41,6 +41,9 @@ extension Color {
 
     /// 月の光を思わせる青（アクセント、リンクカラー）
     static let moonAccentBlue = Color(red: 97/255, green: 163/255, blue: 242/255)
+
+    /// エラー表示用の赤色（バリデーションエラーなど）
+    static let moonErrorBackground = Color.red.opacity(0.8)
 }
 
 
