@@ -19,14 +19,24 @@ struct SessionLabelSection: View {
             HStack(alignment: .top) {
                 if isCustomActivity {
                     HStack(spacing: 8) {
-                        TextField("Enter session name...", text: $activity)
-                            .foregroundColor(.moonTextPrimary)
-                            .padding(.horizontal, 12)
-                            .frame(height: labelHeight)
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(labelCornerRadius)
-                            .focused($isActivityFocused)
-                            .frame(maxWidth: .infinity)
+                        ZStack(alignment: .topLeading) {
+                            if activity.isEmpty {
+                                Text("Enter session name...")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                            }
+
+                            TextField("", text: $activity)
+                                .foregroundColor(.moonTextPrimary)
+                                .padding(.horizontal, 12)
+                                .frame(height: labelHeight)
+                                .focused($isActivityFocused)
+                        }
+                        .frame(height: labelHeight)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(labelCornerRadius)
+                        .frame(maxWidth: .infinity)
 
                         Button {
                             activity = "Work"
