@@ -55,18 +55,7 @@ struct HistoryView: View {
                 LazyVStack(spacing: 16) {
                     if mode == .day {
                         // Total 表示（日モード）
-                        Text(TimeFormatting.totalText(totalMinutes()))
-                            .glitter(size: 34, resourceName: "gold")
-                            // .font(.title2)
-                            // .fontWeight(.semibold)
-                            // .foregroundColor(.moonTextPrimary)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.moonCardBackground.opacity(0.2))
-                            )
-                            .padding(.horizontal) // カード幅を少し小さくしたい時
+                        totalCard(text: TimeFormatting.totalText(totalMinutes()))
 
                         // 日モードのレコード表示
                         VStack(alignment: .leading, spacing: 8) {
@@ -129,16 +118,7 @@ struct HistoryView: View {
                         }
                     } else {
                         // Total 表示（月モード）
-                        Text("Total \(totalMinutes()) min")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.moonTextPrimary)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.moonCardBackground.opacity(0.15))
-                            )
+                        totalCard(text: TimeFormatting.totalText(totalMinutes()))
 
                         // 月モードの集計表示
                         VStack(alignment: .leading, spacing: 8) {
@@ -152,7 +132,7 @@ struct HistoryView: View {
                                     Text(s.label)
                                         .foregroundColor(.moonTextPrimary)
                                     Spacer()
-                                    Text("\(s.total) min")
+                                    Text(TimeFormatting.totalText(s.total))
                                         .foregroundColor(.moonTextPrimary)
                                 }
                                 .font(.body)
@@ -175,7 +155,7 @@ struct HistoryView: View {
                                     Text(s.label)
                                         .foregroundColor(.moonTextPrimary)
                                     Spacer()
-                                    Text("\(s.total) min")
+                                    Text(TimeFormatting.totalText(s.total))
                                         .foregroundColor(.moonTextPrimary)
                                 }
                                 .font(.body)
@@ -286,6 +266,19 @@ struct HistoryView: View {
         case .month:
             return cal.date(from: cal.dateComponents([.year, .month], from: date))!
         }
+    }
+
+    // 共通のTotal表示用View
+    private func totalCard(text: String) -> some View {
+        Text(text)
+            .glitter(size: 24, resourceName: "gold")
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.moonCardBackground.opacity(0.2))
+            )
+            .padding(.horizontal) // カード幅を少し小さくしたい時
     }
 }
 
