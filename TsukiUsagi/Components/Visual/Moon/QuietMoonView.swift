@@ -7,14 +7,11 @@ struct QuietMoonView: View {
 
     let size: CGSize
     let safeAreaInsets: EdgeInsets
-    let moonSize: CGFloat // 動的サイズ対応
 
     // MARK: - Computed Properties
 
     /// 動的高さ計算（ふじこ式）
-    private var dynamicHeight: CGFloat {
-        return min(moonSize * 1.5, 400)
-    }
+    private var dynamicHeight: CGFloat { min(size.height * 0.5, 400) }
 
     /// 横画面判定
     private var isLandscape: Bool {
