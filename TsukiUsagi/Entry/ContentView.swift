@@ -35,8 +35,8 @@ struct ContentView: View {
 
     // 比率定数
     private let timerBottomRatio: CGFloat = 1.1   // 画面高に対する TimerPanel の比率
-    private let moonPortraitYOffsetRatio: CGFloat = 0.15 // landscape時のmoonは少し下げる
-    private let moonLandscapeYOffsetRatio: CGFloat = 0.1 // portrait時のmoonは少し上げる
+    private let moonPortraitYOffsetRatio: CGFloat = 0.15 // portrait（縦画面）時のmoonは少し上げる
+    private let moonLandscapeYOffsetRatio: CGFloat = 0.1 // landscape（横画面）時のmoonは少し上げる
 
     // MARK: - Computed Properties
 
@@ -135,8 +135,8 @@ struct ContentView: View {
 
                             // 縦横別：比率で位置を決定
                             let setCenterY: CGFloat = isLandscape
-                                ? centerY  // Landscape時は中央ジャスト
-                                : centerY - contentSize.height * moonPortraitYOffsetRatio
+                                ? centerY - contentSize.height * moonLandscapeYOffsetRatio // 横画面
+                                : centerY - contentSize.height * moonPortraitYOffsetRatio // 縦画面
 
                             if timerVM.isSessionFinished {
                                 // 終了時はQuietMoonViewのみ
@@ -144,7 +144,7 @@ struct ContentView: View {
                                     // 横画面：左右分割（最高品質版）
                                     HStack(spacing: landscapeMargin) {
                                         // 左側：QuietMoonView
-                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets, moonSize: moonSize)
+                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
                                             .frame(width: (contentSize.width - landscapeMargin) * 0.5, height: setHeight)
                                             .background(Color.clear)
                                             .zIndex(10)
@@ -184,7 +184,7 @@ struct ContentView: View {
                                 } else {
                                     // 縦画面：従来通り
                                     VStack {
-                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets, moonSize: moonSize)
+                                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
                                             .accessibilityLabel("Quiet Moon Message")
                                             .accessibilityHint("Displays inspirational messages after session completion")
                                             .accessibilityAddTraits(.isHeader)
@@ -202,33 +202,30 @@ struct ContentView: View {
                                 // 進行中はMoon+Timerセット
                                 if isLandscape {
                                     // --- Landscape の Moon + Timer 横並び ---
+                                    let hStackWidth = contentSize.width * 0.8
                                     HStack(spacing: landscapeMargin) {
-                                        // 左側：Moon
+                                        // MoonView
                                         MoonView(
                                             moonSize: moonSize,
                                             glitterText: moonTitle,
                                             size: size
                                         )
                                         .allowsHitTesting(false)
-                                        .frame(width: (contentSize.width - landscapeMargin) * 0.5,
-                                               height: moonSize)
+                                        .frame(width: (hStackWidth - landscapeMargin) * 0.5, height: moonSize)
                                         .layoutPriority(1)
 
-                                        // 右側：Timer
+                                        // TimerPanel
                                         VStack {
                                             Spacer()
                                             TimerPanel(timerVM: timerVM)
                                                 .frame(minWidth: moonSize, maxWidth: moonSize * 1.5, minHeight: timerHeight, maxHeight: timerHeight)
                                             Spacer()
                                         }
-                                        .frame(width: (contentSize.width - landscapeMargin) * 0.5,
-                                               height: moonSize)
+                                        .frame(width: (hStackWidth - landscapeMargin) * 0.5, height: moonSize)
                                         .layoutPriority(0)
                                     }
-                                    .frame(width: contentSize.width,
-                                           height: moonSize)
-                                    .position(x: contentSize.width / 2,
-                                              y: setCenterY)
+                                    .frame(width: hStackWidth, height: moonSize)
+                                    .position(x: contentSize.width / 2, y: setCenterY)
                                 } else {
                                     // 縦画面：従来通り
                                     VStack(spacing: timerSpacing) {
@@ -243,9 +240,9 @@ struct ContentView: View {
                                             .frame(minWidth: moonSize, maxWidth: moonSize * 1.5, minHeight: timerHeight, maxHeight: timerHeight)
                                     }
                                     .frame(width: contentSize.width,
-                                           height: setHeight)
+                                            height: setHeight)
                                     .position(x: contentSize.width / 2,
-                                              y: setCenterY)
+                                                y: setCenterY)
                                 }
                             }
                         }

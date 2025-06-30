@@ -11,13 +11,13 @@ struct MoonView: View {
 	@State private var animate = false
 	@State private var float = false
 
-	var moonSize: CGFloat = 200
+	var moonSize: CGFloat
 	var glitterText: String
 	var size: CGSize
 
 	// 紫の影（アニメーション）
 	var nearY: CGFloat { moonSize } // 上の位置
-	var farY:  CGFloat = 44  // 下の位置
+	var farY:  CGFloat { moonSize * 0.22 }  // 下の位置（月サイズに比例）
 	var duration: Double = 17
 
 	// 🐇
