@@ -40,9 +40,10 @@ final class TimerViewModel: ObservableObject {
 
     // 実際のセッション時間を分で計算
     var actualSessionMinutes: Int {
-        // 実作業秒数を分換算（切り上げ）
-        let minutes = Int(ceil(Double(actualWorkedSeconds) / 60.0))
-        return max(minutes, 1) // 最低1分を保証
+        guard let start = startTime, let end = endTime else { return 1 }
+        let diff = Calendar.current.dateComponents([.minute], from: start, to: end)
+        let minutes = diff.minute ?? 0
+        return max(minutes, 1)
     }
 
     // User-configurable
