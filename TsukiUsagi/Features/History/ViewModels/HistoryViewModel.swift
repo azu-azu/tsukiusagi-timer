@@ -9,6 +9,9 @@ struct SessionRecord: Codable, Identifiable {
     var activity: String          // 上位
     var detail:   String?         // 下位
     var memo:     String?         // ←★ new
+
+    // 履歴行のduration（秒）
+    var duration: TimeInterval { end.timeIntervalSince(start) }
 }
 
 class HistoryViewModel: ObservableObject {
@@ -45,8 +48,28 @@ class HistoryViewModel: ObservableObject {
         store.save(history)
     }
 
-    // MARK: - Helper Methods
+    // MARK: - isDeleted判定
+    func isDeleted(sessionManager: SessionManager, activity: String) -> Bool {
+        !sessionManager.allSessions.contains(where: { $0.name == activity })
+    }
 
+    // (Deleted)表記付きアクティビティ名
+    func displayActivity(sessionManager: SessionManager, activity: String) -> String {
+        isDeleted(sessionManager: sessionManager, activity: activity) ? "\(activity) (Deleted)" : activity
+    }
+
+    // 復元処理
+    func restore(record: SessionRecord, sessionManager: SessionManager) throws {
+        let sessionItem = SessionItem(
+            id: UUID(),
+            name: record.activity,
+            detail: record.detail
+        )
+        try sessionManager.restoreFromHistory(sessionItem)
+        // 復元後、ViewでisDeletedを再判定すること
+    }
+
+    // MARK: - Helper Methods
     /// 固定値のIDを生成（日時ベース）
     private func generateFixedId(from date: Date) -> String {
         let formatter = DateFormatter()

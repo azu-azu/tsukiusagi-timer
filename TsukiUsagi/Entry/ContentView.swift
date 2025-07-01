@@ -14,6 +14,7 @@ struct ContentView: View {
     // Environment
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM:   TimerViewModel
+    @StateObject private var sessionManager = SessionManager()
 
     // Environment for Orientation and Accessibility
     @Environment(\.horizontalSizeClass) private var horizontalClass
@@ -289,6 +290,7 @@ struct ContentView: View {
                         SettingsView(size: size, safeAreaInsets: safeAreaInsets)
                             .environmentObject(timerVM)
                             .environmentObject(historyVM)
+                            .environmentObject(sessionManager)
                     }
                     .sheet(isPresented: $showingEditRecord) {
                         TimerEditView()

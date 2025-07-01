@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
+    @EnvironmentObject private var sessionManager: SessionManager
 
     @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
@@ -109,6 +110,16 @@ struct SettingsView: View {
                                 showEmptyError: .constant(currentShowEmptyError),
                                 onDone: nil
                             )
+                            NavigationLink(destination: SessionNameManagerView().environmentObject(sessionManager)) {
+                                HStack {
+                                    Text("Manage Session Names")
+                                        .foregroundColor(.moonTextPrimary)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.moonTextMuted)
+                                }
+                                .padding(.vertical, 8)
+                            }
                         }
 
                         // Session Control

@@ -10,9 +10,10 @@ struct SessionLabelSection: View {
     let inputHeight: CGFloat
     @Binding var showEmptyError: Bool
     let onDone: (() -> Void)?
+    @EnvironmentObject var sessionManager: SessionManager
 
     private var isCustomActivity: Bool {
-        !["Work", "Study", "Read"].contains(activity)
+        !sessionManager.allSessions.map { $0.name }.contains(activity)
     }
 
     var body: some View {
@@ -44,7 +45,7 @@ struct SessionLabelSection: View {
                         .frame(maxWidth: .infinity)
 
                         Button {
-                            activity = "Work"
+                            activity = sessionManager.fixedSessions.first?.name ?? "Work"
                             isActivityFocused = false
                         } label: {
                             Image(systemName: "xmark.circle.fill")
@@ -54,16 +55,24 @@ struct SessionLabelSection: View {
                     }
                 } else {
                     Menu {
-                        ForEach(["Work", "Study", "Read"], id: \.self) { label in
+                        // 固定3種
+                        ForEach(sessionManager.fixedSessions) { item in
                             Button {
-                                activity = label
+                                activity = item.name
                             } label: {
-                                Text(label)
+                                Text(item.name)
                             }
                         }
-
                         Divider()
-
+                        // カスタムSession Name
+                        ForEach(sessionManager.customSessions) { item in
+                            Button {
+                                activity = item.name
+                            } label: {
+                                Text(item.name)
+                            }
+                        }
+                        Divider()
                         Button("Custom Input...") {
                             activity = ""
                             isActivityFocused = true
