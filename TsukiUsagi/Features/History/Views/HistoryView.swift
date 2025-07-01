@@ -9,9 +9,12 @@ private enum Granularity: String, CaseIterable, Identifiable {
 
 struct HistoryView: View {
     @EnvironmentObject var historyVM: HistoryViewModel
+    @EnvironmentObject var sessionManager: SessionManager
 
     @State private var selectedDate = Calendar.current.startOfDay(for: Date())  // 基準日
     @State private var mode: Granularity = .day // 粒度
+    @State private var restoreError: String? = nil
+    @State private var showRestoreAlert = false
 
     private let cal = Calendar.current
 
@@ -60,14 +63,8 @@ struct HistoryView: View {
                         // 日モードのレコード表示
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(records()) { rec in
-                                let labelText: String = {
-                                    if let d = rec.detail, !d.isEmpty {
-                                        return "\(rec.activity) | \(d)"
-                                    } else {
-                                        return rec.activity
-                                    }
-                                }()
-
+                                let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
+                                let displayName = historyVM.displayActivity(sessionManager: sessionManager, activity: rec.activity)
                                 HStack {
                                     Text(rec.start.formatted(date: .omitted, time: .shortened))
                                         .foregroundColor(.moonTextPrimary)
@@ -76,11 +73,22 @@ struct HistoryView: View {
                                         .foregroundColor(.moonTextSecondary)
                                     Text(rec.end.formatted(date: .omitted, time: .shortened))
                                         .foregroundColor(.moonTextPrimary)
-
                                     Spacer(minLength: 8)
-
-                                    Text("\(labelText) \(durationMinutes(rec)) min")
-                                        .foregroundColor(.moonTextPrimary)
+                                    Text("\(displayName) \(durationMinutes(rec)) min")
+                                        .foregroundColor(isDeleted ? .gray : .moonTextPrimary)
+                                        .opacity(isDeleted ? 0.5 : 1.0)
+                                    if isDeleted {
+                                        Button("復元") {
+                                            do {
+                                                try historyVM.restore(record: rec, sessionManager: sessionManager)
+                                            } catch {
+                                                restoreError = error.localizedDescription
+                                                showRestoreAlert = true
+                                            }
+                                        }
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
+                                    }
                                 }
                                 .font(.body)
                                 .padding()
@@ -171,6 +179,9 @@ struct HistoryView: View {
                 }
                 .padding(.horizontal)
             }
+        }
+        .alert(isPresented: $showRestoreAlert) {
+            Alert(title: Text("復元エラー"), message: Text(restoreError ?? ""), dismissButton: .default(Text("OK")))
         }
         .background(
             ZStack {
