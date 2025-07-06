@@ -4,21 +4,20 @@ struct TimerEditView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM: TimerViewModel
+    @EnvironmentObject private var sessionManager: SessionManager
 
     @State private var editedActivity = ""
-    @State private var editedDetail   = ""
+    @State private var editedSubtitle   = ""
     @State private var editedMemo     = ""
     @State private var editedEnd      = Date()
     @State private var minEnd         = Date()
 
-    @FocusState private var isDetailFocused: Bool
+    @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
     @FocusState private var isActivityFocused: Bool
 
     // SettingsViewと同じ定数
     private let topPadding: CGFloat = 8
-    private let labelHeight: CGFloat = 28
-    private let inputHeight: CGFloat = 42
     private let cardCornerRadius: CGFloat = 8
     private let labelCornerRadius: CGFloat = 6
 
@@ -62,7 +61,7 @@ struct TimerEditView: View {
 
                         Button("Save") {
                             historyVM.updateLast(activity: editedActivity,
-                                                detail: editedDetail,
+                                                subtitle: editedSubtitle,
                                                 memo: editedMemo,
                                                 end: editedEnd)
                             timerVM.setEndTime(editedEnd)
@@ -78,15 +77,14 @@ struct TimerEditView: View {
                     section(title: "Session Label") {
                         SessionLabelSection(
                             activity: $editedActivity,
-                            detail: $editedDetail,
+                            subtitle: $editedSubtitle,
                             isActivityFocused: $isActivityFocused,
-                            isDetailFocused: $isDetailFocused,
-                            labelHeight: labelHeight,
+                            isSubtitleFocused: $isSubtitleFocused,
                             labelCornerRadius: labelCornerRadius,
-                            inputHeight: inputHeight,
                             showEmptyError: .constant(currentShowEmptyError),
                             onDone: nil
                         )
+                        .environmentObject(sessionManager)
                     }
 
                     // Final Time
@@ -144,7 +142,7 @@ struct TimerEditView: View {
             .presentationDetents([.large])
             .modifier(DismissKeyboardOnTap(
                 isActivityFocused: $isActivityFocused,
-                isDetailFocused: $isDetailFocused,
+                isSubtitleFocused: $isSubtitleFocused,
                 isMemoFocused: $isMemoFocused
             ))
             .toolbar {
@@ -152,7 +150,7 @@ struct TimerEditView: View {
                     Spacer()
                     Button("Close") {
                         isActivityFocused = false
-                        isDetailFocused = false
+                        isSubtitleFocused = false
                         isMemoFocused = false
                     }
                 }
@@ -162,7 +160,7 @@ struct TimerEditView: View {
                 editedEnd = timerVM.endTime ?? Date()
                 minEnd    = timerVM.startTime ?? Date()
                 editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
-                editedDetail   = timerVM.currentDetailLabel
+                editedSubtitle   = timerVM.currentSubtitleLabel
                 editedMemo     = ""
             }
         }

@@ -229,7 +229,7 @@ struct HistoryView: View {
     }
 
     private func byDetail() -> [LabelSummary] {
-        groupAndSum { $0.detail?.isEmpty == false ? $0.detail! : "—" }
+        groupAndSum { $0.subtitle?.isEmpty == false ? $0.subtitle! : "—" }
     }
 
     private func groupAndSum<T>(_ key: (SessionRecord) -> T) -> [LabelSummary] where T: Hashable {

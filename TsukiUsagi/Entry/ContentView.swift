@@ -300,6 +300,7 @@ struct ContentView: View {
                         TimerEditView()
                             .environmentObject(timerVM)
                             .environmentObject(historyVM)
+                            .environmentObject(sessionManager)
                     }
                     .onChange(of: timerVM.isSessionFinished) { oldValue, newValue in
                         if newValue {
@@ -316,6 +317,7 @@ struct ContentView: View {
                 }
             }
         }
+        .environmentObject(sessionManager)
     }
 
     // MARK: - Footer
@@ -383,7 +385,9 @@ struct ContentView: View {
 #Preview {
     let history = HistoryViewModel()
     let timer   = TimerViewModel(historyVM: history)
-    ContentView()
+    let sessionManager = SessionManager()
+    return ContentView()
         .environmentObject(history)
         .environmentObject(timer)
+        .environmentObject(sessionManager)
 }

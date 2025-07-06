@@ -48,7 +48,7 @@ final class TimerViewModel: ObservableObject {
 
     // User-configurable
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
-    @AppStorage("detailLabel")   private var detailLabel:   String = ""
+    @AppStorage("subtitleLabel")   private var subtitleLabel:   String = ""
     @AppStorage("workMinutes")  private var workMinutes:  Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5 {
         didSet {
@@ -263,7 +263,7 @@ final class TimerViewModel: ObservableObject {
                 end:      end,
                 phase:    isWorkSession ? .focus : .breakTime,
                 activity: activityLabel,
-                detail:   detailLabel,
+                subtitle:   subtitleLabel,
                 memo:     nil
             )
         }
@@ -368,7 +368,7 @@ final class TimerViewModel: ObservableObject {
 
     // 公開getter
     public var currentActivityLabel: String { activityLabel }
-    public var currentDetailLabel: String { detailLabel }
+    public var currentSubtitleLabel: String { subtitleLabel }
 
     func resetTimer() {
         stopTimer()

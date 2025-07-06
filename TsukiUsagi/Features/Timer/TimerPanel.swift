@@ -17,7 +17,7 @@ struct TimerPanel: View {
     @State private var flashScale  = false
     @State private var isEditing = false
     @State private var editedActivity: String = ""
-    @State private var editedDetail: String = ""
+    @State private var editedSubtitle: String = ""
     @State private var editedMemo: String = ""
     @State private var lastEditID = UUID()
 

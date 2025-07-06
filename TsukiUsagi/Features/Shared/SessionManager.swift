@@ -25,11 +25,56 @@ class SessionManager: ObservableObject {
     }
 
     init() {
+        migrateIfNeeded()
         load()
     }
 
     var allSessions: [SessionItem] {
         fixedSessions + customSessions
+    }
+
+    // MARK: - Migration
+
+    private func migrateIfNeeded() {
+        let defaults = UserDefaults.standard
+        let key = "didMigrateDetailToSubtitle"
+
+        if !defaults.bool(forKey: key) {
+            migrateDetailLabelToSubtitleLabel()
+            migrateCustomSessionsIfNeeded()
+            defaults.set(true, forKey: key)
+            print("✅ マイグレーション全処理完了")
+        }
+    }
+
+    private func migrateDetailLabelToSubtitleLabel() {
+        let defaults = UserDefaults.standard
+        if let oldValue = defaults.string(forKey: "detailLabel") {
+            defaults.set(oldValue, forKey: "subtitleLabel")
+            defaults.removeObject(forKey: "detailLabel")
+            print("✅ detailLabel → subtitleLabel 移行完了")
+        }
+    }
+
+    private func migrateCustomSessionsIfNeeded() {
+        let defaults = UserDefaults.standard
+
+        guard let data = defaults.data(forKey: "customSessions") else {
+            return
+        }
+
+        // 古い model で decode
+        if let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data) {
+            // subtitle に詰め替える
+            let newItems: [SessionItem] = oldItems.map {
+                SessionItem(id: $0.id, name: $0.name, subtitle: $0.detail)
+            }
+
+            if let newData = try? JSONEncoder().encode(newItems) {
+                defaults.set(newData, forKey: "customSessions")
+                print("✅ customSessions の detail → subtitle 移行完了")
+            }
+        }
     }
 
     // MARK: - CRUD
@@ -44,12 +89,12 @@ class SessionManager: ObservableObject {
         }
         var newItem = item
         newItem.name = trimmedName
-        newItem.detail = item.detail?.trimmed
+        newItem.subtitle = item.subtitle?.trimmed
         customSessions.append(newItem)
         save()
     }
 
-    func editSession(id: UUID, newName: String, newDetail: String?) throws {
+    func editSession(id: UUID, newName: String, newSubtitle: String?) throws {
         let trimmedName = newName.trimmed
         guard let idx = customSessions.firstIndex(where: { $0.id == id }) else {
             throw SessionError.notFound
@@ -59,7 +104,7 @@ class SessionManager: ObservableObject {
             throw SessionError.duplicate
         }
         customSessions[idx].name = trimmedName
-        customSessions[idx].detail = newDetail?.trimmed
+        customSessions[idx].subtitle = newSubtitle?.trimmed
         save()
     }
 
@@ -79,7 +124,7 @@ class SessionManager: ObservableObject {
         let newItem = SessionItem(
             id: UUID(),
             name: trimmedName,
-            detail: item.detail?.trimmed
+            subtitle: item.subtitle?.trimmed
         )
         customSessions.append(newItem)
         save()
