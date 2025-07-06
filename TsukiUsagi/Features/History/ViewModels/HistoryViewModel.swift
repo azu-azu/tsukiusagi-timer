@@ -7,7 +7,7 @@ struct SessionRecord: Codable, Identifiable {
     var start, end: Date
     var phase: PomodoroPhase
     var activity: String          // 上位
-    var detail:   String?         // 下位
+    var subtitle:   String?         // 下位
     var memo:     String?         // ←★ new
 
     // 履歴行のduration（秒）
@@ -24,7 +24,7 @@ class HistoryViewModel: ObservableObject {
     func add(start: Date, end: Date,
             phase: PomodoroPhase,
             activity: String,
-            detail: String?,
+            subtitle: String?,
             memo: String?) {
         guard phase == .focus else { return } // ← 休憩は記録しない
 
@@ -40,7 +40,7 @@ class HistoryViewModel: ObservableObject {
                         end: end,
                         phase: phase,
                         activity: activity,
-                        detail: detail,
+                        subtitle: subtitle,
                         memo: memo
         )
 
@@ -63,7 +63,7 @@ class HistoryViewModel: ObservableObject {
         let sessionItem = SessionItem(
             id: UUID(),
             name: record.activity,
-            detail: record.detail
+            subtitle: record.subtitle
         )
         try sessionManager.restoreFromHistory(sessionItem)
         // 復元後、ViewでisDeletedを再判定すること
@@ -83,12 +83,12 @@ class HistoryViewModel: ObservableObject {
     }
 
     func updateLast(activity: String,
-                    detail: String,
+                    subtitle: String,
                     memo: String,
                     end: Date? = nil) {
         guard let i = history.indices.last else { return }
         history[i].activity = activity
-        history[i].detail   = detail
+        history[i].subtitle   = subtitle
         history[i].memo     = memo
         if let end = end {
             history[i].end = end

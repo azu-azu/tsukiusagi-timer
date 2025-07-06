@@ -2,15 +2,17 @@ import SwiftUI
 
 struct SessionLabelSection: View {
     @Binding var activity: String
-    @Binding var detail: String
+    @Binding var subtitle: String
     @FocusState.Binding var isActivityFocused: Bool
-    @FocusState.Binding var isDetailFocused: Bool
-    let labelHeight: CGFloat
+    @FocusState.Binding var isSubtitleFocused: Bool
     let labelCornerRadius: CGFloat
-    let inputHeight: CGFloat
     @Binding var showEmptyError: Bool
     let onDone: (() -> Void)?
     @EnvironmentObject var sessionManager: SessionManager
+
+    // 内部で固定値として定義
+    private let inputHeight: CGFloat = 42
+    private let labelHeight: CGFloat = 28
 
     private var isCustomActivity: Bool {
         !sessionManager.allSessions.map { $0.name }.contains(activity)
@@ -92,10 +94,10 @@ struct SessionLabelSection: View {
 
                 Spacer(minLength: 8)
 
-                if isActivityFocused || isDetailFocused {
+                if isActivityFocused || isSubtitleFocused {
                     Button("Done") {
                         isActivityFocused = false
-                        isDetailFocused = false
+                        isSubtitleFocused = false
                         onDone?()
                     }
                     .foregroundColor(.moonTextPrimary)
@@ -106,24 +108,24 @@ struct SessionLabelSection: View {
                             .fill(Color.white.opacity(0.15))
                     )
                     .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: isActivityFocused || isDetailFocused)
+                    .animation(.easeInOut(duration: 0.2), value: isActivityFocused || isSubtitleFocused)
                 }
             }
 
             ZStack(alignment: .topLeading) {
-                if detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text("Detail (optional)")
+                if subtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Text("Subtitle (optional)")
                         .foregroundColor(.gray)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 12)
                 }
 
-                TextEditor(text: $detail)
+                TextEditor(text: $subtitle)
                     .frame(height: inputHeight)
                     .padding(8)
                     .scrollContentBackground(.hidden)
                     .background(Color.white.opacity(0.05))
-                    .focused($isDetailFocused)
+                    .focused($isSubtitleFocused)
             }
         }
     }

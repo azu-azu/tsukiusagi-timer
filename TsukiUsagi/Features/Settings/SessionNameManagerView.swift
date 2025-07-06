@@ -7,14 +7,14 @@ struct AlertID: Identifiable, Equatable {
 struct SessionNameManagerView: View {
     @EnvironmentObject var sessionManager: SessionManager
     @State private var name: String = ""
-    @State private var detail: String = ""
+    @State private var subtitle: String = ""
     @State private var errorMessage: String? = nil
     @State private var showErrorAlert = false
     @FocusState private var isNameFocused: Bool
-    @FocusState private var isDetailFocused: Bool
+    @FocusState private var isSubtitleFocused: Bool
     @State private var editingId: UUID? = nil
     @State private var editingName: String = ""
-    @State private var editingDetail: String = ""
+    @State private var editingSubtitle: String = ""
     @State private var showDeleteAlert: AlertID? = nil
 
     var body: some View {
@@ -26,10 +26,10 @@ struct SessionNameManagerView: View {
                 TextField("Session Name (required)", text: $name)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .focused($isNameFocused)
-                    .onSubmit { isDetailFocused = true }
-                TextField("Detail (optional)", text: $detail)
+                    .onSubmit { isSubtitleFocused = true }
+                TextField("Subtitle (optional)", text: $subtitle)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .focused($isDetailFocused)
+                    .focused($isSubtitleFocused)
                 Button("Add") {
                     addSession()
                 }
@@ -46,8 +46,8 @@ struct SessionNameManagerView: View {
                         HStack {
                             Text(item.name)
                                 .fontWeight(.semibold)
-                            if let d = item.detail, !d.isEmpty {
-                                Text("| \(d)")
+                            if let s = item.subtitle, !s.isEmpty {
+                                Text("| \(s)")
                                     .foregroundColor(.moonTextSecondary)
                             }
                         }
@@ -62,7 +62,7 @@ struct SessionNameManagerView: View {
                                     TextField("Session Name", text: $editingName)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .frame(maxWidth: 160)
-                                    TextField("Detail", text: $editingDetail)
+                                    TextField("Subtitle", text: $editingSubtitle)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .frame(maxWidth: 160)
                                 }
@@ -82,8 +82,8 @@ struct SessionNameManagerView: View {
                                 VStack(alignment: .leading) {
                                     Text(item.name)
                                         .fontWeight(.semibold)
-                                    if let d = item.detail, !d.isEmpty {
-                                        Text(d)
+                                    if let s = item.subtitle, !s.isEmpty {
+                                        Text(s)
                                             .font(.caption)
                                             .foregroundColor(.moonTextSecondary)
                                     }
@@ -92,7 +92,7 @@ struct SessionNameManagerView: View {
                                 Button("Edit") {
                                     editingId = item.id
                                     editingName = item.name
-                                    editingDetail = item.detail ?? ""
+                                    editingSubtitle = item.subtitle ?? ""
                                 }
                                 .font(.caption)
                                 Button(role: .destructive) {
@@ -126,12 +126,12 @@ struct SessionNameManagerView: View {
 
     private func addSession() {
         let trimmedName = name.trimmed
-        let trimmedDetail = detail.trimmed
+        let trimmedSubtitle = subtitle.trimmed
         guard !trimmedName.isEmpty else { return }
         do {
-            try sessionManager.addSession(SessionItem(id: UUID(), name: trimmedName, detail: trimmedDetail.isEmpty ? nil : trimmedDetail))
+            try sessionManager.addSession(SessionItem(id: UUID(), name: trimmedName, subtitle: trimmedSubtitle.isEmpty ? nil : trimmedSubtitle))
             name = ""
-            detail = ""
+            subtitle = ""
             isNameFocused = true
         } catch {
             errorMessage = error.localizedDescription
@@ -141,14 +141,14 @@ struct SessionNameManagerView: View {
 
     private func saveEdit(id: UUID) {
         let trimmedName = editingName.trimmed
-        let trimmedDetail = editingDetail.trimmed
+        let trimmedSubtitle = editingSubtitle.trimmed
         guard !trimmedName.isEmpty else {
             errorMessage = "Session Name is required."
             showErrorAlert = true
             return
         }
         do {
-            try sessionManager.editSession(id: id, newName: trimmedName, newDetail: trimmedDetail.isEmpty ? nil : trimmedDetail)
+            try sessionManager.editSession(id: id, newName: trimmedName, newSubtitle: trimmedSubtitle.isEmpty ? nil : trimmedSubtitle)
             editingId = nil
         } catch {
             errorMessage = error.localizedDescription

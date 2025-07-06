@@ -9,10 +9,11 @@ struct SettingsView: View {
     @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
-    @AppStorage("detailLabel") private var detailLabel: String = ""
+    @AppStorage("subtitleLabel") private var subtitleLabel: String = ""
 
     @FocusState private var isActivityFocused: Bool
-    @FocusState private var isDetailFocused: Bool
+    @FocusState private var isSubtitleFocused: Bool
+    @FocusState private var dummyMemoFocused: Bool
 
     // TODO: 将来的に中間バッファを導入する可能性を考慮
     // 現在は直接AppStorageにBindingしているが、
@@ -23,8 +24,8 @@ struct SettingsView: View {
         [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
 
     // ヘッダー周りのpadding
-    private let headerTopPadding: CGFloat = 20
-    private let headerBottomPadding: CGFloat = 24
+    private let headerTopPadding: CGFloat = 5
+    private let headerBottomPadding: CGFloat = 34
 
     // plusMinusボタン
     private let plusMinusSize: CGFloat = 12
@@ -34,8 +35,6 @@ struct SettingsView: View {
     private let betweenCardSpace: CGFloat = 24
     private let breakBottomPadding: CGFloat = 26
 
-    private let labelHeight: CGFloat = 28
-    private let inputHeight: CGFloat = 42
     private let timeTitleWidth: CGFloat = 80 // WORK, BREAK の文字の幅
 
     private let cardCornerRadius: CGFloat = 8
@@ -183,15 +182,14 @@ struct SettingsView: View {
                         section(title: "Session Label") {
                             SessionLabelSection(
                                 activity: $activityLabel,
-                                detail: $detailLabel,
+                                subtitle: $subtitleLabel,
                                 isActivityFocused: $isActivityFocused,
-                                isDetailFocused: $isDetailFocused,
-                                labelHeight: labelHeight,
+                                isSubtitleFocused: $isSubtitleFocused,
                                 labelCornerRadius: labelCornerRadius,
-                                inputHeight: inputHeight,
                                 showEmptyError: .constant(currentShowEmptyError),
                                 onDone: nil
                             )
+                            .environmentObject(sessionManager)
                         }
                         // Session Label周りのpadding
                         .padding(.bottom, betweenCardSpaceNarrow)
@@ -296,8 +294,8 @@ struct SettingsView: View {
                 .presentationDetents([.large])
                 .modifier(DismissKeyboardOnTap(
                     isActivityFocused: $isActivityFocused,
-                    isDetailFocused: $isDetailFocused,
-                    isMemoFocused: nil
+                    isSubtitleFocused: $isSubtitleFocused,
+                    isMemoFocused: $dummyMemoFocused
                 ))
             }
             .toolbar {
@@ -305,7 +303,7 @@ struct SettingsView: View {
                     Spacer()
                     Button("Close") {
                         isActivityFocused = false
-                        isDetailFocused = false
+                        isSubtitleFocused = false
                     }
                 }
             }
@@ -318,14 +316,12 @@ struct SettingsView: View {
         isCompact: Bool = false,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: isCompact ? 5 : 10) {
-        // VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: isCompact ? 2 : 5) {
             if !title.isEmpty {
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.moonTextSecondary)
-                    // .padding(.horizontal, 2)
             }
 
             VStack(alignment: .leading, spacing: 10) {
@@ -350,15 +346,15 @@ extension UIApplication {
 
 struct DismissKeyboardOnTap: ViewModifier {
     var isActivityFocused: FocusState<Bool>.Binding
-    var isDetailFocused: FocusState<Bool>.Binding
-    var isMemoFocused: FocusState<Bool>.Binding?
+    var isSubtitleFocused: FocusState<Bool>.Binding
+    var isMemoFocused: FocusState<Bool>.Binding
 
     func body(content: Content) -> some View {
         content.onTapGesture {
             UIApplication.shared.endEditing()
             isActivityFocused.wrappedValue = false
-            isDetailFocused.wrappedValue = false
-            isMemoFocused?.wrappedValue = false
+            isSubtitleFocused.wrappedValue = false
+            isMemoFocused.wrappedValue = false
         }
     }
 }
