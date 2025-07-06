@@ -130,12 +130,16 @@ final class TimerViewModel: ObservableObject {
     }
 
     // Init
-    init(historyVM: HistoryViewModel) {
+    init(historyVM: HistoryViewModel, activityLabel: String = "Work", subtitleLabel: String = "") {
         self.historyVM = historyVM
 
         // AppStorage を self にアクセスせず使う方法
         let minutes = UserDefaults.standard.integer(forKey: "workMinutes")
         _timeRemaining = Published(initialValue: minutes > 0 ? minutes * 60 : 25 * 60)
+
+        // プレビュー用の初期値をセット（本番ではデフォルト値）
+        self.activityLabel = activityLabel
+        self.subtitleLabel = subtitleLabel
 
         // --- Restore timer state if needed ---
         restoreTimerState()

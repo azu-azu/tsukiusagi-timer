@@ -204,7 +204,7 @@ struct TimerEditView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(Color.moonCardBackground.opacity(0.15))
+                    .fill(DesignTokens.Colors.moonCardBG)
             )
         }
     }

@@ -57,19 +57,6 @@ extension View {
     }
 }
 
-// TextStyle → サイズ変換
-private extension Font.TextStyle {
-    var size: CGFloat {
-        switch self {
-        case .largeTitle: return 34
-        case .title:      return 28
-        case .title2:     return 22
-        case .title3:     return 20
-        default:          return 17
-        }
-    }
-}
-
 // * AvenirNext White Modifiers
 private struct AvenirNextWhiteModifier: ViewModifier {
     let size: CGFloat

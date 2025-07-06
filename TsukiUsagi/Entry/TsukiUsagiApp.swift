@@ -14,6 +14,9 @@ struct TsukiUsagiApp: App {
         _historyVM = StateObject(wrappedValue: history)
         _timerVM   = StateObject(wrappedValue: TimerViewModel(historyVM: history))
 
+        // Feature Flags の初期化
+        FeatureFlags.setDefaultValues()
+
         NotificationManager.shared.requestAuthorization { ok in
             print(ok ? "Notification authorization granted."
                     : "Notification authorization denied.")
@@ -23,7 +26,7 @@ struct TsukiUsagiApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                // ★ “必ず” アプリ全体に配る
+                // ★ "必ず" アプリ全体に配る
                 .environmentObject(timerVM)
                 .environmentObject(historyVM)
         }

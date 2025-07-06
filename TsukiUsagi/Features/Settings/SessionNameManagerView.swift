@@ -18,42 +18,59 @@ struct SessionNameManagerView: View {
     @State private var showDeleteAlert: AlertID? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
             // 新規登録フォーム
-            VStack(alignment: .leading, spacing: 8) {
-                Text("New Session Name")
-                    .font(.headline)
-                TextField("Session Name (required)", text: $name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .focused($isNameFocused)
-                    .onSubmit { isSubtitleFocused = true }
-                TextField("Subtitle (optional)", text: $subtitle)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .focused($isSubtitleFocused)
-                Button("Add") {
-                    addSession()
+            RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("New Session Name")
+                        .headlineFont()
+                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                    TextField("Session Name (required)", text: $name)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .focused($isNameFocused)
+                        .onSubmit { isSubtitleFocused = true }
+                        .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
+                    TextField("Subtitle (optional)", text: $subtitle)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .focused($isSubtitleFocused)
+                        .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
+                    Button("Add") {
+                        addSession()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(name.trimmed.isEmpty)
+                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(name.trimmed.isEmpty)
             }
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.moonCardBackground.opacity(0.15)))
 
             // 登録済み一覧
             List {
-                Section(header: Text("Fixed Sessions")) {
+                Section(header:
+                    Text("FIXED SESSIONS")
+                        .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                ) {
                     ForEach(sessionManager.fixedSessions) { item in
                         HStack {
                             Text(item.name)
                                 .fontWeight(.semibold)
+                                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                             if let s = item.subtitle, !s.isEmpty {
                                 Text("| \(s)")
-                                    .foregroundColor(.moonTextSecondary)
+                                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                             }
                         }
+                        .padding(.vertical, 8)
                     }
                 }
-                Section(header: Text("Custom Sessions")) {
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(DesignTokens.Colors.moonCardBG)
+                )
+
+                Section(header:
+                    Text("CUSTOM SESSIONS")
+                        .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                ) {
                     ForEach(sessionManager.customSessions) { item in
                         if editingId == item.id {
                             // 編集モード
@@ -62,9 +79,11 @@ struct SessionNameManagerView: View {
                                     TextField("Session Name", text: $editingName)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .frame(maxWidth: 160)
+                                        .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
                                     TextField("Subtitle", text: $editingSubtitle)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .frame(maxWidth: 160)
+                                        .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
                                 }
                                 Spacer()
                                 Button("Save") {
@@ -72,20 +91,23 @@ struct SessionNameManagerView: View {
                                 }
                                 .font(.caption)
                                 .buttonStyle(.borderedProminent)
+                                .accessibilityIdentifier(AccessibilityIDs.SessionManager.saveButton)
                                 Button("Cancel") {
                                     editingId = nil
                                 }
                                 .font(.caption)
+                                .accessibilityIdentifier(AccessibilityIDs.SessionManager.cancelButton)
                             }
                         } else {
                             HStack {
                                 VStack(alignment: .leading) {
                                     Text(item.name)
                                         .fontWeight(.semibold)
+                                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                                     if let s = item.subtitle, !s.isEmpty {
                                         Text(s)
-                                            .font(.caption)
-                                            .foregroundColor(.moonTextSecondary)
+                                            .captionFont()
+                                            .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                                     }
                                 }
                                 Spacer()
@@ -95,11 +117,14 @@ struct SessionNameManagerView: View {
                                     editingSubtitle = item.subtitle ?? ""
                                 }
                                 .font(.caption)
+                                .accessibilityIdentifier(AccessibilityIDs.SessionManager.editButton)
                                 Button(role: .destructive) {
                                     showDeleteAlert = AlertID(id: item.id)
                                 } label: {
                                     Image(systemName: "trash")
+                                        .foregroundColor(DesignTokens.Colors.moonTextMuted)
                                 }
+                                .accessibilityIdentifier(AccessibilityIDs.SessionManager.deleteButton)
                                 .alert(item: $showDeleteAlert) { alertID in
                                     Alert(
                                         title: Text("Delete Session?"),
@@ -111,17 +136,25 @@ struct SessionNameManagerView: View {
                                     )
                                 }
                             }
+                            .accessibilityIdentifier(AccessibilityIDs.SessionManager.sessionCell(id: item.id.uuidString))
                         }
                     }
+                    .listRowBackground(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(DesignTokens.Colors.moonCardBG)
+                    )
                 }
             }
-            .listStyle(.insetGrouped)
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(Color.clear)
         }
         .padding()
         .navigationTitle("Manage Session Names")
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text("Error"), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
         }
+        .adaptiveStarBackground()
     }
 
     private func addSession() {
