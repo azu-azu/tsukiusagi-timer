@@ -189,14 +189,13 @@ struct SettingsView: View {
                                 showEmptyError: .constant(currentShowEmptyError),
                                 onDone: nil
                             )
-                            .environmentObject(sessionManager)
                         }
                         // Session Label周りのpadding
                         .padding(.bottom, betweenCardSpaceNarrow)
 
                         // Manage Session Names
                         section(title: "", isCompact: true) {
-                            NavigationLink(destination: SessionNameManagerView().environmentObject(sessionManager)) {
+                            NavigationLink(destination: SessionNameManagerView()) {
                                 HStack {
                                     Text("Manage Session Names")
                                         .foregroundColor(.moonTextPrimary)

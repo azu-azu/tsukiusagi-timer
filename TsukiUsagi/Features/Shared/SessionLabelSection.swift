@@ -11,7 +11,7 @@ struct SessionLabelSection: View {
     @EnvironmentObject var sessionManager: SessionManager
 
     // 内部で固定値として定義
-    private let inputHeight: CGFloat = 42
+    private let inputHeight: CGFloat = 28
     private let labelHeight: CGFloat = 28
 
     private var isCustomActivity: Bool {

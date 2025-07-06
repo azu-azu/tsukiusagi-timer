@@ -16,6 +16,9 @@ struct HistoryView: View {
     @State private var restoreError: String? = nil
     @State private var showRestoreAlert = false
 
+    private let dayCardSpacing: CGFloat = 2
+    private let dayModeCardHeight: CGFloat = 8
+
     private let cal = Calendar.current
 
     var body: some View {
@@ -57,131 +60,16 @@ struct HistoryView: View {
             ScrollView {
                 LazyVStack(spacing: 16) {
                     if mode == .day {
-                        // Total 表示（日モード）
-                        totalCard(text: TimeFormatting.totalText(totalMinutes()))
-
-                        // 日モードのレコード表示
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(records()) { rec in
-                                let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
-                                let displayName = historyVM.displayActivity(sessionManager: sessionManager, activity: rec.activity)
-                                HStack {
-                                    Text(rec.start.formatted(date: .omitted, time: .shortened))
-                                        .foregroundColor(.moonTextPrimary)
-                                    Image(systemName: "arrow.right")
-                                        .font(.caption)
-                                        .foregroundColor(.moonTextSecondary)
-                                    Text(rec.end.formatted(date: .omitted, time: .shortened))
-                                        .foregroundColor(.moonTextPrimary)
-                                    Spacer(minLength: 8)
-                                    Text("\(displayName) \(durationMinutes(rec)) min")
-                                        .foregroundColor(isDeleted ? .gray : .moonTextPrimary)
-                                        .opacity(isDeleted ? 0.5 : 1.0)
-                                    if isDeleted {
-                                        Button("復元") {
-                                            do {
-                                                try historyVM.restore(record: rec, sessionManager: sessionManager)
-                                            } catch {
-                                                restoreError = error.localizedDescription
-                                                showRestoreAlert = true
-                                            }
-                                        }
-                                        .font(.caption)
-                                        .foregroundColor(.blue)
-                                    }
-                                }
-                                .font(.body)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.moonCardBackground.opacity(0.15))
-                                )
-                            }
-                        }
-
-                        // メモ部分
-                        let memos = records()
-                            .compactMap { $0.memo?.trimmingCharacters(in: .whitespacesAndNewlines) }
-                            .filter { !$0.isEmpty }
-
-                        if !memos.isEmpty {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("📝 Memos")
-                                    .font(.subheadline)
-                                    .foregroundColor(.moonTextSecondary)
-                                    .padding(.bottom, 4)
-
-                                ForEach(memos, id: \.self) { memo in
-                                    Text(memo)
-                                        .font(.footnote)
-                                        .foregroundColor(.moonTextSecondary)
-                                        .padding(8)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(Color.moonCardBackground.opacity(0.15))
-                                        )
-                                }
-                            }
-                            .padding(.top, 16)
-                        }
+                        dayModeContent()
                     } else {
-                        // Total 表示（月モード）
-                        totalCard(text: TimeFormatting.totalText(totalMinutes()))
-
-                        // 月モードの集計表示
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("By Activity")
-                                .font(.subheadline)
-                                .foregroundColor(.moonTextSecondary)
-                                .padding(.bottom, 4)
-
-                            ForEach(byActivity(), id: \.label) { s in
-                                HStack {
-                                    Text(s.label)
-                                        .foregroundColor(.moonTextPrimary)
-                                    Spacer()
-                                    Text(TimeFormatting.totalText(s.total))
-                                        .foregroundColor(.moonTextPrimary)
-                                }
-                                .font(.body)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.moonCardBackground.opacity(0.15))
-                                )
-                            }
-                        }
-
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("By Detail")
-                                .font(.subheadline)
-                                .foregroundColor(.moonTextSecondary)
-                                .padding(.bottom, 4)
-
-                            ForEach(byDetail(), id: \.label) { s in
-                                HStack {
-                                    Text(s.label)
-                                        .foregroundColor(.moonTextPrimary)
-                                    Spacer()
-                                    Text(TimeFormatting.totalText(s.total))
-                                        .foregroundColor(.moonTextPrimary)
-                                }
-                                .font(.body)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.moonCardBackground.opacity(0.15))
-                                )
-                            }
-                        }
-                        .padding(.top, 16)
+                        monthModeContent()
                     }
                 }
                 .padding(.horizontal)
             }
         }
         .alert(isPresented: $showRestoreAlert) {
-            Alert(title: Text("復元エラー"), message: Text(restoreError ?? ""), dismissButton: .default(Text("OK")))
+            Alert(title: Text("Restore Error"), message: Text(restoreError ?? ""), dismissButton: .default(Text("OK")))
         }
         .background(
             ZStack {
@@ -195,6 +83,86 @@ struct HistoryView: View {
                     spawnArea: nil
                 )
             }
+        )
+    }
+
+    // ─────────────────────────────
+    // MARK: - View Components
+    // ☀️ Day MODE
+    @ViewBuilder
+    private func dayModeContent() -> some View {
+        // Total 表示（日モード）
+        totalCard(text: TimeFormatting.totalText(totalMinutes()))
+
+        // 日モードのレコード表示
+        dayModeRecordsSection()
+
+        // 日モードの集計表示（レコードが複数ある場合のみ）
+        if records().count > 1 {
+            activitySummarySection()
+            subtitleSummarySection()
+        }
+
+        // メモ部分
+        memoSection()
+    }
+
+    // 🌝 Month MODE
+    @ViewBuilder
+    private func monthModeContent() -> some View {
+        // Total 表示（月モード）
+        totalCard(text: TimeFormatting.totalText(totalMinutes()))
+
+        // 月モードの集計表示
+        activitySummarySection()
+        subtitleSummarySection()
+    }
+
+    @ViewBuilder
+    private func dayModeRecordsSection() -> some View {
+        VStack(alignment: .leading, spacing: dayCardSpacing) {
+            ForEach(records()) { rec in
+                recordRow(rec)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func recordRow(_ rec: SessionRecord) -> some View {
+        let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
+        let displayName = historyVM.displayActivity(sessionManager: sessionManager, activity: rec.activity)
+
+        HStack {
+            Text(rec.start.formatted(date: .omitted, time: .shortened))
+                .foregroundColor(.moonTextPrimary)
+            Image(systemName: "arrow.right")
+                .font(.caption)
+                .foregroundColor(.moonTextSecondary)
+            Text(rec.end.formatted(date: .omitted, time: .shortened))
+                .foregroundColor(.moonTextPrimary)
+            Spacer(minLength: 8)
+            Text("\(displayName) \(durationMinutes(rec)) min")
+                .foregroundColor(isDeleted ? .gray : .moonTextPrimary)
+                .opacity(isDeleted ? 0.5 : 1.0)
+            if isDeleted {
+                Button("Restore") {
+                    do {
+                        try historyVM.restore(record: rec, sessionManager: sessionManager)
+                    } catch {
+                        restoreError = error.localizedDescription
+                        showRestoreAlert = true
+                    }
+                }
+                .font(.caption)
+                .foregroundColor(.blue)
+            }
+        }
+        .frame(height: dayModeCardHeight)
+        .font(.body)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.moonCardBackground.opacity(0.15))
         )
     }
 
@@ -228,8 +196,19 @@ struct HistoryView: View {
         groupAndSum(\.activity)
     }
 
-    private func byDetail() -> [LabelSummary] {
-        groupAndSum { $0.subtitle?.isEmpty == false ? $0.subtitle! : "—" }
+    private func bySubtitle() -> [LabelSummary] {
+        let recordsWithSubtitle = records().filter {
+            guard let subtitle = $0.subtitle?.trimmingCharacters(in: .whitespacesAndNewlines) else { return false }
+            return !subtitle.isEmpty
+        }
+        let grouped = Dictionary(grouping: recordsWithSubtitle) { $0.subtitle! }
+        return grouped.map { (k, recs) in
+            LabelSummary(
+                label: k,
+                total: recs.reduce(0) { $0 + durationMinutes($1) }
+            )
+        }
+        .sorted { $0.total > $1.total }
     }
 
     private func groupAndSum<T>(_ key: (SessionRecord) -> T) -> [LabelSummary] where T: Hashable {
@@ -290,6 +269,75 @@ struct HistoryView: View {
                     .fill(Color.moonCardBackground.opacity(0.2))
             )
             .padding(.horizontal) // カード幅を少し小さくしたい時
+    }
+
+    // ─────────────────────────────
+    // MARK: - View Components
+
+    // 共通の集計セクション表示用View
+    private func summarySection(title: String, summaries: [LabelSummary]) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.moonTextSecondary)
+
+            ForEach(summaries, id: \.label) { s in
+                HStack {
+                    Text(s.label)
+                        .foregroundColor(.moonTextPrimary)
+                    Spacer()
+                    Text(TimeFormatting.totalText(s.total))
+                        .foregroundColor(.moonTextPrimary)
+                }
+                .font(.body)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.moonCardBackground.opacity(0.15))
+                )
+            }
+        }
+        .padding(.top, 16)
+    }
+
+    @ViewBuilder
+    private func activitySummarySection() -> some View {
+        summarySection(title: "By Activity", summaries: byActivity())
+    }
+
+    @ViewBuilder
+    private func subtitleSummarySection() -> some View {
+        if !bySubtitle().isEmpty {
+            summarySection(title: "By Subtitle", summaries: bySubtitle())
+        }
+    }
+
+    @ViewBuilder
+    private func memoSection() -> some View {
+        let memos = records()
+            .compactMap { $0.memo?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        if !memos.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("📝 Memos")
+                    .font(.subheadline)
+                    .foregroundColor(.moonTextSecondary)
+
+                ForEach(memos, id: \.self) { memo in
+                    Text(memo)
+                        .font(.footnote)
+                        .foregroundColor(.moonTextSecondary)
+                        .padding(8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.moonCardBackground.opacity(0.15))
+                        )
+                }
+            }
+            .padding(.top, 16)
+        }
     }
 }
 
