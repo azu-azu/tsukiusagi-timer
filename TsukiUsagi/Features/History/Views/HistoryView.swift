@@ -37,13 +37,13 @@ struct HistoryView: View {
                     Image(systemName: "chevron.left")
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(.moonTextSecondary)
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
                 Spacer()
 
                 Text(titleString())
-                    .font(.headline)
-                    .foregroundColor(.moonTextPrimary)
+                    .headlineFont()
+                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
 
                 Spacer()
 
@@ -51,7 +51,7 @@ struct HistoryView: View {
                     Image(systemName: "chevron.right")
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(.moonTextSecondary)
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                 .disabled(isAtLatest())
             }
             .padding(.horizontal)
@@ -71,19 +71,7 @@ struct HistoryView: View {
         .alert(isPresented: $showRestoreAlert) {
             Alert(title: Text("Restore Error"), message: Text(restoreError ?? ""), dismissButton: .default(Text("OK")))
         }
-        .background(
-            ZStack {
-                Color.moonBackground.ignoresSafeArea()
-                StaticStarsView(starCount: 40).allowsHitTesting(false)
-                FlowingStarsView(
-                    starCount: 40,
-                    angle: .degrees(135),
-                    durationRange: 24...40,
-                    sizeRange: 2...4,
-                    spawnArea: nil
-                )
-            }
-        )
+        .adaptiveStarBackground()
     }
 
     // ─────────────────────────────
@@ -92,7 +80,7 @@ struct HistoryView: View {
     @ViewBuilder
     private func dayModeContent() -> some View {
         // Total 表示（日モード）
-        totalCard(text: TimeFormatting.totalText(totalMinutes()))
+        TotalCard(text: TimeFormatting.totalText(totalMinutes()))
 
         // 日モードのレコード表示
         dayModeRecordsSection()
@@ -111,7 +99,7 @@ struct HistoryView: View {
     @ViewBuilder
     private func monthModeContent() -> some View {
         // Total 表示（月モード）
-        totalCard(text: TimeFormatting.totalText(totalMinutes()))
+        TotalCard(text: TimeFormatting.totalText(totalMinutes()))
 
         // 月モードの集計表示
         activitySummarySection()
@@ -134,15 +122,15 @@ struct HistoryView: View {
 
         HStack {
             Text(rec.start.formatted(date: .omitted, time: .shortened))
-                .foregroundColor(.moonTextPrimary)
+                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
             Image(systemName: "arrow.right")
                 .font(.caption)
-                .foregroundColor(.moonTextSecondary)
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
             Text(rec.end.formatted(date: .omitted, time: .shortened))
-                .foregroundColor(.moonTextPrimary)
+                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
             Spacer(minLength: 8)
             Text("\(displayName) \(durationMinutes(rec)) min")
-                .foregroundColor(isDeleted ? .gray : .moonTextPrimary)
+                .foregroundColor(isDeleted ? .gray : DesignTokens.Colors.moonTextPrimary)
                 .opacity(isDeleted ? 0.5 : 1.0)
             if isDeleted {
                 Button("Restore") {
@@ -158,12 +146,9 @@ struct HistoryView: View {
             }
         }
         .frame(height: dayModeCardHeight)
-        .font(.body)
+        .bodyFont()
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.moonCardBackground.opacity(0.15))
-        )
+        .roundedCard()
     }
 
     // ─────────────────────────────
@@ -258,19 +243,6 @@ struct HistoryView: View {
         }
     }
 
-    // 共通のTotal表示用View
-    private func totalCard(text: String) -> some View {
-        Text(text)
-            .glitter(size: 24, resourceName: "gold")
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.moonCardBackground.opacity(0.2))
-            )
-            .padding(.horizontal) // カード幅を少し小さくしたい時
-    }
-
     // ─────────────────────────────
     // MARK: - View Components
 
@@ -278,24 +250,20 @@ struct HistoryView: View {
     private func summarySection(title: String, summaries: [LabelSummary]) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(.moonTextSecondary)
+                .subheadlineFont()
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
             ForEach(summaries, id: \.label) { s in
                 HStack {
                     Text(s.label)
-                        .foregroundColor(.moonTextPrimary)
+                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                     Spacer()
                     Text(TimeFormatting.totalText(s.total))
-                        .foregroundColor(.moonTextPrimary)
+                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 }
-                .font(.body)
+                .bodyFont()
                 .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.moonCardBackground.opacity(0.15))
-                )
+                .roundedCard()
             }
         }
         .padding(.top, 16)
@@ -322,18 +290,15 @@ struct HistoryView: View {
         if !memos.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 Text("📝 Memos")
-                    .font(.subheadline)
-                    .foregroundColor(.moonTextSecondary)
+                    .subheadlineFont()
+                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
                 ForEach(memos, id: \.self) { memo in
                     Text(memo)
-                        .font(.footnote)
-                        .foregroundColor(.moonTextSecondary)
+                        .captionFont()
+                        .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                         .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.moonCardBackground.opacity(0.15))
-                        )
+                        .roundedCard()
                 }
             }
             .padding(.top, 16)

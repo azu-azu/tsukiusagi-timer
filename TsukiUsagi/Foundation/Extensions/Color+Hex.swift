@@ -35,9 +35,9 @@ extension Color {
     static let moonCardBackground = Color(hex: "#4b95ba")
 
     /// やさしい白文字（テキスト全般）
-    static let moonTextPrimary = Color.white.opacity(0.9)
-    static let moonTextSecondary = Color.white.opacity(0.6)
-    static let moonTextMuted = Color.white.opacity(0.35)
+//    static let moonTextPrimary = Color.white.opacity(0.9)
+//    static let moonTextSecondary = Color.white.opacity(0.6)
+//    static let moonTextMuted = Color.white.opacity(0.35)
 
     /// 月の光を思わせる青（アクセント、リンクカラー）
     static let moonAccentBlue = Color(red: 97/255, green: 163/255, blue: 242/255)

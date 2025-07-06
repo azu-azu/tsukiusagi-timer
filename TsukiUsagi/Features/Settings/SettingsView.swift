@@ -5,6 +5,8 @@ struct SettingsView: View {
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var sessionManager: SessionManager
+    @Environment(\.horizontalSizeClass) private var horizontalClass
+    @Environment(\.verticalSizeClass) private var verticalClass
 
     @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
@@ -42,7 +44,7 @@ struct SettingsView: View {
     private let clipRadius: CGFloat = 30 // 画面全体のコーナー
 
     // 星の数
-    private let flowingStarCount: Int = 40
+    private let flowingStarCount: Int = 20
 
     let size: CGSize
     let safeAreaInsets: EdgeInsets
@@ -65,32 +67,17 @@ struct SettingsView: View {
         return isCustomActivity && isActivityEmpty()
     }
 
-    // プラスマイナスボタンの共通化
-    @ViewBuilder
-    private func plusMinusButton(
-        systemName: String,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: plusMinusSize, height: plusMinusSize)
-                .foregroundColor(.white)
-                .padding(plusMinusPadding)
-                .background(Circle().fill(Color.white.opacity(0.1)))
-        }
-    }
-
+    // プラスマイナスボタンの共通化（新しいコンポーネントを使用）
     @ViewBuilder
     private func plusMinusButtons(
         onMinus: @escaping () -> Void,
         onPlus: @escaping () -> Void
     ) -> some View {
-        HStack() {
-            plusMinusButton(systemName: "minus", action: onMinus)
-            plusMinusButton(systemName: "plus", action: onPlus)
-        }
+        PlusMinusButtonPair(
+            onMinus: onMinus,
+            onPlus: onPlus,
+            spacing: DesignTokens.Spacing.small
+        )
     }
 
     // 🕐 時間設定セクションの共通化
@@ -105,15 +92,13 @@ struct SettingsView: View {
         section(title: "", isCompact: true) {
             HStack {
                 Text(title)
-                    .font(.callout)
-                    .fontWeight(.bold)
-                    .foregroundColor(.moonTextSecondary)
+                    .scaledFont(style: .callout, weight: .bold)
+                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                     .frame(width: timeTitleWidth, alignment: .leading)
 
                 Text(String(format: "%2d min", minutes))
-                    .font(.system(.title3, design: .monospaced))
-                    .fontWeight(.medium)
-                    .foregroundColor(.moonTextPrimary)
+                    .monospaceFont()
+                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
 
                 Spacer()
 
@@ -125,188 +110,64 @@ struct SettingsView: View {
 
     // body
     var body: some View {
-        guard size.width > 0 && size.height > 0 else {
-            return AnyView(EmptyView())
-        }
-
-        return AnyView(
-            NavigationStack {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        // ヘッダー
-                        HStack {
-                            Button("Close") {
-                                dismiss()
-                            }
-                            .foregroundColor(.moonTextSecondary)
-
-                            Spacer()
-
-                            Button("Done") {
-                                dismiss()
-                            }
-                            .disabled(shouldDisableDone())
-                            .foregroundColor(shouldDisableDone() ? .gray : .moonAccentBlue)
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // 自作ヘッダー
+                    HStack {
+                        Button("Close") {
+                            dismiss()
                         }
+                        .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
-                        // ヘッダー周りのpadding
-                        .padding(.horizontal)
-                        .padding(.top, headerTopPadding)
-                        .padding(.bottom, headerBottomPadding)
+                        Spacer()
 
-                        // 🕐 Work Length
-                        timeSettingSection(title: "WORK", minutes: workMinutes, onMinus: {
-                            let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
-                            if currentIndex > 0 {
-                                workMinutes = workMinutesOptions[currentIndex - 1]
-                            }
-                        }, onPlus: {
-                            let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
-                            if currentIndex < workMinutesOptions.count - 1 {
-                                workMinutes = workMinutesOptions[currentIndex + 1]
-                            }
-                        }, bottomPadding: betweenCardSpaceNarrow)
-
-                        // 🕐 Break Length
-                        timeSettingSection(title: "BREAK", minutes: breakMinutes, onMinus: {
-                            if breakMinutes > 1 {
-                                breakMinutes -= 1
-                            }
-                        }, onPlus: {
-                            if breakMinutes < 30 {
-                                breakMinutes += 1
-                            }
-                        }, bottomPadding: breakBottomPadding)
-
-                        // Session Label
-                        section(title: "Session Label") {
-                            SessionLabelSection(
-                                activity: $activityLabel,
-                                subtitle: $subtitleLabel,
-                                isActivityFocused: $isActivityFocused,
-                                isSubtitleFocused: $isSubtitleFocused,
-                                labelCornerRadius: labelCornerRadius,
-                                showEmptyError: .constant(currentShowEmptyError),
-                                onDone: nil
-                            )
+                        Button("Done") {
+                            dismiss()
                         }
-                        // Session Label周りのpadding
+                        .disabled(shouldDisableDone())
+                        .foregroundColor(shouldDisableDone() ? .gray : DesignTokens.Colors.moonAccentBlue)
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, headerTopPadding)
+                    .padding(.bottom, headerBottomPadding)
+
+                    workTimeSection()
                         .padding(.bottom, betweenCardSpaceNarrow)
 
-                        // Manage Session Names
-                        section(title: "", isCompact: true) {
-                            NavigationLink(destination: SessionNameManagerView()) {
-                                HStack {
-                                    Text("Manage Session Names")
-                                        .foregroundColor(.moonTextPrimary)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.moonTextMuted)
-                                }
-                                .padding(.vertical, 8)
-                            }
-                        }
+                    breakTimeSection()
+                        .padding(.bottom, breakBottomPadding)
 
-                        // Manage Session Names周りのpadding
+                    sessionLabelSection()
+                        .padding(.bottom, betweenCardSpaceNarrow)
+
+                    manageSessionNamesSection()
                         .padding(.bottom, betweenCardSpace)
 
-                        // Session Control
-                        section(title: "", isCompact: false) {
-                            VStack(spacing: 14) {
-                                Button() {
-                                    timerVM.resetTimer()
-                                    dismiss()
-                                } label: {
-                                    HStack(spacing: 8) {
-                                        // 🛑 Reset
-                                        Image(systemName: "arrow.uturn.backward")
-                                        Text(timerVM.isWorkSession
-                                            ? "Reset Timer (No Save)"
-                                            : "Reset Timer (already saved)"
-                                        )
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                }
-                                .tint(.red.opacity(0.8))
-
-                                // 🛑 Stop
-                                if timerVM.isWorkSession && timerVM.startTime != nil {
-                                    Button {
-                                        timerVM.forceFinishWorkSession()
-                                        dismiss()
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            Image(systemName: "forward.end")
-                                            Text("Stop (Save)")
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    }
-                                    .tint(.blue)
-                                } else {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "forward.end")
-                                            .foregroundColor(.gray.opacity(0.6))
-                                        Text("Stop (Save)")
-                                            .foregroundColor(.gray.opacity(0.6))
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                }
-                            }
-                        }
-
-                        // Session Control周りのpadding
+                    resetStopSection()
                         .padding(.bottom, betweenCardSpace)
 
-                        // Logs
-                        section(title: "", isCompact: true) {
-                            NavigationLink(destination: HistoryView().environmentObject(historyVM)) {
-                                HStack {
-                                    Text("View History")
-                                        .foregroundColor(.moonTextPrimary)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.moonTextMuted)
-                                }
-                                .padding(.vertical, 8)
-                            }
-                        }
-
-                        Spacer(minLength: 40)
-                    }
-                    .padding()
+                    viewHistorySection()
+                        .padding(.bottom, betweenCardSpace)
                 }
-                .background(
-                    ZStack {
-                        Color.moonBackground.ignoresSafeArea()
-                        StaticStarsView(starCount: 30).allowsHitTesting(false)
-                        FlowingStarsView(
-                            starCount: flowingStarCount,
-                            angle: .degrees(135),
-                            durationRange: 24...40,
-                            sizeRange: 2...4,
-                            spawnArea: nil
-                        )
-                    }
-                )
-                .clipShape(RoundedRectangle(cornerRadius: clipRadius))
-                .padding(.top, 0) // デフォルト背景と宇宙背景との間 ※余白をつけるとデフォルト背景（白または黒）が見える
-                .presentationDetents([.large])
-                .modifier(DismissKeyboardOnTap(
-                    isActivityFocused: $isActivityFocused,
-                    isSubtitleFocused: $isSubtitleFocused,
-                    isMemoFocused: $dummyMemoFocused
-                ))
+                .padding()
             }
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Close") {
-                        isActivityFocused = false
-                        isSubtitleFocused = false
-                    }
+            .background(
+                ZStack {
+                    Color.moonBackground.ignoresSafeArea()
+                    StaticStarsView(starCount: 30).allowsHitTesting(false)
+                    FlowingStarsView(
+                        starCount: flowingStarCount,
+                        angle: .degrees(135),
+                        durationRange: 24...40,
+                        sizeRange: 2...4,
+                        spawnArea: nil
+                    )
                 }
-            }
-        )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: clipRadius))
+            .padding(.top, 0)
+        }
     }
 
     @ViewBuilder
@@ -315,12 +176,11 @@ struct SettingsView: View {
         isCompact: Bool = false,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: isCompact ? 2 : 5) {
+        VStack(alignment: .leading, spacing: isCompact ? DesignTokens.Spacing.extraSmall : DesignTokens.Spacing.small) {
             if !title.isEmpty {
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.moonTextSecondary)
+                    .subheadlineFont()
+                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
             }
 
             VStack(alignment: .leading, spacing: 10) {
@@ -331,8 +191,135 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(Color.moonCardBackground.opacity(0.15))
+                    .fill(DesignTokens.Colors.moonCardBG)
             )
+        }
+    }
+
+    private func workTimeSection() -> some View {
+        section(title: "", isCompact: true) {
+            HStack {
+                Text("WORK")
+                    .scaledFont(style: .callout, weight: .bold)
+                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .frame(width: timeTitleWidth, alignment: .leading)
+                Text(String(format: "%2d min", workMinutes))
+                    .monospaceFont()
+                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                Spacer()
+                plusMinusButtons(
+                    onMinus: { if workMinutes > 1 { workMinutes -= 1 } },
+                    onPlus: { if workMinutes < 60 { workMinutes += 1 } }
+                )
+            }
+        }
+    }
+
+    private func breakTimeSection() -> some View {
+        section(title: "", isCompact: true) {
+            HStack {
+                Text("BREAK")
+                    .scaledFont(style: .callout, weight: .bold)
+                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .frame(width: timeTitleWidth, alignment: .leading)
+                Text(String(format: "%2d min", breakMinutes))
+                    .monospaceFont()
+                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                Spacer()
+                plusMinusButtons(
+                    onMinus: { if breakMinutes > 1 { breakMinutes -= 1 } },
+                    onPlus: { if breakMinutes < 30 { breakMinutes += 1 } }
+                )
+            }
+        }
+    }
+
+    private func sessionLabelSection() -> some View {
+        section(title: "Session Label") {
+            SessionLabelSection(
+                activity: $activityLabel,
+                subtitle: $subtitleLabel,
+                isActivityFocused: $isActivityFocused,
+                isSubtitleFocused: $isSubtitleFocused,
+                labelCornerRadius: labelCornerRadius,
+                showEmptyError: .constant(currentShowEmptyError),
+                onDone: nil
+            )
+        }
+    }
+
+    private func manageSessionNamesSection() -> some View {
+        section(title: "", isCompact: true) {
+            NavigationLink(destination: SessionNameManagerView()) {
+                HStack {
+                    Text("Manage Session Names")
+                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(DesignTokens.Colors.moonTextMuted)
+                }
+                .padding(.vertical, 8)
+            }
+        }
+    }
+
+    private func resetStopSection() -> some View {
+        section(title: "", isCompact: false) {
+            VStack(spacing: 14) {
+                Button() {
+                    timerVM.resetTimer()
+                    dismiss()
+                } label: {
+                    HStack(spacing: 8) {
+                        // 🛑 Reset
+                        Image(systemName: "arrow.uturn.backward")
+                        Text(timerVM.isWorkSession
+                            ? "Reset Timer (No Save)"
+                            : "Reset Timer (already saved)"
+                        )
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .tint(.red.opacity(0.8))
+
+                // 🛑 Stop
+                if timerVM.isWorkSession && timerVM.startTime != nil {
+                    Button {
+                        timerVM.forceFinishWorkSession()
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "forward.end")
+                            Text("Stop (Save)")
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .tint(.blue)
+                } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: "forward.end")
+                            .foregroundColor(.gray.opacity(0.6))
+                        Text("Stop (Save)")
+                            .foregroundColor(.gray.opacity(0.6))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+    }
+
+    private func viewHistorySection() -> some View {
+        section(title: "", isCompact: true) {
+            NavigationLink(destination: HistoryView().environmentObject(historyVM)) {
+                HStack {
+                    Text("View History")
+                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(DesignTokens.Colors.moonTextMuted)
+                }
+                .padding(.vertical, 8)
+            }
         }
     }
 }
@@ -356,4 +343,10 @@ struct DismissKeyboardOnTap: ViewModifier {
             isMemoFocused.wrappedValue = false
         }
     }
+}
+
+// 横画面判定用ユーティリティ
+private func safeIsLandscape(size: CGSize, horizontalClass: UserInterfaceSizeClass?, verticalClass: UserInterfaceSizeClass?) -> Bool {
+    // ルール集推奨の判定
+    return horizontalClass == .regular || size.width > size.height
 }

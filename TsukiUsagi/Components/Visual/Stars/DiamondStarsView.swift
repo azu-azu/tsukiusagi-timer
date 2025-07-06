@@ -79,7 +79,7 @@ private struct SparkleSpec: Identifiable {
 
 struct DiamondStarsOnceView: View {
     // ✨ 作りたい総数
-    private let total = 180
+    private let total = 250
     private let perOnce = 60 // 一回で何個までか
 
     @State private var stars: [SparkleSpec] = []

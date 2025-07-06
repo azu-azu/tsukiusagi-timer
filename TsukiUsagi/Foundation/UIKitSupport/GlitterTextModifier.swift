@@ -49,3 +49,20 @@ extension Text {
         )
     }
 }
+
+// Text以外のViewにもキラキラエフェクトを重ねる
+extension View {
+    /// 任意のViewにキラキラエフェクトを重ねる
+    func glitter(size: CGFloat = 36, resourceName: String = "black_yellow", resourceExt: String = "gif") -> some View {
+        self.overlay(
+            AnimatedImage(
+                url: Bundle.main.url(
+                    forResource: resourceName,
+                    withExtension: resourceExt)
+            )
+            .resizable()
+            .scaledToFill()
+            .frame(width: size, height: size)
+        )
+    }
+}
