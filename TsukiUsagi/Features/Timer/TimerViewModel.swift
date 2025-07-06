@@ -147,6 +147,10 @@ final class TimerViewModel: ObservableObject {
 
         stopTimer()
 
+        // ★ ここで必ず初期化する
+        startTime = nil
+        endTime = nil
+
         // 新しいセッション開始
         if isSessionFinished {
             isWorkSession     = true
@@ -216,8 +220,26 @@ final class TimerViewModel: ObservableObject {
 
     // Stopボタン用：work終了→break画面へ
     func forceFinishWorkSession() {
-        stopTimer()
         endTime = Date()
+
+        // ★ startTime が残っているうちに履歴保存
+        if let start = startTime, let end = endTime {
+            historyVM.add(
+                start: start,
+                end: end,
+                phase: .focus,
+                activity: activityLabel,
+                subtitle: subtitleLabel,
+                memo: nil
+            )
+        }
+
+        stopTimer()  // ★ タイマー停止（時刻は残る）
+
+        // ★ 削除：時刻は残す（表示のため）
+        // startTime = nil
+        // endTime = nil
+
         isSessionFinished = true
         isWorkSession = false
     }
@@ -259,14 +281,18 @@ final class TimerViewModel: ObservableObject {
         // 履歴に本フェーズを保存
         if let start = startTime, let end = endTime {
             historyVM.add(
-                start:    start,
-                end:      end,
-                phase:    isWorkSession ? .focus : .breakTime,
+                start: start,
+                end: end,
+                phase: isWorkSession ? .focus : .breakTime,
                 activity: activityLabel,
-                subtitle:   subtitleLabel,
-                memo:     nil
+                subtitle: subtitleLabel,
+                memo: nil
             )
         }
+
+        // ★ 削除：時刻は残す（表示のため）
+        // startTime = nil
+        // endTime = nil
 
         // フェーズ別後処理
         if isWorkSession {

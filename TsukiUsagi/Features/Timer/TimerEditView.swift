@@ -84,7 +84,6 @@ struct TimerEditView: View {
                             showEmptyError: .constant(currentShowEmptyError),
                             onDone: nil
                         )
-                        .environmentObject(sessionManager)
                     }
 
                     // Final Time
