@@ -61,12 +61,12 @@ struct TimerPanel: View {
 
         // ★START押下アニメ（追加）
         .onReceive(timerVM.startPulse) { _ in
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(.easeInOut(duration: 0.4)) {
                 flashYellow = true
                 flashScale  = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(.easeInOut(duration: 2.0)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                withAnimation(.easeInOut(duration: 1.8)) {
                     flashYellow = false
                     flashScale  = false
                 }

@@ -85,6 +85,29 @@ final class TimerViewModel: ObservableObject {
     // 🔔 START アニメ用トリガー
     let startPulse = PassthroughSubject<Void, Never>()
 
+    // MARK: - Animation Methods
+
+    /// diamondアニメーションとstartPulseアニメーションを発火
+    private func triggerStartAnimations() {
+        if !shouldSuppressAnimation {
+            flashStars.toggle()
+            DispatchQueue.main.async {
+                self.startPulse.send()
+            }
+        }
+    }
+
+    // MARK: - Timer Management
+
+    /// タイマーを開始する共通処理
+    private func startTimerInternal() {
+        isRunning = true
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
+                                    repeats: true) { [weak self] _ in
+            self?.tick()
+        }
+    }
+
     // MARK: - State Persistence
     func saveTimerState() {
         storedRemainingSeconds = timeRemaining
@@ -152,31 +175,23 @@ final class TimerViewModel: ObservableObject {
         // それ以外 (= ポーズ再開) は timeRemaining や startTime を触らない
 
         // 3) 走り出す
-        if !shouldSuppressAnimation {
-            flashStars.toggle()
-            DispatchQueue.main.async {
-                self.startPulse.send()
-            }
-        }
+        triggerStartAnimations()
         shouldSuppressAnimation = false
 
-        isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
-                                    repeats: true) { [weak self] _ in
-            self?.tick()
-        }
+        startTimerInternal()
     }
 
     // Resume用
     func resumeTimer() {
         guard !isRunning else { return }
         guard lastResumedTime == nil else { return } // すでに再開中なら何もしない
+
+        // diamondアニメーション発火を追加 ※発火させたくない時はここをコメントアウトする
+        triggerStartAnimations()
+
         lastResumedTime = Date()
         isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
-                                    repeats: true) { [weak self] _ in
-            self?.tick()
-        }
+        startTimerInternal()
     }
 
     func pauseTimer() {
