@@ -39,6 +39,10 @@ struct ContentView: View {
     private let moonPortraitYOffsetRatio: CGFloat = 0.15 // portrait（縦画面）時のmoonは少し上げる
     private let moonLandscapeYOffsetRatio: CGFloat = 0.1 // landscape（横画面）時のmoonは少し上げる
 
+    // 星の数
+    private let flowingStarCount: Int = 70
+    private let staticStarCount: Int = 40
+
     // MARK: - Computed Properties
 
     /// より正確な向き判定（iPad Split View対応）
@@ -97,19 +101,19 @@ struct ContentView: View {
                         // 背景レイヤ
                         BackgroundGradientView().ignoresSafeArea()
                         AwakeEnablerView(hidden: true)
-                        StaticStarsView(starCount: 40)
+                        StaticStarsView(starCount: staticStarCount)
 
                         // FlowingStarsViewなどの星エフェクトはタイマー進行中のみ
                         if !timerVM.isSessionFinished {
                             FlowingStarsView(
-                                starCount: 70,
+                                starCount: flowingStarCount,
                                 angle: .degrees(90), // 下向き
                                 durationRange: 24...40,
                                 sizeRange: 2...4,
                                 spawnArea: nil
                             )
                             FlowingStarsView(
-                                starCount: 70,
+                                starCount: flowingStarCount,
                                 angle: .degrees(-90), // 上向き
                                 durationRange: 24...40,
                                 sizeRange: 2...4,

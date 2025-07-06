@@ -30,20 +30,20 @@ struct SettingsView: View {
     private let plusMinusSize: CGFloat = 12
     private let plusMinusPadding: CGFloat = 10
 
-    // work,break
-    private let workBottomPadding: CGFloat = 8
-    private let breakBottomPadding: CGFloat = 26
-
-    private let sessionCardBottomPadding: CGFloat = 2
-
+    private let betweenCardSpaceNarrow: CGFloat = 4
     private let betweenCardSpace: CGFloat = 24
+    private let breakBottomPadding: CGFloat = 26
 
     private let labelHeight: CGFloat = 28
     private let inputHeight: CGFloat = 42
+    private let timeTitleWidth: CGFloat = 80 // WORK, BREAK の文字の幅
 
     private let cardCornerRadius: CGFloat = 8
     private let labelCornerRadius: CGFloat = 6
     private let clipRadius: CGFloat = 30 // 画面全体のコーナー
+
+    // 星の数
+    private let flowingStarCount: Int = 40
 
     let size: CGSize
     let safeAreaInsets: EdgeInsets
@@ -94,7 +94,7 @@ struct SettingsView: View {
         }
     }
 
-    // 時間設定セクションの共通化
+    // 🕐 時間設定セクションの共通化
     @ViewBuilder
     private func timeSettingSection(
         title: String,
@@ -106,10 +106,10 @@ struct SettingsView: View {
         section(title: "", isCompact: true) {
             HStack {
                 Text(title)
-                    .font(.caption)
+                    .font(.callout)
                     .fontWeight(.bold)
                     .foregroundColor(.moonTextSecondary)
-                    .frame(width: 50, alignment: .leading)
+                    .frame(width: timeTitleWidth, alignment: .leading)
 
                 Text(String(format: "%2d min", minutes))
                     .font(.system(.title3, design: .monospaced))
@@ -124,6 +124,7 @@ struct SettingsView: View {
         .padding(.bottom, bottomPadding)
     }
 
+    // body
     var body: some View {
         guard size.width > 0 && size.height > 0 else {
             return AnyView(EmptyView())
@@ -154,7 +155,7 @@ struct SettingsView: View {
                         .padding(.top, headerTopPadding)
                         .padding(.bottom, headerBottomPadding)
 
-                        // Work Length
+                        // 🕐 Work Length
                         timeSettingSection(title: "WORK", minutes: workMinutes, onMinus: {
                             let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
                             if currentIndex > 0 {
@@ -165,9 +166,9 @@ struct SettingsView: View {
                             if currentIndex < workMinutesOptions.count - 1 {
                                 workMinutes = workMinutesOptions[currentIndex + 1]
                             }
-                        }, bottomPadding: workBottomPadding)
+                        }, bottomPadding: betweenCardSpaceNarrow)
 
-                        // Break Length
+                        // 🕐 Break Length
                         timeSettingSection(title: "BREAK", minutes: breakMinutes, onMinus: {
                             if breakMinutes > 1 {
                                 breakMinutes -= 1
@@ -193,7 +194,7 @@ struct SettingsView: View {
                             )
                         }
                         // Session Label周りのpadding
-                        .padding(.bottom, sessionCardBottomPadding)
+                        .padding(.bottom, betweenCardSpaceNarrow)
 
                         // Manage Session Names
                         section(title: "", isCompact: true) {
@@ -282,7 +283,7 @@ struct SettingsView: View {
                         Color.moonBackground.ignoresSafeArea()
                         StaticStarsView(starCount: 30).allowsHitTesting(false)
                         FlowingStarsView(
-                            starCount: 40,
+                            starCount: flowingStarCount,
                             angle: .degrees(135),
                             durationRange: 24...40,
                             sizeRange: 2...4,
