@@ -2,6 +2,7 @@ import SwiftUI
 
 /// プレビュー用のMockデータ
 /// 本番コードへの逆流を防ぐため、単方向依存の構造を維持
+@MainActor
 struct PreviewData {
 
     // MARK: - View Models

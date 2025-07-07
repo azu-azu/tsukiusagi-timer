@@ -79,7 +79,7 @@ struct TimerPanel: View {
                 timerVM.appDidEnterBackground()
                 timerVM.saveTimerState()
             case .active:
-                timerVM.appWillEnterForeground()
+                Task { timerVM.appWillEnterForeground() }
             default:
                 break
             }

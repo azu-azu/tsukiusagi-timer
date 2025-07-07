@@ -104,11 +104,12 @@ final class TimerViewModel: ObservableObject {
         isRunning = true
         timer = Timer.scheduledTimer(withTimeInterval: 1.0,
                                     repeats: true) { [weak self] _ in
-            self?.tick()
+            Task { await self?.tick() }
         }
     }
 
     // MARK: - State Persistence
+    @MainActor
     func saveTimerState() {
         storedRemainingSeconds = timeRemaining
         storedIsRunning        = isRunning
@@ -116,6 +117,7 @@ final class TimerViewModel: ObservableObject {
         storedIsWorkSession    = isWorkSession
     }
 
+    @MainActor
     func restoreTimerState() {
         guard storedIsRunning else { return }
         let elapsed = Int(Date().timeIntervalSince1970 - storedBackgroundTimestamp)
@@ -124,8 +126,7 @@ final class TimerViewModel: ObservableObject {
         timeRemaining = left
         isRunning = left > 0
         if left == 0 {
-            // セッション完了処理を即実行（UI固まり防止）
-            sessionCompleted()
+            Task { [weak self] in await self?.sessionCompleted() }
         }
     }
 
@@ -142,7 +143,7 @@ final class TimerViewModel: ObservableObject {
         self.subtitleLabel = subtitleLabel
 
         // --- Restore timer state if needed ---
-        restoreTimerState()
+        Task { [weak self] in await self?.restoreTimerState() }
     }
 
     // 公開 API
@@ -223,27 +224,25 @@ final class TimerViewModel: ObservableObject {
     }
 
     // Stopボタン用：work終了→break画面へ
-    func forceFinishWorkSession() {
+    func forceFinishWorkSession() async {
         endTime = Date()
-
         // ★ startTime が残っているうちに履歴保存
         if let start = startTime, let end = endTime {
-            historyVM.add(
-                start: start,
-                end: end,
-                phase: .focus,
-                activity: activityLabel,
-                subtitle: subtitleLabel,
-                memo: nil
-            )
+            await MainActor.run {
+                historyVM.add(
+                    start: start,
+                    end: end,
+                    phase: .focus,
+                    activity: activityLabel,
+                    subtitle: subtitleLabel,
+                    memo: nil
+                )
+            }
         }
-
         stopTimer()  // ★ タイマー停止（時刻は残る）
-
         // ★ 削除：時刻は残す（表示のため）
         // startTime = nil
         // endTime = nil
-
         isSessionFinished = true
         isWorkSession = false
     }
@@ -262,16 +261,18 @@ final class TimerViewModel: ObservableObject {
     var formattedEndTime: String { formatTime(endTime) }
 
     // プライベート
+    @MainActor
     private func tick() {
         if timeRemaining > 0 {
             timeRemaining -= 1
         } else {
-            sessionCompleted()
+            Task { [weak self] in await self?.sessionCompleted() }
         }
     }
 
     // 終了
-    private func sessionCompleted(sendNotification: Bool = true) {
+    @MainActor
+    private func sessionCompleted(sendNotification: Bool = true) async {
         stopTimer()
         // セッション終了時刻を記録（既にセットされていれば上書きしない）
         if endTime == nil {
@@ -284,20 +285,20 @@ final class TimerViewModel: ObservableObject {
         }
         // 履歴に本フェーズを保存
         if let start = startTime, let end = endTime {
-            historyVM.add(
-                start: start,
-                end: end,
-                phase: isWorkSession ? .focus : .breakTime,
-                activity: activityLabel,
-                subtitle: subtitleLabel,
-                memo: nil
-            )
+            await MainActor.run {
+                historyVM.add(
+                    start: start,
+                    end: end,
+                    phase: isWorkSession ? .focus : .breakTime,
+                    activity: activityLabel,
+                    subtitle: subtitleLabel,
+                    memo: nil
+                )
+            }
         }
-
         // ★ 削除：時刻は残す（表示のため）
         // startTime = nil
         // endTime = nil
-
         // フェーズ別後処理
         if isWorkSession {
             finalizeWork(sendNotification: sendNotification)
@@ -365,6 +366,7 @@ final class TimerViewModel: ObservableObject {
     }
 
     // フォアグラウンド復帰
+    @MainActor
     func appWillEnterForeground() {
         guard let last = lastBackgroundDate,
             wasRunningBeforeBackground else { return }
@@ -380,7 +382,7 @@ final class TimerViewModel: ObservableObject {
             // 0になった時刻を計算
             let sessionEndDate = last.addingTimeInterval(TimeInterval(originalRemaining))
             endTime = sessionEndDate
-            sessionCompleted(sendNotification: false)
+            Task { [weak self] in await self?.sessionCompleted(sendNotification: false) }
         } else {
             shouldSuppressAnimation = true
             shouldSuppressSessionFinishedAnimation = true
