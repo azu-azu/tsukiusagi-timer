@@ -7,7 +7,7 @@ struct OldSessionItem: Codable, Identifiable {
     var detail: String?
 }
 
-struct SessionItem: Identifiable, Equatable {
+struct SessionItem: Identifiable, Codable, Equatable {
     let id: UUID
     var name: String
     var subtitle: String?

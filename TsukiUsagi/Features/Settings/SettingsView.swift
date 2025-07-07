@@ -299,8 +299,10 @@ struct SettingsView: View {
                 // 🛑 Stop
                 if timerVM.isWorkSession && timerVM.startTime != nil {
                     Button {
-                        timerVM.forceFinishWorkSession()
-                        dismiss()
+                        Task {
+                            await timerVM.forceFinishWorkSession()
+                            dismiss()
+                        }
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "forward.end")

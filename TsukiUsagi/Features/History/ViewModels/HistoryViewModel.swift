@@ -7,13 +7,14 @@ struct SessionRecord: Codable, Identifiable {
     var start, end: Date
     var phase: PomodoroPhase
     var activity: String          // 上位
-    var subtitle:   String?         // 下位
-    var memo:     String?         // ←★ new
+    var subtitle: String?         // 下位
+    var memo: String?             // ←★ new
 
     // 履歴行のduration（秒）
     var duration: TimeInterval { end.timeIntervalSince(start) }
 }
 
+@MainActor
 class HistoryViewModel: ObservableObject {
     @Published private(set) var history: [SessionRecord] = []
     private let store = HistoryStore()              // 下で定義
