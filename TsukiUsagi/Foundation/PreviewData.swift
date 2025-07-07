@@ -9,8 +9,8 @@ struct PreviewData {
     static let sampleSessionManager: SessionManager = {
         let manager = SessionManager()
         // プレビュー用のカスタムセッションを追加
-        try? manager.addSession(SessionItem(id: UUID(), name: "Preview Work", subtitle: "Sample session"))
-        try? manager.addSession(SessionItem(id: UUID(), name: "Preview Study", subtitle: "Another sample"))
+        try? manager.addSession(SessionItem(id: UUID(), name: "Preview Work", subtitle: "Sample session", isFixed: false))
+        try? manager.addSession(SessionItem(id: UUID(), name: "Preview Study", subtitle: "Another sample", isFixed: false))
         return manager
     }()
 
@@ -83,14 +83,14 @@ struct PreviewData {
     // MARK: - Sample Session Items
     /// サンプルセッションアイテム
     static let sampleSessionItems: [SessionItem] = [
-        SessionItem(id: UUID(), name: "Work", subtitle: "Professional tasks"),
-        SessionItem(id: UUID(), name: "Study", subtitle: "Learning activities"),
-        SessionItem(id: UUID(), name: "Read", subtitle: "Reading time"),
-        SessionItem(id: UUID(), name: "Exercise", subtitle: "Physical activity"),
-        SessionItem(id: UUID(), name: "Meditation", subtitle: "Mindfulness practice"),
-        SessionItem(id: UUID(), name: "Creative Work", subtitle: "Art and design"),
-        SessionItem(id: UUID(), name: "Planning", subtitle: "Strategy and planning"),
-        SessionItem(id: UUID(), name: "Review", subtitle: "Reflection time")
+        SessionItem(id: UUID(), name: "Work", subtitle: "Professional tasks", isFixed: true),
+        SessionItem(id: UUID(), name: "Study", subtitle: "Learning activities", isFixed: true),
+        SessionItem(id: UUID(), name: "Read", subtitle: "Reading time", isFixed: true),
+        SessionItem(id: UUID(), name: "Exercise", subtitle: "Physical activity", isFixed: false),
+        SessionItem(id: UUID(), name: "Meditation", subtitle: "Mindfulness practice", isFixed: false),
+        SessionItem(id: UUID(), name: "Creative Work", subtitle: "Art and design", isFixed: false),
+        SessionItem(id: UUID(), name: "Planning", subtitle: "Strategy and planning", isFixed: false),
+        SessionItem(id: UUID(), name: "Review", subtitle: "Reflection time", isFixed: false)
     ]
 
     // MARK: - Sample Session Records

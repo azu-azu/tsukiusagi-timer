@@ -15,7 +15,7 @@ struct SessionLabelSection: View {
     private let labelHeight: CGFloat = 28
 
     private var isCustomActivity: Bool {
-        !sessionManager.allSessions.map { $0.name }.contains(activity)
+        !sessionManager.sessions.map { $0.name }.contains(activity)
     }
 
     var body: some View {

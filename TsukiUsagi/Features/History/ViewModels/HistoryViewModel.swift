@@ -50,7 +50,7 @@ class HistoryViewModel: ObservableObject {
 
     // MARK: - isDeleted判定
     func isDeleted(sessionManager: SessionManager, activity: String) -> Bool {
-        !sessionManager.allSessions.contains(where: { $0.name == activity })
+        !sessionManager.sessions.contains(where: { $0.name == activity })
     }
 
     // (Deleted)表記付きアクティビティ名
@@ -63,9 +63,10 @@ class HistoryViewModel: ObservableObject {
         let sessionItem = SessionItem(
             id: UUID(),
             name: record.activity,
-            subtitle: record.subtitle
+            subtitle: record.subtitle,
+            isFixed: false
         )
-        try sessionManager.restoreFromHistory(sessionItem)
+        try sessionManager.addSession(sessionItem)
         // 復元後、ViewでisDeletedを再判定すること
     }
 
