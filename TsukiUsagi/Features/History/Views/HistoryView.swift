@@ -16,8 +16,11 @@ struct HistoryView: View {
     @State private var restoreError: String? = nil
     @State private var showRestoreAlert = false
 
-    private let dayCardSpacing: CGFloat = 2
-    private let dayModeCardHeight: CGFloat = 8
+    private let summaryCardHeight: CGFloat = 50
+    private let dayModeCardHeight: CGFloat = 40
+    private let dayModeCardSpacing: CGFloat = 2
+    private let timeWidth: CGFloat = 100
+    private let arrowWidth: CGFloat = 34
 
     private let cal = Calendar.current
 
@@ -108,7 +111,7 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func dayModeRecordsSection() -> some View {
-        VStack(alignment: .leading, spacing: dayCardSpacing) {
+        VStack(alignment: .leading, spacing: dayModeCardSpacing) {
             ForEach(records()) { rec in
                 recordRow(rec)
             }
@@ -117,21 +120,32 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func recordRow(_ rec: SessionRecord) -> some View {
-        let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
+        let isDeleted   = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
         let displayName = historyVM.displayActivity(sessionManager: sessionManager, activity: rec.activity)
 
-        HStack {
+        HStack(spacing: 0) {
             Text(rec.start.formatted(date: .omitted, time: .shortened))
+                .monospacedDigit()
                 .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+
+            Spacer().frame(width: 8)
+
             Image(systemName: "arrow.right")
-                .font(.caption)
+                .font(.caption2)
                 .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+
+            Spacer().frame(width: 8)
+
             Text(rec.end.formatted(date: .omitted, time: .shortened))
+                .monospacedDigit()
                 .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+
             Spacer(minLength: 8)
+
             Text("\(displayName) \(durationMinutes(rec)) min")
                 .foregroundColor(isDeleted ? .gray : DesignTokens.Colors.moonTextPrimary)
                 .opacity(isDeleted ? 0.5 : 1.0)
+
             if isDeleted {
                 Button("Restore") {
                     do {
@@ -145,10 +159,13 @@ struct HistoryView: View {
                 .foregroundColor(.blue)
             }
         }
-        .frame(height: dayModeCardHeight)
         .bodyFont()
-        .padding()
-        .roundedCard()
+        .frame(minHeight: dayModeCardHeight, alignment: .leading)
+        .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(DesignTokens.Colors.moonCardBG)
+        )
     }
 
     // ─────────────────────────────
@@ -256,14 +273,15 @@ struct HistoryView: View {
             ForEach(summaries, id: \.label) { s in
                 HStack {
                     Text(s.label)
+                        .padding(.leading, 8)
                         .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                     Spacer()
                     Text(TimeFormatting.totalText(s.total))
+                        .monospacedDigit()
+                        .frame(width: timeWidth, alignment: .trailing)
                         .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 }
-                .bodyFont()
-                .padding()
-                .roundedCard()
+                .summaryCardStyle(height: summaryCardHeight)
             }
         }
         .padding(.top, 16)
@@ -310,4 +328,23 @@ struct HistoryView: View {
 private func durationMinutes(_ rec: SessionRecord) -> Int {
     let sec = rec.end.timeIntervalSince(rec.start)
     return max(Int(sec) / 60, 1)
+}
+
+// 共通サマリーカードスタイル
+extension View {
+    func summaryCardStyle(
+        height: CGFloat = 32,
+        cornerRadius: CGFloat = 6,
+        backgroundColor: Color = DesignTokens.Colors.moonCardBG,
+        padding: EdgeInsets = EdgeInsets(top: 4, leading: DesignTokens.Padding.cardHorizontal, bottom: 4, trailing: DesignTokens.Padding.cardHorizontal)
+    ) -> some View {
+        self
+            .bodyFont()
+            .padding(padding)
+            .frame(height: height)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(backgroundColor)
+            )
+    }
 }

@@ -127,17 +127,15 @@ extension View {
 }
 
 // MARK: - Conditional Glitter Extension
-extension View {
-    /// 条件付きキラキラエフェクト
+extension Text {
+    /// 条件付きキラキラエフェクト（Text専用: マスクあり）
     func conditionalGlitter(
         show: Bool,
         size: CGFloat,
         resourceName: String
     ) -> some View {
         if show {
-            return AnyView(
-                self.glitter(size: size, resourceName: resourceName)
-            )
+            return AnyView(self.glitter(size: size, resourceName: resourceName))
         } else {
             return AnyView(self)
         }

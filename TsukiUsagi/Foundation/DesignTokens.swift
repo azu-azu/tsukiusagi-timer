@@ -63,6 +63,9 @@ struct DesignTokens {
         /// カード内パディング
         static let card: CGFloat = 12
 
+        /// カードの左右余白（全カード統一用）
+        static let cardHorizontal: CGFloat = 12
+
         /// セクション間パディング
         static let section: CGFloat = 24
     }
