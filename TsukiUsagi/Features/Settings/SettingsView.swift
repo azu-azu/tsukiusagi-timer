@@ -110,63 +110,70 @@ struct SettingsView: View {
 
     // body
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    // 自作ヘッダー
-                    HStack {
-                        Button("Close") {
-                            dismiss()
-                        }
-                        .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+        ZStack {
 
-                        Spacer()
+            NavigationView {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        // 自作ヘッダー
+                        HStack {
+                            Button("Close") {
+                                dismiss()
+                            }
+                            .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
-                        Button("Done") {
-                            dismiss()
+                            Spacer()
+
+                            Button("Done") {
+                                dismiss()
+                            }
+                            .disabled(shouldDisableDone())
+                            .foregroundColor(
+                                shouldDisableDone()
+                                    ? .gray
+                                    : DesignTokens.Colors.moonAccentBlue
+                            )
                         }
-                        .disabled(shouldDisableDone())
-                        .foregroundColor(shouldDisableDone() ? .gray : DesignTokens.Colors.moonAccentBlue)
+                        .padding(.horizontal)
+                        .padding(.top, headerTopPadding)
+                        .padding(.bottom, headerBottomPadding)
+
+                        workTimeSection()
+                            .padding(.bottom, betweenCardSpaceNarrow)
+
+                        breakTimeSection()
+                            .padding(.bottom, breakBottomPadding)
+
+                        sessionLabelSection()
+                            .padding(.bottom, betweenCardSpaceNarrow)
+
+                        manageSessionNamesSection()
+                            .padding(.bottom, betweenCardSpace)
+
+                        resetStopSection()
+                            .padding(.bottom, betweenCardSpace)
+
+                        viewHistorySection()
+                            .padding(.bottom, betweenCardSpace)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, headerTopPadding)
-                    .padding(.bottom, headerBottomPadding)
-
-                    workTimeSection()
-                        .padding(.bottom, betweenCardSpaceNarrow)
-
-                    breakTimeSection()
-                        .padding(.bottom, breakBottomPadding)
-
-                    sessionLabelSection()
-                        .padding(.bottom, betweenCardSpaceNarrow)
-
-                    manageSessionNamesSection()
-                        .padding(.bottom, betweenCardSpace)
-
-                    resetStopSection()
-                        .padding(.bottom, betweenCardSpace)
-
-                    viewHistorySection()
-                        .padding(.bottom, betweenCardSpace)
+                    .padding()
                 }
-                .padding()
+                .background(
+                    ZStack {
+                        Color.moonBackground.ignoresSafeArea()
+                        StaticStarsView(starCount: 30).allowsHitTesting(false)
+                        FlowingStarsView(
+                            starCount: flowingStarCount,
+                            angle: .degrees(135),
+                            durationRange: 24...40,
+                            sizeRange: 2...4,
+                            spawnArea: nil
+                        )
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: clipRadius))
+                .padding(.top, 0)
             }
-            .background(
-                ZStack {
-                    Color.moonBackground.ignoresSafeArea()
-                    StaticStarsView(starCount: 30).allowsHitTesting(false)
-                    FlowingStarsView(
-                        starCount: flowingStarCount,
-                        angle: .degrees(135),
-                        durationRange: 24...40,
-                        sizeRange: 2...4,
-                        spawnArea: nil
-                    )
-                }
-            )
-            .clipShape(RoundedRectangle(cornerRadius: clipRadius))
-            .padding(.top, 0)
         }
     }
 
@@ -176,7 +183,12 @@ struct SettingsView: View {
         isCompact: Bool = false,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: isCompact ? DesignTokens.Spacing.extraSmall : DesignTokens.Spacing.small) {
+        VStack(
+            alignment: .leading,
+            spacing: isCompact
+                ? DesignTokens.Spacing.extraSmall
+                : DesignTokens.Spacing.small
+        ) {
             if !title.isEmpty {
                 Text(title)
                     .subheadlineFont()
@@ -186,7 +198,9 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 10) {
                 content()
             }
-            .padding(isCompact ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12) : EdgeInsets())
+            .padding(isCompact
+                        ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+                        : EdgeInsets())
             .padding(isCompact ? .init() : .all)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
@@ -323,6 +337,7 @@ struct SettingsView: View {
         }
     }
 }
+
 
 extension UIApplication {
     func endEditing() {

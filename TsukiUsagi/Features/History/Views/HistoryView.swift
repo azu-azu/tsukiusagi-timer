@@ -19,7 +19,7 @@ struct HistoryView: View {
     private let summaryCardHeight: CGFloat = 50
     private let dayModeCardHeight: CGFloat = 40
     private let dayModeCardSpacing: CGFloat = 2
-    private let timeWidth: CGFloat = 100
+    private let timeWidth: CGFloat = 100 // 右端のtime
     private let arrowWidth: CGFloat = 34
 
     private let cal = Calendar.current
