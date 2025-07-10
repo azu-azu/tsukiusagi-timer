@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var sessionManager: SessionManager
+    @EnvironmentObject private var sessionManagerV2: SessionManagerV2
     @Environment(\.horizontalSizeClass) private var horizontalClass
     @Environment(\.verticalSizeClass) private var verticalClass
 
@@ -264,7 +265,7 @@ struct SettingsView: View {
 
     private func manageSessionNamesSection() -> some View {
         section(title: "", isCompact: true) {
-            NavigationLink(destination: SessionNameManagerView()) {
+            NavigationLink(destination: SessionNameManagerView().environmentObject(sessionManagerV2)) {
                 HStack {
                     Text("Manage Session Names")
                         .foregroundColor(DesignTokens.Colors.moonTextPrimary)
@@ -367,3 +368,15 @@ private func safeIsLandscape(size: CGSize, horizontalClass: UserInterfaceSizeCla
     // ルール集推奨の判定
     return horizontalClass == .regular || size.width > size.height
 }
+
+#if DEBUG
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        SettingsView(size: .init(width: 375, height: 812), safeAreaInsets: .init())
+            .environmentObject(TimerViewModel(historyVM: HistoryViewModel()))
+            .environmentObject(HistoryViewModel())
+            .environmentObject(SessionManager())
+            .environmentObject(SessionManagerV2())
+    }
+}
+#endif

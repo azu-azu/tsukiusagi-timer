@@ -5,6 +5,10 @@ struct Subtitle: Identifiable, Codable, Hashable {
     let id: UUID
     var text: String
 
+    var internalKey: String {
+        text.normalized.lowercased()
+    }
+
     init(id: UUID = UUID(), text: String) {
         self.id = id
         self.text = text
@@ -37,6 +41,14 @@ struct SessionName: Identifiable, Codable, Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(internalKey)
+    }
+}
+
+extension String {
+    var normalized: String {
+        self
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
     }
 }
 
