@@ -83,9 +83,10 @@ struct QuietMoonView: View {
                     .glitter(size: 24, resourceName: "gold")
                     .frame(maxWidth: .infinity)
 
+                // swiftlint:disable:next forbidden-font-direct
                 SelectableTextView(
                     text: bodyText,
-                    font: avenirNextUIFont(size: 18, weight: .regular, design: .monospaced),
+                    font: avenirNextUIFont(size: 18, weight: .regular, design: .monospaced), // [理由] QuietMoonViewは従来のAvenirNext等幅指定を維持
                     textColor: .white
                 )
                 .frame(height: dynamicHeight)
