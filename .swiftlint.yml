@@ -14,3 +14,6 @@ custom_rules:
       Font.systemの直接使用は推奨しません。DesignTokens.Fonts.xxx を使ってください。
       → Learn More: /docs/font_guidelines.md#why-forbidden
     severity: warning
+
+excluded:
+  - tools/swiftlint_ast_font_check.swift

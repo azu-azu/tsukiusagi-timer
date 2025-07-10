@@ -23,7 +23,8 @@ extension View {
         weight : Font.Weight   = .bold,
         design : Font.Design   = .default
     ) -> some View {
-        self.font(.system(size: size ?? 20, weight: weight, design: design))
+        // swiftlint:disable:next forbidden-font-direct
+        self.font(.system(size: size ?? 20, weight: weight, design: design)) // [理由] 旧API互換のため一時的に許可
             .foregroundColor(.white)
     }
 }
@@ -76,7 +77,8 @@ func avenirNextUIFont(size: CGFloat, weight: UIFont.Weight = .regular, design: U
         fontName = "AvenirNext-Regular"
     }
     guard let baseFont = UIFont(name: fontName, size: size) else {
-        return UIFont.systemFont(ofSize: size, weight: weight)
+        // swiftlint:disable:next forbidden-font-direct
+        return UIFont.systemFont(ofSize: size, weight: weight) // [理由] AvenirNextが取得できない場合のフォールバック
     }
     // デザイン（monospaced等）を適用
     if let descriptor = baseFont.fontDescriptor.withDesign(design) {
