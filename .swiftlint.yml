@@ -16,4 +16,5 @@ custom_rules:
     severity: warning
 
 excluded:
+  - tools/
   - tools/swiftlint_ast_font_check.swift
