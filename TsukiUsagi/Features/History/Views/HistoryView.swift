@@ -45,7 +45,7 @@ struct HistoryView: View {
                 Spacer()
 
                 Text(titleString())
-                    .headlineFont()
+                    .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
 
                 Spacer()
@@ -131,7 +131,7 @@ struct HistoryView: View {
             Spacer().frame(width: 8)
 
             Image(systemName: "arrow.right")
-                .font(.caption2)
+                .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
             Spacer().frame(width: 8)
@@ -155,11 +155,11 @@ struct HistoryView: View {
                         showRestoreAlert = true
                     }
                 }
-                .font(.caption)
+                .font(DesignTokens.Fonts.caption)
                 .foregroundColor(.blue)
             }
         }
-        .bodyFont()
+        .font(DesignTokens.Fonts.label)
         .frame(minHeight: dayModeCardHeight, alignment: .leading)
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .background(
@@ -267,7 +267,7 @@ struct HistoryView: View {
     private func summarySection(title: String, summaries: [LabelSummary]) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
-                .subheadlineFont()
+                .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
             ForEach(summaries, id: \.label) { s in
@@ -308,12 +308,12 @@ struct HistoryView: View {
         if !memos.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 Text("📝 Memos")
-                    .subheadlineFont()
+                    .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
                 ForEach(memos, id: \.self) { memo in
                     Text(memo)
-                        .captionFont()
+                        .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                         .padding(8)
                         .roundedCard()
@@ -339,7 +339,7 @@ extension View {
         padding: EdgeInsets = EdgeInsets(top: 4, leading: DesignTokens.Padding.cardHorizontal, bottom: 4, trailing: DesignTokens.Padding.cardHorizontal)
     ) -> some View {
         self
-            .bodyFont()
+            .font(DesignTokens.Fonts.label)
             .padding(padding)
             .frame(height: height)
             .background(

@@ -52,7 +52,7 @@ class SessionManager: ObservableObject {
                     return
                 }
                 if let data = defaults.data(forKey: self.userDefaultsKeyV1),
-                   let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data) {
+                    let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data) {
                     var seen = Set<String>()
                     let migrated: [SessionItem] = oldItems.compactMap { old in
                         let key = old.name.lowercased()
@@ -79,7 +79,7 @@ class SessionManager: ObservableObject {
             DispatchQueue.global(qos: .userInitiated).async {
                 let defaults = UserDefaults.standard
                 if let data = defaults.data(forKey: self.userDefaultsKeyV2),
-                   let decoded = try? JSONDecoder().decode([SessionItem].self, from: data) {
+                    let decoded = try? JSONDecoder().decode([SessionItem].self, from: data) {
                     Task { await MainActor.run { self.sessions = SessionItem.fixedSessions + decoded }; continuation.resume() }
                 } else {
                     Task { await MainActor.run { self.sessions = SessionItem.fixedSessions }; continuation.resume() }

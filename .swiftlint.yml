@@ -1,0 +1,16 @@
+custom_rules:
+  forbidden-font-direct:
+    name: "Forbidden direct font usage"
+    regex: '\.font\(\.(system|custom)'
+    message: |
+      直値フォント指定は禁止！DesignTokens.Fonts.labelBold などSemantic名を使ってください。
+      → See: /docs/lint_exceptions.md
+      → Learn More: /docs/font_guidelines.md#why-forbidden
+    severity: error
+  discouraged-font-usage:
+    name: "Discouraged Font.system usage"
+    regex: 'Font\.system'
+    message: |
+      Font.systemの直接使用は推奨しません。DesignTokens.Fonts.xxx を使ってください。
+      → Learn More: /docs/font_guidelines.md#why-forbidden
+    severity: warning

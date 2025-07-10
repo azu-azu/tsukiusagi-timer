@@ -75,7 +75,7 @@ struct TotalCard: View {
                 size: glitterSize,
                 resourceName: glitterResource
             )
-            .scaledFont(style: .title3, weight: .medium, design: .monospaced)
+            .font(DesignTokens.Fonts.numericLabel)
             .foregroundColor(textColor)
             .padding(DesignTokens.Padding.card)
             .frame(maxWidth: .infinity)
