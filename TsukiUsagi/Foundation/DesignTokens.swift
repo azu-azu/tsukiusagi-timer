@@ -123,35 +123,29 @@ struct DesignTokens {
 
     // MARK: - Fonts
     struct Fonts {
-        /// ラベル用フォント（17pt Regular）
-        /// - Note: Dynamic Type対応する場合は textStyle(.body) の使用を検討すること
+        // swiftlint:disable:next discouraged-font-usage
         static var label: Font {
-            Font.system(size: 17, weight: .regular, design: .default)
+            Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        /// ラベル用ボールド（17pt Bold）
-        /// - Note: Dynamic Type対応する場合は textStyle(.body, weight: .bold) の使用を検討すること
+        // swiftlint:disable:next discouraged-font-usage
         static var labelBold: Font {
-            Font.system(size: 17, weight: .bold, design: .default)
+            Font.system(size: 17, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        /// セクションタイトル用フォント（15pt Regular）
-        /// - Note: Dynamic Type対応する場合は textStyle(.subheadline) の使用を検討すること
+        // swiftlint:disable:next discouraged-font-usage
         static var sectionTitle: Font {
-            Font.system(size: 15, weight: .regular, design: .default)
+            Font.system(size: 15, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        /// 数字用ラベル（17pt Regular）
-        /// - Note: 将来monospacedにしたい場合はここで切り替える
+        // swiftlint:disable:next discouraged-font-usage
         static var numericLabel: Font {
-            Font.system(size: 17, weight: .regular, design: .default)
+            Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        /// キャプション用フォント（12pt Regular）
-        /// - Note: Dynamic Type対応する場合は textStyle(.caption) の使用を検討すること
+        // swiftlint:disable:next discouraged-font-usage
         static var caption: Font {
-            Font.system(size: 12, weight: .regular, design: .default)
+            Font.system(size: 12, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        /// タイトル用フォント（20pt Bold）
-        /// - Note: Dynamic Type対応する場合は textStyle(.title3, weight: .bold) の使用を検討すること
+        // swiftlint:disable:next discouraged-font-usage
         static var title: Font {
-            Font.system(size: 20, weight: .bold, design: .default)
+            Font.system(size: 20, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
     }
 
