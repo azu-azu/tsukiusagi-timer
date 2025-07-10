@@ -123,27 +123,21 @@ struct DesignTokens {
 
     // MARK: - Fonts
     struct Fonts {
-        // swiftlint:disable:next discouraged-font-usage
         static var label: Font {
             Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var labelBold: Font {
             Font.system(size: 17, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var sectionTitle: Font {
             Font.system(size: 15, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var numericLabel: Font {
             Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var caption: Font {
             Font.system(size: 12, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var title: Font {
             Font.system(size: 20, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
