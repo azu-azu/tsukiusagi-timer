@@ -15,7 +15,8 @@ struct ContentView: View {
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM:   TimerViewModel
     @StateObject private var sessionManager = SessionManager()
-
+	@EnvironmentObject private var sessionManagerV2: SessionManagerV2
+	
     // Environment for Orientation and Accessibility
     @Environment(\.horizontalSizeClass) private var horizontalClass
     @Environment(\.verticalSizeClass) private var verticalClass
@@ -295,6 +296,7 @@ struct ContentView: View {
                             .environmentObject(timerVM)
                             .environmentObject(historyVM)
                             .environmentObject(sessionManager)
+                            .environmentObject(sessionManagerV2)
                     }
                     .sheet(isPresented: $showingEditRecord) {
                         TimerEditView()
@@ -386,8 +388,10 @@ struct ContentView: View {
     let history = HistoryViewModel()
     let timer   = TimerViewModel(historyVM: history)
     let sessionManager = SessionManager()
+    let sessionManagerV2 = SessionManagerV2()
     return ContentView()
         .environmentObject(history)
         .environmentObject(timer)
         .environmentObject(sessionManager)
+        .environmentObject(sessionManagerV2)
 }
