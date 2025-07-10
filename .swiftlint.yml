@@ -17,4 +17,6 @@ custom_rules:
 
 excluded:
   - tools/
-  - tools/swiftlint_ast_font_check.swift
+  - ./tools/
+  - tools/**
+  - ./tools/**
