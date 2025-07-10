@@ -50,7 +50,7 @@ enum MoonMessage {
             "the Moon simply saw—",
             "",
             "not what you’ve done,",
-            "but how softly you’ve been?"
+            "but how softly you’ve been?",
 
             // 月は静かに見ている——
             // 何をしたか、ではなく、
