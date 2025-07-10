@@ -56,7 +56,7 @@ struct PreviewData {
         "iPad Pro (11-inch) (4th generation)",
         "iPad Air (5th generation)",
         "iPad (10th generation)",
-        "iPad mini (6th generation)"
+        "iPad mini (6th generation)",
     ]
 
     // MARK: - Sample Content
@@ -91,7 +91,7 @@ struct PreviewData {
         SessionItem(id: UUID(), name: "Meditation", subtitle: "Mindfulness practice", isFixed: false),
         SessionItem(id: UUID(), name: "Creative Work", subtitle: "Art and design", isFixed: false),
         SessionItem(id: UUID(), name: "Planning", subtitle: "Strategy and planning", isFixed: false),
-        SessionItem(id: UUID(), name: "Review", subtitle: "Reflection time", isFixed: false)
+        SessionItem(id: UUID(), name: "Review", subtitle: "Reflection time", isFixed: false),
     ]
 
     // MARK: - Sample Session Records
@@ -123,7 +123,7 @@ struct PreviewData {
             activity: "Read",
             subtitle: "Reading time",
             memo: "Finished chapter 5 of the book"
-        )
+        ),
     ]
 
     // MARK: - Environment Values

@@ -6,7 +6,7 @@ struct BackgroundBlack: View {
 			gradient: Gradient(stops: [
 				.init(color: Color(hex: "#0a0a0a"), location: 0.0), // ほぼ黒
 				.init(color: Color(hex: "#121212"), location: 0.7), // 深い黒
-				.init(color: Color(hex: "#1a1a1a"), location: 1.0)  // やや明るい黒
+				.init(color: Color(hex: "#1a1a1a"), location: 1.0),  // やや明るい黒
 			]),
 			startPoint: .top,
 			endPoint: .bottom

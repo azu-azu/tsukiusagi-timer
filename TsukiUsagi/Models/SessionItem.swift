@@ -22,7 +22,7 @@ extension SessionItem {
         [
             SessionItem(id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!, name: "Work", subtitle: nil, isFixed: true),
             SessionItem(id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!, name: "Study", subtitle: nil, isFixed: true),
-            SessionItem(id: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!, name: "Read", subtitle: nil, isFixed: true)
+            SessionItem(id: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!, name: "Read", subtitle: nil, isFixed: true),
         ]
     }
 }

@@ -11,7 +11,7 @@ struct UsagiView_1: View {
 	// 呼び出し側でサイズを渡せるようにプロパティ化
 	let width:  CGFloat
 	let height: CGFloat
-	
+
 	@State private var float = false
 	@Environment(\.displayScale) private var scale   // ← 1x / 2x / 3x
 
