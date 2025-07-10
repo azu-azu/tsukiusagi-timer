@@ -12,6 +12,9 @@ struct DesignTokens {
         /// プライマリテキスト色（Light/Dark モード対応）
         static let moonTextPrimary = Color("moonTextPrimary")
 
+        /// 白テキスト色（全体統一用）
+        static let textWhite = Color.white
+
         /// セカンダリテキスト色（Light/Dark モード対応）
         static let moonTextSecondary = Color("moonTextSecondary")
 
@@ -118,6 +121,28 @@ struct DesignTokens {
         static let title: CGFloat = 28
     }
 
+    // MARK: - Fonts
+    struct Fonts {
+        static var label: Font {
+            Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
+        }
+        static var labelBold: Font {
+            Font.system(size: 17, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
+        }
+        static var sectionTitle: Font {
+            Font.system(size: 15, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
+        }
+        static var numericLabel: Font {
+            Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
+        }
+        static var caption: Font {
+            Font.system(size: 12, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
+        }
+        static var title: Font {
+            Font.system(size: 20, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
+        }
+    }
+
     // MARK: - Animation
     struct Animation {
         /// 短いアニメーション（0.2秒）
@@ -152,5 +177,30 @@ struct DesignTokens {
 
         /// Reduce Motion 時のアニメーション速度範囲
         static let reducedDurationRange: ClosedRange<Double> = 30...50
+    }
+}
+
+#if canImport(UIKit)
+import UIKit
+#endif
+
+extension DesignTokens {
+    struct UIKitFonts {
+        static var numericLabel: UIFont {
+#if canImport(UIKit)
+            return UIFont.monospacedDigitSystemFont(ofSize: 18, weight: .medium)
+#else
+            fatalError("UIFont is only available on UIKit platforms.")
+#endif
+        }
+    }
+    struct UIColors {
+        static var textWhite: UIColor {
+#if canImport(UIKit)
+            return UIColor.white
+#else
+            fatalError("UIColor is only available on UIKit platforms.")
+#endif
+        }
     }
 }

@@ -52,7 +52,7 @@ struct SessionLabelSection: View {
                         } label: {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.moonTextMuted)
-                                .font(.system(size: 16))
+                                .font(DesignTokens.Fonts.label)
                         }
                     }
                 } else {

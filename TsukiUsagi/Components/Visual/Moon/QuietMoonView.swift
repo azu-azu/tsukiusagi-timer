@@ -77,13 +77,16 @@ struct QuietMoonView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 20) {
+                // glitter(font:) は現状APIでは使えません！
+                // Textには必ず glitter(size:fontName:resourceName:) を使うこと！
                 Text(title)
                     .glitter(size: 24, resourceName: "gold")
                     .frame(maxWidth: .infinity)
 
+                // swiftlint:disable:next forbidden-font-direct
                 SelectableTextView(
                     text: bodyText,
-                    font: avenirNextUIFont(size: 18, weight: .regular, design: .monospaced),
+                    font: avenirNextUIFont(size: 18, weight: .regular, design: .monospaced), // [理由] QuietMoonViewは従来のAvenirNext等幅指定を維持
                     textColor: .white
                 )
                 .frame(height: dynamicHeight)

@@ -142,9 +142,9 @@ extension View {
         RoundedCard {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Standard Card")
-                    .headlineFont()
+                    .font(DesignTokens.Fonts.labelBold)
                 Text("This is a standard card with default padding and styling.")
-                    .bodyFont()
+                    .font(DesignTokens.Fonts.label)
             }
         }
 
@@ -152,7 +152,7 @@ extension View {
         RoundedCard(isCompact: true, cornerRadius: DesignTokens.CornerRadius.small) {
             HStack {
                 Text("Compact Card")
-                    .subheadlineFont()
+                    .font(DesignTokens.Fonts.sectionTitle)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .foregroundColor(DesignTokens.Colors.moonTextMuted)
@@ -163,9 +163,9 @@ extension View {
         RoundedCard(isLarge: true, cornerRadius: DesignTokens.CornerRadius.large) {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Large Card")
-                    .titleFont()
+                    .font(DesignTokens.Fonts.title)
                 Text("This is a large card with more padding and a larger corner radius.")
-                    .bodyFont()
+                    .font(DesignTokens.Fonts.label)
                 Button("Action") {
                     // Action
                 }
@@ -179,7 +179,7 @@ extension View {
             backgroundColor: DesignTokens.Colors.moonErrorBackground.opacity(0.3)
         ) {
             Text("Custom Background")
-                .bodyFont()
+                .font(DesignTokens.Fonts.label)
         }
     }
     .padding()

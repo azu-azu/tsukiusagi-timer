@@ -47,7 +47,7 @@ struct SessionNameManagerView: View {
         RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("New Session Name")
-                    .headlineFont()
+                    .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 TextField("Session Name (required)", text: $name)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -80,7 +80,7 @@ struct SessionNameManagerView: View {
                         Text("Add Subtitle")
                     }
                 }
-                .font(.caption)
+                .font(DesignTokens.Fonts.caption)
                 .buttonStyle(.plain)
                 Button("Add") {
                     addSession()
@@ -156,14 +156,14 @@ struct SessionNameManagerView: View {
                                 Text("Add Subtitle")
                             }
                         }
-                        .font(.caption)
+                        .font(DesignTokens.Fonts.caption)
                         .buttonStyle(.plain)
                     }
                     Spacer()
                     Button("Save") {
                         Task { await saveEdit(session.id) }
                     }
-                    .font(.caption)
+                    .font(DesignTokens.Fonts.caption)
                     .buttonStyle(.borderedProminent)
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.saveButton)
                     Button("Cancel") {
@@ -171,7 +171,7 @@ struct SessionNameManagerView: View {
                         editingName = ""
                         editingSubtitles = [""]
                     }
-                    .font(.caption)
+                    .font(DesignTokens.Fonts.caption)
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.cancelButton)
                 }
             } else {
@@ -182,7 +182,7 @@ struct SessionNameManagerView: View {
                             .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                         ForEach(session.subtitles) { subtitle in
                             Text(subtitle.text)
-                                .captionFont()
+                                .font(DesignTokens.Fonts.caption)
                                 .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                         }
                     }
@@ -192,7 +192,7 @@ struct SessionNameManagerView: View {
                         editingName = session.name
                         editingSubtitles = session.subtitles.map { $0.text }
                     }
-                    .font(.caption)
+                    .font(DesignTokens.Fonts.caption)
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.editButton)
                     Button(role: .destructive) {
                         showDeleteAlert = AlertID(id: session.id)

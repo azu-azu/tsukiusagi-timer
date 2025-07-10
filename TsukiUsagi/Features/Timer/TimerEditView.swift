@@ -54,7 +54,7 @@ struct TimerEditView: View {
                         Spacer()
 
                         Text("Edit Record")
-                            .font(.headline)
+                            .font(DesignTokens.Fonts.labelBold)
                             .foregroundColor(.moonTextPrimary)
 
                         Spacer()
@@ -176,7 +176,7 @@ struct TimerEditView: View {
         VStack(alignment: .leading, spacing: isCompact ? 5 : 10) {
             HStack {
                 Text(title)
-                    .font(.subheadline)
+                    .font(DesignTokens.Fonts.sectionTitle)
                     .fontWeight(.semibold)
                     .foregroundColor(.moonTextSecondary)
                     .padding(.horizontal, 4)
