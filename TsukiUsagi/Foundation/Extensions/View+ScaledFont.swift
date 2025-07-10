@@ -37,62 +37,6 @@ extension View {
             .font(.system(size: size, weight: weight, design: design))
             .dynamicTypeSize(...maxSize)
     }
-
-    // MARK: - プリセットスタイル
-
-    /// 見出し用フォント
-    func headlineFont() -> some View {
-        scaledFont(style: .headline, weight: .semibold)
-    }
-
-    /// サブヘッドライン用フォント
-    func subheadlineFont() -> some View {
-        scaledFont(style: .subheadline, weight: .semibold)
-    }
-
-    /// ボディ用フォント
-    func bodyFont() -> some View {
-        scaledFont(style: .body, weight: .regular)
-    }
-
-    /// キャプション用フォント
-    func captionFont() -> some View {
-        scaledFont(style: .caption, weight: .regular)
-    }
-
-    /// タイトル用フォント
-    func titleFont() -> some View {
-        scaledFont(style: .title3, weight: .medium)
-    }
-
-    /// モノスペースフォント（時間表示用）
-    func monospaceFont() -> some View {
-        scaledFont(style: .title3, weight: .medium, design: .monospaced)
-    }
-
-    // MARK: - アクセシビリティ対応
-
-    /// アクセシビリティ対応フォント（制限なし）
-    func accessibilityFont(
-        style: Font.TextStyle,
-        weight: Font.Weight = .regular,
-        design: Font.Design = .rounded
-    ) -> some View {
-        self
-            .font(.system(style, design: design, weight: weight))
-            // アクセシビリティサイズの制限なし
-    }
-
-    /// アクセシビリティ対応フォント（サイズ指定）
-    func accessibilityFont(
-        size: CGFloat,
-        weight: Font.Weight = .regular,
-        design: Font.Design = .rounded
-    ) -> some View {
-        self
-            .font(.system(size: size, weight: weight, design: design))
-            // アクセシビリティサイズの制限なし
-    }
 }
 
 // MARK: - フォントサイズ定数

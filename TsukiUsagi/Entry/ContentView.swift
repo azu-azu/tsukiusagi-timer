@@ -16,7 +16,7 @@ struct ContentView: View {
     @EnvironmentObject private var timerVM:   TimerViewModel
     @StateObject private var sessionManager = SessionManager()
 	@EnvironmentObject private var sessionManagerV2: SessionManagerV2
-	
+
     // Environment for Orientation and Accessibility
     @Environment(\.horizontalSizeClass) private var horizontalClass
     @Environment(\.verticalSizeClass) private var verticalClass
@@ -329,9 +329,7 @@ struct ContentView: View {
         ZStack(alignment: .bottom) {
             HStack {
                 Text(DateFormatters.displayDateNoYear.string(from: Date()))
-                    .titleWhite(size: 16,
-                                weight: .bold,
-                                design: .monospaced)
+                    .titleWhite(size: 16, weight: .bold, design: .monospaced)
                     .frame(height: buttonHeight, alignment: .bottom)
 
                 Spacer(minLength: 0)
@@ -346,7 +344,7 @@ struct ContentView: View {
                         .frame(width: buttonHeight,
                                 height: buttonHeight,
                                 alignment: .bottom)
-                        .foregroundColor(.white)
+                        .foregroundColor(DesignTokens.Colors.textWhite)
                 }
             }
 

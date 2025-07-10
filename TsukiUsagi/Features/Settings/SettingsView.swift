@@ -23,8 +23,8 @@ struct SettingsView: View {
     // 複雑なバリデーションや一時保存が必要になった場合は
     // @State private var tempActivityLabel を導入することを検討
 
-    private let workMinutesOptions: [Int] =
-        [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
+    // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
+    private let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
 
     // ヘッダー周りのpadding
     private let headerTopPadding: CGFloat = 5
@@ -93,12 +93,12 @@ struct SettingsView: View {
         section(title: "", isCompact: true) {
             HStack {
                 Text(title)
-                    .scaledFont(style: .callout, weight: .bold)
+                    .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                     .frame(width: timeTitleWidth, alignment: .leading)
 
                 Text(String(format: "%2d min", minutes))
-                    .monospaceFont()
+                    .font(DesignTokens.Fonts.numericLabel)
                     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
 
                 Spacer()
@@ -192,7 +192,7 @@ struct SettingsView: View {
         ) {
             if !title.isEmpty {
                 Text(title)
-                    .subheadlineFont()
+                    .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.Colors.moonTextSecondary)
             }
 
@@ -215,16 +215,26 @@ struct SettingsView: View {
         section(title: "", isCompact: true) {
             HStack {
                 Text("WORK")
-                    .scaledFont(style: .callout, weight: .bold)
+                    .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                     .frame(width: timeTitleWidth, alignment: .leading)
                 Text(String(format: "%2d min", workMinutes))
-                    .monospaceFont()
+                    .font(DesignTokens.Fonts.numericLabel)
                     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 Spacer()
                 plusMinusButtons(
-                    onMinus: { if workMinutes > 1 { workMinutes -= 1 } },
-                    onPlus: { if workMinutes < 60 { workMinutes += 1 } }
+                    onMinus: {
+                        let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
+                        if currentIndex > 0 {
+                            workMinutes = workMinutesOptions[currentIndex - 1]
+                        }
+                    },
+                    onPlus: {
+                        let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
+                        if currentIndex < workMinutesOptions.count - 1 {
+                            workMinutes = workMinutesOptions[currentIndex + 1]
+                        }
+                    }
                 )
             }
         }
@@ -234,11 +244,11 @@ struct SettingsView: View {
         section(title: "", isCompact: true) {
             HStack {
                 Text("BREAK")
-                    .scaledFont(style: .callout, weight: .bold)
+                    .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                     .frame(width: timeTitleWidth, alignment: .leading)
                 Text(String(format: "%2d min", breakMinutes))
-                    .monospaceFont()
+                    .font(DesignTokens.Fonts.numericLabel)
                     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 Spacer()
                 plusMinusButtons(
