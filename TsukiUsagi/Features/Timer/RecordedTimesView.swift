@@ -15,13 +15,15 @@ struct RecordedTimesView: View {
                     Text("Final 🌑 \(formattedEndTime)")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .titleWhiteAvenir(size: 18, weight: .regular)
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.Colors.textWhite)
             }
 
             // ３行目の分数表示
             Text("-- \(actualSessionMinutes) min")
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .titleWhiteAvenir(size: 18, weight: .regular)
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.Colors.textWhite)
                 .frame(maxWidth: 110)
 
             // ✏️
@@ -29,7 +31,7 @@ struct RecordedTimesView: View {
                 Spacer()
                 Button(action: onEdit) {
                     Image(systemName: "pencil")
-                        .font(.system(size: 30))
+                        .font(DesignTokens.Fonts.title)
                         .foregroundColor(.yellow)
                 }
                 .accessibilityLabel("Edit session record")

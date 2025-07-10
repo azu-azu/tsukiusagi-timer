@@ -148,7 +148,7 @@ extension View {
         // 標準背景
         VStack {
             Text("Standard Background")
-                .headlineFont()
+                .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.Colors.moonTextPrimary)
         }
         .frame(height: 200)
@@ -158,7 +158,7 @@ extension View {
         // 軽量背景
         VStack {
             Text("Light Background")
-                .headlineFont()
+                .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.Colors.moonTextPrimary)
         }
         .frame(height: 200)
@@ -168,7 +168,7 @@ extension View {
         // 適応的背景
         VStack {
             Text("Adaptive Background")
-                .headlineFont()
+                .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.Colors.moonTextPrimary)
         }
         .frame(height: 200)

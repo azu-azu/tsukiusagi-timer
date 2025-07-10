@@ -5,35 +5,11 @@
 //  フォントを使うための共通モディファイア
 //
 
-// 使い方
-// Text("Hello Avenir!")
-//     .titleWhite()
-//     .titleWhite(design: .rounded)
-//     .titleWhite(size: 32, design: .rounded)
-//     .titleWhite(size: 18, design: .monospaced)
-//
-//     .titleWhiteAvenir(size: 32, weight: .bold)
-//     .titleWhiteAvenir(size: 24, weight: .regular)
-
 
 import SwiftUI
+import UIKit
 
-// *汎用 system
-private struct TitleWhiteModifier: ViewModifier {
-    let size:   CGFloat
-
-     // 可変
-    let weight: Font.Weight
-    let design: Font.Design
-
-    func body(content: Content) -> some View {
-        content
-            .font(.system(size: size,
-                        weight: weight,
-                        design: design))
-            .foregroundColor(.white)
-    }
-}
+// （font関連ViewModifier拡張をすべて削除）
 
 // シンタックスシュガー
 extension View {
@@ -47,13 +23,8 @@ extension View {
         weight : Font.Weight   = .bold,
         design : Font.Design   = .default
     ) -> some View {
-        self.modifier(
-            TitleWhiteModifier(
-                size: size ?? Font.TextStyle.title3.size,
-                weight: weight,
-                design: design
-            )
-        )
+        self.font(.system(size: size ?? 20, weight: weight, design: design))
+            .foregroundColor(.white)
     }
 }
 
@@ -83,53 +54,34 @@ extension View {
     ) -> some View {
         self.modifier(
             AvenirNextWhiteModifier(
-                size: size ?? Font.TextStyle.title3.size,
+                size: size ?? 20,
                 weight: weight
             )
         )
     }
 }
 
-// ---
-
-func avenirNextUIFont(size: CGFloat, weight: Font.Weight, design: Font.Design = .default) -> UIFont {
-    // AvenirNextのweight対応
+/// AvenirNext系のUIFontを生成
+/// - Parameters:
+///   - size: フォントサイズ
+///   - weight: UIFont.Weight（.regular/.bold など）
+///   - design: UIFontDescriptor.SystemDesign（.default/.monospaced など）
+/// - Returns: UIFont
+func avenirNextUIFont(size: CGFloat, weight: UIFont.Weight = .regular, design: UIFontDescriptor.SystemDesign = .default) -> UIFont {
     let fontName: String
     switch weight {
-    case .ultraLight: fontName = "AvenirNext-UltraLight"
-    case .thin:       fontName = "AvenirNext-Thin"
-    case .light:      fontName = "AvenirNext-Light"
-    case .regular:    fontName = "AvenirNext-Regular"
-    case .medium:     fontName = "AvenirNext-Medium"
-    case .semibold:   fontName = "AvenirNext-DemiBold"
-    case .bold:       fontName = "AvenirNext-Bold"
-    case .heavy:      fontName = "AvenirNext-Heavy"
-    case .black:      fontName = "AvenirNext-Black"
-    default:          fontName = "AvenirNext-Regular"
+    case .bold:
+        fontName = "AvenirNext-Bold"
+    default:
+        fontName = "AvenirNext-Regular"
     }
-
-    // デザイン指定
-    if design == .monospaced {
-        // monospaced指定の場合はAvenirNextではなくmonospacedSystemFontを使う
-        return UIFont.monospacedSystemFont(ofSize: size, weight: toUIFontWeight(weight))
+    guard let baseFont = UIFont(name: fontName, size: size) else {
+        return UIFont.systemFont(ofSize: size, weight: weight)
+    }
+    // デザイン（monospaced等）を適用
+    if let descriptor = baseFont.fontDescriptor.withDesign(design) {
+        return UIFont(descriptor: descriptor, size: size)
     } else {
-        // 通常のAvenirNext
-        return UIFont(name: fontName, size: size) ?? .systemFont(ofSize: size)
-    }
-}
-
-// Font.Weight → UIFont.Weight 変換
-private func toUIFontWeight(_ weight: Font.Weight) -> UIFont.Weight {
-    switch weight {
-    case .ultraLight: return .ultraLight
-    case .thin:       return .thin
-    case .light:      return .light
-    case .regular:    return .regular
-    case .medium:     return .medium
-    case .semibold:   return .semibold
-    case .bold:       return .bold
-    case .heavy:      return .heavy
-    case .black:      return .black
-    default:          return .regular
+        return baseFont
     }
 }

@@ -12,6 +12,9 @@ struct DesignTokens {
         /// プライマリテキスト色（Light/Dark モード対応）
         static let moonTextPrimary = Color("moonTextPrimary")
 
+        /// 白テキスト色（全体統一用）
+        static let textWhite = Color.white
+
         /// セカンダリテキスト色（Light/Dark モード対応）
         static let moonTextSecondary = Color("moonTextSecondary")
 
@@ -118,6 +121,40 @@ struct DesignTokens {
         static let title: CGFloat = 28
     }
 
+    // MARK: - Fonts
+    struct Fonts {
+        /// ラベル用フォント（17pt Regular）
+        /// - Note: Dynamic Type対応する場合は textStyle(.body) の使用を検討すること
+        static var label: Font {
+            Font.system(size: 17, weight: .regular, design: .default)
+        }
+        /// ラベル用ボールド（17pt Bold）
+        /// - Note: Dynamic Type対応する場合は textStyle(.body, weight: .bold) の使用を検討すること
+        static var labelBold: Font {
+            Font.system(size: 17, weight: .bold, design: .default)
+        }
+        /// セクションタイトル用フォント（15pt Regular）
+        /// - Note: Dynamic Type対応する場合は textStyle(.subheadline) の使用を検討すること
+        static var sectionTitle: Font {
+            Font.system(size: 15, weight: .regular, design: .default)
+        }
+        /// 数字用ラベル（17pt Regular）
+        /// - Note: 将来monospacedにしたい場合はここで切り替える
+        static var numericLabel: Font {
+            Font.system(size: 17, weight: .regular, design: .default)
+        }
+        /// キャプション用フォント（12pt Regular）
+        /// - Note: Dynamic Type対応する場合は textStyle(.caption) の使用を検討すること
+        static var caption: Font {
+            Font.system(size: 12, weight: .regular, design: .default)
+        }
+        /// タイトル用フォント（20pt Bold）
+        /// - Note: Dynamic Type対応する場合は textStyle(.title3, weight: .bold) の使用を検討すること
+        static var title: Font {
+            Font.system(size: 20, weight: .bold, design: .default)
+        }
+    }
+
     // MARK: - Animation
     struct Animation {
         /// 短いアニメーション（0.2秒）
@@ -152,5 +189,30 @@ struct DesignTokens {
 
         /// Reduce Motion 時のアニメーション速度範囲
         static let reducedDurationRange: ClosedRange<Double> = 30...50
+    }
+}
+
+#if canImport(UIKit)
+import UIKit
+#endif
+
+extension DesignTokens {
+    struct UIKitFonts {
+        static var numericLabel: UIFont {
+#if canImport(UIKit)
+            return UIFont.monospacedDigitSystemFont(ofSize: 18, weight: .medium)
+#else
+            fatalError("UIFont is only available on UIKit platforms.")
+#endif
+        }
+    }
+    struct UIColors {
+        static var textWhite: UIColor {
+#if canImport(UIKit)
+            return UIColor.white
+#else
+            fatalError("UIColor is only available on UIKit platforms.")
+#endif
+        }
     }
 }
