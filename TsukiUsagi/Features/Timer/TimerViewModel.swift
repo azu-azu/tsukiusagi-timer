@@ -322,9 +322,10 @@ final class TimerViewModel: ObservableObject {
         // 休憩タイマーを"見えないまま"走らせる
         var secondsLeft = breakMinutes * 60 // 表示は更新しない
         print("📝 secondsLeft  =", secondsLeft)
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
-                                     repeats: true)
-        { [weak self] t in
+        timer = Timer.scheduledTimer(
+            withTimeInterval: 1.0,
+            repeats: true
+        ) { [weak self] t in
             guard let self else { return }
             secondsLeft -= 1
             if secondsLeft <= 0 {

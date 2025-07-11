@@ -10,8 +10,22 @@ struct PreviewData {
     static let sampleSessionManager: SessionManager = {
         let manager = SessionManager()
         // プレビュー用のカスタムセッションを追加
-        try? manager.addSession(SessionItem(id: UUID(), name: "Preview Work", subtitle: "Sample session", isFixed: false))
-        try? manager.addSession(SessionItem(id: UUID(), name: "Preview Study", subtitle: "Another sample", isFixed: false))
+        try? manager.addSession(
+            SessionItem(
+                id: UUID(),
+                name: "Preview Work",
+                subtitle: "Sample session",
+                isFixed: false
+            )
+        )
+        try? manager.addSession(
+            SessionItem(
+                id: UUID(),
+                name: "Preview Study",
+                subtitle: "Another sample",
+                isFixed: false
+            )
+        )
         return manager
     }()
 
@@ -20,7 +34,7 @@ struct PreviewData {
         let historyViewModel = HistoryViewModel()
         // プレビュー用の履歴データを追加
         historyViewModel.add(
-            start: Date().addingTimeInterval(-3600), // 1時間前
+            start: Date().addingTimeInterval(-3600),
             end: Date(),
             phase: .focus,
             activity: "Preview Work",
@@ -28,7 +42,7 @@ struct PreviewData {
             memo: "This is a preview memo"
         )
         historyViewModel.add(
-            start: Date().addingTimeInterval(-7200), // 2時間前
+            start: Date().addingTimeInterval(-7200),
             end: Date().addingTimeInterval(-3600),
             phase: .focus,
             activity: "Preview Study",
@@ -87,14 +101,54 @@ struct PreviewData {
 
     /// サンプルセッションアイテム
     static let sampleSessionItems: [SessionItem] = [
-        SessionItem(id: UUID(), name: "Work", subtitle: "Professional tasks", isFixed: true),
-        SessionItem(id: UUID(), name: "Study", subtitle: "Learning activities", isFixed: true),
-        SessionItem(id: UUID(), name: "Read", subtitle: "Reading time", isFixed: true),
-        SessionItem(id: UUID(), name: "Exercise", subtitle: "Physical activity", isFixed: false),
-        SessionItem(id: UUID(), name: "Meditation", subtitle: "Mindfulness practice", isFixed: false),
-        SessionItem(id: UUID(), name: "Creative Work", subtitle: "Art and design", isFixed: false),
-        SessionItem(id: UUID(), name: "Planning", subtitle: "Strategy and planning", isFixed: false),
-        SessionItem(id: UUID(), name: "Review", subtitle: "Reflection time", isFixed: false),
+        SessionItem(
+            id: UUID(),
+            name: "Work",
+            subtitle: "Professional tasks",
+            isFixed: true
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Study",
+            subtitle: "Learning activities",
+            isFixed: true
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Read",
+            subtitle: "Reading time",
+            isFixed: true
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Exercise",
+            subtitle: "Physical activity",
+            isFixed: false
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Meditation",
+            subtitle: "Mindfulness practice",
+            isFixed: false
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Creative Work",
+            subtitle: "Art and design",
+            isFixed: false
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Planning",
+            subtitle: "Strategy and planning",
+            isFixed: false
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Review",
+            subtitle: "Reflection time",
+            isFixed: false
+        )
     ]
 
     // MARK: - Sample Session Records
@@ -127,7 +181,7 @@ struct PreviewData {
             activity: "Read",
             subtitle: "Reading time",
             memo: "Finished chapter 5 of the book"
-        ),
+        )
     ]
 
     // MARK: - Environment Values
