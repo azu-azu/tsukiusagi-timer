@@ -229,13 +229,20 @@ struct FlowingStarView: View {
             .onAppear {
                 let start = CGPoint(
                     x: size.width * star.startRatio.x,
-                    y: safeAreaInsets.top + (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.startRatio.y
+                    y: safeAreaInsets.top + (
+                        (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.startRatio.y
+                    )
                 )
                 let end = CGPoint(
                     x: size.width * star.endRatio.x,
-                    y: safeAreaInsets.top + (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.endRatio.y
+                    y: safeAreaInsets.top + (
+                        (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.endRatio.y
+                    )
                 )
-                pos = start
+                pos = CGPoint(
+                    x: start.x + (end.x - start.x) * progress,
+                    y: start.y + (end.y - start.y) * progress
+                )
 
                 let animate = {
                     pos = end

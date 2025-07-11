@@ -27,7 +27,9 @@ struct StaticStarsView: View {
                         .opacity(0.6)
                         .position(
                             x: size.width * star.xRatio,
-                            y: safeAreaInsets.top + (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.yRatio
+                            y: safeAreaInsets.top + (
+                                (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.yRatio
+                            )
                         )
                 }
             }

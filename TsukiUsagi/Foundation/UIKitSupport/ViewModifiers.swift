@@ -36,7 +36,6 @@ private struct AvenirNextWhiteModifier: ViewModifier {
     func body(content: Content) -> some View {
         let fontName: String = (weight == .bold) ? "AvenirNext-Bold" : "AvenirNext"
         return content
-            // swiftlint:disable:next forbidden-font-direct
             .font(
                 .custom(fontName, size: size)
             )
