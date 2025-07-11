@@ -128,32 +128,32 @@ enum DesignTokens {
     // MARK: - Fonts
 
     enum Fonts {
-        // swiftlint:disable:next discouraged-font-usage
         static var label: Font {
+            // swiftlint:disable:next discouraged-font-usage
             Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var labelBold: Font {
+            // swiftlint:disable:next discouraged-font-usage
             Font.system(size: 17, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var sectionTitle: Font {
+            // swiftlint:disable:next discouraged-font-usage
             Font.system(size: 15, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var numericLabel: Font {
+            // swiftlint:disable:next discouraged-font-usage
             Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var caption: Font {
+            // swiftlint:disable:next discouraged-font-usage
             Font.system(size: 12, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var title: Font {
+            // swiftlint:disable:next discouraged-font-usage
             Font.system(size: 20, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
-        // swiftlint:disable:next discouraged-font-usage
         static var timerDisplay: Font {
+            // swiftlint:disable:next discouraged-font-usage
             Font.system(size: 65, weight: .bold, design: .rounded) // [理由] タイマー表示用の特大・丸みデザイン
         }
     }
