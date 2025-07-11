@@ -13,7 +13,7 @@ struct HistoryView: View {
 
     @State private var selectedDate = Calendar.current.startOfDay(for: Date()) // 基準日
     @State private var mode: Granularity = .day // 粒度
-    @State private var restoreError: String? = nil
+    @State private var restoreError: String?
     @State private var showRestoreAlert = false
 
     private let summaryCardHeight: CGFloat = 50
