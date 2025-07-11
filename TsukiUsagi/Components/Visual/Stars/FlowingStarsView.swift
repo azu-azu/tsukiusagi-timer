@@ -97,10 +97,13 @@ class FlowingStarsGenerator: ObservableObject {
         let centerCount = min(10, starCount) // 最初に中央から生成する星の個数
 
         stars = (0 ..< starCount).map { i in
+            // swiftlint:disable:next identifier_name
+            // i: ループカウンタ（短いスコープのため許容）
             let (startRatio, endRatio): (CGPoint, CGPoint)
 
             // 呼び出し時の最初のみ、中央からも星を出現させる。中央が空く問題を回避するため
             if i < centerCount {
+                // swiftlint:disable:next identifier_name
                 // x, y: 中央付近の座標（数学的意味で許容）
                 let x = CGFloat.random(in: 0.48 ... 0.52)
                 let y = CGFloat.random(in: areaToUse.minYRatio ... areaToUse.maxYRatio)
