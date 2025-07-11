@@ -22,6 +22,7 @@ class HistoryViewModel: ObservableObject {
     init() { history = store.load() } // 起動時に読込
 
     // 保存
+    // TODO: パラメータ数が6個のため、SwiftLint違反。将来的に構造体やラッパー型でまとめて渡す設計にリファクタリングすることを検討。
     func add(start: Date, end: Date,
              phase: PomodoroPhase,
              activity: String,

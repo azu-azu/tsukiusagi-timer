@@ -68,7 +68,11 @@ extension View {
 ///   - weight: UIFont.Weight（.regular/.bold など）
 ///   - design: UIFontDescriptor.SystemDesign（.default/.monospaced など）
 /// - Returns: UIFont
-func avenirNextUIFont(size: CGFloat, weight: UIFont.Weight = .regular, design: UIFontDescriptor.SystemDesign = .default) -> UIFont {
+func avenirNextUIFont(
+    size: CGFloat,
+    weight: UIFont.Weight = .regular,
+    design: UIFontDescriptor.SystemDesign = .default
+) -> UIFont {
     let fontName: String
     switch weight {
     case .bold:

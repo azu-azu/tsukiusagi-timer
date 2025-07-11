@@ -346,7 +346,12 @@ extension View {
         height: CGFloat = 32,
         cornerRadius: CGFloat = 6,
         backgroundColor: Color = DesignTokens.Colors.moonCardBG,
-        padding: EdgeInsets = EdgeInsets(top: 4, leading: DesignTokens.Padding.cardHorizontal, bottom: 4, trailing: DesignTokens.Padding.cardHorizontal)
+        padding: EdgeInsets = EdgeInsets(
+            top: 4,
+            leading: DesignTokens.Padding.cardHorizontal,
+            bottom: 4,
+            trailing: DesignTokens.Padding.cardHorizontal
+        )
     ) -> some View {
         font(DesignTokens.Fonts.label)
             .padding(padding)

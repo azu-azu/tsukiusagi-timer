@@ -155,7 +155,11 @@ class FlowingStarsGenerator: ObservableObject {
     }
 
     // エリア内で開始・終了点を生成
-    private static func generateStartAndEndPoints(for area: StarSpawnArea, angle: CGFloat, distance _: CGFloat = 1.2) -> (CGPoint, CGPoint) {
+    private static func generateStartAndEndPoints(
+        for area: StarSpawnArea,
+        angle: CGFloat,
+        distance _: CGFloat = 1.2
+    ) -> (CGPoint, CGPoint) {
         let startX = CGFloat.random(in: area.minXRatio ... area.maxXRatio)
         let startY = CGFloat.random(in: area.minYRatio ... area.maxYRatio)
 
@@ -184,13 +188,27 @@ struct FlowingStarsView: View {
     @StateObject private var generator: FlowingStarsGenerator
     @State private var lastSize: CGSize = .zero
 
-    init(starCount: Int, angle: Angle, durationRange: ClosedRange<Double>, sizeRange: ClosedRange<CGFloat>, spawnArea: StarSpawnArea?) {
+    init(
+        starCount: Int,
+        angle: Angle,
+        durationRange: ClosedRange<Double>,
+        sizeRange: ClosedRange<CGFloat>,
+        spawnArea: StarSpawnArea?
+    ) {
         self.starCount = starCount
         self.angle = angle
         self.durationRange = durationRange
         self.sizeRange = sizeRange
         self.spawnArea = spawnArea
-        _generator = StateObject(wrappedValue: FlowingStarsGenerator(starCount: starCount, angle: angle, durationRange: durationRange, sizeRange: sizeRange, spawnArea: spawnArea))
+        _generator = StateObject(
+            wrappedValue: FlowingStarsGenerator(
+                starCount: starCount,
+                angle: angle,
+                durationRange: durationRange,
+                sizeRange: sizeRange,
+                spawnArea: spawnArea
+            )
+        )
     }
 
     var body: some View {
@@ -284,4 +302,5 @@ struct FlowingStarView: View {
     }
 }
 
-// 例: FlowingStarsView(starCount: 50, angle: .degrees(90), durationRange: 24...40, sizeRange: 2...4, band: nil) のようにstarCountや各種パラメータを指定可能
+// 例: FlowingStarsView(starCount: 50, angle: .degrees(90), durationRange: 24...40, sizeRange: 2...4, band: nil)
+// のようにstarCountや各種パラメータを指定可能

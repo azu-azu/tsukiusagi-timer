@@ -20,9 +20,8 @@ final class TimerViewModel: ObservableObject {
     @Published private(set) var startTime: Date? // セッション開始時刻
     @Published private(set) var endTime: Date? // セッション終了時刻
     @Published var flashStars = false
-    @Published private(set) var lastBackgroundDate: Date? = nil
-    private var wasRunningBeforeBackground = false
-    private var savedRemainingSeconds: Int? = nil
+    @Published private(set) var lastBackgroundDate: Date?
+    private var savedRemainingSeconds: Int?
 
     // アプリに戻ってきた時にstartアニメを発火しない
     private var shouldSuppressAnimation = false
@@ -31,11 +30,11 @@ final class TimerViewModel: ObservableObject {
     var workLengthMinutes: Int { workMinutes }
 
     // セッションごとのworkMinutesを保存
-    private var sessionWorkMinutes: Int? = nil
+    private var sessionWorkMinutes: Int?
     // 実作業秒数
     private var actualWorkedSeconds: Int = 0
     // 最後に再開した時刻
-    private var lastResumedTime: Date? = nil
+    private var lastResumedTime: Date?
 
     // 実際のセッション時間を分で計算
     var actualSessionMinutes: Int {
@@ -363,7 +362,10 @@ final class TimerViewModel: ObservableObject {
                 actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
                 lastResumedTime = nil
             }
-            NotificationManager.shared.scheduleSessionEndNotification(after: timeRemaining, phase: isWorkSession ? .focus : .breakTime)
+            NotificationManager.shared.scheduleSessionEndNotification(
+                after: timeRemaining,
+                phase: isWorkSession ? .focus : .breakTime
+            )
         }
         stopTimer() // 一旦止める
     }

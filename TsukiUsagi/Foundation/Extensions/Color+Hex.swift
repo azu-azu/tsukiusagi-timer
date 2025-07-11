@@ -26,18 +26,10 @@ extension Color {
     }
 
     /// 夜空の背景（ZStack全体に使用）
-    // static let moonBackground = Color(red: 18/255, green: 28/255, blue: 44/255)
     static let moonBackground = Color(hex: "#060c22")
 
     /// 月明かりのカード背景（セクションやボタン）
-    // static let moonCardBackground = Color(red: 45/255, green: 54/255, blue: 77/255)
-    // static let moonCardBackground = Color(red: 255/255, green: 255/255, blue: 255/255)
     static let moonCardBackground = Color(hex: "#4b95ba")
-
-    /// やさしい白文字（テキスト全般）
-//    static let moonTextPrimary = Color.white.opacity(0.9)
-//    static let moonTextSecondary = Color.white.opacity(0.6)
-//    static let moonTextMuted = Color.white.opacity(0.35)
 
     /// 月の光を思わせる青（アクセント、リンクカラー）
     static let moonAccentBlue = Color(red: 97 / 255, green: 163 / 255, blue: 242 / 255)
