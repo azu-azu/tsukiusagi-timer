@@ -53,8 +53,7 @@ class SessionManager: ObservableObject {
                     return
                 }
                 if let data = defaults.data(forKey: self.userDefaultsKeyV1),
-                    let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data)
-                {
+                    let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data) {
                     // swiftlint:disable:next identifier_name
                     // seen: 重複チェック用の一時変数（用途明示）
                     var seen = Set<String>()
