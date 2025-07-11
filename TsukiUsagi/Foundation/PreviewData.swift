@@ -17,9 +17,9 @@ struct PreviewData {
 
     /// サンプルHistoryViewModel
     static let sampleHistoryVM: HistoryViewModel = {
-        let vm = HistoryViewModel()
+        let historyViewModel = HistoryViewModel()
         // プレビュー用の履歴データを追加
-        vm.add(
+        historyViewModel.add(
             start: Date().addingTimeInterval(-3600), // 1時間前
             end: Date(),
             phase: .focus,
@@ -27,7 +27,7 @@ struct PreviewData {
             subtitle: "Sample session",
             memo: "This is a preview memo"
         )
-        vm.add(
+        historyViewModel.add(
             start: Date().addingTimeInterval(-7200), // 2時間前
             end: Date().addingTimeInterval(-3600),
             phase: .focus,
@@ -35,7 +35,7 @@ struct PreviewData {
             subtitle: "Another sample",
             memo: nil
         )
-        return vm
+        return historyViewModel
     }()
 
     /// サンプルTimerViewModel
