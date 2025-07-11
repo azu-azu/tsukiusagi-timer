@@ -85,7 +85,6 @@ struct QuietMoonView: View {
 
                 SelectableTextView(
                     text: bodyText,
-                    // swiftlint:disable:next forbidden-font-direct
                     font: avenirNextUIFont(
                         size: 18,
                         weight: .regular,
