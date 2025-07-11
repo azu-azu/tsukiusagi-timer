@@ -151,6 +151,10 @@ enum DesignTokens {
         static var title: Font {
             Font.system(size: 20, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
+
+        static var timerDisplay: Font {
+            Font.system(size: 65, weight: .bold, design: .rounded) // [理由] タイマー表示用の特大・丸みデザイン
+        }
     }
 
     // MARK: - Animation
