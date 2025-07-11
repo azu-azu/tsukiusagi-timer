@@ -2,10 +2,10 @@ import SwiftUI
 
 /// デザイン定数の一元管理
 /// Asset Catalog からカラーを参照し、Light/Dark モードに対応
-struct DesignTokens {
-
+enum DesignTokens {
     // MARK: - Colors (Asset Catalog 参照)
-    struct Colors {
+
+    enum Colors {
         /// カード背景色（Light/Dark モード対応）
         static let moonCardBG = Color.moonCardBackground.opacity(0.15)
 
@@ -32,7 +32,8 @@ struct DesignTokens {
     }
 
     // MARK: - Corner Radius
-    struct CornerRadius {
+
+    enum CornerRadius {
         /// 小さい角丸（6pt）
         static let small: CGFloat = 6
 
@@ -47,7 +48,8 @@ struct DesignTokens {
     }
 
     // MARK: - Padding
-    struct Padding {
+
+    enum Padding {
         /// 極小パディング（4pt）
         static let extraSmall: CGFloat = 4
 
@@ -74,7 +76,8 @@ struct DesignTokens {
     }
 
     // MARK: - Spacing
-    struct Spacing {
+
+    enum Spacing {
         /// 極小スペース（2pt）
         static let extraSmall: CGFloat = 2
 
@@ -98,7 +101,8 @@ struct DesignTokens {
     }
 
     // MARK: - Font Sizes
-    struct FontSize {
+
+    enum FontSize {
         /// キャプション（12pt）
         static let caption: CGFloat = 12
 
@@ -122,29 +126,36 @@ struct DesignTokens {
     }
 
     // MARK: - Fonts
-    struct Fonts {
+
+    enum Fonts {
         static var label: Font {
             Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
+
         static var labelBold: Font {
             Font.system(size: 17, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
+
         static var sectionTitle: Font {
             Font.system(size: 15, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
+
         static var numericLabel: Font {
             Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
+
         static var caption: Font {
             Font.system(size: 12, weight: .regular, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
+
         static var title: Font {
             Font.system(size: 20, weight: .bold, design: .default) // [理由] セマンティック名の実体定義としてのみ許可
         }
     }
 
     // MARK: - Animation
-    struct Animation {
+
+    enum Animation {
         /// 短いアニメーション（0.2秒）
         static let short: Double = 0.2
 
@@ -159,7 +170,8 @@ struct DesignTokens {
     }
 
     // MARK: - Star Animation
-    struct StarAnimation {
+
+    enum StarAnimation {
         /// 通常時の星の数
         static let normalStarCount: Int = 40
 
@@ -167,40 +179,41 @@ struct DesignTokens {
         static let reducedStarCount: Int = 20
 
         /// 通常時のFPS
-        static let normalFPS: Double = 1/60
+        static let normalFPS: Double = 1 / 60
 
         /// Reduce Motion 時のFPS
-        static let reducedFPS: Double = 1/30
+        static let reducedFPS: Double = 1 / 30
 
         /// 通常時のアニメーション速度範囲
-        static let normalDurationRange: ClosedRange<Double> = 24...40
+        static let normalDurationRange: ClosedRange<Double> = 24 ... 40
 
         /// Reduce Motion 時のアニメーション速度範囲
-        static let reducedDurationRange: ClosedRange<Double> = 30...50
+        static let reducedDurationRange: ClosedRange<Double> = 30 ... 50
     }
 }
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 extension DesignTokens {
-    struct UIKitFonts {
+    enum UIKitFonts {
         static var numericLabel: UIFont {
-#if canImport(UIKit)
-            return UIFont.monospacedDigitSystemFont(ofSize: 18, weight: .medium)
-#else
-            fatalError("UIFont is only available on UIKit platforms.")
-#endif
+            #if canImport(UIKit)
+                return UIFont.monospacedDigitSystemFont(ofSize: 18, weight: .medium)
+            #else
+                fatalError("UIFont is only available on UIKit platforms.")
+            #endif
         }
     }
-    struct UIColors {
+
+    enum UIColors {
         static var textWhite: UIColor {
-#if canImport(UIKit)
-            return UIColor.white
-#else
-            fatalError("UIColor is only available on UIKit platforms.")
-#endif
+            #if canImport(UIKit)
+                return UIColor.white
+            #else
+                fatalError("UIColor is only available on UIKit platforms.")
+            #endif
         }
     }
 }

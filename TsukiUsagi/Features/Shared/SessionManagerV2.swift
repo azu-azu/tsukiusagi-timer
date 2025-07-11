@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 class SessionManagerV2: ObservableObject {
@@ -104,7 +104,7 @@ class SessionManagerV2: ObservableObject {
 
     func saveAsync() async throws {
         do {
-            let data = try JSONEncoder().encode(self.sessions)
+            let data = try JSONEncoder().encode(sessions)
             UserDefaults.standard.set(data, forKey: "customSessionsV3")
         } catch {
             print("❌ SaveAsync failed: \(error)")

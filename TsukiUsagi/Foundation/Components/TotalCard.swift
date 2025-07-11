@@ -3,8 +3,8 @@ import SwiftUI
 /// 合計表示用カードコンポーネント
 /// History/Settings で使用する統一された合計表示スタイル
 struct TotalCard: View {
-
     // MARK: - Properties
+
     let text: String
     let cornerRadius: CGFloat
     let backgroundColor: Color
@@ -14,6 +14,7 @@ struct TotalCard: View {
     let glitterResource: String
 
     // MARK: - Environment
+
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.sizeCategory) private var sizeCategory
 
@@ -62,12 +63,13 @@ struct TotalCard: View {
         self.cornerRadius = cornerRadius
         self.backgroundColor = backgroundColor ?? DesignTokens.Colors.moonCardBG.opacity(0.15)
         self.textColor = textColor ?? DesignTokens.Colors.moonTextPrimary
-        self.showGlitter = false
-        self.glitterSize = 0
-        self.glitterResource = ""
+        showGlitter = false
+        glitterSize = 0
+        glitterResource = ""
     }
 
     // MARK: - Body
+
     var body: some View {
         Text(text)
             .conditionalGlitter(
@@ -88,6 +90,7 @@ struct TotalCard: View {
 }
 
 // MARK: - Convenience Modifiers
+
 extension View {
     /// 合計カードスタイルを適用
     func totalCard(
@@ -127,6 +130,7 @@ extension View {
 }
 
 // MARK: - Conditional Glitter Extension
+
 extension Text {
     /// 条件付きキラキラエフェクト（Text専用: マスクあり）
     func conditionalGlitter(
@@ -135,7 +139,7 @@ extension Text {
         resourceName: String
     ) -> some View {
         if show {
-            return AnyView(self.glitter(size: size, resourceName: resourceName))
+            return AnyView(glitter(size: size, resourceName: resourceName))
         } else {
             return AnyView(self)
         }
@@ -143,6 +147,7 @@ extension Text {
 }
 
 // MARK: - Preview
+
 #Preview("TotalCard") {
     VStack(spacing: 20) {
         // 標準合計カード

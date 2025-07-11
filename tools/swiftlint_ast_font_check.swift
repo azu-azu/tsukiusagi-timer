@@ -18,10 +18,12 @@ class FontCallVisitor: SyntaxVisitor {
     init(file: String) { self.file = file }
     override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
         if let called = node.calledExpression.as(MemberAccessExprSyntax.self),
-           called.name.text == "font" {
+           called.name.text == "font"
+        {
             if let arg = node.argumentList.first?.expression.as(FunctionCallExprSyntax.self),
                let fontType = arg.calledExpression.as(MemberAccessExprSyntax.self)?.name.text,
-               ["system", "custom"].contains(fontType) {
+               ["system", "custom"].contains(fontType)
+            {
                 let pos = node.positionAfterSkippingLeadingTrivia
                 print("\(file):\(pos.line ?? 0):\(pos.column ?? 0): error: Forbidden direct font usage detected in AST.")
                 print("→ 修正例: DesignTokens.Fonts.labelBold")
@@ -38,6 +40,7 @@ if CommandLine.arguments.count < 2 {
     print("Usage: swift run tools/swiftlint_ast_font_check.swift <target_dir>")
     exit(1)
 }
+
 let targetDir = CommandLine.arguments[1]
 let fm = FileManager.default
 let enumerator = fm.enumerator(atPath: targetDir)

@@ -50,7 +50,6 @@ final class HapticManager {
         gen.impactOccurred()
     }
 
-
     // MARK: - Notification Feedback
 
     /// 成功通知フィードバック

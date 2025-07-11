@@ -3,9 +3,9 @@ import Foundation
 /// 型安全なアクセシビリティID の管理
 /// プロダクトコードとUITest両方で同じIDを参照できるように構造化
 struct AccessibilityIDs {
-
     // MARK: - Settings
-    struct Settings {
+
+    enum Settings {
         /// 作業時間フィールド
         static let workMinutesField = "settings_workMinutesField"
 
@@ -44,7 +44,8 @@ struct AccessibilityIDs {
     }
 
     // MARK: - Session Manager
-    struct SessionManager {
+
+    enum SessionManager {
         /// セッション名フィールド
         static let nameField = "sessionManager_nameField"
 
@@ -73,7 +74,8 @@ struct AccessibilityIDs {
     }
 
     // MARK: - History
-    struct History {
+
+    enum History {
         /// 日モードボタン
         static let dayModeButton = "history_dayModeButton"
 
@@ -101,7 +103,8 @@ struct AccessibilityIDs {
     }
 
     // MARK: - Timer
-    struct Timer {
+
+    enum Timer {
         /// タイマーパネル
         static let timerPanel = "timer_timerPanel"
 
@@ -116,7 +119,8 @@ struct AccessibilityIDs {
     }
 
     // MARK: - Common
-    struct Common {
+
+    enum Common {
         /// 閉じるボタン
         static let closeButton = "common_closeButton"
 
@@ -134,6 +138,7 @@ struct AccessibilityIDs {
     }
 
     // MARK: - Validation
+
     /// アクセシビリティID の有効性を検証
     /// 重複や無効な文字が含まれていないかチェック
     static func validate() -> [String] {

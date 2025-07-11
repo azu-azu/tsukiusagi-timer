@@ -3,14 +3,15 @@ import SwiftUI
 /// 統一カードスタイルコンポーネント
 /// Asset Catalog からカラーを参照し、Light/Dark モードに対応
 struct RoundedCard<Content: View>: View {
-
     // MARK: - Properties
+
     let content: Content
     let cornerRadius: CGFloat
     let padding: EdgeInsets
     let backgroundColor: Color
 
     // MARK: - Environment
+
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.sizeCategory) private var sizeCategory
 
@@ -56,21 +57,21 @@ struct RoundedCard<Content: View>: View {
         self.content = content()
         self.cornerRadius = cornerRadius
         if isLarge {
-            self.padding = EdgeInsets(
+            padding = EdgeInsets(
                 top: DesignTokens.Padding.large,
                 leading: DesignTokens.Padding.large,
                 bottom: DesignTokens.Padding.large,
                 trailing: DesignTokens.Padding.large
             )
         } else if isCompact {
-            self.padding = EdgeInsets(
+            padding = EdgeInsets(
                 top: DesignTokens.Padding.small,
                 leading: DesignTokens.Padding.medium,
                 bottom: DesignTokens.Padding.small,
                 trailing: DesignTokens.Padding.medium
             )
         } else {
-            self.padding = EdgeInsets(
+            padding = EdgeInsets(
                 top: DesignTokens.Padding.card,
                 leading: DesignTokens.Padding.card,
                 bottom: DesignTokens.Padding.card,
@@ -81,6 +82,7 @@ struct RoundedCard<Content: View>: View {
     }
 
     // MARK: - Body
+
     var body: some View {
         content
             .padding(padding)
@@ -93,6 +95,7 @@ struct RoundedCard<Content: View>: View {
 }
 
 // MARK: - Convenience Modifiers
+
 extension View {
     /// 標準的なカードスタイルを適用
     func roundedCard(
@@ -136,6 +139,7 @@ extension View {
 }
 
 // MARK: - Preview
+
 #Preview("RoundedCard") {
     VStack(spacing: 20) {
         // 標準カード

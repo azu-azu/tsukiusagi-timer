@@ -112,7 +112,6 @@ struct SettingsView: View {
     // body
     var body: some View {
         ZStack {
-
             NavigationView {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -166,8 +165,8 @@ struct SettingsView: View {
                         FlowingStarsView(
                             starCount: flowingStarCount,
                             angle: .degrees(135),
-                            durationRange: 24...40,
-                            sizeRange: 2...4,
+                            durationRange: 24 ... 40,
+                            sizeRange: 2 ... 4,
                             spawnArea: nil
                         )
                     }
@@ -200,8 +199,8 @@ struct SettingsView: View {
                 content()
             }
             .padding(isCompact
-                        ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
-                        : EdgeInsets())
+                ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+                : EdgeInsets())
             .padding(isCompact ? .init() : .all)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
@@ -291,7 +290,7 @@ struct SettingsView: View {
     private func resetStopSection() -> some View {
         section(title: "", isCompact: false) {
             VStack(spacing: 14) {
-                Button() {
+                Button {
                     timerVM.resetTimer()
                     dismiss()
                 } label: {
@@ -351,7 +350,6 @@ struct SettingsView: View {
     }
 }
 
-
 extension UIApplication {
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -374,19 +372,19 @@ struct DismissKeyboardOnTap: ViewModifier {
 }
 
 // 横画面判定用ユーティリティ
-private func safeIsLandscape(size: CGSize, horizontalClass: UserInterfaceSizeClass?, verticalClass: UserInterfaceSizeClass?) -> Bool {
+private func safeIsLandscape(size: CGSize, horizontalClass: UserInterfaceSizeClass?, verticalClass _: UserInterfaceSizeClass?) -> Bool {
     // ルール集推奨の判定
     return horizontalClass == .regular || size.width > size.height
 }
 
 #if DEBUG
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView(size: .init(width: 375, height: 812), safeAreaInsets: .init())
-            .environmentObject(TimerViewModel(historyVM: HistoryViewModel()))
-            .environmentObject(HistoryViewModel())
-            .environmentObject(SessionManager())
-            .environmentObject(SessionManagerV2())
+    struct SettingsView_Previews: PreviewProvider {
+        static var previews: some View {
+            SettingsView(size: .init(width: 375, height: 812), safeAreaInsets: .init())
+                .environmentObject(TimerViewModel(historyVM: HistoryViewModel()))
+                .environmentObject(HistoryViewModel())
+                .environmentObject(SessionManager())
+                .environmentObject(SessionManagerV2())
+        }
     }
-}
 #endif
