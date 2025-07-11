@@ -84,13 +84,18 @@ class FlowingStarsGenerator: ObservableObject {
     private let spawnArea: StarSpawnArea?
     private var lastSize: CGSize = .zero
 
-    init(starCount: Int, angle: Angle, durationRange: ClosedRange<Double>, sizeRange: ClosedRange<CGFloat>, spawnArea: StarSpawnArea?) {
-        self.starCount = starCount
-        self.angle = angle
-        self.durationRange = durationRange
-        self.sizeRange = sizeRange
-        self.spawnArea = spawnArea
-        generateStars(for: .zero)
+    init(
+        starCount: Int,
+        angle: Angle,
+        durationRange: ClosedRange<Double>,
+        sizeRange: ClosedRange<CGFloat>,
+        spawnArea: StarSpawnArea?) {
+            self.starCount = starCount
+            self.angle = angle
+            self.durationRange = durationRange
+            self.sizeRange = sizeRange
+            self.spawnArea = spawnArea
+            generateStars(for: .zero)
     }
 
     func regenerateStars(for size: CGSize) {

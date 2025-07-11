@@ -39,9 +39,9 @@ extension Text {
     ///   - resourceName: GIF file in the main bundle (default "black_yellow")
     ///   - resourceExt:  File extension (default "gif")
     func glitter(size: CGFloat = 36,
-                 fontName: String = "AvenirNext-Bold",
-                 resourceName: String = "black_yellow",
-                 resourceExt: String = "gif") -> some View
+                fontName: String = "AvenirNext-Bold",
+                resourceName: String = "black_yellow",
+                resourceExt: String = "gif") -> some View
     {
         let customFont = Font.custom(fontName, size: size)
         return modifier(
