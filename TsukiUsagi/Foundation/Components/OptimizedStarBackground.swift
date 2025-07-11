@@ -66,7 +66,11 @@ struct OptimizedStarBackground: ViewModifier {
 
     func body(content: Content) -> some View {
         content.background(
-            TimelineView(.animation(minimumInterval: reduceMotion ? DesignTokens.StarAnimation.reducedFPS : DesignTokens.StarAnimation.normalFPS)) { _ in
+            TimelineView(
+                .animation(
+                    minimumInterval: reduceMotion ? DesignTokens.StarAnimation.reducedFPS : DesignTokens.StarAnimation.normalFPS
+                )
+            ) { _ in
                 ZStack {
                     // 背景色
                     DesignTokens.Colors.moonBackground

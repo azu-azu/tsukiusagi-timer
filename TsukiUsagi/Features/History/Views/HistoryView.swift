@@ -289,7 +289,9 @@ struct HistoryView: View {
                         .frame(width: timeWidth, alignment: .trailing)
                         .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 }
-                .summaryCardStyle(height: summaryCardHeight)
+                .summaryCardStyle(
+                    height: summaryCardHeight
+                )
             }
         }
         .padding(.top, 16)
