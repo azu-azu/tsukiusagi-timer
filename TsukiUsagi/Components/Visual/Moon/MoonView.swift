@@ -38,7 +38,7 @@ struct MoonView: View {
 
             // 🐇
             ZStack {
-                UsagiView_1(width: usagiWidth, height: usagiHeight)
+                UsagiViewOne(width: usagiWidth, height: usagiHeight)
                     .blur(radius: 2)
                     .opacity(0.3)
                     .offset(x: usagiOffsetX)

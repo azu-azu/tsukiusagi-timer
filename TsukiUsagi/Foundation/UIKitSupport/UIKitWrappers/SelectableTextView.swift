@@ -6,17 +6,17 @@ struct SelectableTextView: UIViewRepresentable {
     let textColor: UIColor
 
     func makeUIView(context _: Context) -> UITextView {
-        let tv = UITextView()
-        tv.isEditable = false
-        tv.isSelectable = true
-        tv.isScrollEnabled = true
-        tv.backgroundColor = .clear
-        tv.textContainerInset = .zero
-        tv.textContainer.lineFragmentPadding = 0
-        tv.textContainer.widthTracksTextView = true
-        tv.textContainer.lineBreakMode = .byWordWrapping
-        tv.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        return tv
+        let textView = UITextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = true
+        textView.backgroundColor = .clear
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.textContainer.widthTracksTextView = true
+        textView.textContainer.lineBreakMode = .byWordWrapping
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return textView
     }
 
     func updateUIView(_ uiView: UITextView, context _: Context) {

@@ -1,5 +1,5 @@
 //
-//  UsagiView_1.swift
+//  UsagiViewOne.swift
 //  TsukiUsagi
 //
 //  Created by azu-azu on 2025/06/12.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct UsagiView_1: View {
+struct UsagiViewOne: View {
     // 呼び出し側でサイズを渡せるようにプロパティ化
     let width: CGFloat
     let height: CGFloat

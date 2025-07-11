@@ -1,5 +1,5 @@
 //
-//  UsagiView_2.swift
+//  UsagiViewTwo.swift
 //  TsukiUsagi
 //
 //  Created by azu-azu on 2025/06/12.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct UsagiView: View {
+struct UsagiViewTwo: View {
     @State private var float = false
 
     var body: some View {
