@@ -89,6 +89,8 @@ struct DiamondStarsOnceView: View {
     // private let colors: [Color] = [.yellow, .white] // 複数指定する場合
     var body: some View {
         ZStack {
+            // swiftlint:disable:next identifier_name
+            // s: SparkleSpecの短命な一時変数（forEach内のみ許容）
             ForEach(stars) { s in
                 SparkleDiamond(
                     position: s.position,
@@ -104,6 +106,8 @@ struct DiamondStarsOnceView: View {
 
     private func launchTimer() {
         // N秒ごとにバラけて出現
+        // swiftlint:disable:next identifier_name
+        // t: Timerクロージャの一時変数（用途明示）
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { t in
             // 1 回あたり 何個か
             let burst = Int.random(in: 2 ... perOnce)
@@ -138,6 +142,8 @@ struct DiamondStarsView: View {
 
     var body: some View {
         ZStack {
+            // swiftlint:disable:next identifier_name
+            // s: SparkleSpecの短命な一時変数（forEach内のみ許容）
             ForEach(stars) { s in
                 SparkleDiamond(
                     position: s.position,
@@ -153,6 +159,8 @@ struct DiamondStarsView: View {
 
     private func launchTimer() {
         // repeats:繰り返すかどうか
+        // swiftlint:disable:next identifier_name
+        // t: Timerクロージャの一時変数（用途明示）
         Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { _ in
             let count = Int.random(in: 30 ... 80) // ランダム数 repeatsの時
             // let count = 80
