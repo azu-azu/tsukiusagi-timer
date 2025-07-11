@@ -84,9 +84,19 @@ class SessionManager: ObservableObject {
                 if let data = defaults.data(forKey: self.userDefaultsKeyV2),
                    let decoded = try? JSONDecoder().decode([SessionItem].self, from: data)
                 {
-                    Task { await MainActor.run { self.sessions = SessionItem.fixedSessions + decoded }; continuation.resume() }
+                    Task {
+                        await MainActor.run {
+                            self.sessions = SessionItem.fixedSessions + decoded
+                        }
+                        continuation.resume()
+                    }
                 } else {
-                    Task { await MainActor.run { self.sessions = SessionItem.fixedSessions }; continuation.resume() }
+                    Task {
+                        await MainActor.run {
+                            self.sessions = SessionItem.fixedSessions
+                        }
+                        continuation.resume()
+                    }
                 }
             }
         }

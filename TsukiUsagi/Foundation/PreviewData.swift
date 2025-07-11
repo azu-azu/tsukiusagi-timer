@@ -54,7 +54,11 @@ struct PreviewData {
 
     /// サンプルTimerViewModel
     static let sampleTimerVM: TimerViewModel = {
-        let timer = TimerViewModel(historyVM: sampleHistoryVM, activityLabel: "Preview Work", subtitleLabel: "Sample session")
+        let timer = TimerViewModel(
+            historyVM: sampleHistoryVM,
+            activityLabel: "Preview Work",
+            subtitleLabel: "Sample session"
+        )
         return timer
     }()
 
@@ -80,7 +84,8 @@ struct PreviewData {
     enum SampleText {
         static let short = "Short text"
         static let medium = "This is a medium length text for testing purposes"
-        static let long = "This is a very long text that should be used to test how the UI behaves when there is a lot of content. It should wrap properly and maintain good readability."
+        static let long = "This is a very long text that should be used to test how the UI behaves when there is a lot of content. " +
+            "It should wrap properly and maintain good readability."
         static let multiline = """
         This is a multiline text
         that spans multiple lines
