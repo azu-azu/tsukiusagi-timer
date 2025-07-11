@@ -21,6 +21,7 @@ final class TimerViewModel: ObservableObject {
     @Published private(set) var endTime: Date? // セッション終了時刻
     @Published var flashStars = false
     @Published private(set) var lastBackgroundDate: Date?
+    private var wasRunningBeforeBackground = false
     private var savedRemainingSeconds: Int?
 
     // アプリに戻ってきた時にstartアニメを発火しない

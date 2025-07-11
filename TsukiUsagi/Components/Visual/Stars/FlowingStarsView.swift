@@ -263,6 +263,13 @@ struct FlowingStarView: View {
                         (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.endRatio.y
                     )
                 )
+                // progressを分岐前に定義
+                let progress: CGFloat
+                if star.delay < 0 {
+                    progress = min(max(-star.delay / star.duration, 0), 1)
+                } else {
+                    progress = 0
+                }
                 pos = CGPoint(
                     x: start.x + (end.x - start.x) * progress,
                     y: start.y + (end.y - start.y) * progress
@@ -273,11 +280,6 @@ struct FlowingStarView: View {
                 }
 
                 if star.delay < 0 {
-                    let progress = min(max(-star.delay / star.duration, 0), 1)
-                    pos = CGPoint(
-                        x: start.x + (end.x - start.x) * progress,
-                        y: start.y + (end.y - start.y) * progress
-                    )
                     isVisible = true
                     hasStarted = true
                     withAnimation(
