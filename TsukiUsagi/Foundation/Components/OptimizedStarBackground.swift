@@ -68,7 +68,9 @@ struct OptimizedStarBackground: ViewModifier {
         content.background(
             TimelineView(
                 .animation(
-                    minimumInterval: reduceMotion ? DesignTokens.StarAnimation.reducedFPS : DesignTokens.StarAnimation.normalFPS
+                    minimumInterval: reduceMotion
+                        ? DesignTokens.StarAnimation.reducedFPS
+                        : DesignTokens.StarAnimation.normalFPS
                 )
             ) { _ in
                 ZStack {

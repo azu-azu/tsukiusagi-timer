@@ -71,7 +71,7 @@ struct PreviewData {
         "iPad Pro (11-inch) (4th generation)",
         "iPad Air (5th generation)",
         "iPad (10th generation)",
-        "iPad mini (6th generation)",
+        "iPad mini (6th generation)"
     ]
 
     // MARK: - Sample Content
