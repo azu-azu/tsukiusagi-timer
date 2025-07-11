@@ -101,7 +101,7 @@ class FlowingStarsGenerator: ObservableObject {
 
             // 呼び出し時の最初のみ、中央からも星を出現させる。中央が空く問題を回避するため
             if i < centerCount {
-                // 中央付近からスタート（x:0.48〜0.52, y:エリアのminYRatio〜maxYRatio）
+                // x, y: 中央付近の座標（数学的意味で許容）
                 let x = CGFloat.random(in: 0.48 ... 0.52)
                 let y = CGFloat.random(in: areaToUse.minYRatio ... areaToUse.maxYRatio)
                 let start = CGPoint(x: x, y: y)
