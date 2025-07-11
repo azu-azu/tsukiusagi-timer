@@ -8,8 +8,7 @@ struct TimerTextView: View {
 
     var body: some View {
         Text(timeText)
-            // swiftlint:disable:next forbidden-font-direct
-            .font(.system(size: 65, weight: .bold, design: .rounded)) // [理由] タイマー表示は特大・丸みデザインが要件
+            .font(DesignTokens.Fonts.timerDisplay)
             .opacity(isSessionFinished ? 0 : 1.0)
             .transition(.opacity)
             .foregroundColor(flashYellow ? .yellow : .white)
