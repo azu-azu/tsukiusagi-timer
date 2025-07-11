@@ -42,3 +42,31 @@ Text("特殊用途")
 ---
 
 Suppressの多用は禁止。例外は最小限に抑えてください。
+
+---
+
+## 5. 命名規則（短すぎる変数名の例外）
+
+原則として、変数名・定数名は意味のある名前を付けること。
+ただし、以下の場合は例外として単一文字の変数名を許可する。
+
+- `i`, `j`, `k`：ループカウンタ等、短いスコープでのみ許可
+- `x`, `y`：座標や数学的意味での使用は許可
+- `t`, `p`：一時的な値で、かつコメントで意味が明示されている場合のみ許可
+- それ以外（`f`, `m`, `r`, `g`, `b`, `s` など）は descriptive name にリネームすること
+
+Suppressや例外コメントには、必ず理由を明記すること。
+
+### 例
+```swift
+// x, y: 中央付近の座標（数学的意味で許容）
+let x = CGFloat.random(in: 0.48 ... 0.52)
+let y = CGFloat.random(in: areaToUse.minYRatio ... areaToUse.maxYRatio)
+
+// t: 一時的なタイマー（用途をコメントで明示）
+Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { t in ... }
+
+// NG例（リネーム推奨）
+let f = DateFormatter() // → let dateFormatter = DateFormatter()
+let r = ... // → let red = ...
+```
