@@ -23,11 +23,14 @@ class HistoryViewModel: ObservableObject {
 
     // 保存
     // TODO: パラメータ数が6個のため、SwiftLint違反。将来的に構造体やラッパー型でまとめて渡す設計にリファクタリングすることを検討。
-    func add(start: Date, end: Date,
-            phase: PomodoroPhase,
-            activity: String,
-            subtitle: String?,
-            memo: String?) {
+    func add(
+        start: Date,
+        end: Date,
+        phase: PomodoroPhase,
+        activity: String,
+        subtitle: String?,
+        memo: String?
+    ) {
         guard phase == .focus else { return } // ← 休憩は記録しない
 
         // 3秒未満は記録しない！
