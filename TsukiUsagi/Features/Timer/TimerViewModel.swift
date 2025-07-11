@@ -346,9 +346,9 @@ final class TimerViewModel: ObservableObject {
 
     // Static helpers
     private static let startFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        return dateFormatter
     }()
 
     // バックグラウンドへ
