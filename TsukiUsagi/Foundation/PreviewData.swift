@@ -4,8 +4,8 @@ import SwiftUI
 /// 本番コードへの逆流を防ぐため、単方向依存の構造を維持
 @MainActor
 struct PreviewData {
-
     // MARK: - View Models
+
     /// サンプルSessionManager
     static let sampleSessionManager: SessionManager = {
         let manager = SessionManager()
@@ -45,6 +45,7 @@ struct PreviewData {
     }()
 
     // MARK: - Preview Devices
+
     /// プレビュー用デバイス一覧
     static let previewDevices: [String] = [
         "iPhone 15 Pro",
@@ -60,8 +61,9 @@ struct PreviewData {
     ]
 
     // MARK: - Sample Content
+
     /// サンプルテキスト
-    struct SampleText {
+    enum SampleText {
         static let short = "Short text"
         static let medium = "This is a medium length text for testing purposes"
         static let long = "This is a very long text that should be used to test how the UI behaves when there is a lot of content. It should wrap properly and maintain good readability."
@@ -74,7 +76,7 @@ struct PreviewData {
     }
 
     /// サンプル日付
-    struct SampleDates {
+    enum SampleDates {
         static let today = Date()
         static let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
         static let lastWeek = Calendar.current.date(byAdding: .day, value: -7, to: today) ?? today
@@ -82,6 +84,7 @@ struct PreviewData {
     }
 
     // MARK: - Sample Session Items
+
     /// サンプルセッションアイテム
     static let sampleSessionItems: [SessionItem] = [
         SessionItem(id: UUID(), name: "Work", subtitle: "Professional tasks", isFixed: true),
@@ -95,6 +98,7 @@ struct PreviewData {
     ]
 
     // MARK: - Sample Session Records
+
     /// サンプルセッションレコード
     static let sampleSessionRecords: [SessionRecord] = [
         SessionRecord(
@@ -127,6 +131,7 @@ struct PreviewData {
     ]
 
     // MARK: - Environment Values
+
     /// プレビュー用の環境値
     struct EnvironmentValues {
         /// 通常の環境値
@@ -163,11 +168,11 @@ struct PreviewData {
 }
 
 // MARK: - Preview Helpers
+
 extension View {
     /// プレビュー用の環境値を適用
     func previewEnvironment(_ values: PreviewData.EnvironmentValues) -> some View {
-        self
-            .environment(\.sizeCategory, values.sizeCategory)
+        environment(\.sizeCategory, values.sizeCategory)
             .preferredColorScheme(values.colorScheme)
     }
 
@@ -182,8 +187,7 @@ extension View {
 
     /// アクセシビリティ対応のプレビュー
     func previewAccessibility() -> some View {
-        self
-            .previewEnvironment(PreviewData.EnvironmentValues.accessibility)
+        previewEnvironment(PreviewData.EnvironmentValues.accessibility)
             .previewDisplayName("Accessibility")
     }
 

@@ -4,14 +4,14 @@
 // Text("Custom").glitter(size: 40, fontName: "Futura-Bold")
 // Text("Pink").glitter(resourceName: "gold")
 
-import SwiftUI
 import SDWebImageSwiftUI
+import SwiftUI
 
 // Modifier 本体
 private struct GlitterTextModifier: ViewModifier {
     let font: Font
-    let resourceName: String     // e.g. "black_yellow"
-    let resourceExt: String      // default "gif"
+    let resourceName: String // e.g. "black_yellow"
+    let resourceExt: String // default "gif"
 
     func body(content: Content) -> some View {
         content
@@ -20,7 +20,8 @@ private struct GlitterTextModifier: ViewModifier {
                 AnimatedImage(
                     url: Bundle.main.url(
                         forResource: resourceName,
-                        withExtension: resourceExt)
+                        withExtension: resourceExt
+                    )
                 )
                 .resizable()
                 .scaledToFill()
@@ -38,9 +39,10 @@ extension Text {
     ///   - resourceName: GIF file in the main bundle (default "black_yellow")
     ///   - resourceExt:  File extension (default "gif")
     func glitter(size: CGFloat = 36,
-                fontName: String = "AvenirNext-Bold",
-                resourceName: String = "black_yellow",
-                resourceExt: String = "gif") -> some View {
+                 fontName: String = "AvenirNext-Bold",
+                 resourceName: String = "black_yellow",
+                 resourceExt: String = "gif") -> some View
+    {
         let customFont = Font.custom(fontName, size: size)
         return modifier(
             GlitterTextModifier(font: customFont,
@@ -54,11 +56,12 @@ extension Text {
 extension View {
     /// 任意のViewにキラキラエフェクトを重ねる
     func glitter(size: CGFloat = 36, resourceName: String = "black_yellow", resourceExt: String = "gif") -> some View {
-        self.overlay(
+        overlay(
             AnimatedImage(
                 url: Bundle.main.url(
                     forResource: resourceName,
-                    withExtension: resourceExt)
+                    withExtension: resourceExt
+                )
             )
             .resizable()
             .scaledToFill()

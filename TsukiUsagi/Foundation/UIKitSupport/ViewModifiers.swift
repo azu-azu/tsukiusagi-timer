@@ -5,7 +5,6 @@
 //  フォントを使うための共通モディファイア
 //
 
-
 import SwiftUI
 import UIKit
 
@@ -19,12 +18,12 @@ extension View {
     ///   - weight:  `.regular`, `.medium`, `.bold` など（デフォルト `.bold`）
     ///   - design:  `.default`, `.rounded`, `.serif`, `.monospaced` など
     func titleWhite(
-        size   : CGFloat?      = nil,
-        weight : Font.Weight   = .bold,
-        design : Font.Design   = .default
+        size: CGFloat? = nil,
+        weight: Font.Weight = .bold,
+        design: Font.Design = .default
     ) -> some View {
         // swiftlint:disable:next forbidden-font-direct
-        self.font(.system(size: size ?? 20, weight: weight, design: design)) // [理由] 旧API互換のため一時的に許可
+        font(.system(size: size ?? 20, weight: weight, design: design)) // [理由] 旧API互換のため一時的に許可
             .foregroundColor(.white)
     }
 }
@@ -50,10 +49,10 @@ extension View {
     ///   - size:   フォントサイズ (pt)。nil＝title3相当 (20pt)
     ///   - weight: `.regular` か `.bold`（デフォルト `.bold`）
     func titleWhiteAvenir(
-        size  : CGFloat?    = nil,
+        size: CGFloat? = nil,
         weight: Font.Weight = .bold
     ) -> some View {
-        self.modifier(
+        modifier(
             AvenirNextWhiteModifier(
                 size: size ?? 20,
                 weight: weight

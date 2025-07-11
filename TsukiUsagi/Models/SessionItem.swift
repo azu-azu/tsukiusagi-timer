@@ -11,7 +11,7 @@ struct SessionItem: Identifiable, Codable, Equatable {
     let id: UUID
     var name: String
     var subtitle: String?
-    var isFixed: Bool            // ← 固定／カスタムを区別
+    var isFixed: Bool // ← 固定／カスタムを区別
     // サブタイトル複数対応（将来拡張用）
     // var subtitles: [String] = []
 }

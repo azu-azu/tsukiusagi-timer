@@ -5,7 +5,7 @@ struct SelectableTextView: UIViewRepresentable {
     let font: UIFont
     let textColor: UIColor
 
-    func makeUIView(context: Context) -> UITextView {
+    func makeUIView(context _: Context) -> UITextView {
         let tv = UITextView()
         tv.isEditable = false
         tv.isSelectable = true
@@ -19,7 +19,7 @@ struct SelectableTextView: UIViewRepresentable {
         return tv
     }
 
-    func updateUIView(_ uiView: UITextView, context: Context) {
+    func updateUIView(_ uiView: UITextView, context _: Context) {
         let attrString = NSAttributedString(
             string: text,
             attributes: [

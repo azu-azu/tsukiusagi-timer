@@ -46,13 +46,13 @@ struct SessionName: Identifiable, Codable, Hashable {
 
 extension String {
     var normalized: String {
-        self
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        trimmingCharacters(in: .whitespacesAndNewlines)
             .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
     }
 }
 
 // MARK: - 上限定数
+
 extension SessionName {
     /// 親（SessionName）の最大数
     static let parentLimit = 50

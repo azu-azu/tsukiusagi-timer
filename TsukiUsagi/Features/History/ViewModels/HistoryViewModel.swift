@@ -1,14 +1,14 @@
-import Foundation
 import Combine
+import Foundation
 import SwiftUI
 
 struct SessionRecord: Codable, Identifiable {
-    var id: String  // UUID から String に変更（固定値）
+    var id: String // UUID から String に変更（固定値）
     var start, end: Date
     var phase: PomodoroPhase
-    var activity: String          // 上位
-    var subtitle: String?         // 下位
-    var memo: String?             // ←★ new
+    var activity: String // 上位
+    var subtitle: String? // 下位
+    var memo: String? // ←★ new
 
     // 履歴行のduration（秒）
     var duration: TimeInterval { end.timeIntervalSince(start) }
@@ -17,16 +17,17 @@ struct SessionRecord: Codable, Identifiable {
 @MainActor
 class HistoryViewModel: ObservableObject {
     @Published private(set) var history: [SessionRecord] = []
-    private let store = HistoryStore()              // 下で定義
+    private let store = HistoryStore() // 下で定義
 
-    init() { history = store.load() }               // 起動時に読込
+    init() { history = store.load() } // 起動時に読込
 
     // 保存
     func add(start: Date, end: Date,
-            phase: PomodoroPhase,
-            activity: String,
-            subtitle: String?,
-            memo: String?) {
+             phase: PomodoroPhase,
+             activity: String,
+             subtitle: String?,
+             memo: String?)
+    {
         guard phase == .focus else { return } // ← 休憩は記録しない
 
         // 3秒未満は記録しない！
@@ -36,13 +37,13 @@ class HistoryViewModel: ObservableObject {
         guard duration >= 3 else { return }
 
         let record = SessionRecord(
-                        id: generateFixedId(from: start), // 固定値IDを生成
-                        start: start,
-                        end: end,
-                        phase: phase,
-                        activity: activity,
-                        subtitle: subtitle,
-                        memo: memo
+            id: generateFixedId(from: start), // 固定値IDを生成
+            start: start,
+            end: end,
+            phase: phase,
+            activity: activity,
+            subtitle: subtitle,
+            memo: memo
         )
 
         history.append(record)
@@ -50,6 +51,7 @@ class HistoryViewModel: ObservableObject {
     }
 
     // MARK: - isDeleted判定
+
     func isDeleted(sessionManager: SessionManager, activity: String) -> Bool {
         !sessionManager.sessions.contains(where: { $0.name == activity })
     }
@@ -72,6 +74,7 @@ class HistoryViewModel: ObservableObject {
     }
 
     // MARK: - Helper Methods
+
     /// 固定値のIDを生成（日時ベース）
     private func generateFixedId(from date: Date) -> String {
         let formatter = DateFormatter()
@@ -87,15 +90,15 @@ class HistoryViewModel: ObservableObject {
     func updateLast(activity: String,
                     subtitle: String,
                     memo: String,
-                    end: Date? = nil) {
+                    end: Date? = nil)
+    {
         guard let i = history.indices.last else { return }
         history[i].activity = activity
-        history[i].subtitle   = subtitle
-        history[i].memo     = memo
+        history[i].subtitle = subtitle
+        history[i].memo = memo
         if let end = end {
             history[i].end = end
         }
         save()
     }
 }
-

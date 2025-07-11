@@ -1,16 +1,17 @@
 import SwiftUI
 
 // MARK: - キラッと光る 1 粒
+
 struct SparkleStar: View {
     // 角度をランダムに回して “菱形” に見せるだけ
     @State private var scale: CGFloat = 0
     let position: CGPoint
     let color: Color
     let size: CGFloat
-    let lifetime: Double          // 秒
+    let lifetime: Double // 秒
 
     var body: some View {
-        Rectangle()                           // 正方形を 45° 回転で菱形
+        Rectangle() // 正方形を 45° 回転で菱形
             .fill(
                 RadialGradient(
                     gradient: Gradient(colors: [color, .clear]),
@@ -28,7 +29,7 @@ struct SparkleStar: View {
                 // 消えるアニメ
                 withAnimation(
                     .easeIn(duration: lifetime * 0.6)
-                    .delay(lifetime * 0.4)
+                        .delay(lifetime * 0.4)
                 ) {
                     scale = 0
                 }
@@ -37,6 +38,7 @@ struct SparkleStar: View {
 }
 
 // MARK: - ランダムに “ポンっ” と出る星群
+
 struct SparkleStarsView: View {
     @State private var stars: [SparkleSpec] = []
 
@@ -59,11 +61,12 @@ struct SparkleStarsView: View {
     }
 
     // MARK: - タイマーで一定間隔ごとにパッと発生
+
     private func launchTimer() {
         Timer.scheduledTimer(withTimeInterval: 0.15, repeats: true) { _ in
             // 少しだけ同時に出す
-            let burst = Int.random(in: 2...5)
-            for _ in 0..<burst {
+            let burst = Int.random(in: 2 ... 5)
+            for _ in 0 ..< burst {
                 stars.append(randomSpec())
             }
             // 破棄（メモリリーク防止）
@@ -80,8 +83,8 @@ struct SparkleStarsView: View {
                 x: .random(in: -40 ... screen.width + 40),
                 y: .random(in: -40 ... screen.height + 40)
             ),
-            size: .random(in: 12...26),
-            lifetime: .random(in: 0.6...1.0)
+            size: .random(in: 12 ... 26),
+            lifetime: .random(in: 0.6 ... 1.0)
         )
     }
 }

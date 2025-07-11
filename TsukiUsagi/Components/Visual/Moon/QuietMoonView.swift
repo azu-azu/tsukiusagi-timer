@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct QuietMoonView: View {
-    private let title  = "Quiet Moon"
+    private let title = "Quiet Moon"
     private let paddingY: CGFloat = 60
     private let bodyText = MoonMessage.random().lines.joined(separator: "\n")
 
@@ -38,12 +38,12 @@ struct QuietMoonView: View {
 
         // デバッグ用ログ（開発時のみ）
         #if DEBUG
-        print("🌙 QuietMoonView - topPadding calculation:")
-        print("  - paddingY: \(paddingY)")
-        print("  - safeAreaInsets.top: \(safeAreaInsets.top)")
-        print("  - deviceSpecificPadding: \(deviceSpecificPadding)")
-        print("  - calculatedPadding: \(calculatedPadding)")
-        print("  - isLandscape: \(isLandscape)")
+            print("🌙 QuietMoonView - topPadding calculation:")
+            print("  - paddingY: \(paddingY)")
+            print("  - safeAreaInsets.top: \(safeAreaInsets.top)")
+            print("  - deviceSpecificPadding: \(deviceSpecificPadding)")
+            print("  - calculatedPadding: \(calculatedPadding)")
+            print("  - isLandscape: \(isLandscape)")
         #endif
 
         // ノッチを避けた上で、最小限のスペースを保証
@@ -102,8 +102,8 @@ struct QuietMoonView: View {
             FlowingStarsView(
                 starCount: 20,
                 angle: .degrees(135),
-                durationRange: 24...40,
-                sizeRange: 2...4,
+                durationRange: 24 ... 40,
+                sizeRange: 2 ... 4,
                 spawnArea: nil
             )
             .ignoresSafeArea()

@@ -1,12 +1,12 @@
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 class SessionManager: ObservableObject {
     @Published private(set) var sessions: [SessionItem] = []
 
     // Convenience getters
-    var fixedSessions: [SessionItem]  { sessions.filter { $0.isFixed } }
+    var fixedSessions: [SessionItem] { sessions.filter { $0.isFixed } }
     var customSessions: [SessionItem] { sessions.filter { !$0.isFixed } }
 
     private let userDefaultsKeyV1 = "customSessions"
@@ -42,6 +42,7 @@ class SessionManager: ObservableObject {
     }
 
     // MARK: - マイグレーション v1→v2 (async)
+
     private func migrateIfNeededAsync() async {
         await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
@@ -52,7 +53,8 @@ class SessionManager: ObservableObject {
                     return
                 }
                 if let data = defaults.data(forKey: self.userDefaultsKeyV1),
-                    let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data) {
+                   let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data)
+                {
                     var seen = Set<String>()
                     let migrated: [SessionItem] = oldItems.compactMap { old in
                         let key = old.name.lowercased()
@@ -74,12 +76,14 @@ class SessionManager: ObservableObject {
     }
 
     // MARK: - データロード (async)
+
     private func loadAsync() async {
         await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 let defaults = UserDefaults.standard
                 if let data = defaults.data(forKey: self.userDefaultsKeyV2),
-                    let decoded = try? JSONDecoder().decode([SessionItem].self, from: data) {
+                   let decoded = try? JSONDecoder().decode([SessionItem].self, from: data)
+                {
                     Task { await MainActor.run { self.sessions = SessionItem.fixedSessions + decoded }; continuation.resume() }
                 } else {
                     Task { await MainActor.run { self.sessions = SessionItem.fixedSessions }; continuation.resume() }
@@ -89,6 +93,7 @@ class SessionManager: ObservableObject {
     }
 
     // MARK: - データ保存 (async)
+
     private func saveAsync() async {
         let custom = await MainActor.run { self.sessions.filter { !$0.isFixed } }
         await withCheckedContinuation { continuation in
@@ -102,6 +107,7 @@ class SessionManager: ObservableObject {
     }
 
     // MARK: - CRUD
+
     func addSession(_ item: SessionItem) throws {
         let trimmedName = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !sessions.contains(where: { $0.name.lowercased() == trimmedName.lowercased() }) else {

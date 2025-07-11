@@ -14,7 +14,7 @@ struct TimerPanel: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var flashYellow = false
-    @State private var flashScale  = false
+    @State private var flashScale = false
     @State private var isEditing = false
     @State private var editedActivity: String = ""
     @State private var editedSubtitle: String = ""
@@ -22,7 +22,7 @@ struct TimerPanel: View {
     @State private var lastEditID = UUID()
 
     private let buttonWidth: CGFloat = 120
-    private let recordBottomPadding: CGFloat = 200   // ← 下から何pt に出す？
+    private let recordBottomPadding: CGFloat = 200 // ← 下から何pt に出す？
 
     var body: some View {
         // "タイマー中央" と "記録ブロック下端" を別レイヤーで配置
@@ -35,8 +35,8 @@ struct TimerPanel: View {
                 flashScale: flashScale
             )
             .frame(maxWidth: .infinity,
-                    maxHeight: .infinity,
-                    alignment: .center)
+                   maxHeight: .infinity,
+                   alignment: .center)
 
             // 記録ブロック：常に下端
             // --- RecordedTimesViewの呼び出しを削除 ---
@@ -53,7 +53,7 @@ struct TimerPanel: View {
             value: timerVM.isSessionFinished
         )
         // アニメーション抑制フラグをリセット
-        .onChange(of: timerVM.isSessionFinished) { oldValue, newValue in
+        .onChange(of: timerVM.isSessionFinished) { _, _ in
             if timerVM.shouldSuppressSessionFinishedAnimation {
                 timerVM.shouldSuppressSessionFinishedAnimation = false
             }
@@ -63,17 +63,17 @@ struct TimerPanel: View {
         .onReceive(timerVM.startPulse) { _ in
             withAnimation(.easeInOut(duration: 0.4)) {
                 flashYellow = true
-                flashScale  = true
+                flashScale = true
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 withAnimation(.easeInOut(duration: 1.8)) {
                     flashYellow = false
-                    flashScale  = false
+                    flashScale = false
                 }
             }
         }
 
-        .onChange(of: scenePhase) { oldPhase, newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .background:
                 timerVM.appDidEnterBackground()
@@ -115,5 +115,3 @@ struct TimerPanel: View {
         timerVM.actualSessionMinutes
     }
 }
-
-

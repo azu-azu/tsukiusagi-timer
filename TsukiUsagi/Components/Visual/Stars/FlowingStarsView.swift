@@ -62,7 +62,7 @@ class FlowingStarsGenerator: ObservableObject {
     struct FlowingStar: Identifiable {
         let id = UUID()
         let startRatio: CGPoint // 0〜1
-        let endRatio: CGPoint   // 0〜1
+        let endRatio: CGPoint // 0〜1
         let size: CGFloat
         let color: Color
         let opacity: Double
@@ -92,23 +92,23 @@ class FlowingStarsGenerator: ObservableObject {
         generateStars(for: size)
     }
 
-    private func generateStars(for size: CGSize) {
+    private func generateStars(for _: CGSize) {
         let areaToUse = spawnArea ?? Self.defaultSpawnArea(for: angle)
         let centerCount = min(10, starCount) // 最初に中央から生成する星の個数
 
-        stars = (0..<starCount).map { i in
+        stars = (0 ..< starCount).map { i in
             let (startRatio, endRatio): (CGPoint, CGPoint)
 
             // 呼び出し時の最初のみ、中央からも星を出現させる。中央が空く問題を回避するため
             if i < centerCount {
                 // 中央付近からスタート（x:0.48〜0.52, y:エリアのminYRatio〜maxYRatio）
-                let x = CGFloat.random(in: 0.48...0.52)
-                let y = CGFloat.random(in: areaToUse.minYRatio...areaToUse.maxYRatio)
+                let x = CGFloat.random(in: 0.48 ... 0.52)
+                let y = CGFloat.random(in: areaToUse.minYRatio ... areaToUse.maxYRatio)
                 let start = CGPoint(x: x, y: y)
                 // 角度にランダム性を追加（±5度の範囲でばらつかせる）
-                let angleVariation = CGFloat.random(in: -5...5) * .pi / 180
+                let angleVariation = CGFloat.random(in: -5 ... 5) * .pi / 180
                 let adjustedAngle = angle.radians + angleVariation
-                let distance: CGFloat = CGFloat.random(in: 1.0...1.4) // 距離もランダム化
+                let distance = CGFloat.random(in: 1.0 ... 1.4) // 距離もランダム化
                 let deltaX = cos(adjustedAngle) * distance
                 let deltaY = sin(adjustedAngle) * distance
                 let end = CGPoint(x: start.x + deltaX, y: start.y + deltaY)
@@ -122,9 +122,9 @@ class FlowingStarsGenerator: ObservableObject {
                 endRatio: endRatio,
                 size: .random(in: sizeRange),
                 color: Color.white,
-                opacity: .random(in: 0.3...0.8),
+                opacity: .random(in: 0.3 ... 0.8),
                 duration: .random(in: durationRange),
-                delay: .random(in: -15...15)
+                delay: .random(in: -15 ... 15)
             )
         }
     }
@@ -146,16 +146,16 @@ class FlowingStarsGenerator: ObservableObject {
     }
 
     // エリア内で開始・終了点を生成
-    private static func generateStartAndEndPoints(for area: StarSpawnArea, angle: CGFloat, distance: CGFloat = 1.2) -> (CGPoint, CGPoint) {
-        let startX = CGFloat.random(in: area.minXRatio...area.maxXRatio)
-        let startY = CGFloat.random(in: area.minYRatio...area.maxYRatio)
+    private static func generateStartAndEndPoints(for area: StarSpawnArea, angle: CGFloat, distance _: CGFloat = 1.2) -> (CGPoint, CGPoint) {
+        let startX = CGFloat.random(in: area.minXRatio ... area.maxXRatio)
+        let startY = CGFloat.random(in: area.minYRatio ... area.maxYRatio)
 
         // 角度にランダム性を追加（±3度の範囲でばらつかせる）
-        let angleVariation = CGFloat.random(in: -3...3) * .pi / 180
+        let angleVariation = CGFloat.random(in: -3 ... 3) * .pi / 180
         let adjustedAngle = angle + angleVariation
 
         // 距離もランダム化
-        let randomDistance = CGFloat.random(in: 0.8...1.6)
+        let randomDistance = CGFloat.random(in: 0.8 ... 1.6)
 
         let deltaX = cos(adjustedAngle) * randomDistance
         let deltaY = sin(adjustedAngle) * randomDistance
@@ -198,7 +198,7 @@ struct FlowingStarsView: View {
                 }
             }
             .ignoresSafeArea()
-            .onChange(of: size) { oldSize, newSize in
+            .onChange(of: size) { _, newSize in
                 if newSize != lastSize {
                     lastSize = newSize
                     generator.regenerateStars(for: newSize)
@@ -263,4 +263,3 @@ struct FlowingStarView: View {
 }
 
 // 例: FlowingStarsView(starCount: 50, angle: .degrees(90), durationRange: 24...40, sizeRange: 2...4, band: nil) のようにstarCountや各種パラメータを指定可能
-
