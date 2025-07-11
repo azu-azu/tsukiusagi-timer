@@ -27,8 +27,7 @@ class HistoryViewModel: ObservableObject {
              phase: PomodoroPhase,
              activity: String,
              subtitle: String?,
-             memo: String?)
-    {
+             memo: String?) {
         guard phase == .focus else { return } // ← 休憩は記録しない
 
         // 3秒未満は記録しない！
@@ -91,8 +90,7 @@ class HistoryViewModel: ObservableObject {
     func updateLast(activity: String,
                     subtitle: String,
                     memo: String,
-                    end: Date? = nil)
-    {
+                    end: Date? = nil) {
         guard let i = history.indices.last else { return }
         history[i].activity = activity
         history[i].subtitle = subtitle
