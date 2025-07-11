@@ -24,7 +24,7 @@ struct SelectableTextView: UIViewRepresentable {
             string: text,
             attributes: [
                 .font: font,
-                .foregroundColor: textColor,
+                .foregroundColor: textColor
             ]
         )
         uiView.attributedText = attrString

@@ -39,7 +39,7 @@ struct SparkleDiamond: View {
                             .init(color: color, location: 0.0),
                             .init(color: color, location: 0.15),
                             .init(color: color.opacity(0.2), location: 0.45),
-                            .init(color: .clear, location: 1.0),
+                            .init(color: .clear, location: 1.0)
                         ]),
                         center: .center,
                         startRadius: 0,
