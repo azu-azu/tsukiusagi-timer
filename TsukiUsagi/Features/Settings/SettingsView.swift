@@ -18,6 +18,7 @@ struct SettingsView: View {
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var dummyMemoFocused: Bool
 
+    // swiftlint:disable:next todo
     // TODO: 将来的に中間バッファを導入する可能性を考慮
     // 現在は直接AppStorageにBindingしているが、
     // 複雑なバリデーションや一時保存が必要になった場合は
