@@ -35,6 +35,7 @@ private struct AvenirNextWhiteModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         let fontName: String = (weight == .bold) ? "AvenirNext-Bold" : "AvenirNext"
+        // swiftlint:disable:next forbidden-font-direct
         return content
             .font(.custom(fontName, size: size))
             .foregroundColor(.white)
@@ -75,6 +76,7 @@ func avenirNextUIFont(size: CGFloat, weight: UIFont.Weight = .regular, design: U
         fontName = "AvenirNext-Regular"
     }
     guard let baseFont = UIFont(name: fontName, size: size) else {
+        // swiftlint:disable:next discouraged-font-usage
         return UIFont.systemFont(ofSize: size, weight: weight) // [理由] AvenirNextが取得できない場合のフォールバック
     }
     // デザイン（monospaced等）を適用
