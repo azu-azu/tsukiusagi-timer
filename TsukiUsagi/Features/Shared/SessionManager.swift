@@ -53,8 +53,7 @@ class SessionManager: ObservableObject {
                     return
                 }
                 if let data = defaults.data(forKey: self.userDefaultsKeyV1),
-                   let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data)
-                {
+                   let oldItems = try? JSONDecoder().decode([OldSessionItem].self, from: data) {
                     var seen = Set<String>()
                     let migrated: [SessionItem] = oldItems.compactMap { old in
                         let key = old.name.lowercased()
