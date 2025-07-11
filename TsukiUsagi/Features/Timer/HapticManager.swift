@@ -7,8 +7,8 @@
 
 import UIKit
 
-/// ハプティックフィードバックを管理するユーティリティクラス
-final class HapticManager {
+/// HapticManager: 端末の触覚フィードバックを管理するシングルトン
+class HapticManager {
     static let shared = HapticManager()
 
     private init() {}
