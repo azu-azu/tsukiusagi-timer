@@ -101,9 +101,12 @@ final class TimerViewModel: ObservableObject {
     /// タイマーを開始する共通処理
     private func startTimerInternal() {
         isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
-                                     repeats: true)
-        { [weak self] _ in
+        timer = Timer.scheduledTimer(
+            withTimeInterval: 1.0,
+            repeats: true
+        ) { [weak self] _ in
+            // swiftlint:disable:next identifier_name
+            // _: 使用しない引数（用途明示）
             Task { await self?.tick() }
         }
     }
