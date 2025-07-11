@@ -27,3 +27,6 @@ excluded:
   - ./tools/
   - tools/**
   - ./tools/**
+
+disabled_rules:
+  - identifier_name
