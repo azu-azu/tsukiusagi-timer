@@ -34,12 +34,18 @@ struct LinearMovingStar: View {
                         x: start.x + (end.x - start.x) * progress,
                         y: start.y + (end.y - start.y) * progress
                     )
-                    withAnimation(.linear(duration: duration * (1 - progress)).repeatForever(autoreverses: false)) {
+                    withAnimation(
+                        .linear(duration: duration * (1 - progress))
+                            .repeatForever(autoreverses: false)
+                    ) {
                         animate()
                     }
                 } else {
                     DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                        withAnimation(.linear(duration: duration).repeatForever(autoreverses: false)) {
+                        withAnimation(
+                            .linear(duration: duration)
+                                .repeatForever(autoreverses: false)
+                        ) {
                             animate()
                         }
                     }
@@ -256,14 +262,20 @@ struct FlowingStarView: View {
                     )
                     isVisible = true
                     hasStarted = true
-                    withAnimation(.linear(duration: star.duration * (1 - progress)).repeatForever(autoreverses: false)) {
+                    withAnimation(
+                        .linear(duration: star.duration * (1 - progress))
+                            .repeatForever(autoreverses: false)
+                    ) {
                         animate()
                     }
                 } else {
                     DispatchQueue.main.asyncAfter(deadline: .now() + star.delay) {
                         isVisible = true
                         hasStarted = true
-                        withAnimation(.linear(duration: star.duration).repeatForever(autoreverses: false)) {
+                        withAnimation(
+                            .linear(duration: star.duration)
+                                .repeatForever(autoreverses: false)
+                        ) {
                             animate()
                         }
                     }
