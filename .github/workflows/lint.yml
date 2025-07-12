@@ -27,7 +27,7 @@ jobs:
 
       - name: Install SwiftLint
         run: |
-          brew install swiftlint@0.54.0
+          brew install swiftlint
           swiftlint version
 
       - name: Run SwiftLint
