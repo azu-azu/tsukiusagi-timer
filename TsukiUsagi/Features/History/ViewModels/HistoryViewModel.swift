@@ -21,8 +21,7 @@ class HistoryViewModel: ObservableObject {
 
     init() { history = store.load() } // 起動時に読込
 
-    // swiftlint:disable:next todo
-    // TODO: パラメータ数が6個のため、SwiftLint違反。将来的に構造体やラッパー型でまとめて渡す設計にリファクタリングすることを検討。
+    // swiftlint:disable:next todo // Issue #5: TODO管理のためSuppress（2024年8月目標）
     func add(
         start: Date,
         end: Date,

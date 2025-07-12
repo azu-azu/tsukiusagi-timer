@@ -31,6 +31,16 @@ All text in English, with a clean and simple visual aesthetic.
 開発中 🌱
 **Started from a moment I almost cried.** That’s where TsukiUsagi began.
 
+## Development Guidelines
+
+### 🔧 Lint & Code Quality
+- [Lint Suppress例外管理・運用ルール](./docs/lint_exceptions.md)
+- [Font Guidelines](./docs/font_guidelines.md)
+
+### 📋 PR & Issue Templates
+- [PR Template](.github/PULL_REQUEST_TEMPLATE.md)
+- [Lint Refactor Issue Template](.github/ISSUE_TEMPLATE/lint_refactor.md)
+
 ## License
 
 MIT

@@ -89,7 +89,7 @@ struct DiamondStarsOnceView: View {
     // private let colors: [Color] = [.yellow, .white] // 複数指定する場合
     var body: some View {
         ZStack {
-            // swiftlint:disable:next identifier_name
+            // swiftlint:disable:next identifier_name // Issue #4: 一時変数用途の命名ルール明確化（2024年8月目標）
             // s: SparkleSpecの短命な一時変数（forEach内のみ許容）
             ForEach(stars) { s in
                 SparkleDiamond(
