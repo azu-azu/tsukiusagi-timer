@@ -2,7 +2,7 @@
 //  TsukiUsagiUITests.swift
 //  TsukiUsagiUITests
 //
-//  Created by 松本和実 on 2025/06/11.
+//  Created by azu-azu on 2025/06/11.
 //
 
 import XCTest

@@ -156,7 +156,9 @@ struct ContentView: View {
                                             .zIndex(10)
                                             .layoutPriority(1)
                                             .accessibilityLabel("Quiet Moon Message")
-                                            .accessibilityHint("Displays inspirational messages after session completion")
+                                            .accessibilityHint(
+                                                "Displays inspirational messages after session completion"
+                                            )
                                             .accessibilityAddTraits(.isHeader)
                                             .focused($isQuietMoonFocused)
 
@@ -178,7 +180,9 @@ struct ContentView: View {
                                         .zIndex(10)
                                         .layoutPriority(0)
                                         .accessibilityLabel("Session Record")
-                                        .accessibilityHint("Shows start time, end time, and session duration")
+                                                                                    .accessibilityHint(
+                                                "Shows start time, end time, and session duration"
+                                            )
                                     }
                                     .frame(width: contentSize.width, height: setHeight)
                                     .position(x: contentSize.width / 2, y: setCenterY)
@@ -192,7 +196,9 @@ struct ContentView: View {
                                     VStack {
                                         QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
                                             .accessibilityLabel("Quiet Moon Message")
-                                            .accessibilityHint("Displays inspirational messages after session completion")
+                                            .accessibilityHint(
+                                                "Displays inspirational messages after session completion"
+                                            )
                                             .accessibilityAddTraits(.isHeader)
                                             .focused($isQuietMoonFocused)
                                     }
@@ -362,8 +368,11 @@ struct ContentView: View {
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
             HapticManager.shared.buttonTapFeedback()
-            timerVM.isRunning ? timerVM.stopTimer()
-                : timerVM.startTimer()
+            if timerVM.isRunning {
+                timerVM.stopTimer()
+            } else {
+                timerVM.startTimer()
+            }
         }
         .frame(width: buttonWidth, height: buttonHeight)
         .background(Color.white.opacity(0.2),
