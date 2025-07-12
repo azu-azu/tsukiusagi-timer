@@ -86,6 +86,14 @@ Text("特殊用途")
 - Date: 2024/07/11
 - Author: Kazumi
 
+- File: TsukiUsagi/Foundation/DesignTokens.swift
+- Line: 131,135,139,143,147,151,155
+- Reason: セマンティック名の実体定義用途
+- Issue: #3
+- Why Forbidden: DesignTokens.Fonts の実体定義として、セマンティック名を提供するため
+- Date: 2024/07/12
+- Author: Kazumi
+
 - File: TsukiUsagi/Components/Visual/Stars/DiamondStarsView.swift
 - Line: 91
 - Reason: 一時変数用途の命名ルール明確化

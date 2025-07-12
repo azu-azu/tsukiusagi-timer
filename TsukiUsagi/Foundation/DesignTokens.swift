@@ -128,33 +128,53 @@ enum DesignTokens {
     // MARK: - Fonts
 
     enum Fonts {
+        /// ラベル用フォント（17pt, regular）
         static var label: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義用途（Issue #3, 2024年8月目標）
+            // Issue #3: セマンティック名の実体定義用途（2024年8月目標）
+            Font.system(size: 17, weight: .regular, design: .default)
         }
+
+        /// 太字ラベル用フォント（17pt, bold）
         static var labelBold: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 17, weight: .bold, design: .default) // [理由] セマンティック名の実体定義用途（Issue #3, 2024年8月目標）
+            // Issue #3: セマンティック名の実体定義用途（2024年8月目標）
+            Font.system(size: 17, weight: .bold, design: .default)
         }
+
+        /// セクションタイトル用フォント（15pt, regular）
         static var sectionTitle: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 15, weight: .regular, design: .default) // [理由] セマンティック名の実体定義用途（Issue #3, 2024年8月目標）
+            // Issue #3: セマンティック名の実体定義用途（2024年8月目標）
+            Font.system(size: 15, weight: .regular, design: .default)
         }
+
+        /// 数値ラベル用フォント（17pt, regular）
         static var numericLabel: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 17, weight: .regular, design: .default) // [理由] セマンティック名の実体定義用途（Issue #3, 2024年8月目標）
+            // Issue #3: セマンティック名の実体定義用途（2024年8月目標）
+            Font.system(size: 17, weight: .regular, design: .default)
         }
+
+        /// キャプション用フォント（12pt, regular）
         static var caption: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 12, weight: .regular, design: .default) // [理由] セマンティック名の実体定義用途（Issue #3, 2024年8月目標）
+            // Issue #3: セマンティック名の実体定義用途（2024年8月目標）
+            Font.system(size: 12, weight: .regular, design: .default)
         }
+
+        /// タイトル用フォント（20pt, bold）
         static var title: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 20, weight: .bold, design: .default) // [理由] セマンティック名の実体定義用途（Issue #3, 2024年8月目標）
+            // Issue #3: セマンティック名の実体定義用途（2024年8月目標）
+            Font.system(size: 20, weight: .bold, design: .default)
         }
+
+        /// タイマー表示用フォント（65pt, bold, rounded）
         static var timerDisplay: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 65, weight: .bold, design: .rounded) // [理由] タイマー表示用の特大・丸みデザイン（Issue #3, 2024年8月目標）
+            // Issue #3: タイマー表示用の特大・丸みデザイン（2024年8月目標）
+            Font.system(size: 65, weight: .bold, design: .rounded)
         }
     }
 
