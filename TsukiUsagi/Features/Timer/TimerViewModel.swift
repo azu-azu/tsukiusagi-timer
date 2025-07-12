@@ -234,7 +234,7 @@ final class TimerViewModel: ObservableObject {
         // ★ startTime が残っているうちに履歴保存
         if let start = startTime, let end = endTime {
             await MainActor.run {
-                historyVM.add(
+                let parameters = AddSessionParameters(
                     start: start,
                     end: end,
                     phase: .focus,
@@ -242,6 +242,7 @@ final class TimerViewModel: ObservableObject {
                     subtitle: subtitleLabel,
                     memo: nil
                 )
+                historyVM.add(parameters: parameters)
             }
         }
         stopTimer() // ★ タイマー停止（時刻は残る）
@@ -291,7 +292,7 @@ final class TimerViewModel: ObservableObject {
         // 履歴に本フェーズを保存
         if let start = startTime, let end = endTime {
             await MainActor.run {
-                historyVM.add(
+                let parameters = AddSessionParameters(
                     start: start,
                     end: end,
                     phase: isWorkSession ? .focus : .breakTime,
@@ -299,6 +300,7 @@ final class TimerViewModel: ObservableObject {
                     subtitle: subtitleLabel,
                     memo: nil
                 )
+                historyVM.add(parameters: parameters)
             }
         }
         // ★ 削除：時刻は残す（表示のため）
@@ -379,7 +381,7 @@ final class TimerViewModel: ObservableObject {
     @MainActor
     func appWillEnterForeground() {
         guard let last = lastBackgroundDate,
-              wasRunningBeforeBackground else { return }
+            wasRunningBeforeBackground else { return }
 
         let elapsed = Int(Date().timeIntervalSince(last))
         NotificationManager.shared.cancelSessionEndNotification()

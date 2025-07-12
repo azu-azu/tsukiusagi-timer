@@ -26,7 +26,9 @@ jobs:
           ruby-version: '3.1'
 
       - name: Install SwiftLint
-        run: brew install swiftlint
+        run: |
+          brew install swiftlint
+          swiftlint version
 
       - name: Run SwiftLint
         run: swiftlint --strict --force-exclude
