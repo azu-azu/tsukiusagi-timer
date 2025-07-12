@@ -14,6 +14,16 @@ struct SessionRecord: Codable, Identifiable {
     var duration: TimeInterval { end.timeIntervalSince(start) }
 }
 
+// MARK: - Add Session Parameters
+struct AddSessionParameters {
+    let start: Date
+    let end: Date
+    let phase: PomodoroPhase
+    let activity: String
+    let subtitle: String?
+    let memo: String?
+}
+
 @MainActor
 class HistoryViewModel: ObservableObject {
     @Published private(set) var history: [SessionRecord] = []
@@ -21,35 +31,30 @@ class HistoryViewModel: ObservableObject {
 
     init() { history = store.load() } // 起動時に読込
 
-    func add(
-        start: Date,
-        end: Date,
-        phase: PomodoroPhase,
-        activity: String,
-        subtitle: String?,
-        memo: String?
-    ) {
-        guard phase == .focus else { return } // ← 休憩は記録しない
+    func add(parameters: AddSessionParameters) {
+        guard parameters.phase == .focus else { return } // ← 休憩は記録しない
 
         // 3秒未満は記録しない！
         // >= 3秒	誤タップではなく意図的操作とみなす最小限
         // >= 60秒	本気の集中だけに絞りたいならこっち（後で調整）
-        let duration = end.timeIntervalSince(start)
+        let duration = parameters.end.timeIntervalSince(parameters.start)
         guard duration >= 3 else { return }
 
         let record = SessionRecord(
-            id: generateFixedId(from: start), // 固定値IDを生成
-            start: start,
-            end: end,
-            phase: phase,
-            activity: activity,
-            subtitle: subtitle,
-            memo: memo
+            id: generateFixedId(from: parameters.start), // 固定値IDを生成
+            start: parameters.start,
+            end: parameters.end,
+            phase: parameters.phase,
+            activity: parameters.activity,
+            subtitle: parameters.subtitle,
+            memo: parameters.memo
         )
 
         history.append(record)
         store.save(history)
     }
+
+
 
     // MARK: - isDeleted判定
 
