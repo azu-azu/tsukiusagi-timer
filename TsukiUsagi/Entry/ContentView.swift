@@ -262,9 +262,9 @@ struct ContentView: View {
                                             )
                                     }
                                     .frame(width: contentSize.width,
-                                           height: setHeight)
+                                        height: setHeight)
                                     .position(x: contentSize.width / 2,
-                                              y: setCenterY)
+                                            y: setCenterY)
                                 }
                             }
                         }
@@ -294,7 +294,7 @@ struct ContentView: View {
                             )
                             .sessionVisibility(isVisible: timerVM.isSessionFinished)
                             .padding(.bottom, LayoutConstants.footerBarHeight +
-                                     safeAreaInsets.bottom + LayoutConstants.recordedTimesBottomSpacing)
+                                    safeAreaInsets.bottom + LayoutConstants.recordedTimesBottomSpacing)
                             .zIndex(LayoutConstants.overlayZIndex)
                             .sessionEndTransition(timerVM)
                         }
