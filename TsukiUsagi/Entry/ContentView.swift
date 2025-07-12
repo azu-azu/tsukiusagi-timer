@@ -151,7 +151,8 @@ struct ContentView: View {
                                     HStack(spacing: landscapeMargin) {
                                         // 左側：QuietMoonView
                                         QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
-                                            .frame(width: (contentSize.width - landscapeMargin) * 0.5, height: setHeight)
+                                            .frame(width: (contentSize.width - landscapeMargin) * 0.5,
+                                                    height: setHeight)
                                             .background(Color.clear)
                                             .zIndex(10)
                                             .layoutPriority(1)
@@ -181,7 +182,8 @@ struct ContentView: View {
                                         .layoutPriority(0)
                                         .accessibilityLabel("Session Record")
                                         .accessibilityHint(
-                                            "Shows start time, end time, and session duration"
+                                            "Shows start time, end time, and session " +
+                                            "duration"
                                         )
                                     }
                                     .frame(width: contentSize.width, height: setHeight)

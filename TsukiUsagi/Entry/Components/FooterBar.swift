@@ -22,8 +22,8 @@ struct FooterBar: View {
                         .scaledToFit()
                         .frame(width: 16, height: 16)
                         .frame(width: buttonHeight,
-                               height: buttonHeight,
-                               alignment: .bottom)
+                                height: buttonHeight,
+                                alignment: .bottom)
                         .foregroundColor(DesignTokens.Colors.textWhite)
                 }
             }
