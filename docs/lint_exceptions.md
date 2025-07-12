@@ -143,6 +143,14 @@ Text("特殊用途")
 - Author: Kazumi
 
 - File: TsukiUsagi/Features/History/ViewModels/HistoryViewModel.swift
+- Line: 23
+- Reason: TODO管理のためSuppress
+- Issue: #5
+- Why Forbidden: add関数のパラメータ数整理等のTODO管理のため
+- Date: 2024/07/11
+- Author: Kazumi
+
+- File: TsukiUsagi/Features/History/ViewModels/HistoryViewModel.swift
 - Line: 6
 - Reason: SessionRecord の memberwise initializer は設計上許容するため suppress
 - Issue: #6
