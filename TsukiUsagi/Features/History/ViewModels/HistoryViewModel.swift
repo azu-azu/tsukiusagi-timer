@@ -2,8 +2,6 @@ import Combine
 import Foundation
 import SwiftUI
 
-// swiftlint:disable:next function_parameter_count
-// Issue #6: SessionRecord の memberwise initializer は設計上許容するため suppress
 struct SessionRecord: Codable, Identifiable {
     var id: String // UUID から String に変更（固定値）
     var start, end: Date
@@ -42,8 +40,6 @@ class HistoryViewModel: ObservableObject {
         let duration = parameters.end.timeIntervalSince(parameters.start)
         guard duration >= 3 else { return }
 
-        // Issue #6: SessionRecord の memberwise initializer は設計上許容するため suppress
-        // swiftlint:disable:next function_parameter_count
         let record = SessionRecord(
             id: generateFixedId(from: parameters.start), // 固定値IDを生成
             start: parameters.start,
@@ -57,8 +53,6 @@ class HistoryViewModel: ObservableObject {
         history.append(record)
         store.save(history)
     }
-
-
 
     // MARK: - isDeleted判定
 
