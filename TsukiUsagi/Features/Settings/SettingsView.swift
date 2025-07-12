@@ -18,7 +18,9 @@ struct SettingsView: View {
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var dummyMemoFocused: Bool
 
-    // TODO: 将来的に中間バッファを導入する可能性を考慮
+    // swiftlint:disable:next todo
+    // Issue #5: TODO管理のためSuppress（2024年8月目標）
+    // 将来的に中間バッファを導入する可能性を考慮
     // 現在は直接AppStorageにBindingしているが、
     // 複雑なバリデーションや一時保存が必要になった場合は
     // @State private var tempActivityLabel を導入することを検討
@@ -112,7 +114,6 @@ struct SettingsView: View {
     // body
     var body: some View {
         ZStack {
-
             NavigationView {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -166,8 +167,8 @@ struct SettingsView: View {
                         FlowingStarsView(
                             starCount: flowingStarCount,
                             angle: .degrees(135),
-                            durationRange: 24...40,
-                            sizeRange: 2...4,
+                            durationRange: 24 ... 40,
+                            sizeRange: 2 ... 4,
                             spawnArea: nil
                         )
                     }
@@ -200,8 +201,8 @@ struct SettingsView: View {
                 content()
             }
             .padding(isCompact
-                        ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
-                        : EdgeInsets())
+                ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+                : EdgeInsets())
             .padding(isCompact ? .init() : .all)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
@@ -291,7 +292,7 @@ struct SettingsView: View {
     private func resetStopSection() -> some View {
         section(title: "", isCompact: false) {
             VStack(spacing: 14) {
-                Button() {
+                Button {
                     timerVM.resetTimer()
                     dismiss()
                 } label: {
@@ -351,7 +352,6 @@ struct SettingsView: View {
     }
 }
 
-
 extension UIApplication {
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -374,19 +374,19 @@ struct DismissKeyboardOnTap: ViewModifier {
 }
 
 // 横画面判定用ユーティリティ
-private func safeIsLandscape(size: CGSize, horizontalClass: UserInterfaceSizeClass?, verticalClass: UserInterfaceSizeClass?) -> Bool {
+private func safeIsLandscape(size: CGSize, horizontalClass: UserInterfaceSizeClass?, verticalClass _: UserInterfaceSizeClass?) -> Bool {
     // ルール集推奨の判定
     return horizontalClass == .regular || size.width > size.height
 }
 
 #if DEBUG
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView(size: .init(width: 375, height: 812), safeAreaInsets: .init())
-            .environmentObject(TimerViewModel(historyVM: HistoryViewModel()))
-            .environmentObject(HistoryViewModel())
-            .environmentObject(SessionManager())
-            .environmentObject(SessionManagerV2())
+    struct SettingsView_Previews: PreviewProvider {
+        static var previews: some View {
+            SettingsView(size: .init(width: 375, height: 812), safeAreaInsets: .init())
+                .environmentObject(TimerViewModel(historyVM: HistoryViewModel()))
+                .environmentObject(HistoryViewModel())
+                .environmentObject(SessionManager())
+                .environmentObject(SessionManagerV2())
+        }
     }
-}
 #endif

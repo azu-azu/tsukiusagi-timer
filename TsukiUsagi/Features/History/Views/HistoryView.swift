@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 粒度：日 or 月
 private enum Granularity: String, CaseIterable, Identifiable {
-    case day  = "Day"
+    case day = "Day"
     case month = "Month"
     var id: Self { self }
 }
@@ -11,9 +11,9 @@ struct HistoryView: View {
     @EnvironmentObject var historyVM: HistoryViewModel
     @EnvironmentObject var sessionManager: SessionManager
 
-    @State private var selectedDate = Calendar.current.startOfDay(for: Date())  // 基準日
+    @State private var selectedDate = Calendar.current.startOfDay(for: Date()) // 基準日
     @State private var mode: Granularity = .day // 粒度
-    @State private var restoreError: String? = nil
+    @State private var restoreError: String?
     @State private var showRestoreAlert = false
 
     private let summaryCardHeight: CGFloat = 50
@@ -26,7 +26,6 @@ struct HistoryView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-
             // ① 粒度切替
             Picker("Mode", selection: $mode) {
                 ForEach(Granularity.allCases) { Text($0.rawValue) }
@@ -78,7 +77,9 @@ struct HistoryView: View {
     }
 
     // ─────────────────────────────
+
     // MARK: - View Components
+
     // ☀️ Day MODE
     @ViewBuilder
     private func dayModeContent() -> some View {
@@ -120,7 +121,7 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func recordRow(_ rec: SessionRecord) -> some View {
-        let isDeleted   = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
+        let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
         let displayName = historyVM.displayActivity(sessionManager: sessionManager, activity: rec.activity)
 
         HStack(spacing: 0) {
@@ -169,7 +170,9 @@ struct HistoryView: View {
     }
 
     // ─────────────────────────────
+
     // MARK: - Record 抽出・集計
+
     private func records() -> [SessionRecord] {
         historyVM.history
             .filter { rec in
@@ -188,7 +191,9 @@ struct HistoryView: View {
     }
 
     // ─────────────────────────────
+
     // MARK: - 集計構造
+
     private struct LabelSummary {
         let label: String
         let total: Int
@@ -204,7 +209,7 @@ struct HistoryView: View {
             return !subtitle.isEmpty
         }
         let grouped = Dictionary(grouping: recordsWithSubtitle) { $0.subtitle! }
-        return grouped.map { (k, recs) in
+        return grouped.map { k, recs in
             LabelSummary(
                 label: k,
                 total: recs.reduce(0) { $0 + durationMinutes($1) }
@@ -215,7 +220,7 @@ struct HistoryView: View {
 
     private func groupAndSum<T>(_ key: (SessionRecord) -> T) -> [LabelSummary] where T: Hashable {
         let grouped = Dictionary(grouping: records(), by: key)
-        return grouped.map { (k, recs) in
+        return grouped.map { k, recs in
             LabelSummary(
                 label: String(describing: k),
                 total: recs.reduce(0) { $0 + durationMinutes($1) }
@@ -225,7 +230,9 @@ struct HistoryView: View {
     }
 
     // ─────────────────────────────
+
     // MARK: - ナビゲーション
+
     private func change(by offset: Int) {
         let component: Calendar.Component = (mode == .day) ? .day : .month
         if let newDate = cal.date(byAdding: component, value: offset, to: selectedDate) {
@@ -261,6 +268,7 @@ struct HistoryView: View {
     }
 
     // ─────────────────────────────
+
     // MARK: - View Components
 
     // 共通の集計セクション表示用View
@@ -281,7 +289,9 @@ struct HistoryView: View {
                         .frame(width: timeWidth, alignment: .trailing)
                         .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 }
-                .summaryCardStyle(height: summaryCardHeight)
+                .summaryCardStyle(
+                    height: summaryCardHeight
+                )
             }
         }
         .padding(.top, 16)
@@ -336,10 +346,14 @@ extension View {
         height: CGFloat = 32,
         cornerRadius: CGFloat = 6,
         backgroundColor: Color = DesignTokens.Colors.moonCardBG,
-        padding: EdgeInsets = EdgeInsets(top: 4, leading: DesignTokens.Padding.cardHorizontal, bottom: 4, trailing: DesignTokens.Padding.cardHorizontal)
+        padding: EdgeInsets = EdgeInsets(
+            top: 4,
+            leading: DesignTokens.Padding.cardHorizontal,
+            bottom: 4,
+            trailing: DesignTokens.Padding.cardHorizontal
+        )
     ) -> some View {
-        self
-            .font(DesignTokens.Fonts.label)
+        font(DesignTokens.Fonts.label)
             .padding(padding)
             .frame(height: height)
             .background(

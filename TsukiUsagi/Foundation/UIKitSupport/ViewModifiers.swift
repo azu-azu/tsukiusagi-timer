@@ -5,7 +5,6 @@
 //  フォントを使うための共通モディファイア
 //
 
-
 import SwiftUI
 import UIKit
 
@@ -19,11 +18,11 @@ extension View {
     ///   - weight:  `.regular`, `.medium`, `.bold` など（デフォルト `.bold`）
     ///   - design:  `.default`, `.rounded`, `.serif`, `.monospaced` など
     func titleWhite(
-        size   : CGFloat?      = nil,
-        weight : Font.Weight   = .bold,
-        design : Font.Design   = .default
+        size: CGFloat? = nil,
+        weight: Font.Weight = .bold,
+        design: Font.Design = .default
     ) -> some View {
-        self.font(.system(size: size ?? 20, weight: weight, design: design))
+        font(DesignTokens.Fonts.title)
             .foregroundColor(.white)
     }
 }
@@ -37,7 +36,9 @@ private struct AvenirNextWhiteModifier: ViewModifier {
     func body(content: Content) -> some View {
         let fontName: String = (weight == .bold) ? "AvenirNext-Bold" : "AvenirNext"
         return content
-            .font(.custom(fontName, size: size))
+            .font(
+                .custom(fontName, size: size)
+            )
             .foregroundColor(.white)
     }
 }
@@ -49,10 +50,10 @@ extension View {
     ///   - size:   フォントサイズ (pt)。nil＝title3相当 (20pt)
     ///   - weight: `.regular` か `.bold`（デフォルト `.bold`）
     func titleWhiteAvenir(
-        size  : CGFloat?    = nil,
+        size: CGFloat? = nil,
         weight: Font.Weight = .bold
     ) -> some View {
-        self.modifier(
+        modifier(
             AvenirNextWhiteModifier(
                 size: size ?? 20,
                 weight: weight
@@ -67,7 +68,11 @@ extension View {
 ///   - weight: UIFont.Weight（.regular/.bold など）
 ///   - design: UIFontDescriptor.SystemDesign（.default/.monospaced など）
 /// - Returns: UIFont
-func avenirNextUIFont(size: CGFloat, weight: UIFont.Weight = .regular, design: UIFontDescriptor.SystemDesign = .default) -> UIFont {
+func avenirNextUIFont(
+    size: CGFloat,
+    weight: UIFont.Weight = .regular,
+    design: UIFontDescriptor.SystemDesign = .default
+) -> UIFont {
     let fontName: String
     switch weight {
     case .bold:
@@ -76,7 +81,8 @@ func avenirNextUIFont(size: CGFloat, weight: UIFont.Weight = .regular, design: U
         fontName = "AvenirNext-Regular"
     }
     guard let baseFont = UIFont(name: fontName, size: size) else {
-        return UIFont.systemFont(ofSize: size, weight: weight)
+        // swiftlint:disable:next discouraged-font-usage
+        return UIFont.systemFont(ofSize: size, weight: weight) // [理由] AvenirNextが取得できない場合のフォールバック（Issue #3, 2024年8月目標）
     }
     // デザイン（monospaced等）を適用
     if let descriptor = baseFont.fontDescriptor.withDesign(design) {

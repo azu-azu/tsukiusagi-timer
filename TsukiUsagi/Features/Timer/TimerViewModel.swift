@@ -5,25 +5,24 @@
 //  Created by azu-azu on 2025/06/12.
 //
 
-import Foundation
 import Combine
+import Foundation
 import SwiftUI
-import UIKit   // UINotificationFeedbackGeneratorのため
+import UIKit // UINotificationFeedbackGeneratorのため
 
 /// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
 final class TimerViewModel: ObservableObject {
-
     // Published 状態
-    @Published var timeRemaining: Int        // 残り秒
-    @Published var isRunning:     Bool     = false      // 走っているか
-    @Published var isWorkSession: Bool     = true       // true = focus, false = break
-    @Published var isSessionFinished       = false      // 終了フラグ（View 切替に使用）
-    @Published private(set) var startTime: Date?        // セッション開始時刻
-    @Published private(set) var endTime: Date?          // セッション終了時刻
+    @Published var timeRemaining: Int // 残り秒
+    @Published var isRunning: Bool = false // 走っているか
+    @Published var isWorkSession: Bool = true // true = focus, false = break
+    @Published var isSessionFinished = false // 終了フラグ（View 切替に使用）
+    @Published private(set) var startTime: Date? // セッション開始時刻
+    @Published private(set) var endTime: Date? // セッション終了時刻
     @Published var flashStars = false
-    @Published private(set) var lastBackgroundDate: Date? = nil
+    @Published private(set) var lastBackgroundDate: Date?
     private var wasRunningBeforeBackground = false
-    private var savedRemainingSeconds: Int? = nil
+    private var savedRemainingSeconds: Int?
 
     // アプリに戻ってきた時にstartアニメを発火しない
     private var shouldSuppressAnimation = false
@@ -32,11 +31,11 @@ final class TimerViewModel: ObservableObject {
     var workLengthMinutes: Int { workMinutes }
 
     // セッションごとのworkMinutesを保存
-    private var sessionWorkMinutes: Int? = nil
+    private var sessionWorkMinutes: Int?
     // 実作業秒数
     private var actualWorkedSeconds: Int = 0
     // 最後に再開した時刻
-    private var lastResumedTime: Date? = nil
+    private var lastResumedTime: Date?
 
     // 実際のセッション時間を分で計算
     var actualSessionMinutes: Int {
@@ -48,8 +47,8 @@ final class TimerViewModel: ObservableObject {
 
     // User-configurable
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
-    @AppStorage("subtitleLabel")   private var subtitleLabel:   String = ""
-    @AppStorage("workMinutes")  private var workMinutes:  Int = 25
+    @AppStorage("subtitleLabel") private var subtitleLabel: String = ""
+    @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5 {
         didSet {
             if breakMinutes < 1 {
@@ -61,15 +60,15 @@ final class TimerViewModel: ObservableObject {
     // --- Persistent timer state for background/kill recovery ---
     private enum TimerPersistKeys {
         static let remainingSeconds = "remainingSeconds"
-        static let isRunning        = "isRunning"
+        static let isRunning = "isRunning"
         static let backgroundTimestamp = "backgroundTimestamp"
-        static let isWorkSession    = "isWorkSession"
+        static let isWorkSession = "isWorkSession"
     }
 
     @AppStorage(TimerPersistKeys.remainingSeconds) private var storedRemainingSeconds: Int = 0
-    @AppStorage(TimerPersistKeys.isRunning)        private var storedIsRunning: Bool = false
+    @AppStorage(TimerPersistKeys.isRunning) private var storedIsRunning: Bool = false
     @AppStorage(TimerPersistKeys.backgroundTimestamp) private var storedBackgroundTimestamp: Double = 0
-    @AppStorage(TimerPersistKeys.isWorkSession)    private var storedIsWorkSession: Bool = true
+    @AppStorage(TimerPersistKeys.isWorkSession) private var storedIsWorkSession: Bool = true
 
     /// 設定変更を即反映（STOP中だけ）
     func refreshAfterSettingsChange() {
@@ -102,19 +101,25 @@ final class TimerViewModel: ObservableObject {
     /// タイマーを開始する共通処理
     private func startTimerInternal() {
         isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
-                                    repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(
+            withTimeInterval: 1.0,
+            repeats: true
+        ) { [weak self] _ in
+            // swiftlint:disable:next identifier_name
+            // Issue #4: 一時変数用途の命名ルール明確化（2024年8月目標）
+            // _: 使用しない引数（用途明示）
             Task { await self?.tick() }
         }
     }
 
     // MARK: - State Persistence
+
     @MainActor
     func saveTimerState() {
         storedRemainingSeconds = timeRemaining
-        storedIsRunning        = isRunning
+        storedIsRunning = isRunning
         storedBackgroundTimestamp = Date().timeIntervalSince1970
-        storedIsWorkSession    = isWorkSession
+        storedIsWorkSession = isWorkSession
     }
 
     @MainActor
@@ -158,12 +163,12 @@ final class TimerViewModel: ObservableObject {
 
         // 新しいセッション開始
         if isSessionFinished {
-            isWorkSession     = true
+            isWorkSession = true
             // セッション開始時のworkMinutesを保存
             sessionWorkMinutes = workMinutes
-            timeRemaining     = workMinutes * 60
-            startTime         = Date()
-            endTime           = nil
+            timeRemaining = workMinutes * 60
+            startTime = Date()
+            endTime = nil
             isSessionFinished = false
             actualWorkedSeconds = 0
             lastResumedTime = Date()
@@ -172,8 +177,8 @@ final class TimerViewModel: ObservableObject {
             let minutes = isWorkSession ? workMinutes : breakMinutes
             sessionWorkMinutes = isWorkSession ? workMinutes : breakMinutes
             timeRemaining = minutes * 60
-            startTime     = Date()
-            endTime       = nil
+            startTime = Date()
+            endTime = nil
             actualWorkedSeconds = 0
             lastResumedTime = Date()
         } else {
@@ -239,7 +244,7 @@ final class TimerViewModel: ObservableObject {
                 )
             }
         }
-        stopTimer()  // ★ タイマー停止（時刻は残る）
+        stopTimer() // ★ タイマー停止（時刻は残る）
         // ★ 削除：時刻は残す（表示のため）
         // startTime = nil
         // endTime = nil
@@ -315,14 +320,16 @@ final class TimerViewModel: ObservableObject {
         }
 
         isSessionFinished = true
-        isRunning         = false       // ← ボタンは Stop 表示させない
-        isWorkSession     = false       // ← ブレイクモードへ
+        isRunning = false // ← ボタンは Stop 表示させない
+        isWorkSession = false // ← ブレイクモードへ
 
         // 休憩タイマーを"見えないまま"走らせる
-        var secondsLeft = breakMinutes * 60  // 表示は更新しない
+        var secondsLeft = breakMinutes * 60 // 表示は更新しない
         print("📝 secondsLeft  =", secondsLeft)
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0,
-                                    repeats: true) { [weak self] t in
+        timer = Timer.scheduledTimer(
+            withTimeInterval: 1.0,
+            repeats: true
+        ) { [weak self] t in
             guard let self else { return }
             secondsLeft -= 1
             if secondsLeft <= 0 {
@@ -344,14 +351,14 @@ final class TimerViewModel: ObservableObject {
 
     // Static helpers
     private static let startFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        return dateFormatter
     }()
 
     // バックグラウンドへ
     func appDidEnterBackground() {
-        wasRunningBeforeBackground = isRunning          // ↙︎ 動いてたか保存
+        wasRunningBeforeBackground = isRunning // ↙︎ 動いてたか保存
         lastBackgroundDate = Date()
         savedRemainingSeconds = timeRemaining
         if isRunning {
@@ -360,16 +367,19 @@ final class TimerViewModel: ObservableObject {
                 actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
                 lastResumedTime = nil
             }
-            NotificationManager.shared.scheduleSessionEndNotification(after: timeRemaining, phase: isWorkSession ? .focus : .breakTime)
+            NotificationManager.shared.scheduleSessionEndNotification(
+                after: timeRemaining,
+                phase: isWorkSession ? .focus : .breakTime
+            )
         }
-        stopTimer()                                     // 一旦止める
+        stopTimer() // 一旦止める
     }
 
     // フォアグラウンド復帰
     @MainActor
     func appWillEnterForeground() {
         guard let last = lastBackgroundDate,
-            wasRunningBeforeBackground else { return }
+              wasRunningBeforeBackground else { return }
 
         let elapsed = Int(Date().timeIntervalSince(last))
         NotificationManager.shared.cancelSessionEndNotification()
@@ -404,7 +414,7 @@ final class TimerViewModel: ObservableObject {
 
     func resetTimer() {
         stopTimer()
-        isRunning = false   // ← 明示的に止めとくと安心
+        isRunning = false // ← 明示的に止めとくと安心
         isWorkSession = true
         let minutes = sessionWorkMinutes ?? workMinutes
         timeRemaining = minutes * 60

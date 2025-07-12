@@ -12,7 +12,7 @@ enum MoonMessage {
             "There is no sound in space.",
             "Stars explode in silence.",
             "",
-            "At its core, every work is quiet.",
+            "At its core, every work is quiet."
         ]),
 
         MoonMessageEntry(lines: [
@@ -20,7 +20,7 @@ enum MoonMessage {
             "",
             "There’s a side of the Moon we’ll never see—",
             "",
-            "There’s a side of you no one will ever see.",
+            "There’s a side of you no one will ever see."
         ]),
 
         MoonMessageEntry(lines: [
@@ -31,15 +31,14 @@ enum MoonMessage {
             "",
             "It might come like moonlight—",
             "soft, slow, ",
-            "and never asking.",
+            "and never asking."
         ]),
 
         MoonMessageEntry(lines: [
             "True joy drifts in,",
             "like the moon—",
             "",
-            "never loud, never rushed.",
-
+            "never loud, never rushed."
             // 喜びは、月明かりのよう。
             // ふわっと静かにやってくる。
             // “drift in” ＝「漂うように入ってくる」
@@ -51,7 +50,6 @@ enum MoonMessage {
             "",
             "not what you’ve done,",
             "but how softly you’ve been?"
-
             // 月は静かに見ている——
             // 何をしたか、ではなく、
             // どれだけ優しくあれたかを。
@@ -62,8 +60,7 @@ enum MoonMessage {
             "",
             "Even if you scream, no sound would ever form.",
             "",
-            "It’s okay for silence to be the answer.",
-
+            "It’s okay for silence to be the answer."
             // 月には、音が存在しない。
             // それでも、静かに輝いていられる。
         ]),
@@ -72,7 +69,7 @@ enum MoonMessage {
             "The Moon always watches us.",
             "",
             "She sees your work.",
-            "You are quietly seen.",
+            "You are quietly seen."
         ]),
 
         MoonMessageEntry(lines: [
@@ -80,7 +77,7 @@ enum MoonMessage {
             "",
             "You are quietly seen.",
             "",
-            "You don’t need to shout to be noticed.",
+            "You don’t need to shout to be noticed."
         ]),
 
         MoonMessageEntry(lines: [
@@ -88,7 +85,7 @@ enum MoonMessage {
             "",
             "Even in silence, the Moon moves the sea.",
             "",
-            "You don’t need noise to change the world.",
+            "You don’t need noise to change the world."
         ]),
 
         MoonMessageEntry(lines: [
@@ -96,7 +93,7 @@ enum MoonMessage {
             "",
             "astronaut footprints on the Moon may last for millions of years.",
             "",
-            "You’re erased only when something erases you.",
+            "You’re erased only when something erases you."
         ]),
 
         MoonMessageEntry(lines: [
@@ -105,28 +102,27 @@ enum MoonMessage {
             "For a human, that's about the speed of a brisk walk.",
             "",
             "The Moon moves slowly.",
-            "Yet its influence is vast.",
+            "Yet its influence is vast."
         ]),
 
         MoonMessageEntry(lines: [
             "On the Moon, shadows are sharp.",
             "",
             "No air, no blur—",
-            "just clarity from what's absent.",
+            "just clarity from what's absent."
         ]),
 
         MoonMessageEntry(lines: [
             "The Moon moves the tides without a sound.",
             "But the Moon doesn't intend to pull the sea.",
             "",
-            "We move each other—silently.",
+            "We move each other—silently."
         ]),
 
         MoonMessageEntry(lines: [
             "The Moon quietly pulls the sea and stirs the waves.",
             "",
-            "You, too, pull someone—",
-
+            "You, too, pull someone—"
             // 僕らは皆、ただここにいるだけで
             // 誰かの心の波を、静かに動かしているんだ
         ]),
@@ -137,14 +133,13 @@ enum MoonMessage {
             "",
             "but because you've done too little of what sparks a light in you.",
             "",
-            "— Alexander Den Heijer",
+            "— Alexander Den Heijer"
         ]),
 
         MoonMessageEntry(lines: [
             "The Moon doesn’t shine.",
             "It just stays close to the Sun.",
-            "Sometimes, being near is enough to glow.",
-
+            "Sometimes, being near is enough to glow."
             // 光らなくてもいい
             // 太陽のそばにいるだけで、輝ける
         ]),
@@ -163,8 +158,8 @@ enum MoonMessage {
             "",
             "but because you've done too little of what sparks a light in you.",
             "",
-            "— Alexander Den Heijer",
-        ]),
+            "— Alexander Den Heijer"
+        ])
     ]
 
     static func random() -> MoonMessageEntry {

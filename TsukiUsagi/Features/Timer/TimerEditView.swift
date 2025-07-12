@@ -7,10 +7,10 @@ struct TimerEditView: View {
     @EnvironmentObject private var sessionManager: SessionManager
 
     @State private var editedActivity = ""
-    @State private var editedSubtitle   = ""
-    @State private var editedMemo     = ""
-    @State private var editedEnd      = Date()
-    @State private var minEnd         = Date()
+    @State private var editedSubtitle = ""
+    @State private var editedMemo = ""
+    @State private var editedEnd = Date()
+    @State private var minEnd = Date()
 
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
@@ -61,9 +61,9 @@ struct TimerEditView: View {
 
                         Button("Save") {
                             historyVM.updateLast(activity: editedActivity,
-                                                subtitle: editedSubtitle,
-                                                memo: editedMemo,
-                                                end: editedEnd)
+                                                 subtitle: editedSubtitle,
+                                                 memo: editedMemo,
+                                                 end: editedEnd)
                             timerVM.setEndTime(editedEnd)
                             dismiss()
                         }
@@ -130,8 +130,8 @@ struct TimerEditView: View {
                     FlowingStarsView(
                         starCount: 40,
                         angle: .degrees(135),
-                        durationRange: 24...40,
-                        sizeRange: 2...4,
+                        durationRange: 24 ... 40,
+                        sizeRange: 2 ... 4,
                         spawnArea: nil
                     )
                 }
@@ -157,10 +157,10 @@ struct TimerEditView: View {
             .task {
                 // 編集画面を開いた時、現在のセッションの値をセット
                 editedEnd = timerVM.endTime ?? Date()
-                minEnd    = timerVM.startTime ?? Date()
+                minEnd = timerVM.startTime ?? Date()
                 editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
-                editedSubtitle   = timerVM.currentSubtitleLabel
-                editedMemo     = ""
+                editedSubtitle = timerVM.currentSubtitleLabel
+                editedMemo = ""
             }
         }
     }

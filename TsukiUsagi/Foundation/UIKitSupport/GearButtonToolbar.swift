@@ -35,6 +35,6 @@ struct GearButtonToolbar: ViewModifier {
 // sugary extension stays the same
 extension View {
     func gearButtonToolbar(showing: Binding<Bool>) -> some View {
-        self.modifier(GearButtonToolbar(showing: showing))
+        modifier(GearButtonToolbar(showing: showing))
     }
 }

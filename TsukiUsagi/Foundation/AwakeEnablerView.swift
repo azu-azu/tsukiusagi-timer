@@ -15,8 +15,3 @@ struct AwakeEnablerView: View {
         .clipped()
     }
 }
-
-
-
-
-
