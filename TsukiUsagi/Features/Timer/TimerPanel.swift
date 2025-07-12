@@ -45,11 +45,13 @@ struct TimerPanel: View {
         .sheet(isPresented: $isEditing, onDismiss: {
             // 再描画用にIDを更新
             lastEditID = UUID()
-        }) { editSheetView() }
+        }, content: { editSheetView() })
 
         // ★ Moon メッセージと同じ duration で同期
         .animation(
-            timerVM.shouldSuppressSessionFinishedAnimation ? nil : .easeInOut(duration: LayoutConstants.sessionEndAnimationDuration),
+            timerVM.shouldSuppressSessionFinishedAnimation ? nil : .easeInOut(
+                duration: LayoutConstants.sessionEndAnimationDuration
+            ),
             value: timerVM.isSessionFinished
         )
         // アニメーション抑制フラグをリセット

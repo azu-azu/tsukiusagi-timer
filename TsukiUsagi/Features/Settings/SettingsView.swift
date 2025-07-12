@@ -18,12 +18,7 @@ struct SettingsView: View {
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var dummyMemoFocused: Bool
 
-    // swiftlint:disable:next todo
-    // Issue #5: TODO管理のためSuppress（2024年8月目標）
-    // 将来的に中間バッファを導入する可能性を考慮
-    // 現在は直接AppStorageにBindingしているが、
-    // 複雑なバリデーションや一時保存が必要になった場合は
-    // @State private var tempActivityLabel を導入することを検討
+
 
     // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
     private let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
@@ -276,7 +271,9 @@ struct SettingsView: View {
 
     private func manageSessionNamesSection() -> some View {
         section(title: "", isCompact: true) {
-            NavigationLink(destination: SessionNameManagerView().environmentObject(sessionManagerV2)) {
+            NavigationLink(
+                destination: SessionNameManagerView().environmentObject(sessionManagerV2)
+            ) {
                 HStack {
                     Text("Manage Session Names")
                         .foregroundColor(DesignTokens.Colors.moonTextPrimary)

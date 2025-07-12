@@ -8,14 +8,14 @@ struct SessionNameManagerView: View {
     @EnvironmentObject var sessionManager: SessionManagerV2
     @State private var name: String = ""
     @State private var subtitle: String = ""
-    @State private var errorMessage: String? = nil
+    @State private var errorMessage: String?
     @State private var showErrorAlert = false
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
-    @State private var editingId: UUID? = nil
+    @State private var editingId: UUID?
     @State private var editingName: String = ""
     @State private var editingSubtitle: String = ""
-    @State private var showDeleteAlert: AlertID? = nil
+    @State private var showDeleteAlert: AlertID?
     @State private var subtitleTexts: [String] = [""]
     @State private var errorTitle: String = "Error"
     @State private var editingSubtitles: [String] = [""]
@@ -67,24 +67,24 @@ struct SessionNameManagerView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .focused($isSubtitleFocused)
                         .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
-                        Button(action: { subtitleTexts.remove(at: idx) }) {
+                        Button(action: { subtitleTexts.remove(at: idx) }, label: {
                             Image(systemName: "minus.circle")
-                        }
+                        })
                         .buttonStyle(.plain)
                         .disabled(subtitleTexts.count == 1)
                     }
                 }
-                Button(action: { subtitleTexts.append("") }) {
+                Button(action: { subtitleTexts.append("") }, label: {
                     HStack(spacing: 4) {
                         Image(systemName: "plus.circle")
                         Text("Add Subtitle")
                     }
-                }
+                })
                 .font(DesignTokens.Fonts.caption)
                 .buttonStyle(.plain)
-                Button("Add") {
+                Button("Add", action: {
                     addSession()
-                }
+                })
                 .buttonStyle(.borderedProminent)
                 .disabled(name.normalized.isEmpty || subtitleTexts.allSatisfy { $0.normalized.isEmpty })
                 .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
@@ -143,34 +143,34 @@ struct SessionNameManagerView: View {
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .frame(maxWidth: .infinity)
                                 .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
-                                Button(action: { editingSubtitles.remove(at: idx) }) {
+                                Button(action: { editingSubtitles.remove(at: idx) }, label: {
                                     Image(systemName: "minus.circle")
-                                }
+                                })
                                 .buttonStyle(.plain)
                                 .disabled(editingSubtitles.count == 1)
                             }
                         }
-                        Button(action: { editingSubtitles.append("") }) {
+                        Button(action: { editingSubtitles.append("") }, label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "plus.circle")
                                 Text("Add Subtitle")
                             }
-                        }
+                        })
                         .font(DesignTokens.Fonts.caption)
                         .buttonStyle(.plain)
                     }
                     Spacer()
-                    Button("Save") {
+                    Button("Save", action: {
                         Task { await saveEdit(session.id) }
-                    }
+                    })
                     .font(DesignTokens.Fonts.caption)
                     .buttonStyle(.borderedProminent)
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.saveButton)
-                    Button("Cancel") {
+                    Button("Cancel", action: {
                         editingId = nil
                         editingName = ""
                         editingSubtitles = [""]
-                    }
+                    })
                     .font(DesignTokens.Fonts.caption)
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.cancelButton)
                 }
@@ -187,30 +187,30 @@ struct SessionNameManagerView: View {
                         }
                     }
                     Spacer()
-                    Button("Edit") {
+                    Button("Edit", action: {
                         editingId = session.id
                         editingName = session.name
                         editingSubtitles = session.subtitles.map { $0.text }
-                    }
+                    })
                     .font(DesignTokens.Fonts.caption)
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.editButton)
-                    Button(role: .destructive) {
+                    Button(role: .destructive, action: {
                         showDeleteAlert = AlertID(id: session.id)
-                    } label: {
+                    }, label: {
                         Image(systemName: "trash")
                             .foregroundColor(DesignTokens.Colors.moonTextMuted)
-                    }
+                    })
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.deleteButton)
-                    .alert(item: $showDeleteAlert) { alertID in
+                    .alert(item: $showDeleteAlert, content: { alertID in
                         Alert(
                             title: Text("Delete Session?"),
                             message: Text("Are you sure you want to delete this session name?"),
-                            primaryButton: .destructive(Text("Delete")) {
+                            primaryButton: .destructive(Text("Delete"), action: {
                                 deleteSession(alertID.id)
-                            },
+                            }),
                             secondaryButton: .cancel()
                         )
-                    }
+                    })
                 }
                 .accessibilityIdentifier(AccessibilityIDs.SessionManager.sessionCell(id: session.id.uuidString))
             }
