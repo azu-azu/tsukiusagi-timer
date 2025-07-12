@@ -273,10 +273,16 @@ struct ContentView: View {
                         }
 
                         // footerBarはZStackの一番下
-                        footerBar()
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, safeAreaInsets.bottom)
-                            .zIndex(LayoutConstants.footerZIndex)
+                        FooterBar(
+                            buttonHeight: buttonHeight,
+                            buttonWidth: buttonWidth,
+                            dateString: DateFormatters.displayDateNoYear.string(from: Date()),
+                            onGearTap: { gearButtonAction(showing: &showingSettings) },
+                            startPauseButton: AnyView(startPauseButton())
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, safeAreaInsets.bottom)
+                        .zIndex(LayoutConstants.footerZIndex)
 
                         // RecordedTimesViewを縦画面時のみfooterBarの直上に追加
                         if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
@@ -337,41 +343,6 @@ struct ContentView: View {
             }
         }
         .environmentObject(sessionManager)
-    }
-
-    // MARK: - Footer
-
-    @ViewBuilder
-    private func footerBar() -> some View {
-        ZStack(alignment: .bottom) {
-            HStack {
-                Text(DateFormatters.displayDateNoYear.string(from: Date()))
-                    .titleWhite(size: 16, weight: .bold, design: .monospaced)
-                    .frame(height: buttonHeight, alignment: .bottom)
-
-                Spacer(minLength: 0)
-
-                Button {
-                    gearButtonAction(showing: &showingSettings)
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
-                        .frame(width: buttonHeight,
-                               height: buttonHeight,
-                               alignment: .bottom)
-                        .foregroundColor(DesignTokens.Colors.textWhite)
-                }
-            }
-
-            startPauseButton()
-                .frame(height: buttonHeight, alignment: .bottom)
-                .offset(y: 6)
-        }
-        .frame(height: buttonHeight)
-        .background(Color.black.opacity(0.0001))
-        .zIndex(LayoutConstants.overlayZIndex)
     }
 
     // MARK: - Start / Pause Button
