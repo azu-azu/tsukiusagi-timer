@@ -33,7 +33,7 @@ struct PreviewData {
     static let sampleHistoryVM: HistoryViewModel = {
         let historyViewModel = HistoryViewModel()
         // プレビュー用の履歴データを追加
-        historyViewModel.add(
+        let parameters1 = AddSessionParameters(
             start: Date().addingTimeInterval(-3600),
             end: Date(),
             phase: .focus,
@@ -41,7 +41,9 @@ struct PreviewData {
             subtitle: "Sample session",
             memo: "This is a preview memo"
         )
-        historyViewModel.add(
+        historyViewModel.add(parameters: parameters1)
+
+        let parameters2 = AddSessionParameters(
             start: Date().addingTimeInterval(-7200),
             end: Date().addingTimeInterval(-3600),
             phase: .focus,
@@ -49,6 +51,7 @@ struct PreviewData {
             subtitle: "Another sample",
             memo: nil
         )
+        historyViewModel.add(parameters: parameters2)
         return historyViewModel
     }()
 
