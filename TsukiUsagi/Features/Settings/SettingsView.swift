@@ -18,8 +18,6 @@ struct SettingsView: View {
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var dummyMemoFocused: Bool
 
-
-
     // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
     private let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
 
@@ -371,7 +369,11 @@ struct DismissKeyboardOnTap: ViewModifier {
 }
 
 // 横画面判定用ユーティリティ
-private func safeIsLandscape(size: CGSize, horizontalClass: UserInterfaceSizeClass?, verticalClass _: UserInterfaceSizeClass?) -> Bool {
+private func safeIsLandscape(
+    size: CGSize,
+    horizontalClass: UserInterfaceSizeClass?,
+    verticalClass _: UserInterfaceSizeClass?
+) -> Bool {
     // ルール集推奨の判定
     return horizontalClass == .regular || size.width > size.height
 }

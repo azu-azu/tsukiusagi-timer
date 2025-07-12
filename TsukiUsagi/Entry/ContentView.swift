@@ -180,9 +180,9 @@ struct ContentView: View {
                                         .zIndex(10)
                                         .layoutPriority(0)
                                         .accessibilityLabel("Session Record")
-                                                                                    .accessibilityHint(
-                                                "Shows start time, end time, and session duration"
-                                            )
+                                        .accessibilityHint(
+                                            "Shows start time, end time, and session duration"
+                                        )
                                     }
                                     .frame(width: contentSize.width, height: setHeight)
                                     .position(x: contentSize.width / 2, y: setCenterY)
@@ -230,7 +230,12 @@ struct ContentView: View {
                                         VStack {
                                             Spacer()
                                             TimerPanel(timerVM: timerVM)
-                                                .frame(minWidth: moonSize, maxWidth: moonSize * 1.5, minHeight: timerHeight, maxHeight: timerHeight)
+                                                .frame(
+                                                    minWidth: moonSize,
+                                                    maxWidth: moonSize * 1.5,
+                                                    minHeight: timerHeight,
+                                                    maxHeight: timerHeight
+                                                )
                                             Spacer()
                                         }
                                         .frame(width: (hStackWidth - landscapeMargin) * 0.5, height: moonSize)
@@ -249,7 +254,12 @@ struct ContentView: View {
                                         .allowsHitTesting(false)
 
                                         TimerPanel(timerVM: timerVM)
-                                            .frame(minWidth: moonSize, maxWidth: moonSize * 1.5, minHeight: timerHeight, maxHeight: timerHeight)
+                                            .frame(
+                                                minWidth: moonSize,
+                                                maxWidth: moonSize * 1.5,
+                                                minHeight: timerHeight,
+                                                maxHeight: timerHeight
+                                            )
                                     }
                                     .frame(width: contentSize.width,
                                            height: setHeight)
@@ -277,7 +287,8 @@ struct ContentView: View {
                                 onEdit: { showingEditRecord = true }
                             )
                             .sessionVisibility(isVisible: timerVM.isSessionFinished)
-                            .padding(.bottom, LayoutConstants.footerBarHeight + safeAreaInsets.bottom + LayoutConstants.recordedTimesBottomSpacing)
+                            .padding(.bottom, LayoutConstants.footerBarHeight +
+                                     safeAreaInsets.bottom + LayoutConstants.recordedTimesBottomSpacing)
                             .zIndex(LayoutConstants.overlayZIndex)
                             .sessionEndTransition(timerVM)
                         }
