@@ -156,6 +156,10 @@ enum DesignTokens {
             // swiftlint:disable:next discouraged-font-usage
             Font.system(size: 65, weight: .bold, design: .rounded)
         }
+        static var footerDate: Font {
+            // swiftlint:disable:next discouraged-font-usage
+            Font.system(size: 16, weight: .bold, design: .monospaced)
+        }
     }
 
     // MARK: - Animation
