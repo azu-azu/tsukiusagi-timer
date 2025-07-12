@@ -105,7 +105,8 @@ final class TimerViewModel: ObservableObject {
             withTimeInterval: 1.0,
             repeats: true
         ) { [weak self] _ in
-            // swiftlint:disable:next identifier_name // Issue #4: 一時変数用途の命名ルール明確化（2024年8月目標）
+            // swiftlint:disable:next identifier_name
+            // Issue #4: 一時変数用途の命名ルール明確化（2024年8月目標）
             // _: 使用しない引数（用途明示）
             Task { await self?.tick() }
         }

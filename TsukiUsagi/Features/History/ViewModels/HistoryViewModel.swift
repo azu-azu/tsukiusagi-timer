@@ -21,7 +21,8 @@ class HistoryViewModel: ObservableObject {
 
     init() { history = store.load() } // 起動時に読込
 
-    // swiftlint:disable:next todo // Issue #5: TODO管理のためSuppress（2024年8月目標）
+    // swiftlint:disable:next todo
+    // Issue #5: TODO管理のためSuppress（2024年8月目標）
     func add(
         start: Date,
         end: Date,
