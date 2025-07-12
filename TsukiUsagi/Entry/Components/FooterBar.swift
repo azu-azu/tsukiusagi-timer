@@ -11,7 +11,7 @@ struct FooterBar: View {
         ZStack(alignment: .bottom) {
             HStack {
                 Text(dateString)
-                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    .font(DesignTokens.Fonts.footerDate)
                     .foregroundColor(.white)
                     .frame(height: buttonHeight, alignment: .bottom)
 
