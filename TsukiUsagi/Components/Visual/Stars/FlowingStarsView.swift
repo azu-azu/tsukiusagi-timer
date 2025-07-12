@@ -108,7 +108,7 @@ class FlowingStarsGenerator: ObservableObject {
         let centerCount = min(10, starCount) // 最初に中央から生成する星の個数
 
         stars = (0 ..< starCount).map { i in
-            // swiftlint:disable:next identifier_name
+            // swiftlint:disable:next identifier_name // Issue #4: 一時変数用途の命名ルール明確化（2024年8月目標）
             // i: ループカウンタ（短いスコープのため許容）
             let (startRatio, endRatio): (CGPoint, CGPoint)
 
