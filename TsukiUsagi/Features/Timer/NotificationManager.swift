@@ -54,10 +54,10 @@ final class NotificationManager {
             switch phase {
             case .focus:
                 content.title = "Time to Rest 🌑"
-                content.body  = "The moon is still. So can you be."
+                content.body = "The moon is still. So can you be."
             case .breakTime:
                 content.title = "Time to Focus 🌕"
-                content.body  = "Let's begin, quietly centered."
+                content.body = "Let's begin, quietly centered."
             }
             content.sound = .default
 
@@ -85,10 +85,10 @@ final class NotificationManager {
         switch phase {
         case .focus:
             content.title = "Time to Focus 🌕"
-            content.body  = "Let's begin, quietly centered."
+            content.body = "Let's begin, quietly centered."
         case .breakTime:
             content.title = "Time to Rest 🌑"
-            content.body  = "The moon is still. So can you be."
+            content.body = "The moon is still. So can you be."
         }
 
         // 音＋バイブ

@@ -29,7 +29,7 @@ jobs:
         run: brew install swiftlint
 
       - name: Run SwiftLint
-        run: swiftlint --strict
+        run: swiftlint --strict --force-exclude
 
       - name: Show Lint Exception Policy
         if: failure()

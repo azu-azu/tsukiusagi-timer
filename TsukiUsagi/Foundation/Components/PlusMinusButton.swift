@@ -3,8 +3,8 @@ import SwiftUI
 /// プラス/マイナスボタンコンポーネント
 /// 時間設定で使用する統一されたボタンスタイル
 struct PlusMinusButton: View {
-
     // MARK: - Properties
+
     let systemName: String
     let action: () -> Void
     let size: CGFloat
@@ -14,6 +14,7 @@ struct PlusMinusButton: View {
     let isEnabled: Bool
 
     // MARK: - Environment
+
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.sizeCategory) private var sizeCategory
 
@@ -54,12 +55,12 @@ struct PlusMinusButton: View {
         minus action: @escaping () -> Void,
         isEnabled: Bool = true
     ) {
-        self.systemName = "minus"
+        systemName = "minus"
         self.action = action
-        self.size = DesignTokens.FontSize.caption
-        self.padding = DesignTokens.Padding.small
-        self.backgroundColor = Color.white.opacity(0.1)
-        self.foregroundColor = .white
+        size = DesignTokens.FontSize.caption
+        padding = DesignTokens.Padding.small
+        backgroundColor = Color.white.opacity(0.1)
+        foregroundColor = .white
         self.isEnabled = isEnabled
     }
 
@@ -71,16 +72,17 @@ struct PlusMinusButton: View {
         plus action: @escaping () -> Void,
         isEnabled: Bool = true
     ) {
-        self.systemName = "plus"
+        systemName = "plus"
         self.action = action
-        self.size = DesignTokens.FontSize.caption
-        self.padding = DesignTokens.Padding.small
-        self.backgroundColor = Color.white.opacity(0.1)
-        self.foregroundColor = .white
+        size = DesignTokens.FontSize.caption
+        padding = DesignTokens.Padding.small
+        backgroundColor = Color.white.opacity(0.1)
+        foregroundColor = .white
         self.isEnabled = isEnabled
     }
 
     // MARK: - Body
+
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
@@ -102,8 +104,8 @@ struct PlusMinusButton: View {
 
 /// プラス/マイナスボタンのペア
 struct PlusMinusButtonPair: View {
-
     // MARK: - Properties
+
     let onMinus: () -> Void
     let onPlus: () -> Void
     let minusEnabled: Bool
@@ -134,6 +136,7 @@ struct PlusMinusButtonPair: View {
     }
 
     // MARK: - Body
+
     var body: some View {
         HStack(spacing: spacing) {
             PlusMinusButton(minus: onMinus, isEnabled: minusEnabled)
@@ -146,6 +149,7 @@ struct PlusMinusButtonPair: View {
 }
 
 // MARK: - Convenience Modifiers
+
 extension View {
     /// プラス/マイナスボタンペアを適用
     func plusMinusButtons(
@@ -163,6 +167,7 @@ extension View {
 }
 
 // MARK: - Preview
+
 #Preview("PlusMinusButton") {
     VStack(spacing: 30) {
         // 個別ボタン

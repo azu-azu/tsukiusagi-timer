@@ -5,11 +5,12 @@ struct HistoryStore {
 
     private var url: URL {
         FileManager.default.urls(for: .documentDirectory,
-                                in: .userDomainMask)[0]
+                                 in: .userDomainMask)[0]
             .appendingPathComponent(file)
     }
 
     // MARK: - JSON coder/decoder with ISO-8601 dates
+
     private let encoder: JSONEncoder = {
         let enc = JSONEncoder()
         enc.dateEncodingStrategy = .iso8601
@@ -23,10 +24,11 @@ struct HistoryStore {
     }()
 
     // MARK: - Save
+
     func save(_ data: [SessionRecord]) {
         do {
             let encoded = try encoder.encode(data)
-            let fileURL = url                      // capture value for thread safety
+            let fileURL = url // capture value for thread safety
 
             DispatchQueue.global(qos: .utility).async {
                 do {
@@ -44,6 +46,7 @@ struct HistoryStore {
     }
 
     // MARK: - Load
+
     func load() -> [SessionRecord] {
         guard let raw = try? Data(contentsOf: url) else { return [] }
         return (try? decoder.decode([SessionRecord].self, from: raw)) ?? []

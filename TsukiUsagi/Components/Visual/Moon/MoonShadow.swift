@@ -3,10 +3,10 @@ import SwiftUI
 struct MoonShadow: View {
     @State private var animate = false
     // 🔽 公開プロパティ（全部デフォルト付き）
-    var moonSize: CGFloat  = 200
+    var moonSize: CGFloat = 200
     var duration: Double = 2.0
-    var nearY: CGFloat   = 10
-    var farY: CGFloat    = 30
+    var nearY: CGFloat = 10
+    var farY: CGFloat = 30
 
     var body: some View {
         Circle()

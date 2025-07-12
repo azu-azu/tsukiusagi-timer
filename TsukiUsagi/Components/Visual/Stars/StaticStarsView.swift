@@ -27,20 +27,22 @@ struct StaticStarsView: View {
                         .opacity(0.6)
                         .position(
                             x: size.width * star.xRatio,
-                            y: (safeAreaInsets.top + (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.yRatio)
+                            y: safeAreaInsets.top + (
+                                (size.height - safeAreaInsets.top - safeAreaInsets.bottom) * star.yRatio
+                            )
                         )
                 }
             }
             .ignoresSafeArea()
             .onAppear {
                 if stars.isEmpty {
-                    stars = (0..<starCount).map { _ in
+                    stars = (0 ..< starCount).map { _ in
                         Star(
-                            xRatio: .random(in: 0...1),
-                            yRatio: .random(in: 0...1),
-                            size: .random(in: 2...6),
+                            xRatio: .random(in: 0 ... 1),
+                            yRatio: .random(in: 0 ... 1),
+                            size: .random(in: 2 ... 6),
                             color: Color.yellow,
-                            opacity: .random(in: 0.15...0.8)
+                            opacity: .random(in: 0.15 ... 0.8)
                         )
                     }
                 }

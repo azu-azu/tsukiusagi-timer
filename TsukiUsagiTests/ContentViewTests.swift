@@ -1,9 +1,8 @@
-import XCTest
 import SwiftUI
 @testable import TsukiUsagi
+import XCTest
 
 class ContentViewTests: XCTestCase {
-
     var historyVM: HistoryViewModel!
     var timerVM: TimerViewModel!
 
@@ -114,7 +113,6 @@ class ContentViewTests: XCTestCase {
 // MARK: - PreferenceKey Tests
 
 class LandscapePreferenceKeyTests: XCTestCase {
-
     func testPreferenceKeyDefaultValue() {
         XCTAssertFalse(LandscapePreferenceKey.defaultValue)
     }

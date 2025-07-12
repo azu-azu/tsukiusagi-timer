@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - PreferenceKey for Landscape Detection
+
 struct LandscapePreferenceKey: PreferenceKey {
     static let defaultValue: Bool = false
 
@@ -10,12 +11,11 @@ struct LandscapePreferenceKey: PreferenceKey {
 }
 
 struct ContentView: View {
-
     // Environment
     @EnvironmentObject private var historyVM: HistoryViewModel
-    @EnvironmentObject private var timerVM:   TimerViewModel
+    @EnvironmentObject private var timerVM: TimerViewModel
     @StateObject private var sessionManager = SessionManager()
-	@EnvironmentObject private var sessionManagerV2: SessionManagerV2
+    @EnvironmentObject private var sessionManagerV2: SessionManagerV2
 
     // Environment for Orientation and Accessibility
     @Environment(\.horizontalSizeClass) private var horizontalClass
@@ -23,7 +23,7 @@ struct ContentView: View {
     @Environment(\.sizeCategory) private var sizeCategory
 
     // State
-    @State private var showingSettings  = false
+    @State private var showingSettings = false
     @State private var showingEditRecord = false
     @State private var showDiamondStars = false
     @State private var cachedIsLandscape: Bool = false
@@ -36,7 +36,7 @@ struct ContentView: View {
     private let buttonHeight: CGFloat = LayoutConstants.footerBarHeight
 
     // 比率定数
-    private let timerBottomRatio: CGFloat = 1.1   // 画面高に対する TimerPanel の比率
+    private let timerBottomRatio: CGFloat = 1.1 // 画面高に対する TimerPanel の比率
     private let moonPortraitYOffsetRatio: CGFloat = 0.15 // portrait（縦画面）時のmoonは少し上げる
     private let moonLandscapeYOffsetRatio: CGFloat = 0.1 // landscape（横画面）時のmoonは少し上げる
 
@@ -50,7 +50,7 @@ struct ContentView: View {
     private func safeIsLandscape(size: CGSize) -> Bool {
         guard size.width > 0, size.height > 0 else { return false }
         return horizontalClass == .regular ||
-                (size.width > size.height && size.width > 600)
+            (size.width > size.height && size.width > 600)
     }
 
     /// デバイス別のマージン調整
@@ -109,15 +109,15 @@ struct ContentView: View {
                             FlowingStarsView(
                                 starCount: flowingStarCount,
                                 angle: .degrees(90), // 下向き
-                                durationRange: 24...40,
-                                sizeRange: 2...4,
+                                durationRange: 24 ... 40,
+                                sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
                             FlowingStarsView(
                                 starCount: flowingStarCount,
                                 angle: .degrees(-90), // 上向き
-                                durationRange: 24...40,
-                                sizeRange: 2...4,
+                                durationRange: 24 ... 40,
+                                sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
                         }
@@ -246,13 +246,13 @@ struct ContentView: View {
                                             .frame(minWidth: moonSize, maxWidth: moonSize * 1.5, minHeight: timerHeight, maxHeight: timerHeight)
                                     }
                                     .frame(width: contentSize.width,
-                                            height: setHeight)
+                                           height: setHeight)
                                     .position(x: contentSize.width / 2,
-                                                y: setCenterY)
+                                              y: setCenterY)
                                 }
                             }
                         }
-                        .onPreferenceChange(LandscapePreferenceKey.self) { newValue in
+                        .onPreferenceChange(LandscapePreferenceKey.self) { _ in
                             updateOrientation(size: size)
                         }
 
@@ -304,7 +304,7 @@ struct ContentView: View {
                             .environmentObject(historyVM)
                             .environmentObject(sessionManager)
                     }
-                    .onChange(of: timerVM.isSessionFinished) { oldValue, newValue in
+                    .onChange(of: timerVM.isSessionFinished) { _, newValue in
                         if newValue {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 isQuietMoonFocused = true
@@ -313,7 +313,7 @@ struct ContentView: View {
                     }
                     .animation(
                         .easeInOut(duration: 0.3)
-                        .delay(0.1),
+                            .delay(0.1),
                         value: isLandscape
                     )
                 }
@@ -342,8 +342,8 @@ struct ContentView: View {
                         .scaledToFit()
                         .frame(width: 16, height: 16)
                         .frame(width: buttonHeight,
-                                height: buttonHeight,
-                                alignment: .bottom)
+                               height: buttonHeight,
+                               alignment: .bottom)
                         .foregroundColor(DesignTokens.Colors.textWhite)
                 }
             }
@@ -363,7 +363,7 @@ struct ContentView: View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
             HapticManager.shared.buttonTapFeedback()
             timerVM.isRunning ? timerVM.stopTimer()
-                                : timerVM.startTimer()
+                : timerVM.startTimer()
         }
         .frame(width: buttonWidth, height: buttonHeight)
         .background(Color.white.opacity(0.2),
@@ -384,7 +384,7 @@ struct ContentView: View {
 
 #Preview {
     let history = HistoryViewModel()
-    let timer   = TimerViewModel(historyVM: history)
+    let timer = TimerViewModel(historyVM: history)
     let sessionManager = SessionManager()
     let sessionManagerV2 = SessionManagerV2()
     return ContentView()

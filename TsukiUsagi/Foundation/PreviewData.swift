@@ -4,47 +4,66 @@ import SwiftUI
 /// 本番コードへの逆流を防ぐため、単方向依存の構造を維持
 @MainActor
 struct PreviewData {
-
     // MARK: - View Models
+
     /// サンプルSessionManager
     static let sampleSessionManager: SessionManager = {
         let manager = SessionManager()
         // プレビュー用のカスタムセッションを追加
-        try? manager.addSession(SessionItem(id: UUID(), name: "Preview Work", subtitle: "Sample session", isFixed: false))
-        try? manager.addSession(SessionItem(id: UUID(), name: "Preview Study", subtitle: "Another sample", isFixed: false))
+        try? manager.addSession(
+            SessionItem(
+                id: UUID(),
+                name: "Preview Work",
+                subtitle: "Sample session",
+                isFixed: false
+            )
+        )
+        try? manager.addSession(
+            SessionItem(
+                id: UUID(),
+                name: "Preview Study",
+                subtitle: "Another sample",
+                isFixed: false
+            )
+        )
         return manager
     }()
 
     /// サンプルHistoryViewModel
     static let sampleHistoryVM: HistoryViewModel = {
-        let vm = HistoryViewModel()
+        let historyViewModel = HistoryViewModel()
         // プレビュー用の履歴データを追加
-        vm.add(
-            start: Date().addingTimeInterval(-3600), // 1時間前
+        historyViewModel.add(
+            start: Date().addingTimeInterval(-3600),
             end: Date(),
             phase: .focus,
             activity: "Preview Work",
             subtitle: "Sample session",
             memo: "This is a preview memo"
         )
-        vm.add(
-            start: Date().addingTimeInterval(-7200), // 2時間前
+        historyViewModel.add(
+            start: Date().addingTimeInterval(-7200),
             end: Date().addingTimeInterval(-3600),
             phase: .focus,
             activity: "Preview Study",
             subtitle: "Another sample",
             memo: nil
         )
-        return vm
+        return historyViewModel
     }()
 
     /// サンプルTimerViewModel
     static let sampleTimerVM: TimerViewModel = {
-        let timer = TimerViewModel(historyVM: sampleHistoryVM, activityLabel: "Preview Work", subtitleLabel: "Sample session")
+        let timer = TimerViewModel(
+            historyVM: sampleHistoryVM,
+            activityLabel: "Preview Work",
+            subtitleLabel: "Sample session"
+        )
         return timer
     }()
 
     // MARK: - Preview Devices
+
     /// プレビュー用デバイス一覧
     static let previewDevices: [String] = [
         "iPhone 15 Pro",
@@ -60,11 +79,14 @@ struct PreviewData {
     ]
 
     // MARK: - Sample Content
+
     /// サンプルテキスト
-    struct SampleText {
+    enum SampleText {
         static let short = "Short text"
         static let medium = "This is a medium length text for testing purposes"
-        static let long = "This is a very long text that should be used to test how the UI behaves when there is a lot of content. It should wrap properly and maintain good readability."
+        static let long =
+            "This is a very long text that should be used to test how the UI behaves when there is a lot of content. " +
+            "It should wrap properly and maintain good readability."
         static let multiline = """
         This is a multiline text
         that spans multiple lines
@@ -74,7 +96,7 @@ struct PreviewData {
     }
 
     /// サンプル日付
-    struct SampleDates {
+    enum SampleDates {
         static let today = Date()
         static let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
         static let lastWeek = Calendar.current.date(byAdding: .day, value: -7, to: today) ?? today
@@ -82,19 +104,61 @@ struct PreviewData {
     }
 
     // MARK: - Sample Session Items
+
     /// サンプルセッションアイテム
     static let sampleSessionItems: [SessionItem] = [
-        SessionItem(id: UUID(), name: "Work", subtitle: "Professional tasks", isFixed: true),
-        SessionItem(id: UUID(), name: "Study", subtitle: "Learning activities", isFixed: true),
-        SessionItem(id: UUID(), name: "Read", subtitle: "Reading time", isFixed: true),
-        SessionItem(id: UUID(), name: "Exercise", subtitle: "Physical activity", isFixed: false),
-        SessionItem(id: UUID(), name: "Meditation", subtitle: "Mindfulness practice", isFixed: false),
-        SessionItem(id: UUID(), name: "Creative Work", subtitle: "Art and design", isFixed: false),
-        SessionItem(id: UUID(), name: "Planning", subtitle: "Strategy and planning", isFixed: false),
-        SessionItem(id: UUID(), name: "Review", subtitle: "Reflection time", isFixed: false)
+        SessionItem(
+            id: UUID(),
+            name: "Work",
+            subtitle: "Professional tasks",
+            isFixed: true
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Study",
+            subtitle: "Learning activities",
+            isFixed: true
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Read",
+            subtitle: "Reading time",
+            isFixed: true
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Exercise",
+            subtitle: "Physical activity",
+            isFixed: false
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Meditation",
+            subtitle: "Mindfulness practice",
+            isFixed: false
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Creative Work",
+            subtitle: "Art and design",
+            isFixed: false
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Planning",
+            subtitle: "Strategy and planning",
+            isFixed: false
+        ),
+        SessionItem(
+            id: UUID(),
+            name: "Review",
+            subtitle: "Reflection time",
+            isFixed: false
+        )
     ]
 
     // MARK: - Sample Session Records
+
     /// サンプルセッションレコード
     static let sampleSessionRecords: [SessionRecord] = [
         SessionRecord(
@@ -127,6 +191,7 @@ struct PreviewData {
     ]
 
     // MARK: - Environment Values
+
     /// プレビュー用の環境値
     struct EnvironmentValues {
         /// 通常の環境値
@@ -163,11 +228,11 @@ struct PreviewData {
 }
 
 // MARK: - Preview Helpers
+
 extension View {
     /// プレビュー用の環境値を適用
     func previewEnvironment(_ values: PreviewData.EnvironmentValues) -> some View {
-        self
-            .environment(\.sizeCategory, values.sizeCategory)
+        environment(\.sizeCategory, values.sizeCategory)
             .preferredColorScheme(values.colorScheme)
     }
 
@@ -182,8 +247,7 @@ extension View {
 
     /// アクセシビリティ対応のプレビュー
     func previewAccessibility() -> some View {
-        self
-            .previewEnvironment(PreviewData.EnvironmentValues.accessibility)
+        previewEnvironment(PreviewData.EnvironmentValues.accessibility)
             .previewDisplayName("Accessibility")
     }
 

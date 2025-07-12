@@ -7,14 +7,14 @@
 
 import UIKit
 
-/// ハプティックフィードバックを管理するユーティリティクラス
-final class HapticManager {
+/// HapticManager: 端末の触覚フィードバックを管理するシングルトン
+class HapticManager {
     static let shared = HapticManager()
 
     private init() {}
 
     /// ボタン用
-    // 呼び出し方 -> HapticManager.shared.buttonTapFeedback()
+    /// 呼び出し方 -> HapticManager.shared.buttonTapFeedback()
     func buttonTapFeedback() {
         heavyImpact()
     }
@@ -49,7 +49,6 @@ final class HapticManager {
         gen.prepare()
         gen.impactOccurred()
     }
-
 
     // MARK: - Notification Feedback
 

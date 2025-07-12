@@ -14,3 +14,19 @@ custom_rules:
       Font.systemの直接使用は推奨しません。DesignTokens.Fonts.xxx を使ってください。
       → Learn More: /docs/font_guidelines.md#why-forbidden
     severity: warning
+  short_identifier_name:
+    included: ".*\\.swift"
+    name: "Short Identifier Name Violation"
+    regex: '\\b([a-zA-Z])\\b'
+    excluded_regex: '\\b(i|j|k|x|y|t|p)\\b'
+    message: "Single-letter variable names are not allowed except for i, j, k, x, y, t, p."
+    severity: error
+
+excluded:
+  - tools/
+  - ./tools/
+  - tools/**
+  - ./tools/**
+
+disabled_rules:
+  - identifier_name

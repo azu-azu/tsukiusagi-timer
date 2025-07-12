@@ -284,10 +284,10 @@ extension Array {
 }
 
 #if DEBUG
-struct SessionNameManagerView_Previews: PreviewProvider {
-    static var previews: some View {
-        SessionNameManagerView()
-            .environmentObject(SessionManagerV2())
+    struct SessionNameManagerView_Previews: PreviewProvider {
+        static var previews: some View {
+            SessionNameManagerView()
+                .environmentObject(SessionManagerV2())
+        }
     }
-}
 #endif
