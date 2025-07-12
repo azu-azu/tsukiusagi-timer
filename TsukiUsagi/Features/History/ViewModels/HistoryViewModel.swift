@@ -2,6 +2,8 @@ import Combine
 import Foundation
 import SwiftUI
 
+// swiftlint:disable:next function_parameter_count
+// Issue #6: SessionRecord の memberwise initializer は設計上許容するため suppress
 struct SessionRecord: Codable, Identifiable {
     var id: String // UUID から String に変更（固定値）
     var start, end: Date
