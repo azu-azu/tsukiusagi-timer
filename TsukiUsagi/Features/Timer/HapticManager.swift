@@ -14,7 +14,7 @@ class HapticManager {
     private init() {}
 
     /// ボタン用
-    // 呼び出し方 -> HapticManager.shared.buttonTapFeedback()
+    /// 呼び出し方 -> HapticManager.shared.buttonTapFeedback()
     func buttonTapFeedback() {
         heavyImpact()
     }
