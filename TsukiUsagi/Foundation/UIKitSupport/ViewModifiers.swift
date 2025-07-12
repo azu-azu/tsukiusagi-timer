@@ -81,7 +81,8 @@ func avenirNextUIFont(
         fontName = "AvenirNext-Regular"
     }
     guard let baseFont = UIFont(name: fontName, size: size) else {
-        // swiftlint:disable:next discouraged-font-usage // Issue #3: フォールバック用途（2024年8月目標）
+        // swiftlint:disable:next discouraged-font-usage
+        // Issue #3: フォールバック用途（2024年8月目標）
         return UIFont.systemFont(ofSize: size, weight: weight) // [理由] AvenirNextが取得できない場合のフォールバック
     }
     // デザイン（monospaced等）を適用
