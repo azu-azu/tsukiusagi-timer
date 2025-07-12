@@ -183,12 +183,39 @@ Text("特殊用途")
 原則として、変数名・定数名は意味のある名前を付けること。
 ただし、以下の場合は例外として単一文字の変数名を許可する。
 
-- `i`, `j`, `k`：ループカウンタ等、短いスコープでのみ許可
-- `x`, `y`：座標や数学的意味での使用は許可
-- `t`, `p`：一時的な値で、かつコメントで意味が明示されている場合のみ許可
-- それ以外（`f`, `m`, `r`, `g`, `b`, `s` など）は descriptive name にリネームすること
+### 許可される単一文字変数名
 
-Suppressや例外コメントには、必ず理由を明記すること。
+#### 1. ループ・イテレーション用
+- `i`, `j`, `k`：ループカウンタ等、短いスコープでのみ許可
+- `s`：forEach内の一時変数（SparkleSpec等の短命なオブジェクト）
+
+#### 2. 座標・数学的意味
+- `x`, `y`：座標や数学的意味での使用は許可
+- `t`：Timerクロージャの未使用引数（`_`の代替）
+
+#### 3. 一時的な値（コメント必須）
+- `t`, `p`：一時的な値で、かつコメントで意味が明示されている場合のみ許可
+
+### 禁止される単一文字変数名
+- `f`, `m`, `r`, `g`, `b` など：descriptive name にリネームすること
+
+### Suppressコメント例
+```swift
+// swiftlint:disable:next identifier_name
+// Issue #4: 一時変数用途の命名ルール明確化（2024年8月目標）
+// s: SparkleSpecの短命な一時変数（forEach内のみ許容）
+ForEach(stars) { s in ... }
+
+// swiftlint:disable:next identifier_name
+// Issue #4: 一時変数用途の命名ルール明確化（2024年8月目標）
+// t: Timerクロージャの一時変数（用途明示）
+Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { t in ... }
+
+// swiftlint:disable:next identifier_name
+// Issue #4: 一時変数用途の命名ルール明確化（2024年8月目標）
+// _: 使用しない引数（用途明示）
+Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in ... }
+```
 
 ### 例
 ```swift
@@ -198,6 +225,9 @@ let y = CGFloat.random(in: areaToUse.minYRatio ... areaToUse.maxYRatio)
 
 // t: 一時的なタイマー（用途をコメントで明示）
 Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { t in ... }
+
+// s: SparkleSpecの短命な一時変数（forEach内のみ許容）
+ForEach(stars) { s in ... }
 
 // NG例（リネーム推奨）
 let f = DateFormatter() // → let dateFormatter = DateFormatter()
