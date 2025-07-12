@@ -42,6 +42,8 @@ class HistoryViewModel: ObservableObject {
         let duration = parameters.end.timeIntervalSince(parameters.start)
         guard duration >= 3 else { return }
 
+        // swiftlint:disable:next function_parameter_count
+        // Issue #6: SessionRecord の memberwise initializer は設計上許容するため suppress
         let record = SessionRecord(
             id: generateFixedId(from: parameters.start), // 固定値IDを生成
             start: parameters.start,
