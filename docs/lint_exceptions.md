@@ -134,6 +134,14 @@ Text("特殊用途")
 - Date: 2024/07/11
 - Author: Kazumi
 
+- File: TsukiUsagi/Features/History/ViewModels/HistoryViewModel.swift
+- Line: 6
+- Reason: SessionRecord の memberwise initializer は設計上許容するため suppress
+- Issue: #6
+- Why Forbidden: struct の memberwise initializer は設計上の意図的なものであり、責務がごちゃついているわけではないため
+- Date: 2024/07/11
+- Author: Kazumi
+
 ---
 
 ## 5. なぜ禁止か（教育的解説）
