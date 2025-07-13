@@ -195,4 +195,3 @@ struct SettingsView_Previews: PreviewProvider {
     }
 }
 #endif
-
