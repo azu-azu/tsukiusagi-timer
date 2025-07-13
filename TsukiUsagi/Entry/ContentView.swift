@@ -199,13 +199,13 @@ struct ContentView: View {
                         }
                     }
                     // デバッグ用の状態変化追跡
-                    .onReceive(timerVM.$isSessionFinished) { isFinished in
+                    .onReceive(timerVM.$isSessionFinished) { _ in
                         // print("ContentView: isSessionFinished changed to \(isFinished)")
                     }
-                    .onReceive(timerVM.$isWorkSession) { isWork in
+                    .onReceive(timerVM.$isWorkSession) { _ in
                         // print("ContentView: isWorkSession changed to \(isWork)")
                     }
-                    .onReceive(timerVM.$isRunning) { isRunning in
+                    .onReceive(timerVM.$isRunning) { _ in
                         // print("ContentView: isRunning changed to \(isRunning)")
                     }
                     .animation(
