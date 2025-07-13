@@ -122,7 +122,10 @@ struct MainPanel: View {
                             size: size
                         )
                         .allowsHitTesting(false)
-                        .frame(width: (hStackWidth - landscapeMargin) * 0.5, height: moonSize)
+                        .frame(
+                            width: (hStackWidth - landscapeMargin) * 0.5,
+                            height: moonSize
+                        )
                         .layoutPriority(1)
 
                         // TimerPanel
@@ -137,7 +140,10 @@ struct MainPanel: View {
                                 )
                             Spacer()
                         }
-                        .frame(width: (hStackWidth - landscapeMargin) * 0.5, height: moonSize)
+                        .frame(
+                            width: (hStackWidth - landscapeMargin) * 0.5,
+                            height: moonSize
+                        )
                         .layoutPriority(0)
                     }
                     .frame(width: hStackWidth, height: moonSize)
