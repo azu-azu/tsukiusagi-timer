@@ -42,7 +42,14 @@ extension Text {
         resourceExt: String = "gif"
     ) -> some View {
         let customFont = Font.custom(fontName, size: size)
-        return self.modifier(GlitterTextModifier(font: customFont, resourceName: resourceName, resourceExt: resourceExt, size: size))
+        return self.modifier(
+            GlitterTextModifier(
+                font: customFont,
+                resourceName: resourceName,
+                resourceExt: resourceExt,
+                size: size
+            )
+        )
     }
 }
 

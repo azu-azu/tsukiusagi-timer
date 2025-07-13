@@ -83,7 +83,7 @@ struct DiamondStarsOnceView: View {
     private let perOnce = 60 // 一回で何個までか
 
     // アニメーション終了時のコールバック
-    var onFinished: (() -> Void)? = nil
+    var onFinished: (() -> Void)?
 
     @State private var stars: [SparkleSpec] = []
     @State private var generated = 0 // 今何個作ったか
