@@ -28,10 +28,8 @@ struct ResetStopSectionView: View {
                 // 🛑 Stop
                 if timerVM.isWorkSession && timerVM.startTime != nil {
                     Button {
-                        Task {
-                            timerVM.forceFinishWorkSession()
-                            dismiss()
-                        }
+                        timerVM.forceFinishWorkSession()
+                        dismiss()
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "forward.end")
