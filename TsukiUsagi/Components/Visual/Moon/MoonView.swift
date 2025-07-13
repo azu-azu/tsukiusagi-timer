@@ -61,7 +61,7 @@ struct MoonView: View {
 
             // ✨ キラキラ文字
             Text(glitterText)
-                .glitter(size: moonSize * 0.18)
+                .glitter(size: moonSize * 0.18, resourceName: "black_yellow")
                 .minimumScaleFactor(0.5)
                 .offset(y: 18)
         }

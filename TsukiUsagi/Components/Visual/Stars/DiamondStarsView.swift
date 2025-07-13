@@ -82,11 +82,21 @@ struct DiamondStarsOnceView: View {
     private let total = 250
     private let perOnce = 60 // 一回で何個までか
 
+    // アニメーション終了時のコールバック
+    var onFinished: (() -> Void)? = nil
+
     @State private var stars: [SparkleSpec] = []
     @State private var generated = 0 // 今何個作ったか
     private let screen = UIScreen.main.bounds
     private let colors: [Color] = [.yellow]
     // private let colors: [Color] = [.yellow, .white] // 複数指定する場合
+
+    // アニメーション全体の想定時間
+    private var animationTotalTime: Double {
+        // 星の生成間隔 * 総数 + 最後の星のライフタイム
+        return 0.1 * Double(total / perOnce) + 0.3
+    }
+
     var body: some View {
         ZStack {
             // swiftlint:disable:next identifier_name
@@ -102,7 +112,14 @@ struct DiamondStarsOnceView: View {
             }
         }
         .ignoresSafeArea()
-        .onAppear { launchTimer() }
+        .onAppear {
+            launchTimer()
+
+            // アニメーション完了タイミングでonFinishedを呼ぶ
+            DispatchQueue.main.asyncAfter(deadline: .now() + animationTotalTime) {
+                onFinished?()
+            }
+        }
     }
 
     private func launchTimer() {

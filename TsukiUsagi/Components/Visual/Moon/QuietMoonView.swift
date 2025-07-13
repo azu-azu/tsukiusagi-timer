@@ -77,10 +77,8 @@ struct QuietMoonView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 20) {
-                // glitter(font:) は現状APIでは使えません！
-                // Textには必ず glitter(size:fontName:resourceName:) を使うこと！
                 Text(title)
-                    .glitter(size: 24, resourceName: "gold")
+                    .glitter(size: 24, resourceName: "black_yellow")
                     .frame(maxWidth: .infinity)
 
                 SelectableTextView(

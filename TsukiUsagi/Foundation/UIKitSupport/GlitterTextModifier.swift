@@ -4,33 +4,30 @@
 // Text("Custom").glitter(size: 40, fontName: "Futura-Bold")
 // Text("Pink").glitter(resourceName: "gold")
 
-import SDWebImageSwiftUI
 import SwiftUI
+import Kingfisher
 
 // Modifier 本体
 private struct GlitterTextModifier: ViewModifier {
     let font: Font
-    let resourceName: String // e.g. "black_yellow"
-    let resourceExt: String // default "gif"
+    let resourceName: String
+    let resourceExt: String
+    let size: CGFloat
 
     func body(content: Content) -> some View {
-        content
+        let url = Bundle.main.url(forResource: resourceName, withExtension: resourceExt)
+
+        return content
             .font(font)
             .overlay(
-                AnimatedImage(
-                    url: Bundle.main.url(
-                        forResource: resourceName,
-                        withExtension: resourceExt
-                    )
-                )
-                .resizable()
-                .scaledToFill()
+                KFAnimatedImage(url)
+                    .frame(height: size)
             )
             .mask(content.font(font))
     }
 }
 
-// Sugar extension
+// Sugar extension for Text
 extension Text {
     /// Adds a glitter GIF mask to the text.
     /// - Parameters:
@@ -45,28 +42,23 @@ extension Text {
         resourceExt: String = "gif"
     ) -> some View {
         let customFont = Font.custom(fontName, size: size)
-        return modifier(
-            GlitterTextModifier(font: customFont,
-                                resourceName: resourceName,
-                                resourceExt: resourceExt)
-        )
+        return self.modifier(GlitterTextModifier(font: customFont, resourceName: resourceName, resourceExt: resourceExt, size: size))
     }
 }
 
 // Text以外のViewにもキラキラエフェクトを重ねる
 extension View {
     /// 任意のViewにキラキラエフェクトを重ねる
-    func glitter(size: CGFloat = 36, resourceName: String = "black_yellow", resourceExt: String = "gif") -> some View {
-        overlay(
-            AnimatedImage(
-                url: Bundle.main.url(
-                    forResource: resourceName,
-                    withExtension: resourceExt
-                )
-            )
-            .resizable()
-            .scaledToFill()
-            .frame(width: size, height: size)
+    func glitter(
+        size: CGFloat = 36,
+        resourceName: String = "black_yellow",
+        resourceExt: String = "gif"
+    ) -> some View {
+        let url = Bundle.main.url(forResource: resourceName, withExtension: resourceExt)
+
+        return overlay(
+            KFAnimatedImage(url)
+                .frame(width: size, height: size)
         )
     }
 }
