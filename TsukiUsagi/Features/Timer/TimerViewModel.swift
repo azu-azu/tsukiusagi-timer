@@ -68,44 +68,43 @@ final class TimerViewModel: ObservableObject {
         persistenceManager: TimerPersistenceManageable,
         formatter: TimeFormatterUtilable
     ) {
-        print("TimerViewModel: init called")
+        // 3. Engine設定
         self.engine = engine
         self.notificationService = notificationService
         self.hapticService = hapticService
+        self.formatter = formatter
         self.historyService = historyService
         self.persistenceManager = persistenceManager
-        self.formatter = formatter
+
+        // 4. Engineのコールバック設定（notificationService初期化後）
+        self.engine.onTick = { [weak self] seconds in
+            self?.timeRemaining = seconds
+        }
+        self.engine.onSessionCompleted = { [weak self] sessionInfo in
+            self?.handleSessionCompleted(sessionInfo)
+        }
 
         // Simulator用：UserDefaultsの初期値を強制設定
         #if targetEnvironment(simulator)
         if UserDefaults.standard.integer(forKey: "workMinutes") == 0 {
             UserDefaults.standard.set(25, forKey: "workMinutes")
-            print("TimerViewModel: Simulator - forced workMinutes to 25")
         }
         if UserDefaults.standard.integer(forKey: "breakMinutes") == 0 {
             UserDefaults.standard.set(5, forKey: "breakMinutes")
-            print("TimerViewModel: Simulator - forced breakMinutes to 5")
         }
         #endif
 
         // 初期値を設定（@AppStorageの値を使用）
         self.timeRemaining = workMinutes * 60
-        print("TimerViewModel: initial timeRemaining = \(self.timeRemaining), workMinutes = \(workMinutes)")
 
         // 5. EngineのonTickでViewModelのtimeRemainingを更新
-        self.engine.onTick = { [weak self] seconds in
-            self?.timeRemaining = seconds
-        }
+        // 既に上で設定済み
 
         // 6. EngineのonSessionCompletedでセッション完了処理
-        self.engine.onSessionCompleted = { [weak self] sessionInfo in
-            self?.handleSessionCompleted(sessionInfo)
-        }
+        // 既に上で設定済み
 
         // 設定を即座に反映
         self.refreshAfterSettingsChange()
-
-        print("TimerViewModel: init completed - isRunning: \(self.isRunning), timeRemaining: \(self.timeRemaining)")
     }
 
     // MARK: - Public API
@@ -113,34 +112,43 @@ final class TimerViewModel: ObservableObject {
     /// 設定変更を即反映（STOP中だけ）
     func refreshAfterSettingsChange() {
         guard !isRunning else {
-            print("TimerViewModel: refreshAfterSettingsChange skipped - timer is running")
             return
         }
 
         let minutes = isWorkSession ? workMinutes : breakMinutes
         let newTimeRemaining = minutes * 60
 
-        print("TimerViewModel: refreshAfterSettingsChange - workMinutes: \(workMinutes), " +
-              "breakMinutes: \(breakMinutes), isWorkSession: \(isWorkSession), " +
-              "newTimeRemaining: \(newTimeRemaining)")
-
         timeRemaining = newTimeRemaining
     }
 
     // 6. タイマー制御はengine経由
     func startTimer(seconds: Int) {
-        print("TimerViewModel: startTimer called with \(seconds) seconds, current isRunning: \(isRunning)")
+        // セッション完了状態をクリア（重要：これを最初に行う）
+        if isSessionFinished {
+            isSessionFinished = false
+        }
+
+        // timeRemainingが0の場合は設定値で初期化
+        let actualSeconds = seconds > 0 ? seconds : workMinutes * 60
+
         startTime = Date()
         isWorkSession = true
         isRunning = true
-        engine.start(seconds: seconds)
-        let newIsRunning = engine.isRunning
-        print("TimerViewModel: engine.isRunning = \(newIsRunning)")
-        isRunning = newIsRunning
-        print("TimerViewModel: isRunning set to \(isRunning)")
+        timeRemaining = actualSeconds
 
-        // アニメーションを発火
-        triggerStartAnimations()
+        // アニメーション抑制フラグをリセット
+        shouldSuppressAnimation = false
+
+        // MainActorで確実に実行
+        Task { @MainActor in
+            self.engine.start(seconds: actualSeconds)
+
+            let newIsRunning = self.engine.isRunning
+            self.isRunning = newIsRunning
+
+            // アニメーションを発火
+            self.triggerStartAnimations()
+        }
     }
     func pauseTimer() {
         engine.pause()
@@ -162,10 +170,12 @@ final class TimerViewModel: ObservableObject {
     /// タイマーリセット
     func resetTimer() {
         stopTimer()
+
+        // 状態を正しい順序でリセット
         isRunning = false
-        isWorkSession = true
+        isSessionFinished = false  // 先にfalseにする
+        isWorkSession = true      // その後でtrueにする
         timeRemaining = workMinutes * 60
-        isSessionFinished = false
         startTime = nil
         endTime = nil
     }
@@ -187,7 +197,7 @@ final class TimerViewModel: ObservableObject {
         }
         stopTimer()
         isSessionFinished = true
-        isWorkSession = false
+        isWorkSession = false  // QuietMoon表示のために必要
     }
 
     /// 外部からendTimeを更新するためのメソッド
@@ -245,9 +255,13 @@ final class TimerViewModel: ObservableObject {
 
     /// セッション完了時の処理（Engineコールバックから呼ばれる）
     private func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
-        print("TimerViewModel: handleSessionCompleted called")
         isRunning = false
         timeRemaining = 0
+
+        // セッション完了状態を設定（順序重要）
+        endTime = sessionInfo.endTime
+        isSessionFinished = true
+        isWorkSession = false  // QuietMoon表示のために必要
 
         // セッション完了時の処理
         hapticService.heavyImpact()
@@ -266,8 +280,6 @@ final class TimerViewModel: ObservableObject {
 
         // 永続化
         persistenceManager.saveTimerState()
-
-        print("TimerViewModel: session completed and saved")
     }
 
     /// diamondアニメーションとstartPulseアニメーションを発火

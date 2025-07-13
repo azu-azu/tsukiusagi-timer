@@ -13,8 +13,6 @@ struct TimerPanel: View {
     @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
     @Environment(\.scenePhase) private var scenePhase
 
-    @State private var flashYellow = false
-    @State private var flashScale = false
     @State private var isEditing = false
     @State private var editedActivity: String = ""
     @State private var editedSubtitle: String = ""
@@ -30,10 +28,12 @@ struct TimerPanel: View {
             // タイマー：常に中央寄り
             TimerTextView(
                 timeText: timerVM.formatTime(timerVM.timeRemaining),
-                isSessionFinished: timerVM.isSessionFinished,
-                flashYellow: flashYellow,
-                flashScale: flashScale
+                isSessionFinished: timerVM.isSessionFinished
             )
+
+            // ★START押下アニメ（追加）
+            .startPulseAnimation(publisher: timerVM.startPulse.eraseToAnyPublisher())
+
             .frame(maxWidth: .infinity,
                     maxHeight: .infinity,
                     alignment: .center)
@@ -58,20 +58,6 @@ struct TimerPanel: View {
         .onChange(of: timerVM.isSessionFinished) { _, _ in
             if timerVM.shouldSuppressSessionFinishedAnimation {
                 timerVM.shouldSuppressSessionFinishedAnimation = false
-            }
-        }
-
-        // ★START押下アニメ（追加）
-        .onReceive(timerVM.startPulse) { _ in
-            withAnimation(.easeInOut(duration: 0.4)) {
-                flashYellow = true
-                flashScale = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                withAnimation(.easeInOut(duration: 1.8)) {
-                    flashYellow = false
-                    flashScale = false
-                }
             }
         }
 

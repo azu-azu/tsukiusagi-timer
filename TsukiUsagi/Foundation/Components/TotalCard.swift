@@ -74,7 +74,7 @@ struct TotalCard: View {
         Group {
             if showGlitter {
                 Text(text)
-                    .glitter(size: glitterSize, resourceName: "black_yellow")
+                    .glitter(size: glitterSize)
             } else {
                 Text(text)
             }

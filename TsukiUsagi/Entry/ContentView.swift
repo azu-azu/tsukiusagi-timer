@@ -198,6 +198,16 @@ struct ContentView: View {
                             }
                         }
                     }
+                    // デバッグ用の状態変化追跡
+                    .onReceive(timerVM.$isSessionFinished) { isFinished in
+                        // print("ContentView: isSessionFinished changed to \(isFinished)")
+                    }
+                    .onReceive(timerVM.$isWorkSession) { isWork in
+                        // print("ContentView: isWorkSession changed to \(isWork)")
+                    }
+                    .onReceive(timerVM.$isRunning) { isRunning in
+                        // print("ContentView: isRunning changed to \(isRunning)")
+                    }
                     .animation(
                         .easeInOut(duration: 0.3)
                             .delay(0.1),
@@ -213,15 +223,13 @@ struct ContentView: View {
 
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
-            print("ContentView: startPauseButton tapped - isRunning: \(timerVM.isRunning), " +
-                  "timeRemaining: \(timerVM.timeRemaining)")
             HapticManager.shared.buttonTapFeedback()
             if timerVM.isRunning {
-                print("ContentView: calling stopTimer()")
                 timerVM.stopTimer()
             } else {
-                print("ContentView: calling startTimer() with \(timerVM.timeRemaining) seconds")
-                timerVM.startTimer(seconds: timerVM.timeRemaining)
+                // セッション完了後の再スタート時は設定値を使用
+                let secondsToStart = timerVM.isSessionFinished ? timerVM.workLengthMinutes * 60 : timerVM.timeRemaining
+                timerVM.startTimer(seconds: secondsToStart)
             }
         }
         .frame(width: buttonWidth, height: buttonHeight)
@@ -241,47 +249,48 @@ struct ContentView: View {
     }
 }
 
+// --- Preview用ダミークラス（ファイルスコープに移動） ---
+private class DummyEngine: TimerEngineable {
+    var timeRemaining: Int = 0
+    var isRunning: Bool = false
+    var onTick: ((Int) -> Void)?
+    var onSessionCompleted: ((TimerSessionInfo) -> Void)?
+    func start(seconds: Int) {}
+    func pause() {}
+    func resume() {}
+    func stop() {}
+    func reset(to seconds: Int) {}
+}
+private class DummyNotification: PhaseNotificationServiceable {
+    func sendStartNotification() {}
+    func cancelNotification() {}
+    func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
+    func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
+    func cancelSessionEndNotification() {}
+    func finalizeWorkPhase() {}
+    func finalizeBreakPhase() {}
+}
+private class DummyHaptic: HapticServiceable {
+    func heavyImpact() {}
+    func lightImpact() {}
+}
+private class DummyHistory: SessionHistoryServiceable {
+    func add(parameters: AddSessionParameters) {}
+}
+private class DummyPersistence: TimerPersistenceManageable {
+    var timeRemaining: Int = 0
+    var isRunning: Bool = false
+    var isWorkSession: Bool = true
+    func saveTimerState() {}
+    func restoreTimerState() {}
+}
+private class DummyFormatter: TimeFormatterUtilable {
+    func format(seconds: Int) -> String { "00:00" }
+    func format(date: Date?) -> String { "date" }
+}
+
 #Preview {
     let history = HistoryViewModel()
-    // ダミーサービスを用意
-    class DummyEngine: TimerEngineable {
-        var timeRemaining: Int = 0
-        var isRunning: Bool = false
-        var onTick: ((Int) -> Void)?
-        var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-        func start(seconds: Int) {}
-        func pause() {}
-        func resume() {}
-        func stop() {}
-        func reset(to seconds: Int) {}
-    }
-    class DummyNotification: PhaseNotificationServiceable {
-        func sendStartNotification() {}
-        func cancelNotification() {}
-        func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
-        func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
-        func cancelSessionEndNotification() {}
-        func finalizeWorkPhase() {}
-        func finalizeBreakPhase() {}
-    }
-    class DummyHaptic: HapticServiceable {
-        func heavyImpact() {}
-        func lightImpact() {}
-    }
-    class DummyHistory: SessionHistoryServiceable {
-        func add(parameters: AddSessionParameters) {}
-    }
-    class DummyPersistence: TimerPersistenceManageable {
-        var timeRemaining: Int = 0
-        var isRunning: Bool = false
-        var isWorkSession: Bool = true
-        func saveTimerState() {}
-        func restoreTimerState() {}
-    }
-    class DummyFormatter: TimeFormatterUtilable {
-        func format(seconds: Int) -> String { "00:00" }
-        func format(date: Date?) -> String { "date" }
-    }
     let timer = TimerViewModel(
         engine: DummyEngine(),
         notificationService: DummyNotification(),
@@ -292,7 +301,7 @@ struct ContentView: View {
     )
     let sessionManager = SessionManager()
     let sessionManagerV2 = SessionManagerV2()
-    return ContentView()
+    ContentView()
         .environmentObject(history)
         .environmentObject(timer)
         .environmentObject(sessionManager)
