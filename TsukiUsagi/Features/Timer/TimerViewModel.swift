@@ -10,10 +10,21 @@ import Foundation
 import SwiftUI
 import UIKit
 
+// 1. 各Serviceable/Engineableのimport
+import Foundation
+
 /// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
 final class TimerViewModel: ObservableObject {
-    // Published 状態
-    @Published var timeRemaining: Int
+    // 2. DIプロパティ
+    private let engine: TimerEngineable
+    private let notificationService: PhaseNotificationServiceable
+    private let hapticService: HapticServiceable
+    private let historyService: SessionHistoryServiceable
+    private let persistenceManager: TimerPersistenceManageable
+    private let formatter: TimeFormatterUtilable
+
+    // 3. @PublishedなどUIバインディング用プロパティ
+    @Published var timeRemaining: Int = 0
     @Published var isRunning: Bool = false
     @Published var isWorkSession: Bool = true
     @Published var isSessionFinished = false
@@ -24,24 +35,11 @@ final class TimerViewModel: ObservableObject {
     @Published var shouldSuppressAnimation = false
     @Published var shouldSuppressSessionFinishedAnimation = false
 
-    // セッションごとのworkMinutesを保存
-    private var sessionWorkMinutes: Int?
-    // 実作業秒数
-    private var actualWorkedSeconds: Int = 0
-    // 最後に再開した時刻
-    private var lastResumedTime: Date?
-
     // User-configurable
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
     @AppStorage("subtitleLabel") private var subtitleLabel: String = ""
     @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
-
-    // 内部
-    private var timer: Timer?
-    private let historyVM: HistoryViewModel
-    // --- 追加: 永続化マネージャ ---
-    private let persistenceManager = TimerPersistenceManager()
 
     // 🔔 START アニメ用トリガー
     let startPulse = PassthroughSubject<Void, Never>()
@@ -56,17 +54,35 @@ final class TimerViewModel: ObservableObject {
 
     var workLengthMinutes: Int { workMinutes }
 
-    // Init
-    init(historyVM: HistoryViewModel, activityLabel: String = "Work", subtitleLabel: String = "") {
-        self.historyVM = historyVM
+    // 4. DIイニシャライザ
+    init(
+        engine: TimerEngineable,
+        notificationService: PhaseNotificationServiceable,
+        hapticService: HapticServiceable,
+        historyService: SessionHistoryServiceable,
+        persistenceManager: TimerPersistenceManageable,
+        formatter: TimeFormatterUtilable
+    ) {
+        self.engine = engine
+        self.notificationService = notificationService
+        self.hapticService = hapticService
+        self.historyService = historyService
+        self.persistenceManager = persistenceManager
+        self.formatter = formatter
 
-        // AppStorage を self にアクセスせず使う方法
-        let minutes = UserDefaults.standard.integer(forKey: "workMinutes")
-        _timeRemaining = Published(initialValue: minutes > 0 ? minutes * 60 : 25 * 60)
+        // 5. EngineのonTickでViewModelのtimeRemainingを更新
+        self.engine.onTick = { [weak self] seconds in
+            DispatchQueue.main.async {
+                self?.timeRemaining = seconds
+            }
+        }
 
-        // プレビュー用の初期値をセット（本番ではデフォルト値）
-        self.activityLabel = activityLabel
-        self.subtitleLabel = subtitleLabel
+        // 6. EngineのonSessionCompletedでセッション完了処理
+        self.engine.onSessionCompleted = { [weak self] sessionInfo in
+            Task { @MainActor in
+                await self?.handleSessionCompleted(sessionInfo)
+            }
+        }
     }
 
     // MARK: - Public API
@@ -78,82 +94,27 @@ final class TimerViewModel: ObservableObject {
         timeRemaining = minutes * 60
     }
 
-    /// タイマー開始
-    func startTimer() {
-        guard !isRunning else { return }
-
-        stopTimer()
-
-        // ★ ここで必ず初期化する
-        startTime = nil
-        endTime = nil
-
-        // 新しいセッション開始
-        if isSessionFinished {
-            isWorkSession = true
-            // セッション開始時のworkMinutesを保存
-            sessionWorkMinutes = workMinutes
-            timeRemaining = workMinutes * 60
-            startTime = Date()
-            endTime = nil
-            isSessionFinished = false
-            actualWorkedSeconds = 0
-            lastResumedTime = Date()
-        } else if startTime == nil {
-            // セッション初回開始
-            let minutes = isWorkSession ? workMinutes : breakMinutes
-            sessionWorkMinutes = isWorkSession ? workMinutes : breakMinutes
-            timeRemaining = minutes * 60
-            startTime = Date()
-            endTime = nil
-            actualWorkedSeconds = 0
-            lastResumedTime = Date()
-        } else {
-            // ポーズ再開
-            resumeTimer()
-            return
-        }
-
-        // 3) 走り出す
-        triggerStartAnimations()
-        shouldSuppressAnimation = false
-
-        startTimerInternal()
+    // 6. タイマー制御はengine経由
+    @MainActor
+    func startTimer(seconds: Int) async {
+        await engine.start(seconds: seconds)
+        isRunning = engine.isRunning
     }
-
-    /// タイマー再開
-    func resumeTimer() {
-        guard !isRunning else { return }
-        guard lastResumedTime == nil else { return } // すでに再開中なら何もしない
-
-        // diamondアニメーション発火を追加
-        triggerStartAnimations()
-
-        lastResumedTime = Date()
-        isRunning = true
-        startTimerInternal()
-    }
-
-    /// タイマー一時停止
     func pauseTimer() {
-        guard isRunning else { return }
-        if let resumedAt = lastResumedTime {
-            actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
-            lastResumedTime = nil
-        }
-        stopTimer()
+        engine.pause()
+        isRunning = engine.isRunning
     }
-
-    /// タイマー停止
+    func resumeTimer() {
+        engine.resume()
+        isRunning = engine.isRunning
+    }
     func stopTimer() {
-        timer?.invalidate()
-        timer = nil
-        isRunning = false
-        // Pause相当の処理
-        if let resumedAt = lastResumedTime {
-            actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
-            lastResumedTime = nil
-        }
+        engine.stop()
+        isRunning = engine.isRunning
+    }
+    func resetTimer(to seconds: Int) {
+        engine.reset(to: seconds)
+        isRunning = engine.isRunning
     }
 
     /// タイマーリセット
@@ -161,13 +122,10 @@ final class TimerViewModel: ObservableObject {
         stopTimer()
         isRunning = false
         isWorkSession = true
-        let minutes = sessionWorkMinutes ?? workMinutes
-        timeRemaining = minutes * 60
+        timeRemaining = workMinutes * 60
         isSessionFinished = false
         startTime = nil
         endTime = nil
-        actualWorkedSeconds = 0
-        lastResumedTime = nil
     }
 
     /// 強制終了（Stopボタン用）
@@ -184,7 +142,7 @@ final class TimerViewModel: ObservableObject {
                     subtitle: subtitleLabel,
                     memo: nil
                 )
-                historyVM.add(parameters: parameters)
+                historyService.add(parameters: parameters)
             }
         }
         stopTimer()
@@ -197,18 +155,30 @@ final class TimerViewModel: ObservableObject {
         endTime = date
     }
 
-    /// "MM:SS" 表示用
-    func formatTime() -> String {
-        TimeFormatters.formatTime(seconds: timeRemaining)
+    // 7. 通知・ハプティック・履歴保存・フォーマットもServiceable経由
+    func sendStartNotification() {
+        notificationService.sendStartNotification()
+    }
+    func triggerHeavyHaptic() {
+        hapticService.heavyImpact()
+    }
+    func addSessionHistory(parameters: AddSessionParameters) {
+        historyService.add(parameters: parameters)
+    }
+    func formatTime(_ seconds: Int) -> String {
+        formatter.format(seconds: seconds)
+    }
+    func formatDate(_ date: Date?) -> String {
+        formatter.format(date: date)
     }
 
     // プライベート
     private func formatTime(_ date: Date?) -> String {
-        TimeFormatters.formatTime(date: date)
+        formatter.format(date: date)
     }
 
-    var formattedStartTime: String { formatTime(startTime) }
-    var formattedEndTime: String { formatTime(endTime) }
+    var formattedStartTime: String { formatDate(startTime) }
+    var formattedEndTime: String { formatDate(endTime) }
 
     // 公開getter
     public var currentActivityLabel: String { activityLabel }
@@ -233,95 +203,33 @@ final class TimerViewModel: ObservableObject {
 
     // MARK: - Private Methods
 
-    /// タイマーを開始する共通処理
-    private func startTimerInternal() {
-        isRunning = true
-        timer = Timer.scheduledTimer(
-            withTimeInterval: 1.0,
-            repeats: true
-        ) { [weak self] _ in
-            Task { await self?.tick() }
-        }
-    }
-
-    /// タイマー更新処理
+    /// セッション完了時の処理（Engineコールバックから呼ばれる）
     @MainActor
-    private func tick() {
-        if timeRemaining > 0 {
-            timeRemaining -= 1
-        } else {
-            Task { [weak self] in await self?.sessionCompleted() }
-        }
-    }
-
-    /// セッション完了処理
-    @MainActor
-    private func sessionCompleted(sendNotification: Bool = true) async {
-        stopTimer()
-        // セッション終了時刻を記録（既にセットされていれば上書きしない）
-        if endTime == nil {
-            endTime = Date()
-        }
-        // 最後のPause漏れ対策
-        if let resumedAt = lastResumedTime {
-            actualWorkedSeconds += Int(endTime!.timeIntervalSince(resumedAt))
-            lastResumedTime = nil
-        }
-        // 履歴に本フェーズを保存
-        if let start = startTime, let end = endTime {
-            await MainActor.run {
-                let parameters = AddSessionParameters(
-                    start: start,
-                    end: end,
-                    phase: isWorkSession ? .focus : .breakTime,
-                    activity: activityLabel,
-                    subtitle: subtitleLabel,
-                    memo: nil
-                )
-                historyVM.add(parameters: parameters)
-            }
-        }
-        // フェーズ別後処理
-        if isWorkSession {
-            finalizeWork(sendNotification: sendNotification)
-        } else {
-            finalizeBreak(sendNotification: sendNotification)
-        }
-    }
-
-    /// Work終了後に呼ぶまとめ関数
-    private func finalizeWork(sendNotification: Bool = true) {
-        HapticManager.shared.heavyImpact()
-        if sendNotification {
-            NotificationManager.shared.sendPhaseChangeNotification(for: .breakTime)
-        }
-
+    private func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) async {
+        // UI状態更新
+        startTime = sessionInfo.startTime
+        endTime = sessionInfo.endTime
         isSessionFinished = true
         isRunning = false
-        isWorkSession = false
 
-        // 休憩タイマーを"見えないまま"走らせる
-        var secondsLeft = breakMinutes * 60
-        print("📝 secondsLeft  =", secondsLeft)
-        timer = Timer.scheduledTimer(
-            withTimeInterval: 1.0,
-            repeats: true
-        ) { [weak self] t in
-            guard let self else { return }
-            secondsLeft -= 1
-            if secondsLeft <= 0 {
-                t.invalidate()
-                self.timer = nil
-                self.finalizeBreak(sendNotification: sendNotification)
-            }
-        }
-    }
+        // 履歴保存
+        let parameters = AddSessionParameters(
+            start: sessionInfo.startTime,
+            end: sessionInfo.endTime,
+            phase: sessionInfo.phase == .focus ? .focus : .breakTime,
+            activity: activityLabel,
+            subtitle: subtitleLabel,
+            memo: nil
+        )
+        historyService.add(parameters: parameters)
 
-    /// 休憩終了後に呼ぶまとめ関数
-    private func finalizeBreak(sendNotification: Bool = true) {
-        HapticManager.shared.heavyImpact()
-        if sendNotification {
-            NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
+        // フェーズ別後処理
+        if sessionInfo.phase == .focus {
+            notificationService.finalizeWorkPhase()
+            isWorkSession = false
+        } else {
+            notificationService.finalizeBreakPhase()
+            isWorkSession = true
         }
     }
 
@@ -341,12 +249,7 @@ final class TimerViewModel: ObservableObject {
     func appDidEnterBackground() {
         lastBackgroundDate = Date()
         if isRunning {
-            // Pause相当の処理
-            if let resumedAt = lastResumedTime {
-                actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
-                lastResumedTime = nil
-            }
-            NotificationManager.shared.scheduleSessionEndNotification(
+            notificationService.scheduleSessionEndNotification(
                 after: timeRemaining,
                 phase: isWorkSession ? .focus : .breakTime
             )
@@ -360,17 +263,15 @@ final class TimerViewModel: ObservableObject {
         guard let last = lastBackgroundDate else { return }
 
         let elapsed = Int(Date().timeIntervalSince(last))
-        NotificationManager.shared.cancelSessionEndNotification()
+        notificationService.cancelSessionEndNotification()
         let originalRemaining = timeRemaining
         timeRemaining = max(originalRemaining - elapsed, 0)
-        // 実作業時間に加算
-        actualWorkedSeconds += min(elapsed, originalRemaining)
 
         if timeRemaining <= 0 {
             // 0になった時刻を計算
             let sessionEndDate = last.addingTimeInterval(TimeInterval(originalRemaining))
             endTime = sessionEndDate
-            Task { [weak self] in await self?.sessionCompleted(sendNotification: false) }
+            // セッション完了処理はEngineのコールバックで行われる
         } else {
             shouldSuppressAnimation = true
             shouldSuppressSessionFinishedAnimation = true

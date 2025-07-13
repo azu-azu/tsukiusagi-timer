@@ -9,7 +9,52 @@ class ContentViewTests: XCTestCase {
     override func setUp() {
         super.setUp()
         historyVM = HistoryViewModel()
-        timerVM = TimerViewModel(historyVM: historyVM)
+        // ダミーサービスを用意
+        class DummyEngine: TimerEngineable {
+            var timeRemaining: Int = 0
+            var isRunning: Bool = false
+            var onTick: ((Int) -> Void)?
+            var onSessionCompleted: ((TimerSessionInfo) -> Void)?
+            func start(seconds: Int) async {}
+            func pause() {}
+            func resume() {}
+            func stop() {}
+            func reset(to seconds: Int) {}
+        }
+        class DummyNotification: PhaseNotificationServiceable {
+            func sendStartNotification() {}
+            func cancelNotification() {}
+            func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
+            func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
+            func cancelSessionEndNotification() {}
+            func finalizeWorkPhase() {}
+            func finalizeBreakPhase() {}
+        }
+        class DummyHaptic: HapticServiceable {
+            func heavyImpact() {}
+        }
+        class DummyHistory: SessionHistoryServiceable {
+            func add(parameters: AddSessionParameters) {}
+        }
+        class DummyPersistence: TimerPersistenceManageable {
+            var timeRemaining: Int = 0
+            var isRunning: Bool = false
+            var isWorkSession: Bool = true
+            func saveTimerState() {}
+            func restoreTimerState() {}
+        }
+        class DummyFormatter: TimeFormatterUtilable {
+            func format(seconds: Int) -> String { "00:00" }
+            func format(date: Date?) -> String { "date" }
+        }
+        timerVM = TimerViewModel(
+            engine: DummyEngine(),
+            notificationService: DummyNotification(),
+            hapticService: DummyHaptic(),
+            historyService: DummyHistory(),
+            persistenceManager: DummyPersistence(),
+            formatter: DummyFormatter()
+        )
     }
 
     override func tearDown() {
