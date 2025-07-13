@@ -14,12 +14,13 @@ struct TimerSessionInfo {
 }
 
 /// タイマー制御の責務のみを持つプロトコル
+@MainActor
 protocol TimerEngineable: AnyObject {
     var timeRemaining: Int { get }
     var isRunning: Bool { get }
     var onTick: ((Int) -> Void)? { get set }
     var onSessionCompleted: ((TimerSessionInfo) -> Void)? { get set }
-    func start(seconds: Int) async
+    func start(seconds: Int)
     func pause()
     func resume()
     func stop()
@@ -41,7 +42,8 @@ final class TimerEngine: TimerEngineable {
     var onTick: ((Int) -> Void)?
     var onSessionCompleted: ((TimerSessionInfo) -> Void)?
 
-    func start(seconds: Int) async {
+    func start(seconds: Int) {
+        print("TimerEngine: start called with \(seconds) seconds")
         stop()
         timeRemaining = seconds
         isRunning = true
@@ -49,18 +51,27 @@ final class TimerEngine: TimerEngineable {
         actualWorkedSeconds = 0
         lastResumedTime = Date()
 
-        timerTask = Task {
-            while !Task.isCancelled && timeRemaining > 0 && isRunning {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                guard isRunning else { break }
+        timerTask?.cancel()
+        timerTask = Task { @MainActor in
+            while timeRemaining > 0 && !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1秒
+
+                if Task.isCancelled { break }
+
                 timeRemaining -= 1
                 onTick?(timeRemaining)
-            }
 
-            if timeRemaining <= 0 {
-                await handleSessionCompleted()
+                if timeRemaining <= 0 {
+                    isRunning = false
+                    onSessionCompleted?(TimerSessionInfo(
+                        startTime: sessionStartTime ?? Date(),
+                        endTime: Date(),
+                        phase: isWorkSession ? .focus : .breakTime,
+                        actualWorkedSeconds: actualWorkedSeconds
+                    ))
+                    break
+                }
             }
-            isRunning = false
         }
     }
 
@@ -141,3 +152,79 @@ final class TimerEngine: TimerEngineable {
         onSessionCompleted?(sessionInfo)
     }
 }
+
+#if targetEnvironment(simulator)
+/// Simulator用のモックTimerEngine
+/// SimulatorではTask.sleepが正しく動作しない場合があるため、DispatchQueue.main.asyncAfterを使用
+final class MockTimerEngine: TimerEngineable {
+    private(set) var timeRemaining: Int = 0
+    private(set) var isRunning: Bool = false
+    private var sessionStartTime: Date?
+    private var actualWorkedSeconds: Int = 0
+    private var isWorkSession: Bool = true
+    private var timer: Timer?
+
+    var onTick: ((Int) -> Void)?
+    var onSessionCompleted: ((TimerSessionInfo) -> Void)?
+
+    func start(seconds: Int) {
+        print("🔥 MockTimerEngine: start called with \(seconds) seconds")
+        stop()
+        timeRemaining = seconds
+        isRunning = true
+        print("🔥 MockTimerEngine: isRunning set to \(isRunning)")
+        sessionStartTime = Date()
+        actualWorkedSeconds = 0
+
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] t in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if self.timeRemaining > 0 {
+                    self.timeRemaining -= 1
+                    print("🔥 MockTimerEngine tick: \(self.timeRemaining)")
+                    self.onTick?(self.timeRemaining)
+                    if self.timeRemaining <= 0 {
+                        t.invalidate()
+                        self.isRunning = false
+                        print("🔥 MockTimerEngine: session completed")
+                        self.onSessionCompleted?(TimerSessionInfo(
+                            startTime: self.sessionStartTime ?? Date(),
+                            endTime: Date(),
+                            phase: self.isWorkSession ? .focus : .breakTime,
+                            actualWorkedSeconds: seconds
+                        ))
+                    }
+                }
+            }
+        }
+    }
+
+    func pause() {
+        print("🔥 MockTimerEngine: pause called")
+        timer?.invalidate()
+        isRunning = false
+    }
+
+    func resume() {
+        print("🔥 MockTimerEngine: resume called")
+        guard !isRunning, timeRemaining > 0 else { return }
+        isRunning = true
+        start(seconds: timeRemaining)
+    }
+
+    func stop() {
+        print("🔥 MockTimerEngine: stop called")
+        timer?.invalidate()
+        isRunning = false
+        timeRemaining = 0
+    }
+
+    func reset(to seconds: Int) {
+        print("🔥 MockTimerEngine: reset called with \(seconds) seconds")
+        stop()
+        timeRemaining = seconds
+        onTick?(timeRemaining)
+    }
+}
+#endif

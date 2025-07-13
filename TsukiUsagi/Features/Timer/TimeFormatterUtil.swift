@@ -7,11 +7,15 @@ protocol TimeFormatterUtilable: AnyObject {
 
 final class TimeFormatterUtil: TimeFormatterUtilable {
     func format(seconds: Int) -> String {
-        // 秒数をmm:ss形式などに変換
-        return ""
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        return String(format: "%02d:%02d", minutes, remainingSeconds)
     }
+
     func format(date: Date?) -> String {
-        // 日付を表示用に変換
-        return ""
+        guard let date = date else { return "--:--" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: date)
     }
 }

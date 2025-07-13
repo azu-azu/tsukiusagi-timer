@@ -71,21 +71,23 @@ struct TotalCard: View {
     // MARK: - Body
 
     var body: some View {
-        Text(text)
-            .conditionalGlitter(
-                show: showGlitter,
-                size: glitterSize,
-                resourceName: glitterResource
-            )
-            .font(DesignTokens.Fonts.numericLabel)
-            .foregroundColor(textColor)
-            .padding(DesignTokens.Padding.card)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(backgroundColor)
-            )
-            .padding(.horizontal, DesignTokens.Padding.medium)
+        Group {
+            if showGlitter {
+                Text(text)
+                    .glitter(size: glitterSize, resourceName: "black_yellow")
+            } else {
+                Text(text)
+            }
+        }
+        .font(DesignTokens.Fonts.numericLabel)
+        .foregroundColor(textColor)
+        .padding(DesignTokens.Padding.card)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(backgroundColor)
+        )
+        .padding(.horizontal, DesignTokens.Padding.medium)
     }
 }
 
@@ -131,20 +133,7 @@ extension View {
 
 // MARK: - Conditional Glitter Extension
 
-extension Text {
-    /// 条件付きキラキラエフェクト（Text専用: マスクあり）
-    func conditionalGlitter(
-        show: Bool,
-        size: CGFloat,
-        resourceName: String
-    ) -> some View {
-        if show {
-            return AnyView(glitter(size: size, resourceName: resourceName))
-        } else {
-            return AnyView(self)
-        }
-    }
-}
+// 旧glitter/conditionalGlitter拡張は不要になったため削除
 
 // MARK: - Preview
 

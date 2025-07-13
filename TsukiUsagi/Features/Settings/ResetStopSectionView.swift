@@ -29,7 +29,7 @@ struct ResetStopSectionView: View {
                 if timerVM.isWorkSession && timerVM.startTime != nil {
                     Button {
                         Task {
-                            await timerVM.forceFinishWorkSession()
+                            timerVM.forceFinishWorkSession()
                             dismiss()
                         }
                     } label: {
@@ -96,7 +96,7 @@ struct ResetStopSectionView_Previews: PreviewProvider {
             var isRunning: Bool = false
             var onTick: ((Int) -> Void)?
             var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-            func start(seconds: Int) async {}
+            func start(seconds: Int) {}
             func pause() {}
             func resume() {}
             func stop() {}

@@ -7,10 +7,11 @@ struct TsukiUsagiApp: App {
     // StateObjects: declaration only
     @StateObject private var historyVM: HistoryViewModel
     @StateObject private var timerVM: TimerViewModel
-    @StateObject private var sessionManagerV2 = SessionManagerV2()
+    @StateObject private var sessionManager: SessionManager
+    @StateObject private var sessionManagerV2: SessionManagerV2
 
     // Service singletons
-    private let timerEngine: TimerEngine
+    private let timerEngine: TimerEngineable
     private let hapticService: HapticService
     private let notificationService: PhaseNotificationServiceable
     private let formatter: TimeFormatterUtil
@@ -19,12 +20,22 @@ struct TsukiUsagiApp: App {
 
     init() {
         // Construct services first
-        let timerEngine = TimerEngine()
+        let timerEngine: TimerEngineable
+
+        #if targetEnvironment(simulator)
+        print("✅ Using MockTimerEngine")
+        timerEngine = MockTimerEngine()
+        #else
+        print("✅ Using TimerEngine")
+        timerEngine = TimerEngine()
+        #endif
+
         let hapticService = HapticService()
         let formatter = TimeFormatterUtil()
         let notificationService = PhaseNotificationService(hapticService: hapticService)
         let historyService = SessionHistoryService(formatter: formatter)
         let persistenceManager = TimerPersistenceManager()
+
         // Assign to lets
         self.timerEngine = timerEngine
         self.hapticService = hapticService
@@ -32,6 +43,7 @@ struct TsukiUsagiApp: App {
         self.formatter = formatter
         self.historyService = historyService
         self.persistenceManager = persistenceManager
+
         // StateObjects
         _historyVM = StateObject(wrappedValue: HistoryViewModel())
         _timerVM = StateObject(wrappedValue: TimerViewModel(
@@ -42,6 +54,9 @@ struct TsukiUsagiApp: App {
             persistenceManager: persistenceManager,
             formatter: formatter
         ))
+        _sessionManager = StateObject(wrappedValue: SessionManager())
+        _sessionManagerV2 = StateObject(wrappedValue: SessionManagerV2())
+
         // Feature Flags の初期化
         FeatureFlags.setDefaultValues()
         NotificationManager.shared.requestAuthorization { ok in
@@ -55,6 +70,7 @@ struct TsukiUsagiApp: App {
             ContentView()
                 .environmentObject(timerVM)
                 .environmentObject(historyVM)
+                .environmentObject(sessionManager)
                 .environmentObject(sessionManagerV2)
         }
     }

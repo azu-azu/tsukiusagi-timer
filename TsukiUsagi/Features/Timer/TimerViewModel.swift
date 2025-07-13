@@ -13,6 +13,7 @@ import UIKit
 import Foundation
 
 /// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
+@MainActor
 final class TimerViewModel: ObservableObject {
     // 2. DIプロパティ
     private let engine: TimerEngineable
@@ -23,7 +24,7 @@ final class TimerViewModel: ObservableObject {
     private let formatter: TimeFormatterUtilable
 
     // 3. @PublishedなどUIバインディング用プロパティ
-    @Published var timeRemaining: Int = 0
+    @Published var timeRemaining: Int = 25 * 60 // 初期値を25分に設定
     @Published var isRunning: Bool = false
     @Published var isWorkSession: Bool = true
     @Published var isSessionFinished = false
@@ -62,6 +63,7 @@ final class TimerViewModel: ObservableObject {
         persistenceManager: TimerPersistenceManageable,
         formatter: TimeFormatterUtilable
     ) {
+        print("TimerViewModel: init called")
         self.engine = engine
         self.notificationService = notificationService
         self.hapticService = hapticService
@@ -69,35 +71,66 @@ final class TimerViewModel: ObservableObject {
         self.persistenceManager = persistenceManager
         self.formatter = formatter
 
+        // Simulator用：UserDefaultsの初期値を強制設定
+        #if targetEnvironment(simulator)
+        if UserDefaults.standard.integer(forKey: "workMinutes") == 0 {
+            UserDefaults.standard.set(25, forKey: "workMinutes")
+            print("TimerViewModel: Simulator - forced workMinutes to 25")
+        }
+        if UserDefaults.standard.integer(forKey: "breakMinutes") == 0 {
+            UserDefaults.standard.set(5, forKey: "breakMinutes")
+            print("TimerViewModel: Simulator - forced breakMinutes to 5")
+        }
+        #endif
+
+        // 初期値を設定（@AppStorageの値を使用）
+        self.timeRemaining = workMinutes * 60
+        print("TimerViewModel: initial timeRemaining = \(self.timeRemaining), workMinutes = \(workMinutes)")
+
         // 5. EngineのonTickでViewModelのtimeRemainingを更新
         self.engine.onTick = { [weak self] seconds in
-            DispatchQueue.main.async {
-                self?.timeRemaining = seconds
-            }
+            self?.timeRemaining = seconds
         }
 
         // 6. EngineのonSessionCompletedでセッション完了処理
         self.engine.onSessionCompleted = { [weak self] sessionInfo in
-            Task { @MainActor in
-                await self?.handleSessionCompleted(sessionInfo)
-            }
+            self?.handleSessionCompleted(sessionInfo)
         }
+
+        // 設定を即座に反映
+        self.refreshAfterSettingsChange()
+
+        print("TimerViewModel: init completed - isRunning: \(self.isRunning), timeRemaining: \(self.timeRemaining)")
     }
 
     // MARK: - Public API
 
     /// 設定変更を即反映（STOP中だけ）
     func refreshAfterSettingsChange() {
-        guard !isRunning else { return }
+        guard !isRunning else {
+            print("TimerViewModel: refreshAfterSettingsChange skipped - timer is running")
+            return
+        }
+
         let minutes = isWorkSession ? workMinutes : breakMinutes
-        timeRemaining = minutes * 60
+        let newTimeRemaining = minutes * 60
+
+        print("TimerViewModel: refreshAfterSettingsChange - workMinutes: \(workMinutes), breakMinutes: \(breakMinutes), isWorkSession: \(isWorkSession), newTimeRemaining: \(newTimeRemaining)")
+
+        timeRemaining = newTimeRemaining
     }
 
     // 6. タイマー制御はengine経由
-    @MainActor
-    func startTimer(seconds: Int) async {
-        await engine.start(seconds: seconds)
-        isRunning = engine.isRunning
+    func startTimer(seconds: Int) {
+        print("TimerViewModel: startTimer called with \(seconds) seconds, current isRunning: \(isRunning)")
+        engine.start(seconds: seconds)
+        let newIsRunning = engine.isRunning
+        print("TimerViewModel: engine.isRunning = \(newIsRunning)")
+        isRunning = newIsRunning
+        print("TimerViewModel: isRunning set to \(isRunning)")
+
+        // アニメーションを発火
+        triggerStartAnimations()
     }
     func pauseTimer() {
         engine.pause()
@@ -128,21 +161,19 @@ final class TimerViewModel: ObservableObject {
     }
 
     /// 強制終了（Stopボタン用）
-    func forceFinishWorkSession() async {
+    func forceFinishWorkSession() {
         endTime = Date()
         // ★ startTime が残っているうちに履歴保存
         if let start = startTime, let end = endTime {
-            await MainActor.run {
-                let parameters = AddSessionParameters(
-                    start: start,
-                    end: end,
-                    phase: .focus,
-                    activity: activityLabel,
-                    subtitle: subtitleLabel,
-                    memo: nil
-                )
-                historyService.add(parameters: parameters)
-            }
+            let parameters = AddSessionParameters(
+                start: start,
+                end: end,
+                phase: .focus,
+                activity: activityLabel,
+                subtitle: subtitleLabel,
+                memo: nil
+            )
+            historyService.add(parameters: parameters)
         }
         stopTimer()
         isSessionFinished = true
@@ -203,15 +234,16 @@ final class TimerViewModel: ObservableObject {
     // MARK: - Private Methods
 
     /// セッション完了時の処理（Engineコールバックから呼ばれる）
-    @MainActor
-    private func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) async {
-        // UI状態更新
-        startTime = sessionInfo.startTime
-        endTime = sessionInfo.endTime
-        isSessionFinished = true
+    private func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
+        print("TimerViewModel: handleSessionCompleted called")
         isRunning = false
+        timeRemaining = 0
 
-        // 履歴保存
+        // セッション完了時の処理
+        hapticService.heavyImpact()
+        notificationService.finalizeWorkPhase()
+
+        // 履歴に保存
         let parameters = AddSessionParameters(
             start: sessionInfo.startTime,
             end: sessionInfo.endTime,
@@ -222,14 +254,10 @@ final class TimerViewModel: ObservableObject {
         )
         historyService.add(parameters: parameters)
 
-        // フェーズ別後処理
-        if sessionInfo.phase == .focus {
-            notificationService.finalizeWorkPhase()
-            isWorkSession = false
-        } else {
-            notificationService.finalizeBreakPhase()
-            isWorkSession = true
-        }
+        // 永続化
+        persistenceManager.saveTimerState()
+
+        print("TimerViewModel: session completed and saved")
     }
 
     /// diamondアニメーションとstartPulseアニメーションを発火

@@ -168,13 +168,10 @@ struct ContentView: View {
 
                         // ダイヤモンドスター
                         if showDiamondStars {
-                            DiamondStarsOnceView()
-                                .allowsHitTesting(false)
-                                .onAppear {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                                        showDiamondStars = false
-                                    }
-                                }
+                            DiamondStarsOnceView {
+                                showDiamondStars = false
+                            }
+                            .allowsHitTesting(false)
                         }
                     }
                     .ignoresSafeArea()
@@ -216,13 +213,14 @@ struct ContentView: View {
 
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
+            print("ContentView: startPauseButton tapped - isRunning: \(timerVM.isRunning), timeRemaining: \(timerVM.timeRemaining)")
             HapticManager.shared.buttonTapFeedback()
             if timerVM.isRunning {
+                print("ContentView: calling stopTimer()")
                 timerVM.stopTimer()
             } else {
-                Task {
-                    await timerVM.startTimer(seconds: timerVM.timeRemaining)
-                }
+                print("ContentView: calling startTimer() with \(timerVM.timeRemaining) seconds")
+                timerVM.startTimer(seconds: timerVM.timeRemaining)
             }
         }
         .frame(width: buttonWidth, height: buttonHeight)
@@ -250,7 +248,7 @@ struct ContentView: View {
         var isRunning: Bool = false
         var onTick: ((Int) -> Void)?
         var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-        func start(seconds: Int) async {}
+        func start(seconds: Int) {}
         func pause() {}
         func resume() {}
         func stop() {}

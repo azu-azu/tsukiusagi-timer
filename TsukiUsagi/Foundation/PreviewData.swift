@@ -63,7 +63,7 @@ struct PreviewData {
             var isRunning: Bool = false
             var onTick: ((Int) -> Void)?
             var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-            func start(seconds: Int) async {}
+            func start(seconds: Int) {}
             func pause() {}
             func resume() {}
             func stop() {}

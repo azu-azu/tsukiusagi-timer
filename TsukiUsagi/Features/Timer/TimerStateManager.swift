@@ -58,7 +58,7 @@ final class TimerStateManager: ObservableObject {
             withTimeInterval: 1.0,
             repeats: true
         ) { [weak self] _ in
-            Task { await self?.tick() }
+            Task { @MainActor in self?.tick() }
         }
     }
 

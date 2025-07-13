@@ -52,7 +52,7 @@ final class TimerSessionManager: ObservableObject {
             secondsLeft -= 1
             if secondsLeft <= 0 {
                 t.invalidate()
-                self.finalizeBreak(sendNotification: sendNotification)
+                Task { @MainActor in self.finalizeBreak(sendNotification: sendNotification) }
             }
         }
     }
@@ -81,7 +81,7 @@ final class TimerSessionManager: ObservableObject {
     }
 
     /// 強制終了（Stopボタン用）
-    func forceFinishWorkSession() async {
+    func forceFinishWorkSession() {
         // 履歴保存は呼び出し側で行う
         isSessionFinished = true
         isWorkSession = false

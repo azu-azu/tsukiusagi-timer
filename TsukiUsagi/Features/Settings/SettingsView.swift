@@ -7,6 +7,7 @@ struct SettingsView: View {
     @EnvironmentObject private var sessionManagerV2: SessionManagerV2
     @Environment(\.horizontalSizeClass) private var horizontalClass
     @Environment(\.verticalSizeClass) private var verticalClass
+    @Environment(\.dismiss) private var dismiss
 
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
     @AppStorage("subtitleLabel") private var subtitleLabel: String = ""
@@ -33,48 +34,50 @@ struct SettingsView: View {
 
     var body: some View {
         ZStack {
-            NavigationView {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        SettingsHeaderView()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    SettingsHeaderView()
 
-                        WorkTimeSectionView()
-                            .padding(.bottom, betweenCardSpaceNarrow)
+                    WorkTimeSectionView()
+                        .padding(.bottom, betweenCardSpaceNarrow)
 
-                        BreakTimeSectionView()
-                            .padding(.bottom, breakBottomPadding)
+                    BreakTimeSectionView()
+                        .padding(.bottom, breakBottomPadding)
 
-                        sessionLabelSection()
-                            .padding(.bottom, betweenCardSpaceNarrow)
+                    sessionLabelSection()
+                        .padding(.bottom, betweenCardSpaceNarrow)
 
-                        ManageSessionNamesSectionView()
-                            .padding(.bottom, betweenCardSpace)
+                    ManageSessionNamesSectionView()
+                        .padding(.bottom, betweenCardSpace)
 
-                        ResetStopSectionView()
-                            .padding(.bottom, betweenCardSpace)
+                    ResetStopSectionView()
+                        .padding(.bottom, betweenCardSpace)
 
-                        ViewHistorySectionView()
-                            .padding(.bottom, betweenCardSpace)
-                    }
-                    .padding()
+                    ViewHistorySectionView()
+                        .padding(.bottom, betweenCardSpace)
                 }
-                .background(
-                    ZStack {
-                        Color.moonBackground.ignoresSafeArea()
-                        StaticStarsView(starCount: 30).allowsHitTesting(false)
-                        FlowingStarsView(
-                            starCount: flowingStarCount,
-                            angle: .degrees(135),
-                            durationRange: 24 ... 40,
-                            sizeRange: 2 ... 4,
-                            spawnArea: nil
-                        )
-                    }
-                )
-                .clipShape(RoundedRectangle(cornerRadius: clipRadius))
-                .padding(.top, 0)
+                .padding()
             }
+            .background(
+                ZStack {
+                    Color.moonBackground.ignoresSafeArea()
+                    StaticStarsView(starCount: 30).allowsHitTesting(false)
+                    FlowingStarsView(
+                        starCount: flowingStarCount,
+                        angle: .degrees(135),
+                        durationRange: 24 ... 40,
+                        sizeRange: 2 ... 4,
+                        spawnArea: nil
+                    )
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: clipRadius))
         }
+        .modifier(DismissKeyboardOnTap(
+            isActivityFocused: $isActivityFocused,
+            isSubtitleFocused: $isSubtitleFocused,
+            isMemoFocused: $dummyMemoFocused
+        ))
     }
 
     private func sessionLabelSection() -> some View {
@@ -134,20 +137,18 @@ private func safeIsLandscape(
     horizontalClass: UserInterfaceSizeClass?,
     verticalClass _: UserInterfaceSizeClass?
 ) -> Bool {
-    // ルール集推奨の判定
     return horizontalClass == .regular || size.width > size.height
 }
 
 #if DEBUG
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        // ダミーサービスを用意
         class DummyEngine: TimerEngineable {
             var timeRemaining: Int = 0
             var isRunning: Bool = false
             var onTick: ((Int) -> Void)?
             var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-            func start(seconds: Int) async {}
+            func start(seconds: Int) {}
             func pause() {}
             func resume() {}
             func stop() {}

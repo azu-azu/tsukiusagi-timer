@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		32AF65F82DFD86DD002B3462 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 32AF65F72DFD86DD002B3462 /* SDWebImageSwiftUI */; };
+		3291E8872E239566006B02CB /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 3291E8862E239566006B02CB /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,7 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32AF65F82DFD86DD002B3462 /* SDWebImageSwiftUI in Frameworks */,
+				3291E8872E239566006B02CB /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +84,7 @@
 				32021C7A2DF97DF200A53A37 /* TsukiUsagi */,
 				32021C882DF97DF300A53A37 /* TsukiUsagiTests */,
 				32021C922DF97DF300A53A37 /* TsukiUsagiUITests */,
+				3291E8852E239566006B02CB /* Frameworks */,
 				32021C792DF97DF200A53A37 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -96,6 +97,13 @@
 				32021C8F2DF97DF300A53A37 /* TsukiUsagiUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3291E8852E239566006B02CB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		32A3E4D62E10E6C100EBD3E2 /* Products */ = {
@@ -123,7 +131,7 @@
 			);
 			name = TsukiUsagi;
 			packageProductDependencies = (
-				32AF65F72DFD86DD002B3462 /* SDWebImageSwiftUI */,
+				3291E8862E239566006B02CB /* Kingfisher */,
 			);
 			productName = TsukiUsagi;
 			productReference = 32021C782DF97DF200A53A37 /* TsukiUsagi.app */;
@@ -208,7 +216,7 @@
 			mainGroup = 32021C6F2DF97DF200A53A37;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				32AF65F62DFD86DD002B3462 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				3291E8842E239552006B02CB /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 32021C792DF97DF200A53A37 /* Products */;
@@ -419,6 +427,7 @@
 				DEVELOPMENT_TEAM = 26BPGVKV5U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSUserNotificationUsageDescription = "This app uses notifications to alert you when your Pomodoro sessions start and end.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -447,6 +456,7 @@
 				DEVELOPMENT_TEAM = 26BPGVKV5U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSUserNotificationUsageDescription = "This app uses notifications to alert you when your Pomodoro sessions start and end.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -575,21 +585,21 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		32AF65F62DFD86DD002B3462 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+		3291E8842E239552006B02CB /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 3.1.3;
+				minimumVersion = 8.4.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		32AF65F72DFD86DD002B3462 /* SDWebImageSwiftUI */ = {
+		3291E8862E239566006B02CB /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 32AF65F62DFD86DD002B3462 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
-			productName = SDWebImageSwiftUI;
+			package = 3291E8842E239552006B02CB /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
