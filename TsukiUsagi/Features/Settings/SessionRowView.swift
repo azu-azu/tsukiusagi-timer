@@ -120,8 +120,6 @@ struct SessionRowView: View {
     }
 }
 
-
-
 #if DEBUG
 struct SessionRowView_Previews: PreviewProvider {
     static var previews: some View {
