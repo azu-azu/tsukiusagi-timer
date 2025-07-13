@@ -54,6 +54,11 @@ final class TimerViewModel: ObservableObject {
 
     var workLengthMinutes: Int { workMinutes }
 
+    // Stopボタンの有効判定
+    var canForceFinish: Bool {
+        isWorkSession && startTime != nil
+    }
+
     // 4. DIイニシャライザ
     init(
         engine: TimerEngineable,
@@ -125,6 +130,9 @@ final class TimerViewModel: ObservableObject {
     // 6. タイマー制御はengine経由
     func startTimer(seconds: Int) {
         print("TimerViewModel: startTimer called with \(seconds) seconds, current isRunning: \(isRunning)")
+        startTime = Date()
+        isWorkSession = true
+        isRunning = true
         engine.start(seconds: seconds)
         let newIsRunning = engine.isRunning
         print("TimerViewModel: engine.isRunning = \(newIsRunning)")
@@ -309,3 +317,13 @@ final class TimerViewModel: ObservableObject {
         lastBackgroundDate = nil
     }
 }
+
+#if DEBUG
+extension TimerViewModel {
+    func _setPreviewState(startTime: Date?, isWorkSession: Bool, isRunning: Bool) {
+        self.startTime = startTime
+        self.isWorkSession = isWorkSession
+        self.isRunning = isRunning
+    }
+}
+#endif
