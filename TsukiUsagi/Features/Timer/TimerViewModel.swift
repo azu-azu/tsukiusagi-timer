@@ -115,7 +115,9 @@ final class TimerViewModel: ObservableObject {
         let minutes = isWorkSession ? workMinutes : breakMinutes
         let newTimeRemaining = minutes * 60
 
-        print("TimerViewModel: refreshAfterSettingsChange - workMinutes: \(workMinutes), breakMinutes: \(breakMinutes), isWorkSession: \(isWorkSession), newTimeRemaining: \(newTimeRemaining)")
+        print("TimerViewModel: refreshAfterSettingsChange - workMinutes: \(workMinutes), " +
+              "breakMinutes: \(breakMinutes), isWorkSession: \(isWorkSession), " +
+              "newTimeRemaining: \(newTimeRemaining)")
 
         timeRemaining = newTimeRemaining
     }
