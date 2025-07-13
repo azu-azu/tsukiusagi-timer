@@ -36,16 +36,6 @@ struct QuietMoonView: View {
 
         let calculatedPadding = max(paddingY, safeAreaInsets.top + deviceSpecificPadding)
 
-        // デバッグ用ログ（開発時のみ）
-        #if DEBUG
-            print("🌙 QuietMoonView - topPadding calculation:")
-            print("  - paddingY: \(paddingY)")
-            print("  - safeAreaInsets.top: \(safeAreaInsets.top)")
-            print("  - deviceSpecificPadding: \(deviceSpecificPadding)")
-            print("  - calculatedPadding: \(calculatedPadding)")
-            print("  - isLandscape: \(isLandscape)")
-        #endif
-
         // ノッチを避けた上で、最小限のスペースを保証
         return calculatedPadding
     }
@@ -78,7 +68,7 @@ struct QuietMoonView: View {
         ZStack {
             VStack(spacing: 20) {
                 Text(title)
-                    .glitter(size: 24, resourceName: "black_yellow")
+                    .glitter(size: 24, resourceName: "gold")
                     .frame(maxWidth: .infinity)
 
                 SelectableTextView(

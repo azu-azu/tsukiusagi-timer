@@ -19,16 +19,12 @@ struct TsukiUsagiApp: App {
     private let persistenceManager: TimerPersistenceManager
 
     init() {
-        // Construct services first
-        let timerEngine: TimerEngineable
+        // ハプティックフィードバックの事前初期化
+        _ = HapticManager.shared
 
-        #if targetEnvironment(simulator)
-        print("✅ Using MockTimerEngine")
-        timerEngine = MockTimerEngine()
-        #else
-        print("✅ Using TimerEngine")
-        timerEngine = TimerEngine()
-        #endif
+        // Construct services first
+        let timerEngine: TimerEngineable = TimerEngine()
+        print("✅ Using TimerEngine for all environments")
 
         let hapticService = HapticService()
         let formatter = TimeFormatterUtil()
@@ -40,9 +36,9 @@ struct TsukiUsagiApp: App {
         self.timerEngine = timerEngine
         self.hapticService = hapticService
         self.notificationService = notificationService
-        self.formatter = formatter
         self.historyService = historyService
         self.persistenceManager = persistenceManager
+        self.formatter = formatter
 
         // StateObjects
         _historyVM = StateObject(wrappedValue: HistoryViewModel())

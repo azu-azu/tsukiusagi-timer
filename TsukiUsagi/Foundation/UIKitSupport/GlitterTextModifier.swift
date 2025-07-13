@@ -33,12 +33,12 @@ extension Text {
     /// - Parameters:
     ///   - size:     Point size (default 36)
     ///   - fontName: Font family (default AvenirNext-Bold)
-    ///   - resourceName: GIF file in the main bundle (default "black_yellow")
+    ///   - resourceName: GIF file in the main bundle (default "gold")
     ///   - resourceExt:  File extension (default "gif")
     func glitter(
         size: CGFloat = 36,
         fontName: String = "AvenirNext-Bold",
-        resourceName: String = "black_yellow",
+        resourceName: String = "gold",
         resourceExt: String = "gif"
     ) -> some View {
         let customFont = Font.custom(fontName, size: size)
@@ -58,7 +58,7 @@ extension View {
     /// 任意のViewにキラキラエフェクトを重ねる
     func glitter(
         size: CGFloat = 36,
-        resourceName: String = "black_yellow",
+        resourceName: String = "gold",
         resourceExt: String = "gif"
     ) -> some View {
         let url = Bundle.main.url(forResource: resourceName, withExtension: resourceExt)

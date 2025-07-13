@@ -4,7 +4,7 @@ struct MainPanel: View {
     let size: CGSize
     let safeAreaInsets: EdgeInsets
     let isLandscape: Bool
-    let timerVM: TimerViewModel
+    @ObservedObject var timerVM: TimerViewModel  // ← let から @ObservedObject に変更
     let moonTitle: String
     let landscapeMargin: CGFloat
     let moonPortraitYOffsetRatio: CGFloat
@@ -13,6 +13,8 @@ struct MainPanel: View {
     @Binding var showingEditRecord: Bool
 
     var body: some View {
+        // let _ = print("🌙 MainPanel - isSessionFinished: \(timerVM.isSessionFinished), isWorkSession: \(timerVM.isWorkSession)")
+
         GeometryReader { geo2 in
             let contentSize = geo2.size
             let safeTop = geo2.safeAreaInsets.top
@@ -35,8 +37,10 @@ struct MainPanel: View {
                 : centerY - contentSize.height * moonPortraitYOffsetRatio // 縦画面
 
             if timerVM.isSessionFinished {
+                // let _ = print("🌙 MainPanel - Showing QuietMoon section")
                 // 終了時はQuietMoonViewのみ
                 if isLandscape {
+                    // let _ = print("🌙 MainPanel - Landscape QuietMoon")
                     // 横画面：左右分割（最高品質版）
                     HStack(spacing: landscapeMargin) {
                         // 左側：QuietMoonView
@@ -83,6 +87,7 @@ struct MainPanel: View {
                         removal: .move(edge: .trailing).combined(with: .opacity)
                     ))
                 } else {
+                    // let _ = print("🌙 MainPanel - Portrait QuietMoon")
                     // 縦画面：従来通り
                     VStack {
                         QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
@@ -101,6 +106,7 @@ struct MainPanel: View {
                     ))
                 }
             } else {
+                // let _ = print("🌙 MainPanel - Showing Timer section")
                 // 進行中はMoon+Timerセット
                 if isLandscape {
                     // --- Landscape の Moon + Timer 横並び ---
