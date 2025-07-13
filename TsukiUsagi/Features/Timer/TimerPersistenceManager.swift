@@ -1,8 +1,16 @@
 import Foundation
 import SwiftUI
 
+protocol TimerPersistenceManageable: AnyObject {
+    var timeRemaining: Int { get set }
+    var isRunning: Bool { get set }
+    var isWorkSession: Bool { get set }
+    func saveTimerState()
+    func restoreTimerState()
+}
+
 /// バックグラウンド対応と状態永続化を担当するManager
-final class TimerPersistenceManager: ObservableObject {
+final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageable {
     @Published var timeRemaining: Int
     @Published var isRunning: Bool = false
     @Published var isWorkSession: Bool = true
@@ -25,28 +33,25 @@ final class TimerPersistenceManager: ObservableObject {
     @AppStorage(TimerPersistKeys.isWorkSession) private var storedIsWorkSession: Bool = true
 
     init() {
-        let minutes = UserDefaults.standard.integer(forKey: "workMinutes")
-        _timeRemaining = Published(initialValue: minutes > 0 ? minutes * 60 : 25 * 60)
+        self.timeRemaining = 0
+        self.isRunning = storedIsRunning
+        self.isWorkSession = storedIsWorkSession
+
+        // 初期化後に永続化された値を復元
+        self.timeRemaining = storedRemainingSeconds
     }
 
-    // MARK: - State Persistence
-
-    @MainActor
     func saveTimerState() {
         storedRemainingSeconds = timeRemaining
         storedIsRunning = isRunning
-        storedBackgroundTimestamp = Date().timeIntervalSince1970
         storedIsWorkSession = isWorkSession
+        storedBackgroundTimestamp = Date().timeIntervalSince1970
     }
 
-    @MainActor
     func restoreTimerState() {
-        guard storedIsRunning else { return }
-        let elapsed = Int(Date().timeIntervalSince1970 - storedBackgroundTimestamp)
-        let left = max(storedRemainingSeconds - elapsed, 0)
+        timeRemaining = storedRemainingSeconds
+        isRunning = storedIsRunning
         isWorkSession = storedIsWorkSession
-        timeRemaining = left
-        isRunning = left > 0
     }
 
     // MARK: - Background Handling

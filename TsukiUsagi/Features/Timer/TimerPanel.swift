@@ -29,14 +29,14 @@ struct TimerPanel: View {
         ZStack {
             // タイマー：常に中央寄り
             TimerTextView(
-                timeText: timerVM.formatTime(),
+                timeText: timerVM.formatTime(timerVM.timeRemaining),
                 isSessionFinished: timerVM.isSessionFinished,
                 flashYellow: flashYellow,
                 flashScale: flashScale
             )
             .frame(maxWidth: .infinity,
-                   maxHeight: .infinity,
-                   alignment: .center)
+                    maxHeight: .infinity,
+                    alignment: .center)
 
             // 記録ブロック：常に下端
             // --- RecordedTimesViewの呼び出しを削除 ---
