@@ -46,8 +46,10 @@ struct MainPanel: View {
                     HStack(spacing: landscapeMargin) {
                         // 左側：QuietMoonView
                         QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
-                            .frame(width: (contentSize.width - landscapeMargin) * 0.5,
-                                    height: setHeight)
+                            .frame(
+                                width: (contentSize.width - landscapeMargin) * 0.5,
+                                height: setHeight
+                            )
                             .background(Color.clear)
                             .zIndex(10)
                             .layoutPriority(1)
