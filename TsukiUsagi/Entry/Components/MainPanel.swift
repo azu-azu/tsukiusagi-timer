@@ -4,7 +4,8 @@ struct MainPanel: View {
     let size: CGSize
     let safeAreaInsets: EdgeInsets
     let isLandscape: Bool
-    @ObservedObject var timerVM: TimerViewModel  // ← let から @ObservedObject に変更
+    @ObservedObject var timerVM: TimerViewModel
+    // ← let から @ObservedObject に変更
     let moonTitle: String
     let landscapeMargin: CGFloat
     let moonPortraitYOffsetRatio: CGFloat
