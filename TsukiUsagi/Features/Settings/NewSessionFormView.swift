@@ -93,8 +93,6 @@ struct NewSessionFormView: View {
     }
 }
 
-
-
 #if DEBUG
 struct NewSessionFormView_Previews: PreviewProvider {
     static var previews: some View {
