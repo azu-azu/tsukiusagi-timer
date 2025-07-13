@@ -33,11 +33,11 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        SettingsHeaderView()
+                        SettingsHeaderView(onDismiss: { dismiss() })
 
                         WorkTimeSectionView()
                             .padding(.bottom, betweenCardSpaceNarrow)
@@ -80,7 +80,6 @@ struct SettingsView: View {
                 isMemoFocused: $dummyMemoFocused
             ))
         }
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private func sessionLabelSection() -> some View {

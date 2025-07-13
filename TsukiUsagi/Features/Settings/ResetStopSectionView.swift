@@ -26,7 +26,7 @@ struct ResetStopSectionView: View {
                 .tint(.red.opacity(0.8))
 
                 // 🛑 Stop
-                if timerVM.isWorkSession && timerVM.startTime != nil {
+                if timerVM.canForceFinish {
                     Button {
                         timerVM.forceFinishWorkSession()
                         dismiss()
@@ -127,15 +127,17 @@ struct ResetStopSectionView_Previews: PreviewProvider {
             func format(seconds: Int) -> String { "00:00" }
             func format(date: Date?) -> String { "date" }
         }
+        let vm = TimerViewModel(
+            engine: DummyEngine(),
+            notificationService: DummyNotification(),
+            hapticService: DummyHaptic(),
+            historyService: DummyHistory(),
+            persistenceManager: DummyPersistence(),
+            formatter: DummyFormatter()
+        )
+        vm._setPreviewState(startTime: Date(), isWorkSession: true, isRunning: true)
         return ResetStopSectionView()
-            .environmentObject(TimerViewModel(
-                engine: DummyEngine(),
-                notificationService: DummyNotification(),
-                hapticService: DummyHaptic(),
-                historyService: DummyHistory(),
-                persistenceManager: DummyPersistence(),
-                formatter: DummyFormatter()
-            ))
+            .environmentObject(vm)
     }
 }
 #endif

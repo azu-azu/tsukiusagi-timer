@@ -5,6 +5,9 @@ struct SettingsHeaderView: View {
     @EnvironmentObject private var timerVM: TimerViewModel
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
 
+    // 親Viewから渡されるdismiss関数
+    var onDismiss: (() -> Void)?
+
     // ヘッダー周りのpadding
     private let headerTopPadding: CGFloat = 5
     private let headerBottomPadding: CGFloat = 34
@@ -25,7 +28,7 @@ struct SettingsHeaderView: View {
     var body: some View {
         HStack {
             Button("Close") {
-                dismiss()
+                onDismiss?() ?? dismiss()
             }
             .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
@@ -34,7 +37,7 @@ struct SettingsHeaderView: View {
             Button("Done") {
                 // 設定変更を反映
                 timerVM.refreshAfterSettingsChange()
-                dismiss()
+                onDismiss?() ?? dismiss()
             }
             .disabled(shouldDisableDone())
             .foregroundColor(
