@@ -213,7 +213,8 @@ struct ContentView: View {
 
     private func startPauseButton() -> some View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
-            print("ContentView: startPauseButton tapped - isRunning: \(timerVM.isRunning), timeRemaining: \(timerVM.timeRemaining)")
+            print("ContentView: startPauseButton tapped - isRunning: \(timerVM.isRunning), " +
+                  "timeRemaining: \(timerVM.timeRemaining)")
             HapticManager.shared.buttonTapFeedback()
             if timerVM.isRunning {
                 print("ContentView: calling stopTimer()")
