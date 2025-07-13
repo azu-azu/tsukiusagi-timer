@@ -33,51 +33,54 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    SettingsHeaderView()
+        NavigationView {
+            ZStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        SettingsHeaderView()
 
-                    WorkTimeSectionView()
-                        .padding(.bottom, betweenCardSpaceNarrow)
+                        WorkTimeSectionView()
+                            .padding(.bottom, betweenCardSpaceNarrow)
 
-                    BreakTimeSectionView()
-                        .padding(.bottom, breakBottomPadding)
+                        BreakTimeSectionView()
+                            .padding(.bottom, breakBottomPadding)
 
-                    sessionLabelSection()
-                        .padding(.bottom, betweenCardSpaceNarrow)
+                        sessionLabelSection()
+                            .padding(.bottom, betweenCardSpaceNarrow)
 
-                    ManageSessionNamesSectionView()
-                        .padding(.bottom, betweenCardSpace)
+                        ManageSessionNamesSectionView()
+                            .padding(.bottom, betweenCardSpace)
 
-                    ResetStopSectionView()
-                        .padding(.bottom, betweenCardSpace)
+                        ResetStopSectionView()
+                            .padding(.bottom, betweenCardSpace)
 
-                    ViewHistorySectionView()
-                        .padding(.bottom, betweenCardSpace)
+                        ViewHistorySectionView()
+                            .padding(.bottom, betweenCardSpace)
+                    }
+                    .padding()
                 }
-                .padding()
+                .background(
+                    ZStack {
+                        Color.moonBackground.ignoresSafeArea()
+                        StaticStarsView(starCount: 30).allowsHitTesting(false)
+                        FlowingStarsView(
+                            starCount: flowingStarCount,
+                            angle: .degrees(135),
+                            durationRange: 24 ... 40,
+                            sizeRange: 2 ... 4,
+                            spawnArea: nil
+                        )
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: clipRadius))
             }
-            .background(
-                ZStack {
-                    Color.moonBackground.ignoresSafeArea()
-                    StaticStarsView(starCount: 30).allowsHitTesting(false)
-                    FlowingStarsView(
-                        starCount: flowingStarCount,
-                        angle: .degrees(135),
-                        durationRange: 24 ... 40,
-                        sizeRange: 2 ... 4,
-                        spawnArea: nil
-                    )
-                }
-            )
-            .clipShape(RoundedRectangle(cornerRadius: clipRadius))
+            .modifier(DismissKeyboardOnTap(
+                isActivityFocused: $isActivityFocused,
+                isSubtitleFocused: $isSubtitleFocused,
+                isMemoFocused: $dummyMemoFocused
+            ))
         }
-        .modifier(DismissKeyboardOnTap(
-            isActivityFocused: $isActivityFocused,
-            isSubtitleFocused: $isSubtitleFocused,
-            isMemoFocused: $dummyMemoFocused
-        ))
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private func sessionLabelSection() -> some View {
