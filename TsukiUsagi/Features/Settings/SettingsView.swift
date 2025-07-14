@@ -97,12 +97,14 @@ struct SettingsView: View {
             .navigationBarHidden(true) // NavigationBarを非表示
             .onReceive(
                 NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
-            ) { notification in
+            ) { _ in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isKeyboardVisible = true
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            ) { _ in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isKeyboardVisible = false
                 }

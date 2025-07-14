@@ -14,7 +14,7 @@ struct MainPanel: View {
     @Binding var showingEditRecord: Bool
 
     var body: some View {
-        // let _ = print("🌙 MainPanel - isSessionFinished: \(timerVM.isSessionFinished),\n//   isWorkSession: \(timerVM.isWorkSession)")
+        // let _ = print("🌙 MainPanel - isSessionFinished:\n//   \(timerVM.isSessionFinished),\n//   isWorkSession: \(timerVM.isWorkSession)")
 
         GeometryReader { geo2 in
             let contentSize = geo2.size
