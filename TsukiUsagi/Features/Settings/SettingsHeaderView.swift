@@ -9,8 +9,8 @@ struct SettingsHeaderView: View {
     var onDismiss: (() -> Void)?
 
     // ヘッダー周りのpadding
-    private let headerTopPadding: CGFloat = 5
-    private let headerBottomPadding: CGFloat = 34
+    private let headerTopPadding: CGFloat = 18
+    private let headerBottomPadding: CGFloat = 20
 
     private var isCustomActivity: Bool {
         !["Work", "Study", "Read"].contains(activityLabel)

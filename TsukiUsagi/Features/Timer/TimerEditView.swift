@@ -11,6 +11,7 @@ struct TimerEditView: View {
     @State private var editedMemo = ""
     @State private var editedEnd = Date()
     @State private var minEnd = Date()
+    @State private var isKeyboardVisible: Bool = false
 
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
@@ -122,35 +123,60 @@ struct TimerEditView: View {
                 }
                 .padding()
             }
+            .scrollIndicators(.hidden) // スクロールインジケーター非表示
+            .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
             .padding(.bottom, 20) // Safe Area対応
             .background(
                 ZStack {
                     Color.moonBackground.ignoresSafeArea()
-                    StaticStarsView(starCount: 40).allowsHitTesting(false)
-                    FlowingStarsView(
-                        starCount: 40,
-                        angle: .degrees(135),
-                        durationRange: 24 ... 40,
-                        sizeRange: 2 ... 4,
-                        spawnArea: nil
-                    )
+
+                    // キーボード表示時は星を非表示
+                    if !isKeyboardVisible {
+                        StaticStarsView(starCount: 40)
+                            .allowsHitTesting(false)
+                            .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+
+                        FlowingStarsView(
+                            starCount: 40,
+                            angle: .degrees(135),
+                            durationRange: 24 ... 40,
+                            sizeRange: 2 ... 4,
+                            spawnArea: nil
+                        )
+                        .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                    }
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: 30))
             .padding(.top, topPadding)
             .presentationDetents([.large])
+            .navigationBarHidden(true) // NavigationBarを非表示
             .modifier(DismissKeyboardOnTap(
                 isActivityFocused: $isActivityFocused,
                 isSubtitleFocused: $isSubtitleFocused,
-                isMemoFocused: $isMemoFocused
+                isMemoFocused: $isMemoFocused,
+                isKeyboardVisible: $isKeyboardVisible
             ))
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isKeyboardVisible = true
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isKeyboardVisible = false
+                }
+            }
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button("Close") {
-                        isActivityFocused = false
-                        isSubtitleFocused = false
-                        isMemoFocused = false
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isActivityFocused = false
+                            isSubtitleFocused = false
+                            isMemoFocused = false
+                            isKeyboardVisible = false
+                        }
                     }
                 }
             }
