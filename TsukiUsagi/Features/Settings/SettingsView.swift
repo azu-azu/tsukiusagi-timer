@@ -95,7 +95,9 @@ struct SettingsView: View {
                 .clipShape(RoundedRectangle(cornerRadius: clipRadius)) // コンテンツ部分のみクリップ
             }
             .navigationBarHidden(true) // NavigationBarを非表示
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            ) { notification in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isKeyboardVisible = true
                 }
