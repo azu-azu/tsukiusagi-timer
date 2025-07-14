@@ -1,5 +1,5 @@
-import SwiftUI
 import Foundation
+import SwiftUI
 
 struct SessionNameManagerView: View {
     @EnvironmentObject var sessionManager: SessionManagerV2
@@ -46,7 +46,7 @@ struct SessionNameManagerView: View {
                                 session: session,
                                 // 必要なBindingやコールバックは適宜渡す
                                 editingId: .constant(nil),
-                                editingName: .constant("") ,
+                                editingName: .constant(""),
                                 editingSubtitles: .constant([""]),
                                 showDeleteAlert: .constant(nil),
                                 saveEdit: { _ in },
@@ -83,7 +83,7 @@ struct SessionNameManagerView: View {
                 try await sessionManager.loadAsync()
                 await MainActor.run {
                     print("✅ Load success. Sessions count: \(sessionManager.sessions.count)")
-                    sessionManager.sessions.forEach { session in
+                    for session in sessionManager.sessions {
                         print("📝 Session: \(session.name)")
                     }
                     // 成功時アラートは表示しない
@@ -101,12 +101,12 @@ struct SessionNameManagerView: View {
 }
 
 #if DEBUG
-struct SessionNameManagerView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            SessionNameManagerView()
-                .environmentObject(SessionManagerV2.previewData)
+    struct SessionNameManagerView_Previews: PreviewProvider {
+        static var previews: some View {
+            NavigationView {
+                SessionNameManagerView()
+                    .environmentObject(SessionManagerV2.previewData)
+            }
         }
     }
-}
 #endif
