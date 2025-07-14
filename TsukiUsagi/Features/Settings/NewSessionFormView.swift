@@ -20,6 +20,7 @@ struct NewSessionFormView: View {
                 TextField("Session Name (required)", text: $name)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .focused($isNameFocused)
+                    .submitLabel(.next)
                     .onSubmit { isSubtitleFocused = true }
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
 
@@ -35,6 +36,8 @@ struct NewSessionFormView: View {
                         ))
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .focused($isSubtitleFocused)
+                        .submitLabel(.done)
+                        .onSubmit { hideKeyboard() }
                         .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
 
                         Button(action: { subtitleTexts.remove(at: idx) }, label: {
@@ -60,6 +63,12 @@ struct NewSessionFormView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(name.normalized.isEmpty || subtitleTexts.allSatisfy { $0.normalized.isEmpty })
                 .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { hideKeyboard() }
             }
         }
         .alert(isPresented: $showErrorAlert) {
@@ -90,6 +99,15 @@ struct NewSessionFormView: View {
                 showErrorAlert = true
             }
         }
+    }
+
+    private func hideKeyboard() {
+        isNameFocused = false
+        isSubtitleFocused = false
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil, from: nil, for: nil
+        )
     }
 }
 

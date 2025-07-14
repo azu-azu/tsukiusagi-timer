@@ -121,3 +121,16 @@ class SessionManagerV2: ObservableObject {
         }
     }
 }
+
+#if DEBUG
+extension SessionManagerV2 {
+    static var previewData: SessionManagerV2 {
+        let manager = SessionManagerV2()
+        manager.sessions = [
+            SessionName(name: "Sample Session 1", subtitles: [Subtitle(text: "Test subtitle")]),
+            SessionName(name: "Sample Session 2", subtitles: [])
+        ]
+        return manager
+    }
+}
+#endif
