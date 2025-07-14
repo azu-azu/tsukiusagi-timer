@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct SessionNameManagerView: View {
     @EnvironmentObject var sessionManager: SessionManagerV2
@@ -33,8 +34,29 @@ struct SessionNameManagerView: View {
             // コンテンツ
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
+                    HiddenKeyboardWarmer() // ← 追加
                     NewSessionFormView()
-                    SessionListSectionView()
+                    // --- ここから登録済みセッションの明示的な表示 ---
+                    List {
+                        // デバッグ用: セッション数表示
+                        Text("Total sessions: \(sessionManager.sessions.count)")
+                            .foregroundColor(.red)
+                        ForEach(sessionManager.sessions) { session in
+                            SessionRowView(
+                                session: session,
+                                // 必要なBindingやコールバックは適宜渡す
+                                editingId: .constant(nil),
+                                editingName: .constant("") ,
+                                editingSubtitles: .constant([""]),
+                                showDeleteAlert: .constant(nil),
+                                saveEdit: { _ in },
+                                deleteSession: { _ in }
+                            )
+                        }
+                    }
+                    .frame(maxHeight: 300) // スクロール内で高さ制限（必要に応じて調整）
+                    .background(Color.white)
+                    // --- ここまで ---
                 }
                 .padding()
             }
@@ -59,10 +81,20 @@ struct SessionNameManagerView: View {
         .task {
             do {
                 try await sessionManager.loadAsync()
+                await MainActor.run {
+                    print("✅ Load success. Sessions count: \(sessionManager.sessions.count)")
+                    sessionManager.sessions.forEach { session in
+                        print("📝 Session: \(session.name)")
+                    }
+                    // 成功時アラートは表示しない
+                }
             } catch {
-                errorTitle = "Failed to Load Sessions"
-                errorMessage = error.localizedDescription
-                showErrorAlert = true
+                await MainActor.run {
+                    print("❌ Load failed: \(error)")
+                    errorTitle = "Failed to Load Sessions"
+                    errorMessage = error.localizedDescription
+                    showErrorAlert = true
+                }
             }
         }
     }
@@ -73,7 +105,7 @@ struct SessionNameManagerView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             SessionNameManagerView()
-                .environmentObject(SessionManagerV2())
+                .environmentObject(SessionManagerV2.previewData)
         }
     }
 }

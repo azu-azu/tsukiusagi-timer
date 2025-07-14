@@ -67,6 +67,7 @@ struct SettingsView: View {
                     // スクロール可能なコンテンツ
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
+                            HiddenKeyboardWarmer()
                             WorkTimeSectionView()
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
