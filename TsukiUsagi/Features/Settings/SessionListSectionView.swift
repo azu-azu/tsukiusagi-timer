@@ -7,10 +7,10 @@ struct IdentifiableError: Identifiable {
 
 struct SessionListSectionView: View {
     @EnvironmentObject var sessionManager: SessionManagerV2
-    @State private var editingId: UUID? = nil
+    @State private var editingId: UUID?
     @State private var editingName: String = ""
     @State private var editingSubtitles: [String] = []
-    @State private var errorMessage: IdentifiableError? = nil
+    @State private var errorMessage: IdentifiableError?
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
 
@@ -39,8 +39,8 @@ struct SessionListSectionView: View {
                 }
             }
         }
-        .alert(item: $errorMessage) { err in
-            Alert(title: Text("Error"), message: Text(err.message), dismissButton: .default(Text("OK")))
+        .alert(item: $errorMessage) { _err in
+            Alert(title: Text("Error"), message: Text(_err.message), dismissButton: .default(Text("OK")))
         }
         .onChange(of: isNameFocused) { oldValue, newValue in
             if newValue {
@@ -60,10 +60,10 @@ struct SessionListSectionView: View {
             VStack(alignment: .leading) {
                 TextField("Session Name", text: $editingName)
                     .focused($isNameFocused)
-                ForEach(editingSubtitles.indices, id: \.self) { idx in
+                ForEach(editingSubtitles.indices, id: \.self) { _idx in
                     TextField("Subtitle", text: Binding(
-                        get: { editingSubtitles[idx] },
-                        set: { editingSubtitles[idx] = $0 }
+                        get: { editingSubtitles[_idx] },
+                        set: { editingSubtitles[_idx] = $0 }
                     ))
                     .focused($isSubtitleFocused)
                 }
