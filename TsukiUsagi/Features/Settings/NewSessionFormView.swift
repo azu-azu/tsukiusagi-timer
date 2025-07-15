@@ -61,7 +61,7 @@ struct NewSessionFormView: View {
                     addSession()
                 })
                 .buttonStyle(.borderedProminent)
-                .disabled(name.normalized.isEmpty || subtitleTexts.allSatisfy { $0.normalized.isEmpty })
+                .disabled(name.normalized.isEmpty && subtitleTexts.allSatisfy { $0.normalized.isEmpty })
                 .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
             }
         }
@@ -78,26 +78,16 @@ struct NewSessionFormView: View {
 
     private func addSession() {
         let trimmedName = name.trimmed
-        let subtitles = subtitleTexts.map { $0.normalized }.filter { !$0.isEmpty }
         guard !trimmedName.isEmpty else { return }
-
         Task {
-            do {
-                let newSession = SessionName(
-                    name: trimmedName,
-                    subtitles: subtitles.map { Subtitle(text: $0) }
-                )
-                try sessionManager.addSession(newSession)
-                name = ""
-                subtitleTexts = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-                if subtitleTexts.isEmpty { subtitleTexts = [""] }
-                isNameFocused = true
-                try await sessionManager.saveAsync()
-            } catch {
-                errorTitle = "Failed to Add Session"
-                errorMessage = error.localizedDescription
-                showErrorAlert = true
-            }
+            sessionManager.addEntry(
+                sessionName: name.isEmpty ? nil : name,
+                subtitles: subtitleTexts.filter { !$0.isEmpty }
+            )
+            name = ""
+            subtitleTexts = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            if subtitleTexts.isEmpty { subtitleTexts = [""] }
+            isNameFocused = true
         }
     }
 
