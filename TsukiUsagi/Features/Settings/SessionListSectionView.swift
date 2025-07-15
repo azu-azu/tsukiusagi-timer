@@ -40,14 +40,18 @@ struct SessionListSectionView: View {
             }
         }
         .alert(item: $errorMessage) { _err in
-            Alert(title: Text("Error"), message: Text(_err.message), dismissButton: .default(Text("OK")))
+            Alert(
+                title: Text("Error"),
+                message: Text(_err.message),
+                dismissButton: .default(Text("OK"))
+            )
         }
-        .onChange(of: isNameFocused) { oldValue, newValue in
+        .onChange(of: isNameFocused) { _, newValue in
             if newValue {
                 HapticManager.shared.heavyImpact()
             }
         }
-        .onChange(of: isSubtitleFocused) { oldValue, newValue in
+        .onChange(of: isSubtitleFocused) { _, newValue in
             if newValue {
                 HapticManager.shared.heavyImpact()
             }
@@ -69,7 +73,11 @@ struct SessionListSectionView: View {
                 }
                 HStack {
                     Button("Save") {
-                        sessionManager.editEntry(id: entry.id, sessionName: editingName.isEmpty ? nil : editingName, subtitles: editingSubtitles)
+                        sessionManager.editEntry(
+                            id: entry.id,
+                            sessionName: editingName.isEmpty ? nil : editingName,
+                            subtitles: editingSubtitles
+                        )
                         editingId = nil
                     }
                     Button("Cancel") {
