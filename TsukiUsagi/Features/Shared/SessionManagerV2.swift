@@ -70,7 +70,8 @@ extension SessionManagerV2 {
             SessionEntry(sessionName: "No Subtitle Session", subtitles: []),
             // 長いセッション名
             SessionEntry(
-                sessionName: "This is a very long session name to test how the UI handles overflow and wrapping in the list row",
+                sessionName:
+                    "This is a very long session name to test how the UI handles overflow and wrapping in the list row",
                 subtitles: [
                     "Long subtitle for testing purposes"
                 ]
