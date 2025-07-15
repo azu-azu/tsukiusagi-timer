@@ -23,6 +23,11 @@ struct NewSessionFormView: View {
                     .submitLabel(.next)
                     .onSubmit { isSubtitleFocused = true }
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
+                .onChange(of: isNameFocused) { oldValue, newValue in
+                    if newValue {
+                        HapticManager.shared.heavyImpact()
+                    }
+                }
 
                 ForEach(subtitleTexts.indices, id: \.self) { idx in
                     HStack {
@@ -39,6 +44,11 @@ struct NewSessionFormView: View {
                         .submitLabel(.done)
                         .onSubmit { hideKeyboard() }
                         .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
+                        .onChange(of: isSubtitleFocused) { oldValue, newValue in
+                            if newValue {
+                                HapticManager.shared.heavyImpact()
+                            }
+                        }
 
                         Button(action: { subtitleTexts.remove(at: idx) }, label: {
                             Image(systemName: "minus.circle")

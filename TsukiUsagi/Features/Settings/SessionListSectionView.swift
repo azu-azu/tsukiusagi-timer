@@ -11,6 +11,8 @@ struct SessionListSectionView: View {
     @State private var editingName: String = ""
     @State private var editingSubtitles: [String] = []
     @State private var errorMessage: IdentifiableError? = nil
+    @FocusState private var isNameFocused: Bool
+    @FocusState private var isSubtitleFocused: Bool
 
     var body: some View {
         List {
@@ -40,6 +42,16 @@ struct SessionListSectionView: View {
         .alert(item: $errorMessage) { err in
             Alert(title: Text("Error"), message: Text(err.message), dismissButton: .default(Text("OK")))
         }
+        .onChange(of: isNameFocused) { oldValue, newValue in
+            if newValue {
+                HapticManager.shared.heavyImpact()
+            }
+        }
+        .onChange(of: isSubtitleFocused) { oldValue, newValue in
+            if newValue {
+                HapticManager.shared.heavyImpact()
+            }
+        }
     }
 
     @ViewBuilder
@@ -47,11 +59,13 @@ struct SessionListSectionView: View {
         if editingId == entry.id {
             VStack(alignment: .leading) {
                 TextField("Session Name", text: $editingName)
+                    .focused($isNameFocused)
                 ForEach(editingSubtitles.indices, id: \.self) { idx in
                     TextField("Subtitle", text: Binding(
                         get: { editingSubtitles[idx] },
                         set: { editingSubtitles[idx] = $0 }
                     ))
+                    .focused($isSubtitleFocused)
                 }
                 HStack {
                     Button("Save") {

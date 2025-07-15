@@ -12,6 +12,8 @@ struct SessionRowView: View {
     @Binding var showDeleteAlert: AlertID?
     let saveEdit: (UUID) async -> Void
     let deleteSession: (UUID) -> Void
+    @FocusState private var isNameFocused: Bool
+    @FocusState private var isSubtitleFocused: Bool
 
     var body: some View {
         if editingId == session.id {
@@ -22,6 +24,12 @@ struct SessionRowView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(maxWidth: 160)
                         .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
+                        .focused($isNameFocused)
+                        .onChange(of: isNameFocused) { oldValue, newValue in
+                            if newValue {
+                                HapticManager.shared.heavyImpact()
+                            }
+                        }
 
                     ForEach(editingSubtitles.indices, id: \.self) { idx in
                         HStack {
@@ -36,6 +44,12 @@ struct SessionRowView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .frame(maxWidth: .infinity)
                             .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
+                            .focused($isSubtitleFocused)
+                            .onChange(of: isSubtitleFocused) { oldValue, newValue in
+                                if newValue {
+                                    HapticManager.shared.heavyImpact()
+                                }
+                            }
 
                             Button(action: { editingSubtitles.remove(at: idx) }, label: {
                                 Image(systemName: "minus.circle")
