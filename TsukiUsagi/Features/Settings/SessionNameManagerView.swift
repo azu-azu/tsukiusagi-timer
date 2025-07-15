@@ -15,26 +15,25 @@ struct SessionNameManagerView: View {
                 Color.moonBackground.ignoresSafeArea()
 
                 // キーボード表示時は星を非表示
-                if !isKeyboardVisible {
-                    StaticStarsView(starCount: 30)
-                        .allowsHitTesting(false)
-                        .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                // if !isKeyboardVisible {
+                //     StaticStarsView(starCount: 30)
+                //         .allowsHitTesting(false)
+                //         .transition(.opacity.animation(.easeInOut(duration: 0.3)))
 
-                    FlowingStarsView(
-                        starCount: 20,
-                        angle: .degrees(135),
-                        durationRange: 24 ... 40,
-                        sizeRange: 2 ... 4,
-                        spawnArea: nil
-                    )
-                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
-                }
+                //     FlowingStarsView(
+                //         starCount: 20,
+                //         angle: .degrees(135),
+                //         durationRange: 24 ... 40,
+                //         sizeRange: 2 ... 4,
+                //         spawnArea: nil
+                //     )
+                //     .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                // }
             }
 
             // コンテンツ
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
-                    HiddenKeyboardWarmer() // ← 追加
                     NewSessionFormView()
                     // --- ここから登録済みセッションの明示的な表示 ---
                     SessionListSectionView()

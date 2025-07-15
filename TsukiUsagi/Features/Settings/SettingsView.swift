@@ -40,21 +40,21 @@ struct SettingsView: View {
                 ZStack {
                     Color.moonBackground.ignoresSafeArea()
 
-                    // キーボード表示時は星を非表示
-                    if !isKeyboardVisible {
-                        StaticStarsView(starCount: 30)
-                            .allowsHitTesting(false)
-                            .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                    // // キーボード表示時は星を非表示
+                    // if !isKeyboardVisible {
+                    //     StaticStarsView(starCount: 30)
+                    //         .allowsHitTesting(false)
+                    //         .transition(.opacity.animation(.easeInOut(duration: 0.3)))
 
-                        FlowingStarsView(
-                            starCount: flowingStarCount,
-                            angle: .degrees(135),
-                            durationRange: 24 ... 40,
-                            sizeRange: 2 ... 4,
-                            spawnArea: nil
-                        )
-                        .transition(.opacity.animation(.easeInOut(duration: 0.3)))
-                    }
+                    //     FlowingStarsView(
+                    //         starCount: flowingStarCount,
+                    //         angle: .degrees(135),
+                    //         durationRange: 24 ... 40,
+                    //         sizeRange: 2 ... 4,
+                    //         spawnArea: nil
+                    //     )
+                    //     .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                    // }
                 }
 
                 // コンテンツ部分のみclipShape適用
@@ -67,7 +67,6 @@ struct SettingsView: View {
                     // スクロール可能なコンテンツ
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
-                            HiddenKeyboardWarmer()
                             WorkTimeSectionView()
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
