@@ -36,7 +36,7 @@ struct SessionLabelSection: View {
                                 .padding(.horizontal, 12)
                                 .frame(height: labelHeight)
                                 .focused($isActivityFocused)
-                                .onChange(of: isActivityFocused) { oldValue, newValue in
+                                .onChange(of: isActivityFocused) { _, newValue in
                                     if newValue {
                                         HapticManager.shared.heavyImpact()
                                     }
@@ -131,7 +131,7 @@ struct SessionLabelSection: View {
                     .scrollContentBackground(.hidden)
                     .background(Color.white.opacity(0.05))
                     .focused($isSubtitleFocused)
-                    .onChange(of: isSubtitleFocused) { oldValue, newValue in
+                    .onChange(of: isSubtitleFocused) { _, newValue in
                         if newValue {
                             HapticManager.shared.heavyImpact()
                         }
