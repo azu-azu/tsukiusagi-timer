@@ -23,7 +23,7 @@ struct NewSessionFormView: View {
                     .submitLabel(.next)
                     .onSubmit { isSubtitleFocused = true }
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
-                .onChange(of: isNameFocused) { oldValue, newValue in
+                .onChange(of: isNameFocused) { _, newValue in
                     if newValue {
                         HapticManager.shared.heavyImpact()
                     }
@@ -44,7 +44,7 @@ struct NewSessionFormView: View {
                         .submitLabel(.done)
                         .onSubmit { hideKeyboard() }
                         .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
-                        .onChange(of: isSubtitleFocused) { oldValue, newValue in
+                        .onChange(of: isSubtitleFocused) { _, newValue in
                             if newValue {
                                 HapticManager.shared.heavyImpact()
                             }
