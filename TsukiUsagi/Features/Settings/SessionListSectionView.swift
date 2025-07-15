@@ -1,69 +1,86 @@
 import SwiftUI
 
+struct IdentifiableError: Identifiable {
+    let id = UUID()
+    let message: String
+}
+
 struct SessionListSectionView: View {
     @EnvironmentObject var sessionManager: SessionManagerV2
-    @State private var editingId: UUID?
+    @State private var editingId: UUID? = nil
     @State private var editingName: String = ""
-    @State private var editingSubtitles: [String] = [""]
-    @State private var showDeleteAlert: AlertID?
-    @State private var errorMessage: String?
-    @State private var showErrorAlert = false
-    @State private var errorTitle: String = "Error"
+    @State private var editingSubtitles: [String] = []
+    @State private var errorMessage: IdentifiableError? = nil
 
     var body: some View {
         List {
-            ForEach(sessionManager.sessions) { session in
-                SessionRowView(
-                    session: session,
-                    editingId: $editingId,
-                    editingName: $editingName,
-                    editingSubtitles: $editingSubtitles,
-                    showDeleteAlert: $showDeleteAlert,
-                    saveEdit: saveEdit,
-                    deleteSession: deleteSession
-                )
+            Section(header: Text("Default Sessions")) {
+                if sessionManager.defaultEntries.isEmpty {
+                    Text("No default sessions.")
+                        .foregroundColor(.secondary)
+                        .italic()
+                } else {
+                    ForEach(sessionManager.defaultEntries) { entry in
+                        sessionRow(entry: entry)
+                    }
+                }
+            }
+            Section(header: Text("Custom Sessions")) {
+                if sessionManager.customEntries.isEmpty {
+                    Text("No custom sessions. Tap + to add.")
+                        .foregroundColor(.secondary)
+                        .italic()
+                } else {
+                    ForEach(sessionManager.customEntries) { entry in
+                        sessionRow(entry: entry)
+                    }
+                }
             }
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .background(Color.clear)
-        .alert(isPresented: $showErrorAlert) {
-            Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
+        .alert(item: $errorMessage) { err in
+            Alert(title: Text("Error"), message: Text(err.message), dismissButton: .default(Text("OK")))
         }
     }
 
-    private func saveEdit(id: UUID) async {
-        let trimmedName = editingName.trimmed
-        let subtitles = editingSubtitles.map { $0.normalized }.filter { !$0.isEmpty }
-        guard !trimmedName.isEmpty else {
-            errorTitle = "Failed to Save Changes"
-            errorMessage = "Session Name is required."
-            showErrorAlert = true
-            return
-        }
-
-        do {
-            try sessionManager.editSession(id: id, newName: trimmedName, newSubtitles: subtitles)
-            try await sessionManager.saveAsync()
-            editingId = nil
-            editingName = ""
-            editingSubtitles = [""]
-        } catch {
-            errorTitle = "Failed to Save Changes"
-            errorMessage = error.localizedDescription
-            showErrorAlert = true
-        }
-    }
-
-    private func deleteSession(id: UUID) {
-        sessionManager.deleteSession(id: id)
-        Task {
-            do {
-                try await sessionManager.saveAsync()
-            } catch {
-                errorTitle = "Failed to Delete Session"
-                errorMessage = error.localizedDescription
-                showErrorAlert = true
+    @ViewBuilder
+    private func sessionRow(entry: SessionEntry) -> some View {
+        if editingId == entry.id {
+            VStack(alignment: .leading) {
+                TextField("Session Name", text: $editingName)
+                ForEach(editingSubtitles.indices, id: \.self) { idx in
+                    TextField("Subtitle", text: Binding(
+                        get: { editingSubtitles[idx] },
+                        set: { editingSubtitles[idx] = $0 }
+                    ))
+                }
+                HStack {
+                    Button("Save") {
+                        sessionManager.editEntry(id: entry.id, sessionName: editingName.isEmpty ? nil : editingName, subtitles: editingSubtitles)
+                        editingId = nil
+                    }
+                    Button("Cancel") {
+                        editingId = nil
+                    }
+                }
+            }
+        } else {
+            VStack(alignment: .leading) {
+                Text(entry.sessionName ?? "(No Name)")
+                ForEach(entry.subtitles, id: \.self) { subtitle in
+                    Text(subtitle).font(.subheadline).foregroundColor(.secondary)
+                }
+                HStack {
+                    Button("Edit") {
+                        editingId = entry.id
+                        editingName = entry.sessionName ?? ""
+                        editingSubtitles = entry.subtitles
+                    }
+                    Button(role: .destructive) {
+                        sessionManager.deleteEntry(id: entry.id)
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                }
             }
         }
     }
