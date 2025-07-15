@@ -73,7 +73,13 @@ extension SessionManagerV2 {
                 "Long subtitle for testing purposes"
             ]),
             // 特殊文字
-            SessionEntry(sessionName: "Special!@#¥%&*()_+{}|:<>? Session", subtitles: ["Emoji 😊🚀✨", "Symbols #$%&"]),
+            SessionEntry(
+                sessionName: "Special!@#¥%&*()_+{}|:<>? Session",
+                subtitles: [
+                    "Emoji 😊🚀✨",
+                    "Symbols #$%&"
+                ]
+            ),
             // 多件数テスト
             SessionEntry(sessionName: "Session 3", subtitles: []),
             SessionEntry(sessionName: "Session 4", subtitles: []),
