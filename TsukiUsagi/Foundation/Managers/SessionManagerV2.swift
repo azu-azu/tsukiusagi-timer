@@ -45,7 +45,7 @@ class SessionManagerV2: ObservableObject {
 
     private func load() {
         if let data = UserDefaults.standard.data(forKey: "customEntries"),
-           let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
+            let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
             self.customEntries = decoded
         } else {
             self.customEntries = []
