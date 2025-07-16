@@ -23,10 +23,8 @@ TsukiUsagi/
 │       │   ├── SparkleStarsView.swift
 │       │   └── StaticStarsView.swift
 │       └── Usagi/
-│           ├── UsagiView_1.swift
-│           └── UsagiView_2.swift
-├── Constants/
-│   └── LayoutConstants.swift
+│           ├── MoonUsagiView.swift
+│           └── JumpingUsagiView.swift
 ├── Entry/
 │   ├── Components/
 │   │   ├── FooterBar.swift
@@ -35,6 +33,8 @@ TsukiUsagi/
 │   ├── ContentView.swift
 │   └── TsukiUsagiApp.swift
 ├── Features/
+│   ├── Common/
+│   │   └── SessionLabelSection.swift
 │   ├── History/
 │   │   ├── Stores/
 │   │   │   └── HistoryStore.swift
@@ -54,11 +54,6 @@ TsukiUsagi/
 │   │   ├── SettingsView.swift
 │   │   ├── ViewHistorySectionView.swift
 │   │   └── WorkTimeSectionView.swift
-│   ├── Shared/
-│   │   ├── SessionLabelSection.swift
-│   │   ├── SessionManager.swift
-│   │   ├── SessionManagerV2.swift
-│   │   └── TimeFormatting.swift
 │   └── Timer/
 │       ├── HapticManager.swift
 │       ├── HapticService.swift
@@ -85,32 +80,39 @@ TsukiUsagi/
 │   │   ├── PlusMinusButton.swift
 │   │   ├── RoundedCard.swift
 │   │   └── TotalCard.swift
+│   ├── Constants/
+│   │   └── AppConstants.swift
 │   ├── Extensions/
 │   │   ├── Array+Safe.swift
 │   │   ├── Color+Hex.swift
 │   │   ├── String+Trimmed.swift
 │   │   └── View+SessionVisibility.swift
+│   ├── Managers/
+│   │   ├── SessionManager.swift
+│   │   └── SessionManagerV2.swift
+│   ├── Utilities/
+│   │   └── TimeFormatting.swift
+│   ├── AccessibilityIDs.swift
+│   ├── AwakeEnablerView.swift
+│   ├── DesignTokens.swift
+│   ├── FeatureFlags.swift
+│   ├── PreviewData.swift
 │   └── Formatters/
 │       ├── DateFormatters.swift
 │       └── TimeFormatters.swift
 ├── UIKitSupport/
 │   ├── UIKitWrappers/
-│   │   ├── SelectableTextView.swift
-│   │   ├── GearButtonToolbar.swift
-│   │   ├── GlitterTextModifier.swift
-│   │   ├── GradientGlitterTextModifier.swift
-│   │   └── ViewModifiers.swift
-│   ├── AccessibilityIDs.swift
-│   ├── AwakeEnablerView.swift
-│   ├── DesignTokens.swift
-│   ├── FeatureFlags.swift
-│   └── PreviewData.swift
+│   │   └── SelectableTextView.swift
+│   ├── GearButtonToolbar.swift
+│   ├── GlitterTextModifier.swift
+│   ├── GradientGlitterTextModifier.swift
+│   └── ViewModifiers.swift
 ├── Models/
 │   ├── SessionEntry.swift
 │   ├── SessionItem.swift
-│   └── SessionName.swift
+│   ├── SessionName.swift
+│   └── MoonMessage.swift
 └── Resources/
     ├── gif/
     └── MoonMessage/
         └── MoonMessage.swift
-```
