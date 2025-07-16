@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum LayoutConstants {
+enum AppConstants {
     static let footerBarHeight: CGFloat = 60
     static let overlayZIndex: Double = 20
     static let moonZIndex: Double = 10

@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 /// 粒度：日 or 月
 private enum Granularity: String, CaseIterable, Identifiable {

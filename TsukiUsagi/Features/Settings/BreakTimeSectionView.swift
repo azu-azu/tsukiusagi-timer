@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct BreakTimeSectionView: View {
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5

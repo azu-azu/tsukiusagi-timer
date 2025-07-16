@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct FooterBar: View {
     let buttonHeight: CGFloat
@@ -34,6 +35,6 @@ struct FooterBar: View {
         }
         .frame(height: buttonHeight)
         .background(Color.black.opacity(0.0001))
-        .zIndex(LayoutConstants.overlayZIndex)
+        .zIndex(AppConstants.overlayZIndex)
     }
 }
