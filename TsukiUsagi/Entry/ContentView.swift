@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 // MARK: - PreferenceKey for Landscape Detection
 
@@ -33,7 +34,7 @@ struct ContentView: View {
 
     // UI Const
     private let buttonWidth: CGFloat = 120
-    private let buttonHeight: CGFloat = LayoutConstants.footerBarHeight
+    private let buttonHeight: CGFloat = AppConstants.footerBarHeight
 
     // 比率定数
     private let timerBottomRatio: CGFloat = 1.1 // 画面高に対する TimerPanel の比率
@@ -149,7 +150,7 @@ struct ContentView: View {
                         )
                         .padding(.horizontal, 16)
                         .padding(.bottom, safeAreaInsets.bottom)
-                        .zIndex(LayoutConstants.footerZIndex)
+                        .zIndex(AppConstants.footerZIndex)
 
                         // RecordedTimesViewを縦画面時のみfooterBarの直上に追加
                         if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
@@ -160,9 +161,9 @@ struct ContentView: View {
                                 onEdit: { showingEditRecord = true }
                             )
                             .sessionVisibility(isVisible: timerVM.isSessionFinished)
-                            .padding(.bottom, LayoutConstants.footerBarHeight +
-                                    safeAreaInsets.bottom + LayoutConstants.recordedTimesBottomSpacing)
-                            .zIndex(LayoutConstants.overlayZIndex)
+                            .padding(.bottom, AppConstants.footerBarHeight +
+                                    safeAreaInsets.bottom + AppConstants.recordedTimesBottomSpacing)
+                            .zIndex(AppConstants.overlayZIndex)
                             .sessionEndTransition(timerVM)
                         }
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 /// プラス/マイナスボタンコンポーネント
 /// 時間設定で使用する統一されたボタンスタイル

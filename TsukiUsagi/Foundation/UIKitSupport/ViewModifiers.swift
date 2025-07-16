@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 import UIKit
 
 // （font関連ViewModifier拡張をすべて削除）

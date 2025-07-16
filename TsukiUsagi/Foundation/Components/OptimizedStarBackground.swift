@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 /// 最適化された星背景レイヤー
 /// FPS制御とReduce Motion対応でパフォーマンスを向上

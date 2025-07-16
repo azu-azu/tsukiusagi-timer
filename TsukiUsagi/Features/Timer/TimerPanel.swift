@@ -50,7 +50,7 @@ struct TimerPanel: View {
         // ★ Moon メッセージと同じ duration で同期
         .animation(
             timerVM.shouldSuppressSessionFinishedAnimation ? nil : .easeInOut(
-                duration: LayoutConstants.sessionEndAnimationDuration
+                duration: AppConstants.sessionEndAnimationDuration
             ),
             value: timerVM.isSessionFinished
         )
