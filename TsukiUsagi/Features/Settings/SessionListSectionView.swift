@@ -23,7 +23,7 @@ struct SessionListSectionView: View {
                         .italic()
                 } else {
                     ForEach(sessionManager.defaultEntries) { entry in
-                        sessionRow(entry: entry)
+                        sessionRow(entry: entry, isDefault: true)
                     }
                 }
             }
@@ -34,7 +34,7 @@ struct SessionListSectionView: View {
                         .italic()
                 } else {
                     ForEach(sessionManager.customEntries) { entry in
-                        sessionRow(entry: entry)
+                        sessionRow(entry: entry, isDefault: false)
                     }
                 }
             }
@@ -59,7 +59,7 @@ struct SessionListSectionView: View {
     }
 
     @ViewBuilder
-    private func sessionRow(entry: SessionEntry) -> some View {
+    private func sessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
         if editingId == entry.id {
             VStack(alignment: .leading) {
                 TextField("Session Name", text: $editingName)
@@ -86,22 +86,30 @@ struct SessionListSectionView: View {
                 }
             }
         } else {
-            VStack(alignment: .leading) {
-                Text(entry.sessionName ?? "(No Name)")
-                ForEach(entry.subtitles, id: \.self) { subtitle in
-                    Text(subtitle).font(.subheadline).foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .top) {
+                    Text(entry.sessionName ?? "(No Name)")
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    if !isDefault {
+                        Button(action: {
+                            editingId = entry.id
+                            editingName = entry.sessionName ?? ""
+                            editingSubtitles = entry.subtitles
+                        }) {
+                            Text("Edit")
+                        }
+                        Button(role: .destructive, action: {
+                            sessionManager.deleteEntry(id: entry.id)
+                        }) {
+                            Image(systemName: "trash")
+                        }
+                    }
                 }
-                HStack {
-                    Button("Edit") {
-                        editingId = entry.id
-                        editingName = entry.sessionName ?? ""
-                        editingSubtitles = entry.subtitles
-                    }
-                    Button(role: .destructive) {
-                        sessionManager.deleteEntry(id: entry.id)
-                    } label: {
-                        Image(systemName: "trash")
-                    }
+                ForEach(entry.subtitles, id: \.self) { subtitle in
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
         }
