@@ -1,4 +1,4 @@
-# TsukiUsagi プロジェクト構造
+# TsukiUsagi プロジェクト構造（最新版）
 
 ```
 TsukiUsagi/
@@ -43,39 +43,51 @@ TsukiUsagi/
 │   │   └── Views/
 │   │       └── HistoryView.swift
 │   ├── Settings/
-│   │   ├── BreakTimeSectionView.swift
-│   │   ├── ManageSessionNamesSectionView.swift
-│   │   ├── NewSessionFormView.swift
-│   │   ├── ResetStopSectionView.swift
-│   │   ├── SessionListSectionView.swift
-│   │   ├── SessionNameManagerView.swift
-│   │   ├── SessionRowView.swift
-│   │   ├── SettingsHeaderView.swift
-│   │   ├── SettingsView.swift
-│   │   ├── ViewHistorySectionView.swift
-│   │   └── WorkTimeSectionView.swift
+│   │   ├── Screens/
+│   │   │   ├── SettingsView.swift
+│   │   │   └── SessionNameManagerView.swift
+│   │   ├── Sections/
+│   │   │   ├── WorkTimeSectionView.swift
+│   │   │   ├── BreakTimeSectionView.swift
+│   │   │   ├── ResetStopSectionView.swift
+│   │   │   ├── ViewHistorySectionView.swift
+│   │   │   ├── ManageSessionNamesSectionView.swift
+│   │   │   └── SessionListSectionView.swift
+│   │   ├── Components/
+│   │   │   ├── SessionRowView.swift
+│   │   │   └── SettingsHeaderView.swift
+│   │   └── Forms/
+│   │       └── NewSessionFormView.swift
 │   └── Timer/
-│       ├── HapticManager.swift
-│       ├── HapticService.swift
-│       ├── NotificationManager.swift
-│       ├── PhaseNotificationService.swift
-│       ├── PomodoroPhase.swift
-│       ├── RecordedTimesView.swift
-│       ├── SessionHistoryService.swift
-│       ├── StartPulseAnimationModifier.swift
-│       ├── TimeFormatterUtil.swift
-│       ├── TimerAnimationManager.swift
-│       ├── TimerEditView.swift
-│       ├── TimerEngine.swift
-│       ├── TimerPanel.swift
-│       ├── TimerPersistenceManager.swift
-│       ├── TimerSessionManager.swift
-│       ├── TimerStateManager.swift
-│       ├── TimerTextView.swift
-│       └── TimerViewModel.swift
+│       ├── Views/
+│       │   ├── RecordedTimesView.swift
+│       │   ├── TimerEditView.swift
+│       │   ├── TimerPanel.swift
+│       │   └── TimerTextView.swift
+│       ├── ViewModels/
+│       │   ├── TimerViewModel.swift
+│       │   ├── TimerStateManager.swift
+│       │   └── TimerSessionManager.swift
+│       ├── Engine/
+│       │   ├── TimerEngine.swift
+│       │   └── TimerPersistenceManager.swift
+│       ├── Services/
+│       │   ├── NotificationManager.swift
+│       │   ├── PhaseNotificationService.swift
+│       │   ├── SessionHistoryService.swift
+│       │   └── HapticService.swift
+│       ├── Managers/
+│       │   ├── HapticManager.swift
+│       │   └── TimerAnimationManager.swift
+│       ├── Modifiers/
+│       │   └── StartPulseAnimationModifier.swift
+│       ├── Utils/
+│       │   └── TimeFormatterUtil.swift
+│       └── Models/
+│           └── PomodoroPhase.swift
 ├── Foundation/
 │   ├── Components/
-│   │   ├── HiddenKeyboardWarner.swift
+│   │   ├── HiddenKeyboardWarmer.swift
 │   │   ├── OptimizedStarBackground.swift
 │   │   ├── PlusMinusButton.swift
 │   │   ├── RoundedCard.swift
