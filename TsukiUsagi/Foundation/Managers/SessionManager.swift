@@ -155,13 +155,14 @@ class SessionManager: ObservableObject {
 
     func deleteEntry(id: UUID) {
         // デフォルトは削除不可
-        guard let entry = sessionDatabase.values.first(where: { $0.id == id }),
-              !entry.isDefault else { return }
-        sessionDatabase.removeValue(
-            forKey: entry.sessionName
-                .lowercased()
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-        )
+        for entry in sessionDatabase.values where entry.id == id && !entry.isDefault {
+            sessionDatabase.removeValue(
+                forKey: entry.sessionName
+                    .lowercased()
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            break
+        }
         save()
     }
 
@@ -233,7 +234,9 @@ extension SessionManager {
             SessionEntry(sessionName: "Session 7", subtitles: [], isDefault: false)
         ]
         for entry in samples {
-            let key = entry.sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            let key = entry.sessionName
+                .lowercased()
+                .trimmingCharacters(in: .whitespacesAndNewlines)
             manager.sessionDatabase[key] = entry
         }
         return manager
