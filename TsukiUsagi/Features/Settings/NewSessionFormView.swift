@@ -10,9 +10,13 @@ struct NewSessionFormView: View {
     @FocusState private var isSubtitleFocused: Bool
     @State private var errorTitle: String = "Error"
 
-    var isAddDisabled: Bool {
+        var isAddDisabled: Bool {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+
+        // Session Nameが空の場合は無効
+        if trimmedName.isEmpty { return true }
+
         // 文字数超過
         if trimmedName.count > SessionManagerV2.maxNameLength { return true }
         if subtitles.contains(where: { $0.count > SessionManagerV2.maxSubtitleLength }) { return true }
@@ -29,24 +33,34 @@ struct NewSessionFormView: View {
         return false
     }
 
+    var saveButtonTitle: String {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // 既存のセッション名が選択されている場合
+        if !trimmedName.isEmpty && sessionManager.allEntries.map({ $0.sessionName }).contains(trimmedName) {
+            return "Update \"\(trimmedName)\""
+        }
+
+        // 新規セッション作成の場合
+        return "Create Session"
+    }
+
     var body: some View {
         RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("New Session Name")
-                    .font(DesignTokens.Fonts.labelBold)
-                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                // Text("New Session Name")
+                //     .font(DesignTokens.Fonts.labelBold)
+                //     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
 
                 // Menu形式でセッション選択（SessionLabelSectionと同じ）
-                if name.isEmpty || !sessionManager.allEntries.map({ $0.sessionName }).contains(name) {
-                    // カスタム入力モード
+                if !name.isEmpty && !sessionManager.allEntries.map({ $0.sessionName }).contains(name) {
+                    // カスタム入力モード（既存セッションにない場合のみ）
                     HStack(spacing: 8) {
                         ZStack(alignment: .topLeading) {
-                            if name.isEmpty {
-                                Text("Enter session name...")
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                            }
+                            Text("Enter session name...")
+                                .foregroundColor(.gray)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
 
                             TextField("", text: $name)
                                 .foregroundColor(.moonTextPrimary)
@@ -65,7 +79,7 @@ struct NewSessionFormView: View {
                         .frame(maxWidth: .infinity)
 
                         Button {
-                            name = sessionManager.defaultEntries.first?.sessionName ?? "Work"
+                            name = ""
                             isNameFocused = false
                         } label: {
                             Image(systemName: "xmark.circle.fill")
@@ -74,7 +88,7 @@ struct NewSessionFormView: View {
                         }
                     }
                 } else {
-                    // Menu選択モード
+                    // Menu選択モード（デフォルト）
                     Menu {
                         // デフォルトセッション
                         ForEach(sessionManager.defaultEntries) { entry in
@@ -100,8 +114,8 @@ struct NewSessionFormView: View {
                         }
                     } label: {
                         HStack {
-                            Text(name.isEmpty ? "Custom" : name)
-                                .foregroundColor(.moonTextPrimary)
+                            Text(name.isEmpty ? "Select Session" : name)
+                                .foregroundColor(name.isEmpty ? .secondary : .moonTextPrimary)
                             Image(systemName: "chevron.down")
                                 .foregroundColor(.moonTextMuted)
                         }
@@ -154,8 +168,9 @@ struct NewSessionFormView: View {
                 })
                 .font(DesignTokens.Fonts.caption)
                 .buttonStyle(.plain)
+                .disabled(name.isEmpty || (subtitleTexts.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true))
 
-                Button("Add", action: {
+                Button(saveButtonTitle, action: {
                     addSession()
                 })
                 .buttonStyle(.borderedProminent)

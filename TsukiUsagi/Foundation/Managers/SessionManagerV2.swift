@@ -8,15 +8,21 @@ class SessionManagerV2: ObservableObject {
     static let maxNameLength = 30 // 文字数制限（将来UIにも反映）
     static let maxSubtitleLength = 30
 
-    // デフォルトセッション名
+    // デフォルトセッション名（順序保持）
     let defaultSessionNames: Set<String> = ["Work", "Study", "Read"]
+    let defaultSessionOrder: [String] = ["Work", "Study", "Read"]
 
     // sessionName(lowercased)をキー
     @Published var sessionDatabase: [String: SessionEntry] = [:]
 
     // デフォルト/カスタム区別
     var defaultEntries: [SessionEntry] {
-        sessionDatabase.values.filter { defaultSessionNames.contains($0.sessionName) && $0.isDefault }.sorted { $0.sessionName < $1.sessionName }
+        let filtered = sessionDatabase.values.filter { defaultSessionNames.contains($0.sessionName) && $0.isDefault }
+        return filtered.sorted { entry1, entry2 in
+            let index1 = defaultSessionOrder.firstIndex(of: entry1.sessionName) ?? Int.max
+            let index2 = defaultSessionOrder.firstIndex(of: entry2.sessionName) ?? Int.max
+            return index1 < index2
+        }
     }
     var customEntries: [SessionEntry] {
         sessionDatabase.values.filter { !defaultSessionNames.contains($0.sessionName) && !$0.isDefault }.sorted { $0.sessionName < $1.sessionName }

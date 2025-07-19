@@ -14,8 +14,12 @@ struct SessionLabelSection: View {
     private let inputHeight: CGFloat = 28
     private let labelHeight: CGFloat = 28
 
+    // 明示的なCustom Input状態管理
+    @State private var isCustomInputMode: Bool = false
+
     private var isCustomActivity: Bool {
-        !sessionManager.allEntries.map { $0.sessionName }.contains(activity)
+        // 明示的なCustom Inputモードまたは空文字の場合
+        return isCustomInputMode || activity.isEmpty
     }
 
     var body: some View {
@@ -66,6 +70,7 @@ struct SessionLabelSection: View {
                         ForEach(sessionManager.defaultEntries) { entry in
                             Button {
                                 activity = entry.sessionName
+                                isCustomInputMode = false
                             } label: {
                                 Text(entry.sessionName)
                             }
@@ -75,6 +80,7 @@ struct SessionLabelSection: View {
                         ForEach(sessionManager.customEntries) { entry in
                             Button {
                                 activity = entry.sessionName
+                                isCustomInputMode = false
                             } label: {
                                 Text(entry.sessionName)
                             }
@@ -82,7 +88,10 @@ struct SessionLabelSection: View {
                         Divider()
                         Button("Custom Input...") {
                             activity = ""
-                            isActivityFocused = true
+                            isCustomInputMode = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                isActivityFocused = true
+                            }
                         }
                     } label: {
                         HStack {
@@ -130,12 +139,20 @@ struct SessionLabelSection: View {
                     .padding(8)
                     .scrollContentBackground(.hidden)
                     .background(Color.white.opacity(0.05))
+                    .cornerRadius(6)
                     .focused($isSubtitleFocused)
                     .onChange(of: isSubtitleFocused) { _, newValue in
                         if newValue {
                             HapticManager.shared.heavyImpact()
                         }
                     }
+            }
+        }
+        .onAppear {
+            // 初期状態で既存セッションが選択されている場合はCustom Inputモードを無効化
+            let allSessionNames = sessionManager.allEntries.map { $0.sessionName }
+            if allSessionNames.contains(activity) {
+                isCustomInputMode = false
             }
         }
     }
