@@ -67,7 +67,11 @@ class HistoryViewModel: ObservableObject {
 
     // 復元処理
     func restore(record: SessionRecord, sessionManager: SessionManager) throws {
-        try sessionManager.addOrUpdateEntry(originalKey: "", sessionName: record.activity, subtitles: record.subtitle != nil ? [record.subtitle!] : [])
+        try sessionManager.addOrUpdateEntry(
+            originalKey: "",
+            sessionName: record.activity,
+            subtitles: record.subtitle != nil ? [record.subtitle!] : []
+        )
         // 復元後、ViewでisDeletedを再判定すること
     }
 
