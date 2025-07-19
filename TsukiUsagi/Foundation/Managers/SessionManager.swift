@@ -101,7 +101,8 @@ class SessionManager: ObservableObject {
     func addOrUpdateEntry(
         originalKey: String,
         sessionName: String,
-        subtitles: [String]) throws {
+        subtitles: [String]
+    ) throws {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         let newKey = trimmedName.lowercased()
         let oldKey = originalKey.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -117,7 +118,8 @@ class SessionManager: ObservableObject {
         // 重複禁止（空文字でない場合のみチェック）
         if !trimmedName.isEmpty,
            let existing = sessionDatabase[newKey],
-           !defaultSessionNames.contains(trimmedName) {
+           !defaultSessionNames.contains(trimmedName)
+        {
             // 元のキーと違う場合のみ重複エラー
             if newKey != oldKey && !existing.isDefault {
                 throw SessionManagerError.duplicateName
@@ -151,9 +153,8 @@ class SessionManager: ObservableObject {
     }
 
     func deleteEntry(id: UUID) {
-        // デフォルトは削除不可
         for entry in sessionDatabase.values
-            where entry.id == id && !entry.isDefault
+            where entry.id == id && !entry.isDefault // デフォルトは削除不可
         {
             sessionDatabase.removeValue(
                 forKey: entry.sessionName
@@ -176,7 +177,8 @@ class SessionManager: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: "customEntriesV2"),
            let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
             for entry in decoded where !entry.sessionName.isEmpty {
-                let key = entry.sessionName.lowercased()
+                let key = entry.sessionName
+                    .lowercased()
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 sessionDatabase[key] = entry
             }

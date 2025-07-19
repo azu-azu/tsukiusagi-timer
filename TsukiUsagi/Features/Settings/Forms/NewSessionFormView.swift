@@ -202,9 +202,14 @@ struct NewSessionFormView: View {
 
                             // 2個目以降にのみマイナスボタンを表示、1個目はスペース確保
                             if idx > 0 {
-                                Button(action: { subtitleTexts.remove(at: idx) }, label: {
-                                    Image(systemName: "minus.circle")
-                                })
+                                Button(
+                                    action: {
+                                        subtitleTexts.remove(at: idx)
+                                    },
+                                    label: {
+                                        Image(systemName: "minus.circle")
+                                    }
+                                )
                                 .buttonStyle(.plain)
                             } else {
                                 // 1個目は透明なスペーサーで横幅を統一
