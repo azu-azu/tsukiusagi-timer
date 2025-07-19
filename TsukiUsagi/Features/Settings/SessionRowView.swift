@@ -14,77 +14,179 @@ struct SessionRowView: View {
     let deleteSession: (UUID) -> Void
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
+    @State private var isCustomInputMode: Bool = false
+    @EnvironmentObject private var sessionManagerV2: SessionManagerV2
 
     var body: some View {
         if editingId == session.id {
             // 編集モード
-            HStack {
-                VStack(alignment: .leading) {
-                    TextField("Session Name", text: $editingName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: 160)
-                        .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
-                        .focused($isNameFocused)
-                        .onChange(of: isNameFocused) { _, newValue in
-                            if newValue {
-                                HapticManager.shared.heavyImpact()
+            VStack(alignment: .leading, spacing: 12) {
+                // Session Name セクション（親）
+                GroupBox("Session Name") {
+                    if isCustomInputMode {
+                        // Custom入力モード
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                TextField("Enter session name", text: $editingName)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .focused($isNameFocused)
+                                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
+                                    .onChange(of: isNameFocused) { _, newValue in
+                                        if newValue {
+                                            HapticManager.shared.heavyImpact()
+                                        }
+                                    }
+
+                                Button("Select Existing") {
+                                    isCustomInputMode = false
+                                    editingName = sessionManagerV2.defaultEntries.first?.sessionName ?? "Work"
+                                    editingSubtitles = sessionManagerV2.getSubtitles(for: editingName)
+                                }
+                                .font(DesignTokens.Fonts.caption)
+                                .buttonStyle(.bordered)
                             }
                         }
-
-                    ForEach(editingSubtitles.indices, id: \.self) { idx in
-                        HStack {
-                            TextField("Subtitle \(idx + 1)", text: Binding(
-                                get: { editingSubtitles[safe: idx] ?? "" },
-                                set: { newValue in
-                                    if idx < editingSubtitles.count {
-                                        editingSubtitles[idx] = newValue
+                    } else {
+                        // 既存セッション選択モード
+                        VStack(alignment: .leading, spacing: 8) {
+                            Menu {
+                                // デフォルトセッション
+                                ForEach(sessionManagerV2.defaultEntries) { entry in
+                                    Button {
+                                        editingName = entry.sessionName
+                                        editingSubtitles = entry.subtitles
+                                    } label: {
+                                        Text(entry.sessionName)
                                     }
                                 }
-                            ))
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(maxWidth: .infinity)
-                            .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
-                            .focused($isSubtitleFocused)
-                            .onChange(of: isSubtitleFocused) { _, newValue in
-                                if newValue {
-                                    HapticManager.shared.heavyImpact()
+                                Divider()
+                                // カスタムセッション
+                                ForEach(sessionManagerV2.customEntries) { entry in
+                                    Button {
+                                        editingName = entry.sessionName
+                                        editingSubtitles = entry.subtitles
+                                    } label: {
+                                        Text(entry.sessionName)
+                                    }
+                                }
+                                Divider()
+                                Button("Custom Input...") {
+                                    isCustomInputMode = true
+                                    editingName = ""
+                                    editingSubtitles = [""]
+                                }
+                            } label: {
+                                HStack {
+                                    Text(editingName.isEmpty ? "Select Session" : editingName)
+                                        .foregroundColor(editingName.isEmpty ? .secondary : .primary)
+                                    Spacer()
+                                    Image(systemName: "chevron.down")
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color(UIColor.systemGray6))
+                                .cornerRadius(8)
+                            }
+                            .onAppear {
+                                // 編集開始時に既存のセッション名が設定されている場合、そのセッションを選択状態にする
+                                if !editingName.isEmpty && !isCustomInputMode {
+                                    // 既存のセッション名が設定されている場合は何もしない（既に正しい状態）
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Subtitles セクション（子）
+                GroupBox("Subtitles") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Subtitles")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+
+                            if !editingName.isEmpty {
+                                Text("for \"\(editingName)\"")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        // インデントで親子関係を表現
+                        VStack(alignment: .leading, spacing: 4) {
+                            ForEach(editingSubtitles.indices, id: \.self) { idx in
+                                HStack {
+                                    // インデント表現
+                                    Rectangle()
+                                        .fill(Color.clear)
+                                        .frame(width: 16, height: 1)
+
+                                    TextField("Subtitle \(idx + 1)", text: Binding(
+                                        get: { editingSubtitles[safe: idx] ?? "" },
+                                        set: { newValue in
+                                            if idx < editingSubtitles.count {
+                                                editingSubtitles[idx] = newValue
+                                            }
+                                        }
+                                    ))
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
+                                    .focused($isSubtitleFocused)
+                                    .onChange(of: isSubtitleFocused) { _, newValue in
+                                        if newValue {
+                                            HapticManager.shared.heavyImpact()
+                                        }
+                                    }
+
+                                    Button(action: { editingSubtitles.remove(at: idx) }, label: {
+                                        Image(systemName: "minus.circle")
+                                    })
+                                    .buttonStyle(.plain)
+                                    .disabled(editingSubtitles.count == 1)
                                 }
                             }
 
-                            Button(action: { editingSubtitles.remove(at: idx) }, label: {
-                                Image(systemName: "minus.circle")
-                            })
-                            .buttonStyle(.plain)
-                            .disabled(editingSubtitles.count == 1)
+                            HStack {
+                                // インデント表現
+                                Rectangle()
+                                    .fill(Color.clear)
+                                    .frame(width: 16, height: 1)
+
+                                Button(action: { editingSubtitles.append("") }, label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "plus.circle")
+                                        Text("Add Subtitle")
+                                    }
+                                })
+                                .font(DesignTokens.Fonts.caption)
+                                .buttonStyle(.plain)
+                                .disabled(editingName.isEmpty || (editingSubtitles.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true))
+
+                                Spacer()
+                            }
                         }
                     }
-
-                    Button(action: { editingSubtitles.append("") }, label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus.circle")
-                            Text("Add Subtitle")
-                        }
-                    })
-                    .font(DesignTokens.Fonts.caption)
-                    .buttonStyle(.plain)
                 }
 
-                Spacer()
+                // Actions セクション
+                HStack {
+                    Button(isCustomInputMode ? "Create Session" : "Update \"\(editingName)\"") {
+                        Task { await saveEdit(session.id) }
+                    }
+                    .disabled(editingName.isEmpty)
+                    .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.saveButton)
 
-                Button("Save", action: {
-                    Task { await saveEdit(session.id) }
-                })
-                .font(DesignTokens.Fonts.caption)
-                .buttonStyle(.borderedProminent)
-                .accessibilityIdentifier(AccessibilityIDs.SessionManager.saveButton)
-
-                Button("Cancel", action: {
-                    editingId = nil
-                    editingName = ""
-                    editingSubtitles = [""]
-                })
-                .font(DesignTokens.Fonts.caption)
-                .accessibilityIdentifier(AccessibilityIDs.SessionManager.cancelButton)
+                    Button("Cancel", action: {
+                        editingId = nil
+                        editingName = ""
+                        editingSubtitles = [""]
+                        isCustomInputMode = false
+                    })
+                    .font(DesignTokens.Fonts.caption)
+                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.cancelButton)
+                }
             }
         } else {
             // 表示モード
@@ -107,6 +209,7 @@ struct SessionRowView: View {
                     editingId = session.id
                     editingName = session.name
                     editingSubtitles = session.subtitles.map { $0.text }
+                    isCustomInputMode = false  // 編集開始時は既存セッション選択モード
                 })
                 .font(DesignTokens.Fonts.caption)
                 .accessibilityIdentifier(AccessibilityIDs.SessionManager.editButton)

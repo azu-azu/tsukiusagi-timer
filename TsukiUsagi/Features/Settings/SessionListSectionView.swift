@@ -14,30 +14,35 @@ struct SessionListSectionView: View {
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
 
-    var body: some View {
-        List {
-            Section(header: Text("Default Sessions")) {
-                if sessionManager.defaultEntries.isEmpty {
-                    Text("No default sessions.")
-                        .foregroundColor(.secondary)
-                        .italic()
-                } else {
-                    ForEach(sessionManager.defaultEntries) { entry in
-                        sessionRow(entry: entry, isDefault: true)
+        var body: some View {
+        RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
+            List {
+                Section(header: Text("Default Sessions")) {
+                    if sessionManager.defaultEntries.isEmpty {
+                        Text("No default sessions.")
+                            .foregroundColor(.secondary)
+                            .italic()
+                    } else {
+                        ForEach(sessionManager.defaultEntries) { entry in
+                            sessionRow(entry: entry, isDefault: true)
+                        }
+                    }
+                }
+                Section(header: Text("Custom Sessions")) {
+                    if sessionManager.customEntries.isEmpty {
+                        Text("No custom sessions. Tap + to add.")
+                            .foregroundColor(.secondary)
+                            .italic()
+                    } else {
+                        ForEach(sessionManager.customEntries) { entry in
+                            sessionRow(entry: entry, isDefault: false)
+                        }
                     }
                 }
             }
-            Section(header: Text("Custom Sessions")) {
-                if sessionManager.customEntries.isEmpty {
-                    Text("No custom sessions. Tap + to add.")
-                        .foregroundColor(.secondary)
-                        .italic()
-                } else {
-                    ForEach(sessionManager.customEntries) { entry in
-                        sessionRow(entry: entry, isDefault: false)
-                    }
-                }
-            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden) //Listのデフォルト背景を消す
+            .listRowBackground(DesignTokens.Colors.moonCardBG) // ← List各行の背景
         }
         .alert(item: $errorMessage) { _err in
             Alert(
@@ -69,6 +74,11 @@ struct SessionListSectionView: View {
                         get: { editingSubtitles[_idx] },
                         set: { editingSubtitles[_idx] = $0 }
                     ))
+                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(6)
                     .focused($isSubtitleFocused)
                 }
                 HStack {
