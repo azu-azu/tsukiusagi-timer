@@ -6,25 +6,17 @@ import SwiftUI
 struct PreviewData {
     // MARK: - View Models
 
-    /// サンプルSessionManager
-    static let sampleSessionManager: SessionManager = {
-        let manager = SessionManager()
+    /// サンプルSessionManagerV2
+    static let sampleSessionManagerV2: SessionManagerV2 = {
+        let manager = SessionManagerV2()
         // プレビュー用のカスタムセッションを追加
-        try? manager.addSession(
-            SessionItem(
-                id: UUID(),
-                name: "Preview Work",
-                subtitle: "Sample session",
-                isFixed: false
-            )
+        try? manager.addOrUpdateEntry(
+            sessionName: "Preview Work",
+            subtitles: ["Sample session"]
         )
-        try? manager.addSession(
-            SessionItem(
-                id: UUID(),
-                name: "Preview Study",
-                subtitle: "Another sample",
-                isFixed: false
-            )
+        try? manager.addOrUpdateEntry(
+            sessionName: "Preview Study",
+            subtitles: ["Another sample"]
         )
         return manager
     }()

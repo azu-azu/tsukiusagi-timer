@@ -7,7 +7,6 @@ struct TsukiUsagiApp: App {
     // StateObjects: declaration only
     @StateObject private var historyVM: HistoryViewModel
     @StateObject private var timerVM: TimerViewModel
-    @StateObject private var sessionManager: SessionManager
     @StateObject private var sessionManagerV2: SessionManagerV2
 
     // Service singletons
@@ -50,7 +49,6 @@ struct TsukiUsagiApp: App {
             persistenceManager: persistenceManager,
             formatter: formatter
         ))
-        _sessionManager = StateObject(wrappedValue: SessionManager())
         _sessionManagerV2 = StateObject(wrappedValue: SessionManagerV2())
 
         // Feature Flags の初期化
@@ -66,7 +64,6 @@ struct TsukiUsagiApp: App {
             ContentView()
                 .environmentObject(timerVM)
                 .environmentObject(historyVM)
-                .environmentObject(sessionManager)
                 .environmentObject(sessionManagerV2)
         }
     }

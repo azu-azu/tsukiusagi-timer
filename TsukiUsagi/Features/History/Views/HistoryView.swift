@@ -10,7 +10,7 @@ private enum Granularity: String, CaseIterable, Identifiable {
 
 struct HistoryView: View {
     @EnvironmentObject var historyVM: HistoryViewModel
-    @EnvironmentObject var sessionManager: SessionManager
+    @EnvironmentObject var sessionManager: SessionManagerV2
 
     @State private var selectedDate = Calendar.current.startOfDay(for: Date()) // 基準日
     @State private var mode: Granularity = .day // 粒度

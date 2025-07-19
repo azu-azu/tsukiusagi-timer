@@ -8,14 +8,14 @@ struct SessionLabelSection: View {
     let labelCornerRadius: CGFloat
     @Binding var showEmptyError: Bool
     let onDone: (() -> Void)?
-    @EnvironmentObject var sessionManager: SessionManager
+    @EnvironmentObject var sessionManager: SessionManagerV2
 
     // 内部で固定値として定義
     private let inputHeight: CGFloat = 28
     private let labelHeight: CGFloat = 28
 
     private var isCustomActivity: Bool {
-        !sessionManager.sessions.map { $0.name }.contains(activity)
+        !sessionManager.allEntries.map { $0.sessionName }.contains(activity)
     }
 
     var body: some View {
@@ -52,7 +52,7 @@ struct SessionLabelSection: View {
                         .frame(maxWidth: .infinity)
 
                         Button {
-                            activity = sessionManager.fixedSessions.first?.name ?? "Work"
+                            activity = sessionManager.defaultEntries.first?.sessionName ?? "Work"
                             isActivityFocused = false
                         } label: {
                             Image(systemName: "xmark.circle.fill")
@@ -62,21 +62,21 @@ struct SessionLabelSection: View {
                     }
                 } else {
                     Menu {
-                        // 固定3種
-                        ForEach(sessionManager.fixedSessions) { item in
+                        // デフォルトセッション
+                        ForEach(sessionManager.defaultEntries) { entry in
                             Button {
-                                activity = item.name
+                                activity = entry.sessionName
                             } label: {
-                                Text(item.name)
+                                Text(entry.sessionName)
                             }
                         }
                         Divider()
-                        // カスタムSession Name
-                        ForEach(sessionManager.customSessions) { item in
+                        // カスタムセッション
+                        ForEach(sessionManager.customEntries) { entry in
                             Button {
-                                activity = item.name
+                                activity = entry.sessionName
                             } label: {
-                                Text(item.name)
+                                Text(entry.sessionName)
                             }
                         }
                         Divider()

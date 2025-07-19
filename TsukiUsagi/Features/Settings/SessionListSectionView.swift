@@ -73,12 +73,12 @@ struct SessionListSectionView: View {
                 }
                 HStack {
                     Button("Save") {
-                        sessionManager.editEntry(
-                            id: entry.id,
-                            sessionName: editingName.isEmpty ? nil : editingName,
-                            subtitles: editingSubtitles
-                        )
-                        editingId = nil
+                        do {
+                            try sessionManager.addOrUpdateEntry(sessionName: editingName, subtitles: editingSubtitles)
+                            editingId = nil
+                        } catch {
+                            errorMessage = IdentifiableError(message: error.localizedDescription)
+                        }
                     }
                     Button("Cancel") {
                         editingId = nil
@@ -88,13 +88,13 @@ struct SessionListSectionView: View {
         } else {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .top) {
-                    Text(entry.sessionName ?? "(No Name)")
+                    Text(entry.sessionName)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                     if !isDefault {
                         Button(action: {
                             editingId = entry.id
-                            editingName = entry.sessionName ?? ""
+                            editingName = entry.sessionName
                             editingSubtitles = entry.subtitles
                         }) {
                             Text("Edit")

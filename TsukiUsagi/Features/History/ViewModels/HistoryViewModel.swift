@@ -56,24 +56,18 @@ class HistoryViewModel: ObservableObject {
 
     // MARK: - isDeleted判定
 
-    func isDeleted(sessionManager: SessionManager, activity: String) -> Bool {
-        !sessionManager.sessions.contains(where: { $0.name == activity })
+    func isDeleted(sessionManager: SessionManagerV2, activity: String) -> Bool {
+        !sessionManager.allEntries.contains(where: { $0.sessionName == activity })
     }
 
     // (Deleted)表記付きアクティビティ名
-    func displayActivity(sessionManager: SessionManager, activity: String) -> String {
+    func displayActivity(sessionManager: SessionManagerV2, activity: String) -> String {
         isDeleted(sessionManager: sessionManager, activity: activity) ? "\(activity) (Deleted)" : activity
     }
 
     // 復元処理
-    func restore(record: SessionRecord, sessionManager: SessionManager) throws {
-        let sessionItem = SessionItem(
-            id: UUID(),
-            name: record.activity,
-            subtitle: record.subtitle,
-            isFixed: false
-        )
-        try sessionManager.addSession(sessionItem)
+    func restore(record: SessionRecord, sessionManager: SessionManagerV2) throws {
+        try sessionManager.addOrUpdateEntry(sessionName: record.activity, subtitles: record.subtitle != nil ? [record.subtitle!] : [])
         // 復元後、ViewでisDeletedを再判定すること
     }
 

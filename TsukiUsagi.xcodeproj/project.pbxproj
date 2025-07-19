@@ -34,22 +34,9 @@
 		32A3E4D52E10E6C100EBD3E2 /* TsukiUsagi.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TsukiUsagi.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		32CFB3BE2E27AC5C00B4F845 /* Exceptions for "TsukiUsagi" folder in "TsukiUsagi" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Features/Shared/SessionLabelSection.swift,
-			);
-			target = 32021C772DF97DF200A53A37 /* TsukiUsagi */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		32021C7A2DF97DF200A53A37 /* TsukiUsagi */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				32CFB3BE2E27AC5C00B4F845 /* Exceptions for "TsukiUsagi" folder in "TsukiUsagi" target */,
-			);
 			path = TsukiUsagi;
 			sourceTree = "<group>";
 		};
