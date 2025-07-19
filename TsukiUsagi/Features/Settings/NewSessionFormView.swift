@@ -10,6 +10,25 @@ struct NewSessionFormView: View {
     @FocusState private var isSubtitleFocused: Bool
     @State private var errorTitle: String = "Error"
 
+    var isAddDisabled: Bool {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        // 文字数超過
+        if trimmedName.count > SessionManagerV2.maxNameLength { return true }
+        if subtitles.contains(where: { $0.count > SessionManagerV2.maxSubtitleLength }) { return true }
+        // 最大数超過
+        if subtitles.count > SessionManagerV2.maxSubtitleCount { return true }
+        // セッション数超過（空文字でない場合のみチェック）
+        if !trimmedName.isEmpty && !sessionManager.defaultSessionNames.contains(trimmedName) && sessionManager.customEntries.count >= SessionManagerV2.maxSessionCount && sessionManager.sessionDatabase[trimmedName.lowercased()] == nil {
+            return true
+        }
+        // 重複禁止（空文字でない場合のみチェック）
+        if !trimmedName.isEmpty, let existing = sessionManager.sessionDatabase[trimmedName.lowercased()], !sessionManager.defaultSessionNames.contains(trimmedName) {
+            if !existing.isDefault { return true }
+        }
+        return false
+    }
+
     var body: some View {
         RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
             VStack(alignment: .leading, spacing: 8) {
@@ -17,15 +36,78 @@ struct NewSessionFormView: View {
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
 
-                TextField("Session Name (required)", text: $name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .focused($isNameFocused)
-                    .submitLabel(.next)
-                    .onSubmit { isSubtitleFocused = true }
-                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
-                .onChange(of: isNameFocused) { _, newValue in
-                    if newValue {
-                        HapticManager.shared.heavyImpact()
+                // Menu形式でセッション選択（SessionLabelSectionと同じ）
+                if name.isEmpty || !sessionManager.allEntries.map({ $0.sessionName }).contains(name) {
+                    // カスタム入力モード
+                    HStack(spacing: 8) {
+                        ZStack(alignment: .topLeading) {
+                            if name.isEmpty {
+                                Text("Enter session name...")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                            }
+
+                            TextField("", text: $name)
+                                .foregroundColor(.moonTextPrimary)
+                                .padding(.horizontal, 12)
+                                .frame(height: 28)
+                                .focused($isNameFocused)
+                                .onChange(of: isNameFocused) { _, newValue in
+                                    if newValue {
+                                        HapticManager.shared.heavyImpact()
+                                    }
+                                }
+                        }
+                        .frame(height: 28)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(6)
+                        .frame(maxWidth: .infinity)
+
+                        Button {
+                            name = sessionManager.defaultEntries.first?.sessionName ?? "Work"
+                            isNameFocused = false
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.moonTextMuted)
+                                .font(DesignTokens.Fonts.label)
+                        }
+                    }
+                } else {
+                    // Menu選択モード
+                    Menu {
+                        // デフォルトセッション
+                        ForEach(sessionManager.defaultEntries) { entry in
+                            Button {
+                                name = entry.sessionName
+                            } label: {
+                                Text(entry.sessionName)
+                            }
+                        }
+                        Divider()
+                        // カスタムセッション
+                        ForEach(sessionManager.customEntries) { entry in
+                            Button {
+                                name = entry.sessionName
+                            } label: {
+                                Text(entry.sessionName)
+                            }
+                        }
+                        Divider()
+                        Button("Custom Input...") {
+                            name = ""
+                            isNameFocused = true
+                        }
+                    } label: {
+                        HStack {
+                            Text(name.isEmpty ? "Custom" : name)
+                                .foregroundColor(.moonTextPrimary)
+                            Image(systemName: "chevron.down")
+                                .foregroundColor(.moonTextMuted)
+                        }
+                        .padding(.horizontal, 12)
+                        .frame(height: 28)
+                        .cornerRadius(6)
                     }
                 }
 
@@ -50,11 +132,17 @@ struct NewSessionFormView: View {
                             }
                         }
 
-                        Button(action: { subtitleTexts.remove(at: idx) }, label: {
-                            Image(systemName: "minus.circle")
-                        })
-                        .buttonStyle(.plain)
-                        .disabled(subtitleTexts.count == 1)
+                        // 2個目以降にのみマイナスボタンを表示、1個目はスペース確保
+                        if idx > 0 {
+                            Button(action: { subtitleTexts.remove(at: idx) }, label: {
+                                Image(systemName: "minus.circle")
+                            })
+                            .buttonStyle(.plain)
+                        } else {
+                            // 1個目は透明なスペーサーで横幅を統一
+                            Color.clear
+                                .frame(width: 24, height: 24)
+                        }
                     }
                 }
 
@@ -71,7 +159,7 @@ struct NewSessionFormView: View {
                     addSession()
                 })
                 .buttonStyle(.borderedProminent)
-                .disabled(name.normalized.isEmpty && subtitleTexts.allSatisfy { $0.normalized.isEmpty })
+                .disabled(isAddDisabled)
                 .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
             }
         }
@@ -88,16 +176,15 @@ struct NewSessionFormView: View {
 
     private func addSession() {
         let trimmedName = name.trimmed
-        guard !trimmedName.isEmpty else { return }
-        Task {
-            sessionManager.addEntry(
-                sessionName: name.isEmpty ? nil : name,
-                subtitles: subtitleTexts.filter { !$0.isEmpty }
-            )
+        let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        do {
+            try sessionManager.addOrUpdateEntry(sessionName: trimmedName, subtitles: subtitles)
             name = ""
-            subtitleTexts = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-            if subtitleTexts.isEmpty { subtitleTexts = [""] }
+            subtitleTexts = [""]
             isNameFocused = true
+        } catch {
+            errorMessage = error.localizedDescription
+            showErrorAlert = true
         }
     }
 

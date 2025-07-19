@@ -2,53 +2,126 @@ import Combine
 import Foundation
 
 class SessionManagerV2: ObservableObject {
-    @Published var customEntries: [SessionEntry] = []
-    let defaultEntries: [SessionEntry] = [
-        SessionEntry(sessionName: "work"),
-        SessionEntry(sessionName: "study"),
-        SessionEntry(sessionName: "read")
-    ]
+    // 定数一元管理
+    static let maxSessionCount = 50
+    static let maxSubtitleCount = 50
+    static let maxNameLength = 30 // 文字数制限（将来UIにも反映）
+    static let maxSubtitleLength = 30
 
+    // デフォルトセッション名
+    let defaultSessionNames: Set<String> = ["Work", "Study", "Read"]
+
+    // sessionName(lowercased)をキー
+    @Published var sessionDatabase: [String: SessionEntry] = [:]
+
+    // デフォルト/カスタム区別
+    var defaultEntries: [SessionEntry] {
+        sessionDatabase.values.filter { defaultSessionNames.contains($0.sessionName) && $0.isDefault }.sorted { $0.sessionName < $1.sessionName }
+    }
+    var customEntries: [SessionEntry] {
+        sessionDatabase.values.filter { !defaultSessionNames.contains($0.sessionName) && !$0.isDefault }.sorted { $0.sessionName < $1.sessionName }
+    }
     var allEntries: [SessionEntry] {
-        defaultEntries + customEntries
+        (defaultEntries + customEntries)
     }
 
     init() {
         load()
+        // デフォルトセッションがなければ追加
+        for name in defaultSessionNames {
+            let key = name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            if sessionDatabase[key] == nil {
+                let entry = SessionEntry(id: UUID(), sessionName: name, subtitles: [], isDefault: true)
+                sessionDatabase[key] = entry
+            }
+        }
     }
 
-    func addEntry(sessionName: String?, subtitles: [String]) {
-        guard (sessionName?.isEmpty != true) || !subtitles.allSatisfy({ $0.isEmpty }) else { return }
-        let entry = SessionEntry(sessionName: sessionName, subtitles: subtitles)
-        customEntries.append(entry)
-        save()
+    // サブタイトル取得
+    func getSubtitles(for sessionName: String) -> [String] {
+        let key = sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        return sessionDatabase[key]?.subtitles ?? []
     }
 
-    func editEntry(id: UUID, sessionName: String?, subtitles: [String]) {
-        guard let idx = customEntries.firstIndex(where: { $0.id == id }) else { return }
-        customEntries[idx].sessionName = sessionName
-        customEntries[idx].subtitles = subtitles
+    // 追加・更新
+    enum SessionManagerError: Error, LocalizedError {
+        case duplicateName
+        case sessionLimitExceeded
+        case subtitleLimitExceeded
+        case nameTooLong
+        case subtitleTooLong
+        case notFound
+        case duplicateSubtitle
+
+        var errorDescription: String? {
+            switch self {
+            case .duplicateName:
+                return "This session name is already registered."
+            case .sessionLimitExceeded:
+                return "You have reached the maximum number of sessions."
+            case .subtitleLimitExceeded:
+                return "You have reached the maximum number of subtitles."
+            case .nameTooLong:
+                return "Session name is too long."
+            case .subtitleTooLong:
+                return "Subtitle is too long."
+            case .notFound:
+                return "Session not found."
+            case .duplicateSubtitle:
+                return "Duplicate subtitles are not allowed."
+            }
+        }
+    }
+
+    func addOrUpdateEntry(sessionName: String, subtitles: [String]) throws {
+        let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = trimmedName.lowercased()
+        // バリデーション
+        if trimmedName.count > Self.maxNameLength { throw SessionManagerError.nameTooLong }
+        if !defaultSessionNames.contains(trimmedName) && customEntries.count >= Self.maxSessionCount && sessionDatabase[key] == nil {
+            throw SessionManagerError.sessionLimitExceeded
+        }
+        // 重複禁止（空文字でない場合のみチェック）
+        if !trimmedName.isEmpty, let existing = sessionDatabase[key], !defaultSessionNames.contains(trimmedName) {
+            if !existing.isDefault { throw SessionManagerError.duplicateName }
+        }
+        // サブタイトル最大数
+        if subtitles.count > Self.maxSubtitleCount { throw SessionManagerError.subtitleLimitExceeded }
+        // サブタイトル文字数
+        for subtitle in subtitles {
+            if subtitle.count > Self.maxSubtitleLength { throw SessionManagerError.subtitleTooLong }
+        }
+        // サブタイトル重複禁止（現状は許容、将来有効化）
+        // let uniqueCount = Set(subtitles.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }).count
+        // if uniqueCount != subtitles.count { throw SessionManagerError.duplicateSubtitle }
+
+        let isDefault = defaultSessionNames.contains(trimmedName)
+        let entry = SessionEntry(id: sessionDatabase[key]?.id ?? UUID(), sessionName: trimmedName, subtitles: subtitles, isDefault: isDefault)
+        sessionDatabase[key] = entry
         save()
     }
 
     func deleteEntry(id: UUID) {
-        customEntries.removeAll { $0.id == id }
+        // デフォルトは削除不可
+        guard let entry = sessionDatabase.values.first(where: { $0.id == id }), !entry.isDefault else { return }
+        sessionDatabase.removeValue(forKey: entry.sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
         save()
     }
 
+    // --- 永続化 ---
     private func save() {
-        // UserDefaults等への保存処理（仮実装）
-        if let data = try? JSONEncoder().encode(customEntries) {
-            UserDefaults.standard.set(data, forKey: "customEntries")
+        let custom = customEntries
+        if let data = try? JSONEncoder().encode(custom) {
+            UserDefaults.standard.set(data, forKey: "customEntriesV2")
         }
     }
-
     private func load() {
-        if let data = UserDefaults.standard.data(forKey: "customEntries"),
-            let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
-            self.customEntries = decoded
-        } else {
-            self.customEntries = []
+        if let data = UserDefaults.standard.data(forKey: "customEntriesV2"),
+           let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
+            for entry in decoded {
+                let key = entry.sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                sessionDatabase[key] = entry
+            }
         }
     }
 }
@@ -57,40 +130,35 @@ class SessionManagerV2: ObservableObject {
 extension SessionManagerV2 {
     static var previewData: SessionManagerV2 {
         let manager = SessionManagerV2()
-        manager.customEntries = [
-            SessionEntry(sessionName: "Sample Session 1", subtitles: ["Test subtitle"]),
-            SessionEntry(sessionName: "Sample Session 2", subtitles: []),
-            // サブタイトルが複数あるケース
+        let samples: [SessionEntry] = [
+            SessionEntry(sessionName: "Sample Session 1", subtitles: ["Test subtitle"], isDefault: false),
+            SessionEntry(sessionName: "Sample Session 2", subtitles: [], isDefault: false),
             SessionEntry(sessionName: "Multi Subtitle Session", subtitles: [
                 "First subtitle",
                 "Second subtitle",
                 "Third subtitle"
-            ]),
-            // サブタイトルが空のケース
-            SessionEntry(sessionName: "No Subtitle Session", subtitles: []),
-            // 長いセッション名
+            ], isDefault: false),
+            SessionEntry(sessionName: "No Subtitle Session", subtitles: [], isDefault: false),
             SessionEntry(
-                sessionName:
-                    "This is a very long session name to test how the UI handles overflow and wrapping in the list row",
-                subtitles: [
-                    "Long subtitle for testing purposes"
-                ]
+                sessionName: "This is a very long session name to test how the UI handles overflow and wrapping in the list row",
+                subtitles: ["Long subtitle for testing purposes"],
+                isDefault: false
             ),
-            // 特殊文字
             SessionEntry(
                 sessionName: "Special!@#¥%&*()_+{}|:<>? Session",
-                subtitles: [
-                    "Emoji 😊🚀✨",
-                    "Symbols #$%&"
-                ]
+                subtitles: ["Emoji 😊🚀✨", "Symbols #$%&"],
+                isDefault: false
             ),
-            // 多件数テスト
-            SessionEntry(sessionName: "Session 3", subtitles: []),
-            SessionEntry(sessionName: "Session 4", subtitles: []),
-            SessionEntry(sessionName: "Session 5", subtitles: []),
-            SessionEntry(sessionName: "Session 6", subtitles: []),
-            SessionEntry(sessionName: "Session 7", subtitles: [])
+            SessionEntry(sessionName: "Session 3", subtitles: [], isDefault: false),
+            SessionEntry(sessionName: "Session 4", subtitles: [], isDefault: false),
+            SessionEntry(sessionName: "Session 5", subtitles: [], isDefault: false),
+            SessionEntry(sessionName: "Session 6", subtitles: [], isDefault: false),
+            SessionEntry(sessionName: "Session 7", subtitles: [], isDefault: false)
         ]
+        for entry in samples {
+            let key = entry.sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            manager.sessionDatabase[key] = entry
+        }
         return manager
     }
 }

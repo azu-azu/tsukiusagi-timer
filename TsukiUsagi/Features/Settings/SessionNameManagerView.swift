@@ -41,7 +41,7 @@ struct SessionNameManagerView: View {
             .padding()
         }
         .navigationTitle("Manage Session Names")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
         }
@@ -60,7 +60,7 @@ struct SessionNameManagerView: View {
             await MainActor.run {
                 print("✅ Load success. Entries count: \(sessionManager.allEntries.count)")
                 for session in sessionManager.allEntries {
-                    print("📝 Session: \(session.sessionName ?? "(No Name)")")
+                    print("📝 Session: \(session.sessionName)")
                 }
                 // 成功時アラートは表示しない
             }
