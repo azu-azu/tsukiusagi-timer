@@ -7,7 +7,7 @@ struct TsukiUsagiApp: App {
     // StateObjects: declaration only
     @StateObject private var historyVM: HistoryViewModel
     @StateObject private var timerVM: TimerViewModel
-    @StateObject private var sessionManagerV2: SessionManagerV2
+    @StateObject private var sessionManager: SessionManager
 
     // Service singletons
     private let timerEngine: TimerEngineable
@@ -49,7 +49,7 @@ struct TsukiUsagiApp: App {
             persistenceManager: persistenceManager,
             formatter: formatter
         ))
-        _sessionManagerV2 = StateObject(wrappedValue: SessionManagerV2())
+        _sessionManager = StateObject(wrappedValue: SessionManager())
 
         // Feature Flags の初期化
         FeatureFlags.setDefaultValues()
@@ -64,7 +64,7 @@ struct TsukiUsagiApp: App {
             ContentView()
                 .environmentObject(timerVM)
                 .environmentObject(historyVM)
-                .environmentObject(sessionManagerV2)
+                .environmentObject(sessionManager)
         }
     }
 }

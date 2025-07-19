@@ -15,7 +15,7 @@ struct ContentView: View {
     // Environment
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM: TimerViewModel
-    @EnvironmentObject private var sessionManagerV2: SessionManagerV2
+    @EnvironmentObject private var sessionManager: SessionManager
 
     // Environment for Orientation and Accessibility
     @Environment(\.horizontalSizeClass) private var horizontalClass
@@ -182,13 +182,13 @@ struct ContentView: View {
                         SettingsView(size: size, safeAreaInsets: safeAreaInsets)
                             .environmentObject(timerVM)
                             .environmentObject(historyVM)
-                            .environmentObject(sessionManagerV2)
+                            .environmentObject(sessionManager)
                     }
                     .sheet(isPresented: $showingEditRecord) {
                         TimerEditView()
                             .environmentObject(timerVM)
                             .environmentObject(historyVM)
-                            .environmentObject(sessionManagerV2)
+                            .environmentObject(sessionManager)
                     }
                     .onChange(of: timerVM.isSessionFinished) { _, newValue in
                         if newValue {
@@ -215,7 +215,7 @@ struct ContentView: View {
                 }
             }
         }
-        .environmentObject(sessionManagerV2)
+        .environmentObject(sessionManager)
     }
 
     // MARK: - Start / Pause Button
@@ -298,9 +298,9 @@ private class DummyFormatter: TimeFormatterUtilable {
         persistenceManager: DummyPersistence(),
         formatter: DummyFormatter()
     )
-    let sessionManagerV2 = SessionManagerV2()
+    let sessionManager = SessionManager()
     ContentView()
         .environmentObject(history)
         .environmentObject(timer)
-        .environmentObject(sessionManagerV2)
+        .environmentObject(sessionManager)
 }

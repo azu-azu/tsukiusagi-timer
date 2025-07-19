@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NewSessionFormView: View {
-    @EnvironmentObject var sessionManager: SessionManagerV2
+    @EnvironmentObject var sessionManager: SessionManager
     @State private var name: String = ""
     @State private var subtitleTexts: [String] = [""]
     @State private var errorMessage: String?
@@ -31,12 +31,12 @@ struct NewSessionFormView: View {
         if trimmedName.isEmpty { return true }
 
         // 文字数超過
-        if trimmedName.count > SessionManagerV2.maxNameLength { return true }
-        if subtitles.contains(where: { $0.count > SessionManagerV2.maxSubtitleLength }) { return true }
+        if trimmedName.count > SessionManager.maxNameLength { return true }
+        if subtitles.contains(where: { $0.count > SessionManager.maxSubtitleLength }) { return true }
         // 最大数超過
-        if subtitles.count > SessionManagerV2.maxSubtitleCount { return true }
+        if subtitles.count > SessionManager.maxSubtitleCount { return true }
         // セッション数超過（空文字でない場合のみチェック）
-        if !trimmedName.isEmpty && !sessionManager.defaultSessionNames.contains(trimmedName) && sessionManager.customEntries.count >= SessionManagerV2.maxSessionCount && sessionManager.sessionDatabase[trimmedName.lowercased()] == nil {
+        if !trimmedName.isEmpty && !sessionManager.defaultSessionNames.contains(trimmedName) && sessionManager.customEntries.count >= SessionManager.maxSessionCount && sessionManager.sessionDatabase[trimmedName.lowercased()] == nil {
             return true
         }
         // 重複禁止（空文字でない場合のみチェック）
@@ -243,7 +243,7 @@ struct NewSessionFormView: View {
         let trimmedName = name.trimmed
         let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
         do {
-            try sessionManager.addOrUpdateEntry(sessionName: trimmedName, subtitles: subtitles)
+            try sessionManager.addOrUpdateEntry(originalKey: "", sessionName: trimmedName, subtitles: subtitles)
             name = ""
             subtitleTexts = [""]
             isCustomInputMode = false
@@ -268,7 +268,7 @@ struct NewSessionFormView: View {
 struct NewSessionFormView_Previews: PreviewProvider {
     static var previews: some View {
         NewSessionFormView()
-            .environmentObject(SessionManagerV2())
+            .environmentObject(SessionManager())
     }
 }
 #endif

@@ -1,14 +1,14 @@
 import SwiftUI
 
 struct ManageSessionNamesSectionView: View {
-    @EnvironmentObject private var sessionManagerV2: SessionManagerV2
+    @EnvironmentObject private var sessionManager: SessionManager
 
     private let cardCornerRadius: CGFloat = 8
 
     var body: some View {
         section(title: "", isCompact: true) {
             NavigationLink(
-                destination: SessionNameManagerView().environmentObject(sessionManagerV2)
+                destination: SessionNameManagerView().environmentObject(sessionManager)
             ) {
                 HStack {
                     Text("Manage Session Names")
@@ -60,7 +60,7 @@ struct ManageSessionNamesSectionView: View {
 struct ManageSessionNamesSectionView_Previews: PreviewProvider {
     static var previews: some View {
         ManageSessionNamesSectionView()
-            .environmentObject(SessionManagerV2())
+            .environmentObject(SessionManager())
     }
 }
 #endif
