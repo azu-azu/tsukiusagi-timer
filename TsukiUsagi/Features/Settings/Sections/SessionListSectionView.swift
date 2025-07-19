@@ -71,72 +71,86 @@ struct SessionListSectionView: View {
     @ViewBuilder
     private func sessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
         if editingId == entry.id {
-            VStack(alignment: .leading, spacing: 4) {
-                TextField("Session Name", text: $editingName)
-                    .focused($isNameFocused)
-                    .textFieldStyle(.roundedBorder)
-
-                ForEach(editingSubtitles.indices, id: \.self) { _idx in
-                    TextField("Subtitle", text: Binding(
-                        get: { editingSubtitles[_idx] },
-                        set: { editingSubtitles[_idx] = $0 }
-                    ))
-                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 6)
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(6)
-                    .focused($isSubtitleFocused)
-                }
-
-                HStack {
-                    Button("Save") {
-                        do {
-                            try sessionManager.addOrUpdateEntry(originalKey: originalKey, sessionName: editingName, subtitles: editingSubtitles)
-                            editingId = nil
-                        } catch {
-                            errorMessage = IdentifiableError(message: error.localizedDescription)
-                        }
-                    }
-                    Button("Cancel") {
-                        editingId = nil
-                    }
-                }
-            }
-            .padding()
-            .background(Color.white.opacity(0.04))
-            .cornerRadius(10)
+            editingSessionRow(entry: entry, isDefault: isDefault)
         } else {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .top) {
-                    Text(entry.sessionName)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                    Spacer()
-                    if !isDefault {
-                        Button("Edit") {
-                            editingId = entry.id
-                            editingName = entry.sessionName
-                            editingSubtitles = entry.subtitles
-                            originalKey = entry.sessionName.lowercased()
-                        }
-                        Button(role: .destructive) {
-                            sessionManager.deleteEntry(id: entry.id)
-                        } label: {
-                            Image(systemName: "trash")
-                        }
+            displaySessionRow(entry: entry, isDefault: isDefault)
+        }
+    }
+
+    @ViewBuilder
+    private func editingSessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            TextField("Session Name", text: $editingName)
+                .focused($isNameFocused)
+                .textFieldStyle(.roundedBorder)
+
+            ForEach(editingSubtitles.indices, id: \.self) { _idx in
+                TextField("Subtitle", text: Binding(
+                    get: { editingSubtitles[_idx] },
+                    set: { editingSubtitles[_idx] = $0 }
+                ))
+                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(6)
+                .focused($isSubtitleFocused)
+            }
+
+            HStack {
+                Button("Save") {
+                    do {
+                        try sessionManager.addOrUpdateEntry(
+                            originalKey: originalKey,
+                            sessionName: editingName,
+                            subtitles: editingSubtitles
+                        )
+                        editingId = nil
+                    } catch {
+                        errorMessage = IdentifiableError(message: error.localizedDescription)
                     }
                 }
-                ForEach(entry.subtitles, id: \.self) { subtitle in
-                    Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                Button("Cancel") {
+                    editingId = nil
                 }
             }
-            .padding()
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(10)
         }
+        .padding()
+        .background(Color.white.opacity(0.04))
+        .cornerRadius(10)
+    }
+
+    @ViewBuilder
+    private func displaySessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top) {
+                Text(entry.sessionName)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                Spacer()
+                if !isDefault {
+                    Button("Edit") {
+                        editingId = entry.id
+                        editingName = entry.sessionName
+                        editingSubtitles = entry.subtitles
+                        originalKey = entry.sessionName.lowercased()
+                    }
+                    Button(role: .destructive) {
+                        sessionManager.deleteEntry(id: entry.id)
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                }
+            }
+            ForEach(entry.subtitles, id: \.self) { subtitle in
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(10)
     }
 }
 

@@ -36,11 +36,16 @@ struct NewSessionFormView: View {
         // 最大数超過
         if subtitles.count > SessionManager.maxSubtitleCount { return true }
         // セッション数超過（空文字でない場合のみチェック）
-        if !trimmedName.isEmpty && !sessionManager.defaultSessionNames.contains(trimmedName) && sessionManager.customEntries.count >= SessionManager.maxSessionCount && sessionManager.sessionDatabase[trimmedName.lowercased()] == nil {
+        if !trimmedName.isEmpty &&
+            !sessionManager.defaultSessionNames.contains(trimmedName) &&
+            sessionManager.customEntries.count >= SessionManager.maxSessionCount &&
+            sessionManager.sessionDatabase[trimmedName.lowercased()] == nil {
             return true
         }
         // 重複禁止（空文字でない場合のみチェック）
-        if !trimmedName.isEmpty, let existing = sessionManager.sessionDatabase[trimmedName.lowercased()], !sessionManager.defaultSessionNames.contains(trimmedName) {
+        if !trimmedName.isEmpty,
+           let existing = sessionManager.sessionDatabase[trimmedName.lowercased()],
+           !sessionManager.defaultSessionNames.contains(trimmedName) {
             if !existing.isDefault { return true }
         }
         return false
@@ -50,7 +55,8 @@ struct NewSessionFormView: View {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // 既存のセッション名が選択されている場合
-        if !trimmedName.isEmpty && sessionManager.allEntries.map({ $0.sessionName }).contains(trimmedName) {
+        if !trimmedName.isEmpty &&
+            sessionManager.allEntries.map({ $0.sessionName }).contains(trimmedName) {
             return "Update \"\(trimmedName)\""
         }
 
@@ -214,7 +220,10 @@ struct NewSessionFormView: View {
                     })
                     .font(DesignTokens.Fonts.caption)
                     .buttonStyle(.plain)
-                    .disabled(name.isEmpty || (subtitleTexts.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true))
+                    .disabled(
+                        name.isEmpty ||
+                        (subtitleTexts.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+                    )
 
                     Button(saveButtonTitle, action: {
                         addSession()
@@ -243,7 +252,11 @@ struct NewSessionFormView: View {
         let trimmedName = name.trimmed
         let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
         do {
-            try sessionManager.addOrUpdateEntry(originalKey: "", sessionName: trimmedName, subtitles: subtitles)
+            try sessionManager.addOrUpdateEntry(
+                originalKey: "",
+                sessionName: trimmedName,
+                subtitles: subtitles
+            )
             name = ""
             subtitleTexts = [""]
             isCustomInputMode = false
