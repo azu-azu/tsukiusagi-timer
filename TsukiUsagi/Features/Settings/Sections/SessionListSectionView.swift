@@ -6,11 +6,12 @@ struct IdentifiableError: Identifiable {
 }
 
 struct SessionListSectionView: View {
-    @EnvironmentObject var sessionManager: SessionManagerV2
+    @EnvironmentObject var sessionManager: SessionManager
     @State private var editingId: UUID?
     @State private var editingName: String = ""
     @State private var editingSubtitles: [String] = []
     @State private var errorMessage: IdentifiableError?
+    @State private var originalKey: String = ""
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
 
@@ -91,7 +92,7 @@ struct SessionListSectionView: View {
                 HStack {
                     Button("Save") {
                         do {
-                            try sessionManager.addOrUpdateEntry(sessionName: editingName, subtitles: editingSubtitles)
+                            try sessionManager.addOrUpdateEntry(originalKey: originalKey, sessionName: editingName, subtitles: editingSubtitles)
                             editingId = nil
                         } catch {
                             errorMessage = IdentifiableError(message: error.localizedDescription)
@@ -117,6 +118,7 @@ struct SessionListSectionView: View {
                             editingId = entry.id
                             editingName = entry.sessionName
                             editingSubtitles = entry.subtitles
+                            originalKey = entry.sessionName.lowercased()
                         }
                         Button(role: .destructive) {
                             sessionManager.deleteEntry(id: entry.id)
@@ -142,7 +144,7 @@ struct SessionListSectionView: View {
 struct SessionListSectionView_Previews: PreviewProvider {
     static var previews: some View {
         SessionListSectionView()
-            .environmentObject(SessionManagerV2())
+            .environmentObject(SessionManager())
             .padding()
             .background(Color.black)
     }

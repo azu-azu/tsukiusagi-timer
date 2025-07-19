@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 struct SessionNameManagerView: View {
-    @EnvironmentObject var sessionManager: SessionManagerV2
+    @EnvironmentObject var sessionManager: SessionManager
     @State private var errorMessage: String?
     @State private var showErrorAlert = false
     @State private var errorTitle: String = "Error"
@@ -75,7 +75,7 @@ struct SessionNameManagerView: View {
         static var previews: some View {
             NavigationView {
                 SessionNameManagerView()
-                    .environmentObject(SessionManagerV2.previewData)
+                    .environmentObject(SessionManager.previewData)
             }
         }
     }

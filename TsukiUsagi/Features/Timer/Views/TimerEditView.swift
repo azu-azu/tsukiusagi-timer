@@ -4,7 +4,7 @@ struct TimerEditView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM: TimerViewModel
-    @EnvironmentObject private var sessionManager: SessionManagerV2
+    @EnvironmentObject private var sessionManager: SessionManager
 
     @State private var editedActivity = ""
     @State private var editedSubtitle = ""

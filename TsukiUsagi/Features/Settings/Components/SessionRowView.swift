@@ -15,7 +15,7 @@ struct SessionRowView: View {
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
     @State private var isCustomInputMode: Bool = false
-    @EnvironmentObject private var sessionManagerV2: SessionManagerV2
+    @EnvironmentObject private var sessionManager: SessionManager
 
     var body: some View {
         if editingId == session.id {
@@ -39,8 +39,8 @@ struct SessionRowView: View {
 
                                 Button("Select Existing") {
                                     isCustomInputMode = false
-                                    editingName = sessionManagerV2.defaultEntries.first?.sessionName ?? "Work"
-                                    editingSubtitles = sessionManagerV2.getSubtitles(for: editingName)
+                                    editingName = sessionManager.defaultEntries.first?.sessionName ?? "Work"
+                                    editingSubtitles = sessionManager.getSubtitles(for: editingName)
                                 }
                                 .font(DesignTokens.Fonts.caption)
                                 .buttonStyle(.bordered)
@@ -51,7 +51,7 @@ struct SessionRowView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Menu {
                                 // デフォルトセッション
-                                ForEach(sessionManagerV2.defaultEntries) { entry in
+                                ForEach(sessionManager.defaultEntries) { entry in
                                     Button {
                                         editingName = entry.sessionName
                                         editingSubtitles = entry.subtitles
@@ -61,7 +61,7 @@ struct SessionRowView: View {
                                 }
                                 Divider()
                                 // カスタムセッション
-                                ForEach(sessionManagerV2.customEntries) { entry in
+                                ForEach(sessionManager.customEntries) { entry in
                                     Button {
                                         editingName = entry.sessionName
                                         editingSubtitles = entry.subtitles
@@ -249,7 +249,7 @@ struct SessionRowView_Previews: PreviewProvider {
             saveEdit: { _ in },
             deleteSession: { _ in }
         )
-        .environmentObject(SessionManagerV2())
+        .environmentObject(SessionManager())
     }
 }
 #endif

@@ -3,7 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
-    @EnvironmentObject private var sessionManagerV2: SessionManagerV2
+    @EnvironmentObject private var sessionManager: SessionManager
     @Environment(\.horizontalSizeClass) private var horizontalClass
     @Environment(\.verticalSizeClass) private var verticalClass
     @Environment(\.dismiss) private var dismiss

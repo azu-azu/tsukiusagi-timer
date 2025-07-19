@@ -8,7 +8,7 @@ struct SessionLabelSection: View {
     let labelCornerRadius: CGFloat
     @Binding var showEmptyError: Bool
     let onDone: (() -> Void)?
-    @EnvironmentObject var sessionManager: SessionManagerV2
+    @EnvironmentObject var sessionManager: SessionManager
 
     // 内部で固定値として定義
     private let inputHeight: CGFloat = 28
