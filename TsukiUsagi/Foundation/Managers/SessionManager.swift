@@ -169,7 +169,7 @@ class SessionManager: ObservableObject {
     private func load() {
         if let data = UserDefaults.standard.data(forKey: "customEntriesV2"),
            let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
-            for entry in decoded {
+            for entry in decoded where !entry.sessionName.isEmpty {
                 let key = entry.sessionName.lowercased()
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 sessionDatabase[key] = entry

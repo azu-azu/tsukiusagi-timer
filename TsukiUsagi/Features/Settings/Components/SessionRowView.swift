@@ -163,7 +163,11 @@ struct SessionRowView: View {
                                 .buttonStyle(.plain)
                                 .disabled(
                                     editingName.isEmpty ||
-                                    (editingSubtitles.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+                                    (
+                                        editingSubtitles.first?
+                                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                                            .isEmpty ?? true
+                                    )
                                 )
 
                                 Spacer()

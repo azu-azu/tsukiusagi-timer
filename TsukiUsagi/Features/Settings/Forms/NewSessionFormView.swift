@@ -25,7 +25,9 @@ struct NewSessionFormView: View {
 
     var isAddDisabled: Bool {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        let subtitles = subtitleTexts.filter {
+            !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            }
 
         // Session Nameが空の場合は無効
         if trimmedName.isEmpty { return true }
@@ -44,8 +46,8 @@ struct NewSessionFormView: View {
         }
         // 重複禁止（空文字でない場合のみチェック）
         if !trimmedName.isEmpty,
-           let existing = sessionManager.sessionDatabase[trimmedName.lowercased()],
-           !sessionManager.defaultSessionNames.contains(trimmedName) {
+            let existing = sessionManager.sessionDatabase[trimmedName.lowercased()],
+            !sessionManager.defaultSessionNames.contains(trimmedName) {
             if !existing.isDefault { return true }
         }
         return false
@@ -222,7 +224,11 @@ struct NewSessionFormView: View {
                     .buttonStyle(.plain)
                     .disabled(
                         name.isEmpty ||
-                        (subtitleTexts.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+                        (
+                            subtitleTexts.first?
+                                .trimmingCharacters(in: .whitespacesAndNewlines)
+                                .isEmpty ?? true
+                        )
                     )
 
                     Button(saveButtonTitle, action: {
