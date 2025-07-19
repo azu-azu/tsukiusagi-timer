@@ -101,8 +101,7 @@ class SessionManager: ObservableObject {
     func addOrUpdateEntry(
         originalKey: String,
         sessionName: String,
-        subtitles: [String]
-    ) throws {
+        subtitles: [String]) throws {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         let newKey = trimmedName.lowercased()
         let oldKey = originalKey.trimmingCharacters(in: .whitespacesAndNewlines)
