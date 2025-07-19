@@ -153,7 +153,9 @@ class SessionManager: ObservableObject {
 
     func deleteEntry(id: UUID) {
         // デフォルトは削除不可
-        for entry in sessionDatabase.values where entry.id == id && !entry.isDefault {
+        for entry in sessionDatabase.values
+            where entry.id == id && !entry.isDefault
+        {
             sessionDatabase.removeValue(
                 forKey: entry.sessionName
                     .lowercased()
