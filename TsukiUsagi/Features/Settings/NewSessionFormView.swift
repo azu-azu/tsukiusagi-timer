@@ -10,7 +10,20 @@ struct NewSessionFormView: View {
     @FocusState private var isSubtitleFocused: Bool
     @State private var errorTitle: String = "Error"
 
-        var isAddDisabled: Bool {
+    // SessionLabelSectionと同じ状態管理
+    @State private var isCustomInputMode: Bool = false
+
+    // SessionLabelSectionと同じ定数
+    private let inputHeight: CGFloat = 28
+    private let labelHeight: CGFloat = 28
+    private let labelCornerRadius: CGFloat = 6
+
+    private var isCustomActivity: Bool {
+        // NewSessionFormView用に調整：明示的にCustom Inputが選択された場合のみtrue
+        return isCustomInputMode
+    }
+
+    var isAddDisabled: Bool {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
@@ -47,155 +60,193 @@ struct NewSessionFormView: View {
 
     var body: some View {
         RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
-            VStack(alignment: .leading, spacing: 8) {
-                // Text("New Session Name")
-                //     .font(DesignTokens.Fonts.labelBold)
-                //     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                VStack(alignment: .leading, spacing: 12) {
+                    // SessionLabelSectionと同じ構造のSession Name選択部分
+                    HStack(alignment: .top) {
+                        if isCustomActivity {
+                            HStack(spacing: 8) {
+                                ZStack(alignment: .topLeading) {
+                                    if name.isEmpty {
+                                        Text("Enter session name...")
+                                            .foregroundColor(.gray)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                    }
 
-                // Menu形式でセッション選択（SessionLabelSectionと同じ）
-                if !name.isEmpty && !sessionManager.allEntries.map({ $0.sessionName }).contains(name) {
-                    // カスタム入力モード（既存セッションにない場合のみ）
-                    HStack(spacing: 8) {
-                        ZStack(alignment: .topLeading) {
-                            Text("Enter session name...")
-                                .foregroundColor(.gray)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
+                                    TextField("", text: $name)
+                                        .foregroundColor(.moonTextPrimary)
+                                        .padding(.horizontal, 12)
+                                        .frame(height: labelHeight)
+                                        .focused($isNameFocused)
+                                        .onChange(of: isNameFocused) { _, newValue in
+                                            if newValue {
+                                                HapticManager.shared.heavyImpact()
+                                            }
+                                        }
+                                }
+                                .frame(height: labelHeight)
+                                .background(Color.white.opacity(0.05))
+                                .cornerRadius(labelCornerRadius)
+                                .frame(maxWidth: .infinity)
 
-                            TextField("", text: $name)
-                                .foregroundColor(.moonTextPrimary)
+                                Button {
+                                    name = sessionManager.defaultEntries.first?.sessionName ?? "Work"
+                                    isCustomInputMode = false
+                                    isNameFocused = false
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.moonTextMuted)
+                                        .font(DesignTokens.Fonts.label)
+                                }
+                            }
+                        } else {
+                            Menu {
+                                // デフォルトセッション
+                                ForEach(sessionManager.defaultEntries) { entry in
+                                    Button {
+                                        name = entry.sessionName
+                                        isCustomInputMode = false
+                                    } label: {
+                                        Text(entry.sessionName)
+                                    }
+                                }
+                                Divider()
+                                // カスタムセッション
+                                ForEach(sessionManager.customEntries) { entry in
+                                    Button {
+                                        name = entry.sessionName
+                                        isCustomInputMode = false
+                                    } label: {
+                                        Text(entry.sessionName)
+                                    }
+                                }
+                                Divider()
+                                Button("Custom Input...") {
+                                    name = ""
+                                    isCustomInputMode = true
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        isNameFocused = true
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Text(name.isEmpty ? "Select Session" : name)
+                                        .foregroundColor(name.isEmpty ? .secondary : .moonTextPrimary)
+                                    Image(systemName: "chevron.down")
+                                        .foregroundColor(.moonTextMuted)
+                                }
                                 .padding(.horizontal, 12)
-                                .frame(height: 28)
-                                .focused($isNameFocused)
-                                .onChange(of: isNameFocused) { _, newValue in
+                                .frame(height: labelHeight)
+                                .cornerRadius(labelCornerRadius)
+                            }
+                        }
+
+                        Spacer(minLength: 8)
+
+                        if isNameFocused || isSubtitleFocused {
+                            Button("Done") {
+                                isNameFocused = false
+                                isSubtitleFocused = false
+                            }
+                            .foregroundColor(.moonTextPrimary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.white.opacity(0.15))
+                            )
+                            .transition(.opacity)
+                            .animation(.easeInOut(duration: 0.2), value: isNameFocused || isSubtitleFocused)
+                        }
+                    }
+
+                    // Subtitle入力欄もSessionLabelSectionと同じスタイルに統一
+                    ForEach(subtitleTexts.indices, id: \.self) { idx in
+                        HStack {
+                            ZStack(alignment: .topLeading) {
+                                if subtitleTexts[safe: idx]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true {
+                                    Text(idx == 0 ? "Subtitle (optional)" : "Subtitle \(idx + 1)")
+                                        .foregroundColor(.gray)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 12)
+                                }
+
+                                TextEditor(text: Binding(
+                                    get: { subtitleTexts[safe: idx] ?? "" },
+                                    set: { newValue in
+                                        if idx < subtitleTexts.count {
+                                            subtitleTexts[idx] = newValue
+                                        }
+                                    }
+                                ))
+                                .frame(height: inputHeight)
+                                .padding(8)
+                                .scrollContentBackground(.hidden)
+                                .background(Color.white.opacity(0.05))
+                                .cornerRadius(labelCornerRadius)
+                                .focused($isSubtitleFocused)
+                                .onChange(of: isSubtitleFocused) { _, newValue in
                                     if newValue {
                                         HapticManager.shared.heavyImpact()
                                     }
                                 }
-                        }
-                        .frame(height: 28)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(6)
-                        .frame(maxWidth: .infinity)
+                            }
 
-                        Button {
-                            name = ""
-                            isNameFocused = false
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.moonTextMuted)
-                                .font(DesignTokens.Fonts.label)
-                        }
-                    }
-                } else {
-                    // Menu選択モード（デフォルト）
-                    Menu {
-                        // デフォルトセッション
-                        ForEach(sessionManager.defaultEntries) { entry in
-                            Button {
-                                name = entry.sessionName
-                            } label: {
-                                Text(entry.sessionName)
+                            // 2個目以降にのみマイナスボタンを表示、1個目はスペース確保
+                            if idx > 0 {
+                                Button(action: { subtitleTexts.remove(at: idx) }, label: {
+                                    Image(systemName: "minus.circle")
+                                })
+                                .buttonStyle(.plain)
+                            } else {
+                                // 1個目は透明なスペーサーで横幅を統一
+                                Color.clear
+                                    .frame(width: 24, height: 24)
                             }
                         }
-                        Divider()
-                        // カスタムセッション
-                        ForEach(sessionManager.customEntries) { entry in
-                            Button {
-                                name = entry.sessionName
-                            } label: {
-                                Text(entry.sessionName)
-                            }
-                        }
-                        Divider()
-                        Button("Custom Input...") {
-                            name = ""
-                            isNameFocused = true
-                        }
-                    } label: {
-                        HStack {
-                            Text(name.isEmpty ? "Select Session" : name)
-                                .foregroundColor(name.isEmpty ? .secondary : .moonTextPrimary)
-                            Image(systemName: "chevron.down")
-                                .foregroundColor(.moonTextMuted)
-                        }
-                        .padding(.horizontal, 12)
-                        .frame(height: 28)
-                        .cornerRadius(6)
                     }
+
+                    Button(action: { subtitleTexts.append("") }, label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus.circle")
+                            Text("Add Subtitle")
+                        }
+                    })
+                    .font(DesignTokens.Fonts.caption)
+                    .buttonStyle(.plain)
+                    .disabled(name.isEmpty || (subtitleTexts.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true))
+
+                    Button(saveButtonTitle, action: {
+                        addSession()
+                    })
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isAddDisabled)
+                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
                 }
-
-                ForEach(subtitleTexts.indices, id: \.self) { idx in
-                    HStack {
-                        TextField(idx == 0 ? "Subtitle (optional)" : "Subtitle \(idx + 1)", text: Binding(
-                            get: { subtitleTexts[safe: idx] ?? "" },
-                            set: { newValue in
-                                if idx < subtitleTexts.count {
-                                    subtitleTexts[idx] = newValue
-                                }
-                            }
-                        ))
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .focused($isSubtitleFocused)
-                        .submitLabel(.done)
-                        .onSubmit { hideKeyboard() }
-                        .accessibilityIdentifier(AccessibilityIDs.SessionManager.subtitleField)
-                        .onChange(of: isSubtitleFocused) { _, newValue in
-                            if newValue {
-                                HapticManager.shared.heavyImpact()
-                            }
-                        }
-
-                        // 2個目以降にのみマイナスボタンを表示、1個目はスペース確保
-                        if idx > 0 {
-                            Button(action: { subtitleTexts.remove(at: idx) }, label: {
-                                Image(systemName: "minus.circle")
-                            })
-                            .buttonStyle(.plain)
-                        } else {
-                            // 1個目は透明なスペーサーで横幅を統一
-                            Color.clear
-                                .frame(width: 24, height: 24)
-                        }
-                    }
+            }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { hideKeyboard() }
                 }
-
-                Button(action: { subtitleTexts.append("") }, label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "plus.circle")
-                        Text("Add Subtitle")
-                    }
-                })
-                .font(DesignTokens.Fonts.caption)
-                .buttonStyle(.plain)
-                .disabled(name.isEmpty || (subtitleTexts.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true))
-
-                Button(saveButtonTitle, action: {
-                    addSession()
-                })
-                .buttonStyle(.borderedProminent)
-                .disabled(isAddDisabled)
-                .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
             }
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") { hideKeyboard() }
+            .alert(isPresented: $showErrorAlert) {
+                Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
             }
-        }
-        .alert(isPresented: $showErrorAlert) {
-            Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
-        }
+            .onAppear {
+                // NewSessionFormView用：初期状態は常にMenu選択モード
+                isCustomInputMode = false
+            }
     }
 
-    private func addSession() {
+    func addSession() {
         let trimmedName = name.trimmed
         let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
         do {
             try sessionManager.addOrUpdateEntry(sessionName: trimmedName, subtitles: subtitles)
             name = ""
             subtitleTexts = [""]
+            isCustomInputMode = false
             isNameFocused = true
         } catch {
             errorMessage = error.localizedDescription
@@ -203,7 +254,7 @@ struct NewSessionFormView: View {
         }
     }
 
-    private func hideKeyboard() {
+    func hideKeyboard() {
         isNameFocused = false
         isSubtitleFocused = false
         UIApplication.shared.sendAction(
