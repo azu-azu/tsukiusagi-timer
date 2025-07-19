@@ -129,10 +129,8 @@ class SessionManager: ObservableObject {
             throw SessionManagerError.subtitleLimitExceeded
         }
         // サブタイトル文字数
-        for subtitle in subtitles {
-            if subtitle.count > Self.maxSubtitleLength {
-                throw SessionManagerError.subtitleTooLong
-            }
+        for subtitle in subtitles where subtitle.count > Self.maxSubtitleLength {
+            throw SessionManagerError.subtitleTooLong
         }
         // サブタイトル重複禁止（現状は許容、将来有効化）
         // let uniqueCount = Set(subtitles.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }).count
