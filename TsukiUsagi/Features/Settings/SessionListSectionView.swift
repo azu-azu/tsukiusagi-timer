@@ -14,35 +14,13 @@ struct SessionListSectionView: View {
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
 
-        var body: some View {
+    var body: some View {
         RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
-            List {
-                Section(header: Text("Default Sessions")) {
-                    if sessionManager.defaultEntries.isEmpty {
-                        Text("No default sessions.")
-                            .foregroundColor(.secondary)
-                            .italic()
-                    } else {
-                        ForEach(sessionManager.defaultEntries) { entry in
-                            sessionRow(entry: entry, isDefault: true)
-                        }
-                    }
-                }
-                Section(header: Text("Custom Sessions")) {
-                    if sessionManager.customEntries.isEmpty {
-                        Text("No custom sessions. Tap + to add.")
-                            .foregroundColor(.secondary)
-                            .italic()
-                    } else {
-                        ForEach(sessionManager.customEntries) { entry in
-                            sessionRow(entry: entry, isDefault: false)
-                        }
-                    }
-                }
+            VStack(alignment: .leading, spacing: 16) {
+                section(title: "Default Sessions", entries: sessionManager.defaultEntries, isDefault: true)
+                section(title: "Custom Sessions", entries: sessionManager.customEntries, isDefault: false)
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden) //Listのデフォルト背景を消す
-            .listRowBackground(DesignTokens.Colors.moonCardBG) // ← List各行の背景
+            .padding(.bottom, 8)
         }
         .alert(item: $errorMessage) { _err in
             Alert(
@@ -64,11 +42,39 @@ struct SessionListSectionView: View {
     }
 
     @ViewBuilder
+    private func section(title: String, entries: [SessionEntry], isDefault: Bool) -> some View {
+        // ここのspacingはタイトルとタイトル下の余白
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.headline)
+                .padding(.horizontal)
+
+            if entries.isEmpty {
+                Text(isDefault ? "No default sessions." : "No custom sessions. Tap + to add.")
+                    .foregroundColor(.secondary)
+                    .italic()
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+            } else {
+                // ここのspacingはrow間
+                VStack(spacing: 4) {
+                    ForEach(entries) { entry in
+                        sessionRow(entry: entry, isDefault: isDefault)
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+
+    @ViewBuilder
     private func sessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
         if editingId == entry.id {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 TextField("Session Name", text: $editingName)
                     .focused($isNameFocused)
+                    .textFieldStyle(.roundedBorder)
+
                 ForEach(editingSubtitles.indices, id: \.self) { _idx in
                     TextField("Subtitle", text: Binding(
                         get: { editingSubtitles[_idx] },
@@ -76,11 +82,12 @@ struct SessionListSectionView: View {
                     ))
                     .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                     .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 6)
                     .background(Color.white.opacity(0.05))
                     .cornerRadius(6)
                     .focused($isSubtitleFocused)
                 }
+
                 HStack {
                     Button("Save") {
                         do {
@@ -95,23 +102,25 @@ struct SessionListSectionView: View {
                     }
                 }
             }
+            .padding()
+            .background(Color.white.opacity(0.04))
+            .cornerRadius(10)
         } else {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top) {
                     Text(entry.sessionName)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .font(.body)
+                        .foregroundColor(.primary)
                     Spacer()
                     if !isDefault {
-                        Button(action: {
+                        Button("Edit") {
                             editingId = entry.id
                             editingName = entry.sessionName
                             editingSubtitles = entry.subtitles
-                        }) {
-                            Text("Edit")
                         }
-                        Button(role: .destructive, action: {
+                        Button(role: .destructive) {
                             sessionManager.deleteEntry(id: entry.id)
-                        }) {
+                        } label: {
                             Image(systemName: "trash")
                         }
                     }
@@ -122,6 +131,9 @@ struct SessionListSectionView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .padding()
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(10)
         }
     }
 }
@@ -131,6 +143,8 @@ struct SessionListSectionView_Previews: PreviewProvider {
     static var previews: some View {
         SessionListSectionView()
             .environmentObject(SessionManagerV2())
+            .padding()
+            .background(Color.black)
     }
 }
 #endif

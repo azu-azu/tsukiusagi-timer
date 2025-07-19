@@ -32,13 +32,15 @@ struct SessionNameManagerView: View {
             }
 
             // コンテンツ
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
-                NewSessionFormView()
-                // --- ここから登録済みセッションの明示的な表示 ---
-                SessionListSectionView()
-                // --- ここまで ---
+            ScrollView {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
+                    NewSessionFormView()
+                    // --- ここから登録済みセッションの明示的な表示 ---
+                    SessionListSectionView()
+                    // --- ここまで ---
+                }
+                .padding()
             }
-            .padding()
         }
         .navigationTitle("Manage Session Names")
         .navigationBarTitleDisplayMode(.inline)
