@@ -214,12 +214,17 @@ struct NewSessionFormView: View {
                         }
                     }
 
-                    Button(action: { subtitleTexts.append("") }, label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus.circle")
-                            Text("Add Subtitle")
+                    Button(
+                        action: {
+                            subtitleTexts.append("")
+                        },
+                        label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "plus.circle")
+                                Text("Add Subtitle")
+                            }
                         }
-                    })
+                    )
                     .font(DesignTokens.Fonts.caption)
                     .buttonStyle(.plain)
                     .disabled(

@@ -46,7 +46,11 @@ class SessionManager: ObservableObject {
     init() {
         load()
         // デフォルトセッションがなければ追加
-        for name in defaultSessionNames where sessionDatabase[name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)] == nil {
+        for name in defaultSessionNames
+            where sessionDatabase[
+                name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            ] == nil
+        {
             let key = name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
             let entry = SessionEntry(
                 id: UUID(),
@@ -154,7 +158,9 @@ class SessionManager: ObservableObject {
         guard let entry = sessionDatabase.values.first(where: { $0.id == id }),
               !entry.isDefault else { return }
         sessionDatabase.removeValue(
-            forKey: entry.sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            forKey: entry.sessionName
+                .lowercased()
+                .trimmingCharacters(in: .whitespacesAndNewlines)
         )
         save()
     }
@@ -208,7 +214,8 @@ extension SessionManager {
                 isDefault: false
             ),
             SessionEntry(
-                sessionName: "This is a very long session name to test how the UI handles overflow and wrapping in the list row",
+                sessionName:
+                    "This is a very long session name to test how the UI handles overflow and wrapping in the list row",
                 subtitles: [
                     "Long subtitle for testing purposes"
                 ],
