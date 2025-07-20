@@ -151,47 +151,16 @@ struct SessionLabelSection: View {
                         }
                     }
                 }
-
-                // Fixed space for Close button (always reserve this space)
-                HStack {
-                    Spacer()
-
-                    if isActivityFocused || isSubtitleFocused {
-                        Button {
-                            KeyboardManager.hideKeyboard {
-                                isActivityFocused = false
-                                isSubtitleFocused = false
-                                onDone?()
-                            }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "keyboard.chevron.compact.down")
-                                Text("Close")
-                            }
-                            .font(.system(size: 14, weight: .medium))
+                .keyboardCloseButton(
+                    isVisible: isActivityFocused || isSubtitleFocused,
+                    action: {
+                        KeyboardManager.hideKeyboard {
+                            isActivityFocused = false
+                            isSubtitleFocused = false
+                            onDone?()
                         }
-                        .foregroundColor(.moonTextPrimary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.white.opacity(0.15))
-                        )
-                        .transition(.opacity)
-                        .animation(.easeInOut(duration: 0.2), value: isActivityFocused || isSubtitleFocused)
-                    } else {
-                        // Invisible placeholder to maintain consistent width
-                        HStack(spacing: 4) {
-                            Image(systemName: "keyboard.chevron.compact.down")
-                            Text("Close")
-                        }
-                        .font(.system(size: 14, weight: .medium))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .opacity(0) // Invisible but takes up space
                     }
-                }
-                .frame(width: 100) // Fixed width for Close button area
+                )
             }
 
             // Subtitle Section
@@ -242,6 +211,9 @@ struct SessionLabelSection: View {
                                 isSubtitleFocused = true
                             }
                         }
+                        // 「None」ボタンは、subtitle（サブタイトル）を未設定（空文字）に戻すために必要。
+                        // これがないと、一度subtitleを選択・入力した後に「サブタイトルなし」に戻せなくなる。
+                        // 例: 「読書」→「集中」→「None」でsubtitle=""（未設定）に戻す用途。
                         Button("None") {
                             subtitle = ""
                             isCustomSubtitleMode = false

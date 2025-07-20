@@ -150,41 +150,16 @@ struct NewSessionFormView: View {
                         }
 
                         Spacer(minLength: 8)
-
-                        if isNameFocused || isSubtitleFocused {
-                            Button {
-                                KeyboardManager.hideKeyboard {
-                                    isNameFocused = false
-                                    isSubtitleFocused = false
-                                }
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "keyboard.chevron.compact.down")
-                                    Text("Close")
-                                }
-                                .font(.system(size: 14, weight: .medium))
-                            }
-                            .foregroundColor(.moonTextPrimary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.white.opacity(0.15))
-                            )
-                            .transition(.opacity)
-                            .animation(.easeInOut(duration: 0.2), value: isNameFocused || isSubtitleFocused)
-                        } else {
-                            // Invisible placeholder to maintain consistent width
-                            HStack(spacing: 4) {
-                                Image(systemName: "keyboard.chevron.compact.down")
-                                Text("Close")
-                            }
-                            .font(.system(size: 14, weight: .medium))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .opacity(0) // Invisible but takes up space
-                        }
                     }
+                    .keyboardCloseButton(
+                        isVisible: isNameFocused || isSubtitleFocused,
+                        action: {
+                            KeyboardManager.hideKeyboard {
+                                isNameFocused = false
+                                isSubtitleFocused = false
+                            }
+                        }
+                    )
 
                     // Subtitle入力欄もSessionLabelSectionと同じスタイルに統一
                     ForEach(subtitleTexts.indices, id: \.self) { idx in

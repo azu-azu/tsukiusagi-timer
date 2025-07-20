@@ -41,6 +41,7 @@ struct SessionNameManagerView: View {
                 }
                 .padding()
             }
+            .dismissKeyboardOnTap()
         }
         .debugScreen(String(describing: Self.self))
         .navigationTitle("Manage Session Names")
