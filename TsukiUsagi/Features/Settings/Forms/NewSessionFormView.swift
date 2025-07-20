@@ -152,9 +152,17 @@ struct NewSessionFormView: View {
                         Spacer(minLength: 8)
 
                         if isNameFocused || isSubtitleFocused {
-                            Button("Done") {
-                                isNameFocused = false
-                                isSubtitleFocused = false
+                            Button {
+                                KeyboardManager.hideKeyboard {
+                                    isNameFocused = false
+                                    isSubtitleFocused = false
+                                }
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "keyboard.chevron.compact.down")
+                                    Text("Close")
+                                }
+                                .font(.system(size: 14, weight: .medium))
                             }
                             .foregroundColor(.moonTextPrimary)
                             .padding(.horizontal, 12)
@@ -165,6 +173,16 @@ struct NewSessionFormView: View {
                             )
                             .transition(.opacity)
                             .animation(.easeInOut(duration: 0.2), value: isNameFocused || isSubtitleFocused)
+                        } else {
+                            // Invisible placeholder to maintain consistent width
+                            HStack(spacing: 4) {
+                                Image(systemName: "keyboard.chevron.compact.down")
+                                Text("Close")
+                            }
+                            .font(.system(size: 14, weight: .medium))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .opacity(0) // Invisible but takes up space
                         }
                     }
 
@@ -249,12 +267,13 @@ struct NewSessionFormView: View {
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
                 }
             }
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { hideKeyboard() }
-                }
-            }
+            // キーボードツールバーは不安定なので、UIボタンのみ使用
+            // .toolbar {
+            //     ToolbarItemGroup(placement: .keyboard) {
+            //         Spacer()
+            //         Button("Done") { hideKeyboard() }
+            //     }
+            // }
             .alert(isPresented: $showErrorAlert) {
                 Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
             }
@@ -284,12 +303,10 @@ struct NewSessionFormView: View {
     }
 
     func hideKeyboard() {
-        isNameFocused = false
-        isSubtitleFocused = false
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder),
-            to: nil, from: nil, for: nil
-        )
+        KeyboardManager.hideKeyboard {
+            isNameFocused = false
+            isSubtitleFocused = false
+        }
     }
 }
 

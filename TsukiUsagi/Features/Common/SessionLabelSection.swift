@@ -16,136 +16,307 @@ struct SessionLabelSection: View {
 
     // 明示的なCustom Input状態管理
     @State private var isCustomInputMode: Bool = false
+    @State private var isCustomSubtitleMode: Bool = false
+    @State private var toolbarID = UUID() // ツールバー強制更新用
 
     private var isCustomActivity: Bool {
         // 明示的なCustom Inputモードまたは空文字の場合
         return isCustomInputMode || activity.isEmpty
     }
 
+    private var isCustomSubtitle: Bool {
+        // 明示的なCustom Subtitleモードまたは選択されたセッションにsubtitleがない場合
+        return isCustomSubtitleMode || getCurrentSessionSubtitles().isEmpty
+    }
+
+    // 現在選択されているセッションに紐づくsubtitlesを取得
+    private func getCurrentSessionSubtitles() -> [String] {
+        guard !activity.isEmpty else { return [] }
+
+        // デフォルトセッションから検索
+        if let entry = sessionManager.defaultEntries.first(where: { $0.sessionName == activity }) {
+            return entry.subtitles
+        }
+
+        // カスタムセッションから検索
+        if let entry = sessionManager.customEntries.first(where: { $0.sessionName == activity }) {
+            return entry.subtitles
+        }
+
+        return []
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                if isCustomActivity {
-                    HStack(spacing: 8) {
-                        ZStack(alignment: .topLeading) {
-                            if activity.isEmpty {
-                                Text("Enter session name...")
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                            }
-
-                            TextField("", text: $activity)
-                                .foregroundColor(.moonTextPrimary)
-                                .padding(.horizontal, 12)
-                                .frame(height: labelHeight)
-                                .focused($isActivityFocused)
-                                .onChange(of: isActivityFocused) { _, newValue in
-                                    if newValue {
-                                        HapticManager.shared.heavyImpact()
-                                    }
+            // Top row with Close button
+            HStack {
+                // セッション名入力部分
+                HStack(alignment: .top) {
+                    if isCustomActivity {
+                        HStack(spacing: 8) {
+                            ZStack(alignment: .topLeading) {
+                                if activity.isEmpty {
+                                    Text("Enter session name...")
+                                        .foregroundColor(.gray)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
                                 }
-                        }
-                        .frame(height: labelHeight)
-                        .background(
-                            (showEmptyError && activity.isEmpty) ?
-                                Color.moonErrorBackground.opacity(0.3) :
-                                Color.white.opacity(0.05)
-                        )
-                        .cornerRadius(labelCornerRadius)
-                        .frame(maxWidth: .infinity)
 
-                        Button {
-                            activity = sessionManager.defaultEntries.first?.sessionName ?? "Work"
-                            isActivityFocused = false
+                                TextField("", text: $activity)
+                                    .foregroundColor(.moonTextPrimary)
+                                    .padding(.horizontal, 12)
+                                    .frame(height: labelHeight)
+                                    .focused($isActivityFocused)
+                                    .submitLabel(.done)
+                                    .onSubmit {
+                                        isActivityFocused = false
+                                        onDone?()
+                                    }
+                                    .onChange(of: isActivityFocused) { _, newValue in
+                                        if newValue {
+                                            HapticManager.shared.heavyImpact()
+                                        }
+                                    }
+                                    .onChange(of: activity) { _, newValue in
+                                        // セッション名が変更されたらsubtitleもリセット
+                                        subtitle = ""
+                                        isCustomSubtitleMode = false
+                                    }
+                            }
+                            .frame(height: labelHeight)
+                            .background(
+                                (showEmptyError && activity.isEmpty) ?
+                                    Color.moonErrorBackground.opacity(0.3) :
+                                    Color.white.opacity(0.05)
+                            )
+                            .cornerRadius(labelCornerRadius)
+
+                            Button {
+                                activity = sessionManager.defaultEntries.first?.sessionName ?? "Work"
+                                subtitle = sessionManager.defaultEntries.first?.subtitles.first ?? ""
+                                isActivityFocused = false
+                                isCustomInputMode = false
+                                isCustomSubtitleMode = false
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.moonTextMuted)
+                                    .font(DesignTokens.Fonts.label)
+                            }
+                        }
+                    } else {
+                        Menu {
+                            // デフォルトセッション
+                            ForEach(sessionManager.defaultEntries) { entry in
+                                Button {
+                                    activity = entry.sessionName
+                                    subtitle = entry.subtitles.first ?? ""
+                                    isCustomInputMode = false
+                                    isCustomSubtitleMode = false
+                                } label: {
+                                    Text(entry.sessionName)
+                                }
+                            }
+                            Divider()
+                            // カスタムセッション
+                            ForEach(sessionManager.customEntries) { entry in
+                                Button {
+                                    activity = entry.sessionName
+                                    subtitle = entry.subtitles.first ?? ""
+                                    isCustomInputMode = false
+                                    isCustomSubtitleMode = false
+                                } label: {
+                                    Text(entry.sessionName)
+                                }
+                            }
+                            Divider()
+                            Button("Custom Input...") {
+                                activity = ""
+                                subtitle = ""
+                                isCustomInputMode = true
+                                isCustomSubtitleMode = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    isActivityFocused = true
+                                }
+                            }
                         } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.moonTextMuted)
-                                .font(DesignTokens.Fonts.label)
+                            HStack {
+                                Text(activity.isEmpty ? "Custom" : activity)
+                                    .foregroundColor(.moonTextPrimary)
+                                Image(systemName: "chevron.down")
+                                    .foregroundColor(.moonTextMuted)
+                            }
+                            .padding(.horizontal, 12)
+                            .frame(height: labelHeight)
+                            .cornerRadius(labelCornerRadius)
                         }
                     }
-                } else {
-                    Menu {
-                        // デフォルトセッション
-                        ForEach(sessionManager.defaultEntries) { entry in
-                            Button {
-                                activity = entry.sessionName
-                                isCustomInputMode = false
-                            } label: {
-                                Text(entry.sessionName)
+                }
+
+                // Fixed space for Close button (always reserve this space)
+                HStack {
+                    Spacer()
+
+                    if isActivityFocused || isSubtitleFocused {
+                        Button {
+                            KeyboardManager.hideKeyboard {
+                                isActivityFocused = false
+                                isSubtitleFocused = false
+                                onDone?()
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "keyboard.chevron.compact.down")
+                                Text("Close")
+                            }
+                            .font(.system(size: 14, weight: .medium))
+                        }
+                        .foregroundColor(.moonTextPrimary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.white.opacity(0.15))
+                        )
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.2), value: isActivityFocused || isSubtitleFocused)
+                    } else {
+                        // Invisible placeholder to maintain consistent width
+                        HStack(spacing: 4) {
+                            Image(systemName: "keyboard.chevron.compact.down")
+                            Text("Close")
+                        }
+                        .font(.system(size: 14, weight: .medium))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .opacity(0) // Invisible but takes up space
+                    }
+                }
+                .frame(width: 100) // Fixed width for Close button area
+            }
+
+            // Subtitle Section
+            if isCustomSubtitle {
+                ZStack(alignment: .topLeading) {
+                    if subtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text("Subtitle (optional)")
+                            .foregroundColor(.gray)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 12)
+                    }
+
+                    TextEditor(text: $subtitle)
+                        .frame(height: inputHeight)
+                        .padding(8)
+                        .scrollContentBackground(.hidden)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(6)
+                        .focused($isSubtitleFocused)
+                        .onChange(of: isSubtitleFocused) { _, newValue in
+                            if newValue {
+                                HapticManager.shared.heavyImpact()
                             }
                         }
-                        Divider()
-                        // カスタムセッション
-                        ForEach(sessionManager.customEntries) { entry in
+                }
+            } else {
+                // Subtitle selection menu
+                let subtitles = getCurrentSessionSubtitles()
+                if !subtitles.isEmpty {
+                    Menu {
+                        ForEach(subtitles, id: \.self) { subtitleOption in
                             Button {
-                                activity = entry.sessionName
-                                isCustomInputMode = false
+                                subtitle = subtitleOption
+                                isCustomSubtitleMode = false
                             } label: {
-                                Text(entry.sessionName)
+                                HStack {
+                                    Text(subtitleOption)
+                                    if subtitle == subtitleOption {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
                             }
                         }
                         Divider()
                         Button("Custom Input...") {
-                            activity = ""
-                            isCustomInputMode = true
+                            isCustomSubtitleMode = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                isActivityFocused = true
+                                isSubtitleFocused = true
                             }
+                        }
+                        Button("None") {
+                            subtitle = ""
+                            isCustomSubtitleMode = false
                         }
                     } label: {
                         HStack {
-                            Text(activity.isEmpty ? "Custom" : activity)
-                                .foregroundColor(.moonTextPrimary)
+                            Text(subtitle.isEmpty ? "Select subtitle..." : subtitle)
+                                .foregroundColor(subtitle.isEmpty ? .gray : .moonTextPrimary)
+                                .lineLimit(1)
+                            Spacer()
                             Image(systemName: "chevron.down")
                                 .foregroundColor(.moonTextMuted)
                         }
                         .padding(.horizontal, 12)
                         .frame(height: labelHeight)
-                        .cornerRadius(labelCornerRadius)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(6)
                     }
-                }
+                } else {
+                    // セッションにsubtitleが設定されていない場合はcustom inputのみ
+                    ZStack(alignment: .topLeading) {
+                        if subtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Text("Subtitle (optional)")
+                                .foregroundColor(.gray)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 12)
+                        }
 
-                Spacer(minLength: 8)
-
-                if isActivityFocused || isSubtitleFocused {
-                    Button("Done") {
-                        isActivityFocused = false
-                        isSubtitleFocused = false
-                        onDone?()
+                        TextEditor(text: $subtitle)
+                            .frame(height: inputHeight)
+                            .padding(8)
+                            .scrollContentBackground(.hidden)
+                            .background(Color.white.opacity(0.05))
+                            .cornerRadius(6)
+                            .focused($isSubtitleFocused)
+                            .onChange(of: isSubtitleFocused) { _, newValue in
+                                if newValue {
+                                    HapticManager.shared.heavyImpact()
+                                }
+                            }
                     }
-                    .foregroundColor(.moonTextPrimary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.white.opacity(0.15))
-                    )
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: isActivityFocused || isSubtitleFocused)
                 }
             }
-
-            ZStack(alignment: .topLeading) {
-                if subtitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text("Subtitle (optional)")
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 12)
+        }
+        // キーボードツールバーは不安定なので、UIボタンのみ使用
+        // .toolbar {
+        //     ToolbarItemGroup(placement: .keyboard) {
+        //         Spacer()
+        //         if isActivityFocused || isSubtitleFocused {
+        //             Button("Close") {
+        //                 isActivityFocused = false
+        //                 isSubtitleFocused = false
+        //                 onDone?()
+        //             }
+        //             .foregroundColor(.blue)
+        //         }
+        //     }
+        // }
+        // .id(toolbarID) // ツールバーの強制更新
+        .onChange(of: isActivityFocused) { _, newValue in
+            if newValue {
+                HapticManager.shared.heavyImpact()
+                // フォーカス時にツールバーを強制更新
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    toolbarID = UUID()
                 }
-
-                TextEditor(text: $subtitle)
-                    .frame(height: inputHeight)
-                    .padding(8)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(6)
-                    .focused($isSubtitleFocused)
-                    .onChange(of: isSubtitleFocused) { _, newValue in
-                        if newValue {
-                            HapticManager.shared.heavyImpact()
-                        }
-                    }
+            }
+        }
+        .onChange(of: isSubtitleFocused) { _, newValue in
+            if newValue {
+                HapticManager.shared.heavyImpact()
+                // フォーカス時にツールバーを強制更新
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    toolbarID = UUID()
+                }
             }
         }
         .onAppear {
@@ -153,7 +324,18 @@ struct SessionLabelSection: View {
             let allSessionNames = sessionManager.allEntries.map { $0.sessionName }
             if allSessionNames.contains(activity) {
                 isCustomInputMode = false
+                isCustomSubtitleMode = false
             }
         }
     }
 }
+
+// SessionManagerのエントリモデルも更新が必要
+// 以下のようにsubtitlesプロパティを追加する必要があります
+/*
+struct SessionEntry: Identifiable, Codable {
+    let id = UUID()
+    let sessionName: String
+    let subtitles: [String]? // 追加
+}
+*/

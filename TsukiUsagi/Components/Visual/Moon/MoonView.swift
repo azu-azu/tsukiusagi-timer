@@ -17,7 +17,7 @@ struct MoonView: View {
 
     // 紫の影（アニメーション）
     var nearY: CGFloat { moonSize } // 上の位置
-    var farY: CGFloat { moonSize * 0.22 } // 下の位置（月サイズに比例）
+    var farY: CGFloat { moonSize * 0.4 } // 下の位置（月サイズに比例）
     var duration: Double = 17
 
     // 🐇

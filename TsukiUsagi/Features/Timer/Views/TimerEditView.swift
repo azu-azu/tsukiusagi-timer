@@ -62,9 +62,9 @@ struct TimerEditView: View {
 
                         Button("Save") {
                             historyVM.updateLast(activity: editedActivity,
-                                                 subtitle: editedSubtitle,
-                                                 memo: editedMemo,
-                                                 end: editedEnd)
+                                                subtitle: editedSubtitle,
+                                                memo: editedMemo,
+                                                end: editedEnd)
                             timerVM.setEndTime(editedEnd)
                             dismiss()
                         }
