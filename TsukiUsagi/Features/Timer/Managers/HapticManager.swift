@@ -36,13 +36,13 @@ class HapticManager {
 
     /// 使用後のジェネレーターを再準備（非同期）
     private func rePrepareGenerator(_ generator: UIImpactFeedbackGenerator) {
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.main.async {
             generator.prepare()
         }
     }
 
     private func rePrepareNotificationGenerator() {
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.main.async {
             self.notificationGenerator.prepare()
         }
     }

@@ -24,6 +24,15 @@ struct SessionListSectionView: View {
             .padding(.bottom, 8)
         }
         .debugSection(String(describing: Self.self), position: .topLeading)
+        .keyboardCloseButton(
+            isVisible: isNameFocused || isSubtitleFocused,
+            action: {
+                KeyboardManager.hideKeyboard {
+                    isNameFocused = false
+                    isSubtitleFocused = false
+                }
+            }
+        )
         .alert(item: $errorMessage) { _err in
             Alert(
                 title: Text("Error"),
@@ -33,12 +42,12 @@ struct SessionListSectionView: View {
         }
         .onChange(of: isNameFocused) { _, newValue in
             if newValue {
-                HapticManager.shared.heavyImpact()
+                // HapticManager.shared.heavyImpact()
             }
         }
         .onChange(of: isSubtitleFocused) { _, newValue in
             if newValue {
-                HapticManager.shared.heavyImpact()
+                // HapticManager.shared.heavyImpact()
             }
         }
     }
@@ -119,15 +128,6 @@ struct SessionListSectionView: View {
         .padding()
         .background(Color.white.opacity(0.04))
         .cornerRadius(10)
-        .keyboardCloseButton(
-            isVisible: isNameFocused || isSubtitleFocused,
-            action: {
-                KeyboardManager.hideKeyboard {
-                    isNameFocused = false
-                    isSubtitleFocused = false
-                }
-            }
-        )
     }
 
     @ViewBuilder

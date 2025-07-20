@@ -33,7 +33,6 @@ final class TimerSessionManager: ObservableObject {
 
     /// Work終了後に呼ぶまとめ関数
     private func finalizeWork(sendNotification: Bool = true) {
-        HapticManager.shared.heavyImpact()
         if sendNotification {
             NotificationManager.shared.sendPhaseChangeNotification(for: .breakTime)
         }
@@ -59,7 +58,6 @@ final class TimerSessionManager: ObservableObject {
 
     /// 休憩終了後に呼ぶまとめ関数
     private func finalizeBreak(sendNotification: Bool = true) {
-        HapticManager.shared.heavyImpact()
         if sendNotification {
             NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
         }
