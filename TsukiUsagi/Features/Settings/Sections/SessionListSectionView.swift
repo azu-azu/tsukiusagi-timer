@@ -45,9 +45,9 @@ struct SessionListSectionView: View {
     @ViewBuilder
     private func section(title: String, entries: [SessionEntry], isDefault: Bool) -> some View {
         // ここのspacingはタイトルとタイトル下の余白
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.headline)
+                .font(DesignTokens.Fonts.sectionTitle)
                 .padding(.horizontal)
 
             if entries.isEmpty {
@@ -79,7 +79,7 @@ struct SessionListSectionView: View {
 
     @ViewBuilder
     private func editingSessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             TextField("Session Name", text: $editingName)
                 .focused($isNameFocused)
                 .textFieldStyle(.roundedBorder)
