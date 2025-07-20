@@ -180,23 +180,23 @@ extension View {
     }
 
     /// 画面レベルのデバッグ表示（青）
-    func debugScreen(_ name: String, position: Alignment = .topTrailing) -> some View {
-        self.modifier(DynamicDebugScreenModifier(name, position: position))
+    func debugScreen(_ name: String, position: Alignment = .top) -> some View {
+        self.modifier(DebugScreenModifier(moduleName: name, position: position))
     }
 
     /// セクションレベルのデバッグ表示（緑）
-    func debugSection(_ name: String, position: Alignment = .topTrailing) -> some View {
-        self.modifier(DynamicDebugSectionModifier(name, position: position))
+    func debugSection(_ name: String, position: Alignment = .top) -> some View {
+        self.modifier(DebugSectionModifier(moduleName: name, position: position))
     }
 
     /// コンポーネントレベルのデバッグ表示（赤）
-    func debugComponent(_ name: String, position: Alignment = .topTrailing) -> some View {
-        self.modifier(DynamicDebugComponentModifier(name, position: position))
+    func debugComponent(_ name: String, position: Alignment = .top) -> some View {
+        self.modifier(DebugComponentModifier(moduleName: name, position: position))
     }
 
     /// フォームレベルのデバッグ表示（オレンジ）
-    func debugForm(_ name: String, position: Alignment = .topTrailing) -> some View {
-        self.modifier(DynamicDebugFormModifier(name, position: position))
+    func debugForm(_ name: String, position: Alignment = .top) -> some View {
+        self.modifier(DebugFormModifier(moduleName: name, position: position))
     }
 }
 

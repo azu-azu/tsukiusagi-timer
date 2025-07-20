@@ -39,6 +39,7 @@ struct WorkTimeSectionView: View {
                 )
             }
         }
+        .debugSection(String(describing: Self.self), position: .topLeading)
     }
 
     // プラスマイナスボタンの共通化

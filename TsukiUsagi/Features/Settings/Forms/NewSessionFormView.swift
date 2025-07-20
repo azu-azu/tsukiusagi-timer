@@ -267,6 +267,7 @@ struct NewSessionFormView: View {
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
                 }
             }
+            .debugForm(String(describing: Self.self), position: .topLeading)
             // キーボードツールバーは不安定なので、UIボタンのみ使用
             // .toolbar {
             //     ToolbarItemGroup(placement: .keyboard) {
