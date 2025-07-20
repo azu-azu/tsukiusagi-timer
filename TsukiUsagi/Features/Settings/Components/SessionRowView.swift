@@ -33,7 +33,6 @@ struct SessionRowView: View {
                                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
                                     .onChange(of: isNameFocused) { _, newValue in
                                         if newValue {
-                                            HapticManager.shared.heavyImpact()
                                         }
                                     }
 
@@ -135,7 +134,6 @@ struct SessionRowView: View {
                                     .focused($isSubtitleFocused)
                                     .onChange(of: isSubtitleFocused) { _, newValue in
                                         if newValue {
-                                            HapticManager.shared.heavyImpact()
                                         }
                                     }
 

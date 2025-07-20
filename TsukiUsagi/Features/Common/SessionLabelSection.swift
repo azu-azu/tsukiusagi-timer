@@ -73,9 +73,7 @@ struct SessionLabelSection: View {
                                         onDone?()
                                     }
                                     .onChange(of: isActivityFocused) { _, newValue in
-                                        if newValue {
-                                            HapticManager.shared.heavyImpact()
-                                        }
+                                        // Haptic feedback removed
                                     }
                                     .onChange(of: activity) { _, newValue in
                                         // セッション名が変更されたらsubtitleもリセット
@@ -151,16 +149,6 @@ struct SessionLabelSection: View {
                         }
                     }
                 }
-                .keyboardCloseButton(
-                    isVisible: isActivityFocused || isSubtitleFocused,
-                    action: {
-                        KeyboardManager.hideKeyboard {
-                            isActivityFocused = false
-                            isSubtitleFocused = false
-                            onDone?()
-                        }
-                    }
-                )
             }
 
             // Subtitle Section
@@ -181,9 +169,7 @@ struct SessionLabelSection: View {
                         .cornerRadius(6)
                         .focused($isSubtitleFocused)
                         .onChange(of: isSubtitleFocused) { _, newValue in
-                            if newValue {
-                                HapticManager.shared.heavyImpact()
-                            }
+                            // Haptic feedback removed
                         }
                 }
             } else {
@@ -250,45 +236,35 @@ struct SessionLabelSection: View {
                             .cornerRadius(6)
                             .focused($isSubtitleFocused)
                             .onChange(of: isSubtitleFocused) { _, newValue in
-                                if newValue {
-                                    HapticManager.shared.heavyImpact()
-                                }
+                                // Haptic feedback removed
                             }
                     }
                 }
             }
         }
-        // キーボードツールバーは不安定なので、UIボタンのみ使用
-        // .toolbar {
-        //     ToolbarItemGroup(placement: .keyboard) {
-        //         Spacer()
-        //         if isActivityFocused || isSubtitleFocused {
-        //             Button("Close") {
-        //                 isActivityFocused = false
-        //                 isSubtitleFocused = false
-        //                 onDone?()
-        //             }
-        //             .foregroundColor(.blue)
-        //         }
-        //     }
-        // }
-        // .id(toolbarID) // ツールバーの強制更新
-        .onChange(of: isActivityFocused) { _, newValue in
-            if newValue {
-                HapticManager.shared.heavyImpact()
-                // フォーカス時にツールバーを強制更新
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    toolbarID = UUID()
+        .keyboardCloseButton(
+            isVisible: isActivityFocused || isSubtitleFocused,
+            topPadding: 8,
+            action: {
+                KeyboardManager.hideKeyboard {
+                    isActivityFocused = false
+                    isSubtitleFocused = false
+                    onDone?()
                 }
+            }
+        )
+        .onChange(of: isActivityFocused) { _, newValue in
+            // Haptic feedback removed
+            // フォーカス時にツールバーを強制更新
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                toolbarID = UUID()
             }
         }
         .onChange(of: isSubtitleFocused) { _, newValue in
-            if newValue {
-                HapticManager.shared.heavyImpact()
-                // フォーカス時にツールバーを強制更新
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    toolbarID = UUID()
-                }
+            // Haptic feedback removed
+            // フォーカス時にツールバーを強制更新
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                toolbarID = UUID()
             }
         }
         .onAppear {
@@ -299,6 +275,7 @@ struct SessionLabelSection: View {
                 isCustomSubtitleMode = false
             }
         }
+        .debugSection(String(describing: Self.self), position: .topLeading)
     }
 }
 
