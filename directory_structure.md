@@ -1,4 +1,4 @@
-# TsukiUsagi プロジェクト構造（最新版）
+# TsukiUsagi プロジェクト構造
 
 ```
 TsukiUsagi/
@@ -93,7 +93,10 @@ TsukiUsagi/
 │   │   ├── RoundedCard.swift
 │   │   ├── TotalCard.swift
 │   │   ├── CardContainer.swift
-│   │   └── NavigationCardView.swift
+│   │   ├── NavigationCardView.swift
+│   │   └── KeyboardCloseButton.swift   # ← 追加: キーボード閉じる共通UI/Modifier
+│   │                                   #   - keyboardCloseButtonモディファイアでCloseボタンUIを提供
+│   │                                   #   - NewSessionFormView, SessionListSectionView, SessionLabelSection等で利用
 │   ├── Constants/
 │   │   └── AppConstants.swift
 │   ├── Extensions/
@@ -104,8 +107,7 @@ TsukiUsagi/
 │   │   ├── View+Debug.swift
 │   │   └── View+Keyboard.swift
 │   ├── Managers/
-│   │   ├── SessionManager.swift
-│   │   └── SessionManagerV2.swift
+│   │   └── SessionManager.swift
 │   ├── Utilities/
 │   │   └── TimeFormatting.swift
 │   ├── AccessibilityIDs.swift
@@ -136,3 +138,14 @@ TsukiUsagi/
         └── blue.gif
 
 ```
+
+---
+
+## 主要モジュール補足
+
+### Foundation/Components/KeyboardCloseButton.swift
+- **役割**: キーボードを閉じるための共通UIコンポーネントとViewModifier（keyboardCloseButton）を提供
+- **使い方**: `.keyboardCloseButton(isVisible:action:)` を任意のViewに付与するだけで、フォーカス時に「Close」ボタンが表示され、キーボードを閉じるUI/UXを統一できる
+- **適用箇所**: `NewSessionFormView`, `SessionListSectionView`, `SessionLabelSection` など
+
+---

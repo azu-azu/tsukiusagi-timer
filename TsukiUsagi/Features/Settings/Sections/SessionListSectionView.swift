@@ -119,6 +119,15 @@ struct SessionListSectionView: View {
         .padding()
         .background(Color.white.opacity(0.04))
         .cornerRadius(10)
+        .keyboardCloseButton(
+            isVisible: isNameFocused || isSubtitleFocused,
+            action: {
+                KeyboardManager.hideKeyboard {
+                    isNameFocused = false
+                    isSubtitleFocused = false
+                }
+            }
+        )
     }
 
     @ViewBuilder
