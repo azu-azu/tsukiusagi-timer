@@ -49,6 +49,7 @@ struct ResetStopSectionView: View {
                 }
             }
         }
+        .debugSection(String(describing: Self.self), position: .topLeading)
     }
 
     @ViewBuilder

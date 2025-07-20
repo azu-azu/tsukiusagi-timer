@@ -68,15 +68,12 @@ struct SettingsView: View {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
                             WorkTimeSectionView()
-                                .debugSection("WorkTimeSectionView", position: .topLeading)
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
                             BreakTimeSectionView()
-                                .debugSection("BreakTimeSectionView", position: .topLeading)
                                 .padding(.bottom, breakBottomPadding)
 
                             sessionLabelSection()
-                                .debugSection("SessionLabelSection", position: .topLeading)
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
                             NavigationCardView(
@@ -87,7 +84,6 @@ struct SettingsView: View {
                             .padding(.bottom, betweenCardSpace)
 
                             ResetStopSectionView()
-                                .debugSection("ResetStopSectionView", position: .topLeading)
                                 .padding(.bottom, betweenCardSpace)
 
                             NavigationCardView(
@@ -113,7 +109,7 @@ struct SettingsView: View {
                 .clipShape(RoundedRectangle(cornerRadius: clipRadius)) // コンテンツ部分のみクリップ
             }
             .navigationBarHidden(true) // NavigationBarを非表示
-            .debugScreen("SettingsView", position: .topTrailing)
+            .debugScreen(String(describing: Self.self))
             .onReceive(
                 NotificationCenter.default.publisher(
                     for: UIResponder.keyboardWillShowNotification

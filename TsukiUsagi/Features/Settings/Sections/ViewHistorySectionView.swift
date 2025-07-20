@@ -19,6 +19,7 @@ struct ViewHistorySectionView: View {
                 .padding(.vertical, 8)
             }
         }
+        .debugSection(String(describing: Self.self))
     }
 
     @ViewBuilder
