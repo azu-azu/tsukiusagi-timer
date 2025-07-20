@@ -60,6 +60,7 @@ struct SettingsView: View {
                 VStack(spacing: 0) {
                     // ヘッダーを固定位置に配置
                     SettingsHeaderView(onDismiss: { dismiss() })
+                        .debugComponent("SettingsHeaderView", position: .topLeading)
                         .background(Color.moonBackground.opacity(0.95))
                         .zIndex(1)
 
@@ -67,22 +68,40 @@ struct SettingsView: View {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
                             WorkTimeSectionView()
+                                .debugSection("WorkTimeSectionView", position: .topLeading)
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
                             BreakTimeSectionView()
+                                .debugSection("BreakTimeSectionView", position: .topLeading)
                                 .padding(.bottom, breakBottomPadding)
 
                             sessionLabelSection()
+                                .debugSection("SessionLabelSection", position: .topLeading)
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
-                            ManageSessionNamesSectionView()
-                                .padding(.bottom, betweenCardSpace)
+                            NavigationCardView(
+                                title: "Manage Session Names",
+                                destination: SessionNameManagerView().environmentObject(sessionManager),
+                                isCompact: true
+                            )
+                            .padding(.bottom, betweenCardSpace)
 
                             ResetStopSectionView()
+                                .debugSection("ResetStopSectionView", position: .topLeading)
                                 .padding(.bottom, betweenCardSpace)
 
-                            ViewHistorySectionView()
+                            NavigationCardView(
+                                title: "View History",
+                                destination: HistoryView().environmentObject(historyVM),
+                                isCompact: true
+                            )
+                            .padding(.bottom, betweenCardSpace)
+
+                            #if DEBUG
+                            DebugMenuView()
+                                .debugSection("DebugMenuView", position: .topLeading)
                                 .padding(.bottom, betweenCardSpace)
+                            #endif
                         }
                         .padding()
                     }
@@ -94,6 +113,7 @@ struct SettingsView: View {
                 .clipShape(RoundedRectangle(cornerRadius: clipRadius)) // コンテンツ部分のみクリップ
             }
             .navigationBarHidden(true) // NavigationBarを非表示
+            .debugScreen("SettingsView", position: .topTrailing)
             .onReceive(
                 NotificationCenter.default.publisher(
                     for: UIResponder.keyboardWillShowNotification

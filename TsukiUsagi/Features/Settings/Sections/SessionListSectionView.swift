@@ -23,6 +23,7 @@ struct SessionListSectionView: View {
             }
             .padding(.bottom, 8)
         }
+        .debugSection(String(describing: Self.self), position: .topLeading)
         .alert(item: $errorMessage) { _err in
             Alert(
                 title: Text("Error"),

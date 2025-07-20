@@ -91,14 +91,18 @@ TsukiUsagi/
 │   │   ├── OptimizedStarBackground.swift
 │   │   ├── PlusMinusButton.swift
 │   │   ├── RoundedCard.swift
-│   │   └── TotalCard.swift
+│   │   ├── TotalCard.swift
+│   │   ├── CardContainer.swift
+│   │   └── NavigationCardView.swift
 │   ├── Constants/
 │   │   └── AppConstants.swift
 │   ├── Extensions/
 │   │   ├── Array+Safe.swift
 │   │   ├── Color+Hex.swift
 │   │   ├── String+Trimmed.swift
-│   │   └── View+SessionVisibility.swift
+│   │   ├── View+SessionVisibility.swift
+│   │   ├── View+Debug.swift
+│   │   └── View+Keyboard.swift
 │   ├── Managers/
 │   │   ├── SessionManager.swift
 │   │   └── SessionManagerV2.swift
@@ -125,6 +129,10 @@ TsukiUsagi/
 │   ├── SessionName.swift
 │   └── MoonMessage.swift
 └── Resources/
-    ├── gif/
-    └── MoonMessage/
-        └── MoonMessage.swift
+    └── gif/
+        ├── gold.gif
+        ├── black_yellow.gif
+        ├── black_red.gif
+        └── blue.gif
+
+```

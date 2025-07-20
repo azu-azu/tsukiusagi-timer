@@ -42,6 +42,7 @@ struct SessionNameManagerView: View {
                 .padding()
             }
         }
+        .debugScreen(String(describing: Self.self), position: .topTrailing)
         .navigationTitle("Manage Session Names")
         .navigationBarTitleDisplayMode(.inline)
         .alert(isPresented: $showErrorAlert) {
