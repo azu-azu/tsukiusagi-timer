@@ -43,6 +43,7 @@ struct TimerEditHeaderView: View {
                 isSaveDisabled: shouldDisableSave()
             )
         )
+        .debugComponent("TimerEditHeaderView", position: .topLeading)
     }
 }
 
@@ -56,7 +57,7 @@ struct TimerEditHeaderView_Previews: PreviewProvider {
             editedMemo: "Test memo",
             editedEnd: Date()
         )
-        .environmentObject(HistoryViewModel())
+        .environmentObject(DummyHistoryViewModel())
         .environmentObject(TimerViewModel(
             engine: DummyEngine(),
             notificationService: DummyNotificationService(),
@@ -114,7 +115,7 @@ private class DummyFormatter: TimeFormatterUtilable {
     func format(date: Date?) -> String { return "" }
 }
 
-private class HistoryViewModel: ObservableObject {
+private class DummyHistoryViewModel: ObservableObject {
     func updateLast(activity: String, subtitle: String, memo: String, end: Date) {}
 }
 #endif

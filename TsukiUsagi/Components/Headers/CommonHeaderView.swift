@@ -4,8 +4,8 @@ import SwiftUI
 struct CommonHeaderView: View {
     private let configuration: HeaderConfiguration
 
-    // ヘッダー周りのpadding
-    private let headerTopPadding: CGFloat = 18
+    // ヘッダー周りのpadding（SettingsViewの構造に合わせて調整）
+    private let headerTopPadding: CGFloat = 8   // SettingsViewの余白に合わせて減らす
     private let headerBottomPadding: CGFloat = 20
 
     init(configuration: HeaderConfiguration) {

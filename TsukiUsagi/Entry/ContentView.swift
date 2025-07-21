@@ -215,10 +215,17 @@ struct ContentView: View {
                         value: isLandscape
                     )
                     .onChange(of: showingSettings) { _, newValue in
-                        isFlowingStarsActive = !newValue && timerVM.isRunning
+                        if newValue {
+                            // Settingsを開いたときはアニメーションOFF
+                            isFlowingStarsActive = false
+                        } else {
+                            // Settingsを閉じたとき、タイマーが動いていなければ星アニメON
+                            isFlowingStarsActive = timerVM.isRunning || (!timerVM.isRunning && !timerVM.isSessionFinished)
+                        }
                     }
                     .onChange(of: timerVM.isRunning) { _, newValue in
-                        isFlowingStarsActive = !showingSettings && newValue
+                        // タイマー開始/停止時もアニメーション状態を制御
+                        isFlowingStarsActive = !showingSettings && (newValue || (!newValue && !timerVM.isSessionFinished))
                     }
                 }
             }
