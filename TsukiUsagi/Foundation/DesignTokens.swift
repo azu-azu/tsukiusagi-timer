@@ -7,7 +7,7 @@ enum DesignTokens {
 
     enum Colors {
         /// カード背景色（Light/Dark モード対応）
-        static let moonCardBG = Color.moonCardBackground
+        static let cosmosCardBG = Color.cosmosCardBackground
 
         /// プライマリテキスト色（Light/Dark モード対応）
         static let moonTextPrimary = Color("moonTextPrimary")

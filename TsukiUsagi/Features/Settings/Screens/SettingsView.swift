@@ -161,7 +161,7 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(DesignTokens.Colors.moonCardBG)
+                    .fill(DesignTokens.Colors.cosmosCardBG)
             )
         }
     }

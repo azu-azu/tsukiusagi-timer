@@ -23,7 +23,7 @@ struct SessionListSectionView: View {
     @State private var isAnyFieldFocused: Bool = false
 
     var body: some View {
-        RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
+        RoundedCard(backgroundColor: DesignTokens.Colors.cosmosCardBG) {
             VStack(alignment: .leading, spacing: 16) {
                 section(title: "Default Sessions", entries: sessionManager.defaultEntries, isDefault: true)
                 section(title: "Custom Sessions", entries: sessionManager.customEntries, isDefault: false)

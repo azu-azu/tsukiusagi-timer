@@ -70,7 +70,7 @@ struct NewSessionFormView: View {
     }
 
     var body: some View {
-        RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
+        RoundedCard(backgroundColor: DesignTokens.Colors.cosmosCardBG) {
             VStack(alignment: .leading, spacing: 12) {
                 // SessionLabelSectionと同じ構造のSession Name選択部分
                 HStack(alignment: .top) {

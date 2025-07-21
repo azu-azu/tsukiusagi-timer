@@ -28,8 +28,8 @@ extension Color {
     /// 夜空の背景（ZStack全体に使用）
     static let cosmosBackground = Color(hex: "#060c22").opacity(0.95)
 
-    /// 月明かりのカード背景（セクションやボタン）
-    static let moonCardBackground = Color(hex: "#ffffff").opacity(0.15)
+    /// コスモスカード背景（セクションやボタン）
+    static let cosmosCardBackground = Color(hex: "#ffffff").opacity(0.15)
 
     /// 月の光を思わせる青（アクセント、リンクカラー）
     static let moonAccentBlue = Color(red: 97 / 255, green: 163 / 255, blue: 242 / 255)
