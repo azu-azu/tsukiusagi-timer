@@ -106,16 +106,16 @@ struct ContentView: View {
 
                         // FlowingStarsViewなどの星エフェクトはタイマー進行中のみ
                         if !timerVM.isSessionFinished {
-                            FlowingStarsView(
-                                starCount: flowingStarCount,
-                                angle: .degrees(90), // 下向き
+                            AdaptiveFlowingStarsView(
+                                baseStarCount: flowingStarCount,
+                                angle: .degrees(90),
                                 durationRange: 24 ... 40,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
-                            FlowingStarsView(
-                                starCount: flowingStarCount,
-                                angle: .degrees(-90), // 上向き
+                            AdaptiveFlowingStarsView(
+                                baseStarCount: flowingStarCount,
+                                angle: .degrees(-90),
                                 durationRange: 24 ... 40,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil

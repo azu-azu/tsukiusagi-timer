@@ -22,10 +22,10 @@ struct UsagiViewOne: View {
             .resizable()
             .frame(width: width, height: height)
             .offset(y: float ? -amplitude : amplitude)
-            .onAppear {
-                withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
-                    float = true
-                }
-            }
+            // .onAppear {
+            //     withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
+            //         float = true
+            //     }
+            // }
     }
 }

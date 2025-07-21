@@ -27,10 +27,13 @@ struct NewSessionFormView: View {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let subtitles = subtitleTexts.filter {
             !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            }
+        }
 
         // Session Nameが空の場合は無効
         if trimmedName.isEmpty { return true }
+
+        // subtitleが1つも入力されていない場合は無効
+        if subtitles.isEmpty { return true }
 
         // 文字数超過
         if trimmedName.count > SessionManager.maxNameLength { return true }
@@ -252,13 +255,31 @@ struct NewSessionFormView: View {
 
     func addSession() {
         let trimmedName = name.trimmed
-        let subtitles = subtitleTexts.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        let subtitles = subtitleTexts
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
         do {
-            try sessionManager.addOrUpdateEntry(
-                originalKey: "",
-                sessionName: trimmedName,
-                subtitles: subtitles
-            )
+			if sessionManager.sessionDatabase[trimmedName.lowercased()] != nil {
+                // 既存セッションの場合：subtitleを1つずつ追加
+                for subtitle in subtitles {
+                    if !subtitle.isEmpty {
+                        try sessionManager.addSubtitleToSession(
+                            sessionName: trimmedName,
+                            newSubtitle: subtitle
+                        )
+                    }
+                }
+            } else {
+                // 新規セッションの場合
+                try sessionManager.addOrUpdateEntry(
+                    originalKey: "",
+                    sessionName: trimmedName,
+                    subtitles: subtitles
+                )
+            }
+
+            // 成功時のリセット
             name = ""
             subtitleTexts = [""]
             isCustomInputMode = false

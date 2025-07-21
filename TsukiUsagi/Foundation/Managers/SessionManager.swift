@@ -186,6 +186,135 @@ class SessionManager: ObservableObject {
     }
 }
 
+// MARK: - Subtitle Management Extension
+
+extension SessionManager {
+
+    /// 指定されたセッションのSubtitle配列を完全に更新する
+    /// - Parameters:
+    ///   - sessionName: セッション名
+    ///   - newSubtitles: 新しいSubtitle配列
+    func updateSessionSubtitles(sessionName: String, newSubtitles: [String]) throws {
+        let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = trimmedName.lowercased()
+
+        // 既存のエントリを確認
+        guard let existingEntry = sessionDatabase[key] else {
+            throw SessionManagerError.notFound
+        }
+
+        // バリデーション
+        if newSubtitles.count > Self.maxSubtitleCount {
+            throw SessionManagerError.subtitleLimitExceeded
+        }
+
+        for subtitle in newSubtitles where subtitle.count > Self.maxSubtitleLength {
+            throw SessionManagerError.subtitleTooLong
+        }
+
+        // Subtitleのみ更新（他のプロパティは保持）
+        let updatedEntry = SessionEntry(
+            id: existingEntry.id,
+            sessionName: existingEntry.sessionName,
+            subtitles: newSubtitles,
+            isDefault: existingEntry.isDefault
+        )
+
+        sessionDatabase[key] = updatedEntry
+        save()
+    }
+
+    /// 指定されたセッションにSubtitleを追加する
+    /// - Parameters:
+    ///   - sessionName: セッション名
+    ///   - newSubtitle: 追加するSubtitle
+    func addSubtitleToSession(sessionName: String, newSubtitle: String) throws {
+        let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = trimmedName.lowercased()
+        let trimmedSubtitle = newSubtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // 既存のエントリを確認
+        guard let existingEntry = sessionDatabase[key] else {
+            throw SessionManagerError.notFound
+        }
+
+        // バリデーション
+        if existingEntry.subtitles.count >= Self.maxSubtitleCount {
+            throw SessionManagerError.subtitleLimitExceeded
+        }
+
+        if trimmedSubtitle.count > Self.maxSubtitleLength {
+            throw SessionManagerError.subtitleTooLong
+        }
+
+        // 新しいSubtitle配列を作成
+        var newSubtitles = existingEntry.subtitles
+        newSubtitles.append(trimmedSubtitle)
+
+        // 更新
+        try updateSessionSubtitles(sessionName: sessionName, newSubtitles: newSubtitles)
+    }
+
+    /// 指定されたセッションの特定のSubtitleを更新する
+    /// - Parameters:
+    ///   - sessionName: セッション名
+    ///   - index: 更新するSubtitleのインデックス
+    ///   - newSubtitle: 新しいSubtitleテキスト
+    func updateSubtitle(sessionName: String, at index: Int, newSubtitle: String) throws {
+        let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = trimmedName.lowercased()
+        let trimmedSubtitle = newSubtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // 既存のエントリを確認
+        guard let existingEntry = sessionDatabase[key] else {
+            throw SessionManagerError.notFound
+        }
+
+        // インデックスチェック
+        guard index >= 0 && index < existingEntry.subtitles.count else {
+            throw SessionManagerError.notFound
+        }
+
+        // バリデーション
+        if trimmedSubtitle.count > Self.maxSubtitleLength {
+            throw SessionManagerError.subtitleTooLong
+        }
+
+        // 新しいSubtitle配列を作成
+        var newSubtitles = existingEntry.subtitles
+        newSubtitles[index] = trimmedSubtitle
+
+        // 更新
+        try updateSessionSubtitles(sessionName: sessionName, newSubtitles: newSubtitles)
+    }
+
+    /// 指定されたセッションからSubtitleを削除する
+    /// - Parameters:
+    ///   - sessionName: セッション名
+    ///   - index: 削除するSubtitleのインデックス
+    func removeSubtitle(sessionName: String, at index: Int) throws {
+        let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = trimmedName.lowercased()
+
+        // 既存のエントリを確認
+        guard let existingEntry = sessionDatabase[key] else {
+            throw SessionManagerError.notFound
+        }
+
+        // インデックスチェック
+        guard index >= 0 && index < existingEntry.subtitles.count else {
+            throw SessionManagerError.notFound
+        }
+
+        // 新しいSubtitle配列を作成
+        var newSubtitles = existingEntry.subtitles
+        newSubtitles.remove(at: index)
+
+        // 更新
+        try updateSessionSubtitles(sessionName: sessionName, newSubtitles: newSubtitles)
+    }
+}
+
 #if DEBUG
 extension SessionManager {
     static var previewData: SessionManager {
@@ -217,7 +346,8 @@ extension SessionManager {
             ),
             SessionEntry(
                 sessionName:
-                    "This is a very long session name to test how the UI handles overflow and wrapping in the list row",
+                    "This is a very long session name to test how the UI handles overflow " +
+                    "and wrapping in the list row",
                 subtitles: [
                     "Long subtitle for testing purposes"
                 ],

@@ -5,15 +5,19 @@ struct IdentifiableError: Identifiable {
     let message: String
 }
 
+// MARK: - Main View
+
 struct SessionListSectionView: View {
     @EnvironmentObject var sessionManager: SessionManager
-    @State private var editingId: UUID?
-    @State private var editingName: String = ""
-    @State private var editingSubtitles: [String] = []
+
+    // エラー表示用
     @State private var errorMessage: IdentifiableError?
-    @State private var originalKey: String = ""
-    @FocusState private var isNameFocused: Bool
-    @FocusState private var isSubtitleFocused: Bool
+
+    // Session編集用の状態管理
+    @State private var editingSessionContext: SessionEditContext? = nil
+    @State private var tempSessionName: String = ""
+    @State private var tempSubtitles: [String] = []
+    @State private var tempSubtitleText: String = ""
 
     var body: some View {
         RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
@@ -24,15 +28,6 @@ struct SessionListSectionView: View {
             .padding(.bottom, 8)
         }
         .debugSection(String(describing: Self.self), position: .topLeading)
-        .keyboardCloseButton(
-            isVisible: isNameFocused || isSubtitleFocused,
-            action: {
-                KeyboardManager.hideKeyboard {
-                    isNameFocused = false
-                    isSubtitleFocused = false
-                }
-            }
-        )
         .alert(item: $errorMessage) { _err in
             Alert(
                 title: Text("Error"),
@@ -40,21 +35,61 @@ struct SessionListSectionView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-        .onChange(of: isNameFocused) { _, newValue in
-            if newValue {
-                // HapticManager.shared.heavyImpact()
-            }
-        }
-        .onChange(of: isSubtitleFocused) { _, newValue in
-            if newValue {
-                // HapticManager.shared.heavyImpact()
+        // Session編集モーダル
+        .sheet(item: $editingSessionContext) { context in
+            switch context.editMode {
+            case .subtitleOnly:
+                // Default Session: Subtitle管理（追加/編集/削除）
+                EditableModal(
+                    title: "Manage Descriptions",
+                    onSave: {
+                        saveSubtitleEdit(context: context)
+                        editingSessionContext = nil
+                    },
+                    onCancel: {
+                        editingSessionContext = nil
+                    }
+                ) {
+                    SubtitleEditContent(
+                        sessionName: context.sessionName,
+                        subtitles: context.subtitles,
+                        editingIndex: context.subtitleIndex
+                    ) { newSubtitles in
+                        tempSubtitles = newSubtitles
+                    }
+                }
+                .presentationDetents([.large])  // 複数subtitle対応でlargeに
+
+            case .fullSession:
+                // Custom Session: Session全体編集
+                EditableModal(
+                    title: "Edit Session",
+                    onSave: {
+                        saveFullSessionEdit(context: context)
+                        editingSessionContext = nil
+                    },
+                    onCancel: {
+                        editingSessionContext = nil
+                    }
+                ) {
+                    FullSessionEditContent(
+                        sessionName: context.sessionName,
+                        subtitles: context.subtitles
+                    ) { newName in
+                        tempSessionName = newName
+                    } onSubtitlesChange: { newSubtitles in
+                        tempSubtitles = newSubtitles
+                    }
+                }
+                .presentationDetents([.large])
             }
         }
     }
 
+    // MARK: - Section Builder
+
     @ViewBuilder
     private func section(title: String, entries: [SessionEntry], isDefault: Bool) -> some View {
-        // ここのspacingはタイトルとタイトル下の余白
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(DesignTokens.Fonts.sectionTitle)
@@ -67,10 +102,9 @@ struct SessionListSectionView: View {
                     .padding(.horizontal)
                     .padding(.vertical, 8)
             } else {
-                // ここのspacingはrow間
                 VStack(spacing: 4) {
                     ForEach(entries) { entry in
-                        sessionRow(entry: entry, isDefault: isDefault)
+                        displaySessionRow(entry: entry, isDefault: isDefault)
                     }
                 }
                 .padding(.horizontal)
@@ -78,61 +112,11 @@ struct SessionListSectionView: View {
         }
     }
 
-    @ViewBuilder
-    private func sessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
-        if editingId == entry.id {
-            editingSessionRow(entry: entry, isDefault: isDefault)
-        } else {
-            displaySessionRow(entry: entry, isDefault: isDefault)
-        }
-    }
-
-    @ViewBuilder
-    private func editingSessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            TextField("Session Name", text: $editingName)
-                .focused($isNameFocused)
-                .textFieldStyle(.roundedBorder)
-
-            ForEach(editingSubtitles.indices, id: \.self) { _idx in
-                TextField("Subtitle", text: Binding(
-                    get: { editingSubtitles[_idx] },
-                    set: { editingSubtitles[_idx] = $0 }
-                ))
-                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(6)
-                .focused($isSubtitleFocused)
-            }
-
-            HStack {
-                Button("Save") {
-                    do {
-                        try sessionManager.addOrUpdateEntry(
-                            originalKey: originalKey,
-                            sessionName: editingName,
-                            subtitles: editingSubtitles
-                        )
-                        editingId = nil
-                    } catch {
-                        errorMessage = IdentifiableError(message: error.localizedDescription)
-                    }
-                }
-                Button("Cancel") {
-                    editingId = nil
-                }
-            }
-        }
-        .padding()
-        .background(Color.white.opacity(0.04))
-        .cornerRadius(10)
-    }
+    // MARK: - Row Builder
 
     @ViewBuilder
     private func displaySessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 Text(entry.sessionName)
                     .font(.body)
@@ -140,29 +124,143 @@ struct SessionListSectionView: View {
                 Spacer()
                 if !isDefault {
                     Button("Edit") {
-                        editingId = entry.id
-                        editingName = entry.sessionName
-                        editingSubtitles = entry.subtitles
-                        originalKey = entry.sessionName.lowercased()
+                        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                        impactFeedback.impactOccurred()
+
+                        editingSessionContext = SessionEditContext.fullSessionEdit(
+                            entryId: entry.id,
+                            sessionName: entry.sessionName,
+                            subtitles: entry.subtitles
+                        )
+                        tempSessionName = entry.sessionName
+                        tempSubtitles = entry.subtitles
                     }
+                    .buttonStyle(.bordered)
+
                     Button(role: .destructive) {
                         sessionManager.deleteEntry(id: entry.id)
                     } label: {
                         Image(systemName: "trash")
                     }
+                    .buttonStyle(.bordered)
                 }
             }
-            ForEach(entry.subtitles, id: \.self) { subtitle in
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+
+            // Subtitles with different behavior for Default vs Custom Sessions
+            if !entry.subtitles.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(Array(entry.subtitles.enumerated()), id: \.offset) { index, subtitle in
+                        if isDefault {
+                            // Default Session: subtitle編集可能（モーダルで）
+                            subtitleEditableRow(subtitle: subtitle, entry: entry, index: index)
+                        } else {
+                            // Custom Session: subtitle表示のみ（session全体編集はEditボタンで）
+                            subtitleDisplayRow(subtitle: subtitle)
+                        }
+                    }
+                }
             }
         }
         .padding()
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(10)
+        .background(
+            Group {
+                if !isDefault {
+                    // 編集可能な項目は背景で一体感を演出
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white.opacity(0.05))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                } else {
+                    // デフォルト項目はシンプルに
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white.opacity(0.02))
+                }
+            }
+        )
+    }
+
+    // MARK: - Subtitle Row Builders
+
+    @ViewBuilder
+    private func subtitleEditableRow(subtitle: String, entry: SessionEntry, index: Int) -> some View {
+        HStack {
+            Text(subtitle)
+                .font(.subheadline)
+                .italic()
+                .foregroundColor(.white.opacity(0.6))
+                .padding(.leading, 16)
+
+            Spacer()
+
+            Image(systemName: "pencil")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.3))
+                .padding(.trailing, 8)
+        }
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                .background(Color.white.opacity(0.02))
+        )
+        .contentShape(Rectangle())
+        .accessibilityLabel("Edit subtitle: \(subtitle)")
+        .accessibilityAddTraits(.isButton)
+        .onTapGesture {
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.impactOccurred()
+
+            editingSessionContext = SessionEditContext.subtitleEdit(
+                entryId: entry.id,
+                sessionName: entry.sessionName,
+                subtitles: entry.subtitles,
+                subtitleIndex: index  // 特定のsubtitle編集
+            )
+            tempSubtitles = entry.subtitles
+        }
+    }
+
+    @ViewBuilder
+    private func subtitleDisplayRow(subtitle: String) -> some View {
+        Text(subtitle)
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            .padding(.leading, 16)
+    }
+
+    // MARK: - Save Methods
+
+    private func saveSubtitleEdit(context: SessionEditContext) {
+        do {
+            // 新しいSessionManagerメソッドを使用
+            try sessionManager.updateSessionSubtitles(
+                sessionName: context.sessionName,
+                newSubtitles: tempSubtitles
+            )
+        } catch {
+            errorMessage = IdentifiableError(message: error.localizedDescription)
+        }
+    }
+
+    private func saveFullSessionEdit(context: SessionEditContext) {
+        guard case .fullSession = context.editMode else { return }
+
+        do {
+            // Custom Sessionの更新
+            try sessionManager.addOrUpdateEntry(
+                originalKey: context.sessionName.lowercased(),
+                sessionName: tempSessionName,
+                subtitles: tempSubtitles
+            )
+        } catch {
+            errorMessage = IdentifiableError(message: error.localizedDescription)
+        }
     }
 }
+
+// MARK: - Preview
 
 #if DEBUG
 struct SessionListSectionView_Previews: PreviewProvider {
