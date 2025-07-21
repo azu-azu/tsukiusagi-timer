@@ -22,7 +22,7 @@ enum DesignTokens {
         static let moonTextMuted = Color("moonTextMuted")
 
         /// 背景色（既存の拡張から）
-        static let moonBackground = Color.moonBackground
+        static let cosmosBackground = Color.cosmosBackground
 
         /// アクセント色（既存の拡張から）
         static let moonAccentBlue = Color.moonAccentBlue

@@ -12,7 +12,7 @@ struct SessionNameManagerView: View {
         ZStack {
             // 背景（画面全体、clipされない）
             ZStack {
-                Color.moonBackground.ignoresSafeArea()
+                Color.cosmosBackground.ignoresSafeArea()
 
                 // キーボード表示時は星を非表示
                 // if !isKeyboardVisible {

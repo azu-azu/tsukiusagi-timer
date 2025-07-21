@@ -26,7 +26,7 @@ extension Color {
     }
 
     /// 夜空の背景（ZStack全体に使用）
-    static let moonBackground = Color(hex: "#060c22")
+    static let cosmosBackground = Color(hex: "#060c22")
 
     /// 月明かりのカード背景（セクションやボタン）
     static let moonCardBackground = Color(hex: "#4b95ba")

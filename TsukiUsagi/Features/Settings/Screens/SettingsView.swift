@@ -37,7 +37,7 @@ struct SettingsView: View {
             ZStack {
                 // 背景（画面全体、clipされない）
                 ZStack {
-                    Color.moonBackground.ignoresSafeArea()
+                    Color.cosmosBackground.ignoresSafeArea()
 
                     // // キーボード表示時は星を非表示
                     // if !isKeyboardVisible {
@@ -61,7 +61,7 @@ struct SettingsView: View {
                     // ヘッダーを固定位置に配置
                     SettingsHeaderView(onDismiss: { dismiss() })
                         .debugComponent("SettingsHeaderView", position: .topLeading)
-                        .background(Color.moonBackground.opacity(0.95))
+                        .background(Color.cosmosBackground.opacity(0.95))
                         .zIndex(1)
 
                     // スクロール可能なコンテンツ

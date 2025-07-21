@@ -210,6 +210,6 @@ extension View {
         }
     }
     .padding()
-    .background(DesignTokens.Colors.moonBackground)
+    .background(DesignTokens.Colors.cosmosBackground)
     .previewColorSchemes()
 }

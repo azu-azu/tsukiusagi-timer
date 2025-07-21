@@ -76,7 +76,7 @@ struct OptimizedStarBackground: ViewModifier {
             ) { _ in
                 ZStack {
                     // 背景色
-                    DesignTokens.Colors.moonBackground
+                    DesignTokens.Colors.cosmosBackground
                         .ignoresSafeArea()
 
                     // 固定星
