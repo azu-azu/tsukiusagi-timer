@@ -83,7 +83,7 @@ struct WorkTimeSectionView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(DesignTokens.Colors.moonCardBG)
+                    .fill(DesignTokens.Colors.cosmosCardBG)
             )
         }
     }

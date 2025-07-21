@@ -41,7 +41,7 @@ struct TotalCard: View {
     ) {
         self.text = text
         self.cornerRadius = cornerRadius
-        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.moonCardBG.opacity(0.2)
+        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.cosmosCardBG.opacity(0.2)
         self.textColor = textColor ?? DesignTokens.Colors.moonTextPrimary
         self.showGlitter = showGlitter
         self.glitterSize = glitterSize
@@ -62,7 +62,7 @@ struct TotalCard: View {
     ) {
         self.text = text
         self.cornerRadius = cornerRadius
-        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.moonCardBG.opacity(0.15)
+        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.cosmosCardBG.opacity(0.15)
         self.textColor = textColor ?? DesignTokens.Colors.moonTextPrimary
         showGlitter = false
         glitterSize = 0

@@ -166,7 +166,7 @@ struct HistoryView: View {
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(DesignTokens.Colors.moonCardBG)
+                .fill(DesignTokens.Colors.cosmosCardBG)
         )
     }
 
@@ -346,7 +346,7 @@ extension View {
     func summaryCardStyle(
         height: CGFloat = 32,
         cornerRadius: CGFloat = 6,
-        backgroundColor: Color = DesignTokens.Colors.moonCardBG,
+        backgroundColor: Color = DesignTokens.Colors.cosmosCardBG,
         padding: EdgeInsets = EdgeInsets(
             top: 4,
             leading: DesignTokens.Padding.cardHorizontal,

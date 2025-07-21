@@ -38,7 +38,7 @@ struct RoundedCard<Content: View>: View {
         self.content = content()
         self.cornerRadius = cornerRadius
         self.padding = padding
-        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.moonCardBG
+        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.cosmosCardBG
     }
 
     /// コンパクト/大きなカード（パディング切り替え）
@@ -79,7 +79,7 @@ struct RoundedCard<Content: View>: View {
                 trailing: DesignTokens.Padding.card
             )
         }
-        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.moonCardBG
+        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.cosmosCardBG
     }
 
     // MARK: - Body
