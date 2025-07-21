@@ -61,7 +61,7 @@ struct SettingsView: View {
                     // ヘッダーを固定位置に配置
                     SettingsHeaderView(onDismiss: { dismiss() })
                         .debugComponent("SettingsHeaderView", position: .topLeading)
-                        .background(Color.cosmosBackground.opacity(0.95))
+                        .background(Color.cosmosBackground)
                         .zIndex(1)
 
                     // スクロール可能なコンテンツ
