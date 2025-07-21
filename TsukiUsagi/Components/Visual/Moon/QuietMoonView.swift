@@ -96,8 +96,7 @@ struct QuietMoonView: View {
                 angle: .degrees(135),
                 durationRange: 24 ... 40,
                 sizeRange: 2 ... 4,
-                spawnArea: nil,
-                isAnimationActive: isAnimationActive
+                spawnArea: nil
             )
             .ignoresSafeArea()
         }
