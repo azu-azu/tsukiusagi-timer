@@ -131,20 +131,20 @@ struct TimerEditView: View {
                     Color.moonBackground.ignoresSafeArea()
 
                     // キーボード表示時は星を非表示
-                    if !isKeyboardVisible {
-                        StaticStarsView(starCount: 40)
-                            .allowsHitTesting(false)
-                            .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                    // if !isKeyboardVisible {
+                    //     StaticStarsView(starCount: 40)
+                    //         .allowsHitTesting(false)
+                    //         .transition(.opacity.animation(.easeInOut(duration: 0.3)))
 
-                        FlowingStarsView(
-                            starCount: 40,
-                            angle: .degrees(135),
-                            durationRange: 24 ... 40,
-                            sizeRange: 2 ... 4,
-                            spawnArea: nil
-                        )
-                        .transition(.opacity.animation(.easeInOut(duration: 0.3)))
-                    }
+                    //     FlowingStarsView(
+                    //         starCount: 40,
+                    //         angle: .degrees(135),
+                    //         durationRange: 24 ... 40,
+                    //         sizeRange: 2 ... 4,
+                    //         spawnArea: nil
+                    //     )
+                    //     .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                    // }
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: 30))

@@ -16,6 +16,24 @@ struct EditableModal<Content: View>: View {
     let onSave: () -> Void
     let onCancel: () -> Void
     let content: () -> Content
+    let isKeyboardCloseVisible: Bool
+    let onKeyboardClose: () -> Void
+
+    init(
+        title: String,
+        onSave: @escaping () -> Void,
+        onCancel: @escaping () -> Void,
+        isKeyboardCloseVisible: Bool,
+        onKeyboardClose: @escaping () -> Void,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.title = title
+        self.onSave = onSave
+        self.onCancel = onCancel
+        self.isKeyboardCloseVisible = isKeyboardCloseVisible
+        self.onKeyboardClose = onKeyboardClose
+        self.content = content
+    }
 
     var body: some View {
         NavigationView {
@@ -24,6 +42,11 @@ struct EditableModal<Content: View>: View {
                 Spacer()
             }
             .padding()
+            .background(Color.moonBackground.ignoresSafeArea())
+            .keyboardCloseButton(
+                isVisible: isKeyboardCloseVisible,
+                action: onKeyboardClose
+            )
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -38,6 +61,7 @@ struct EditableModal<Content: View>: View {
                 }
             }
         }
+        .background(Color.moonBackground.ignoresSafeArea())
         .interactiveDismissDisabled() // 意図しない閉じ操作を防ぐ
     }
 }
@@ -53,8 +77,17 @@ struct SubtitleEditContent: View {
     @State private var subtitles: [String]  // 単一ではなく配列で管理
     let editingIndex: Int?  // 編集中のインデックス（新規の場合はnil）
     let onSubtitlesChange: ([String]) -> Void
+    @Binding var isAnyFieldFocused: Bool
+    let onClearFocus: () -> Void
 
     @FocusState private var focusedField: Int?
+
+    func clearFocus() {
+        withAnimation {
+            focusedField = nil
+        }
+        onClearFocus()
+    }
 
     /// SubtitleEditContentの初期化
     /// - Parameters:
@@ -62,11 +95,22 @@ struct SubtitleEditContent: View {
     ///   - subtitles: 全てのSubtitleリスト
     ///   - editingIndex: 編集対象のインデックス（新規追加の場合はnil）
     ///   - onSubtitlesChange: Subtitleリスト変更時のコールバック
-    init(sessionName: String, subtitles: [String], editingIndex: Int? = nil, onSubtitlesChange: @escaping ([String]) -> Void) {
+    ///   - isAnyFieldFocused: 外部から制御するフォーカス状態
+    ///   - onClearFocus: フォーカスクリア時のコールバック
+    init(
+        sessionName: String,
+        subtitles: [String],
+        editingIndex: Int? = nil,
+        onSubtitlesChange: @escaping ([String]) -> Void,
+        isAnyFieldFocused: Binding<Bool>,
+        onClearFocus: @escaping () -> Void
+    ) {
         self.sessionName = sessionName
         self.editingIndex = editingIndex
-        self._subtitles = State(initialValue: subtitles)
+        _subtitles = State(initialValue: subtitles)
         self.onSubtitlesChange = onSubtitlesChange
+        self._isAnyFieldFocused = isAnyFieldFocused
+        self.onClearFocus = onClearFocus
     }
 
     var body: some View {
@@ -75,14 +119,16 @@ struct SubtitleEditContent: View {
             subtitlesSection
         }
         .onAppear {
-            // モーダル表示時に適切なフィールドにフォーカス
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                if let editingIndex = editingIndex {
-                    focusedField = editingIndex
-                } else if !subtitles.isEmpty {
-                    focusedField = subtitles.count - 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [self] in
+                if let editingIndex = self.editingIndex {
+                    self.focusedField = editingIndex
+                } else if !self.subtitles.isEmpty {
+                    self.focusedField = self.subtitles.count - 1
                 }
             }
+        }
+        .onChange(of: focusedField) { _, newValue in
+            isAnyFieldFocused = newValue != nil
         }
     }
 
@@ -144,26 +190,24 @@ struct SubtitleEditContent: View {
                 .accessibilityLabel("Add description")
             }
 
-            ForEach(Array(subtitles.enumerated()), id: \.offset) { index, subtitle in
-                HStack {
-                    TextField("Description \(index + 1)", text: binding(for: index))
+            ForEach(Array(subtitles.enumerated()), id: \.offset) { [self] index, subtitle in
+                VStack(alignment: .leading) {
+                    TextField("Description \(index + 1)", text: self.binding(for: index))
                         .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: index)
-                        .submitLabel(index == subtitles.count - 1 ? .done : .next)
-                        .onSubmit {
-                            if index < subtitles.count - 1 {
-                                focusedField = index + 1
+                        .focused(self.$focusedField, equals: index)
+                        .submitLabel(index == self.subtitles.count - 1 ? .done : .next)
+                        .onSubmit { [self] in
+                            if index < self.subtitles.count - 1 {
+                                self.focusedField = index + 1
                             }
                         }
 
-                    // 削除ボタン
-                    if subtitles.count > 1 {
-                        Button(action: { removeSubtitle(at: index) }) {
+                    // 削除ボタン（最後の1つは削除不可）
+                    if self.subtitles.count > 1 {
+                        Button(action: { [self] in self.removeSubtitle(at: index) }) {
                             Image(systemName: "minus.circle.fill")
-                                .font(.caption)
                                 .foregroundColor(.red)
                         }
-                        .accessibilityLabel("Remove description")
                     }
                 }
             }
@@ -180,17 +224,17 @@ struct SubtitleEditContent: View {
 
     private func binding(for index: Int) -> Binding<String> {
         Binding(
-            get: {
-                if index < subtitles.count {
-                    return subtitles[index]
+            get: { [self] in
+                if index < self.subtitles.count {
+                    return self.subtitles[index]
                 } else {
                     return ""
                 }
             },
-            set: { newValue in
-                if index < subtitles.count {
-                    subtitles[index] = newValue
-                    onSubtitlesChange(subtitles)
+            set: { [self] newValue in
+                if index < self.subtitles.count {
+                    self.subtitles[index] = newValue
+                    self.onSubtitlesChange(self.subtitles)
                 }
             }
         )
@@ -199,8 +243,8 @@ struct SubtitleEditContent: View {
     private func addSubtitle() {
         subtitles.append("")
         onSubtitlesChange(subtitles)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            focusedField = subtitles.count - 1
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
+            self.focusedField = self.subtitles.count - 1
         }
     }
 
@@ -232,6 +276,8 @@ struct FullSessionEditContent: View {
     @State private var subtitles: [String]
     let onSessionNameChange: (String) -> Void
     let onSubtitlesChange: ([String]) -> Void
+    @Binding var isAnyFieldFocused: Bool
+    let onClearFocus: () -> Void
 
     @FocusState private var focusedField: FocusedField?
 
@@ -240,17 +286,35 @@ struct FullSessionEditContent: View {
         case subtitle(Int)
     }
 
+    func clearFocus() {
+        withAnimation {
+            focusedField = nil
+        }
+        onClearFocus()
+    }
+
     /// FullSessionEditContentの初期化
     /// - Parameters:
     ///   - sessionName: 初期のセッション名
     ///   - subtitles: 初期のSubtitleリスト
     ///   - onSessionNameChange: セッション名変更時のコールバック
     ///   - onSubtitlesChange: Subtitleリスト変更時のコールバック
-    init(sessionName: String, subtitles: [String], onSessionNameChange: @escaping (String) -> Void, onSubtitlesChange: @escaping ([String]) -> Void) {
-        self._sessionName = State(initialValue: sessionName)
-        self._subtitles = State(initialValue: subtitles)
+    ///   - isAnyFieldFocused: 外部から制御するフォーカス状態
+    ///   - onClearFocus: フォーカスクリア時のコールバック
+    init(
+        sessionName: String,
+        subtitles: [String],
+        onSessionNameChange: @escaping (String) -> Void,
+        onSubtitlesChange: @escaping ([String]) -> Void,
+        isAnyFieldFocused: Binding<Bool>,
+        onClearFocus: @escaping () -> Void
+    ) {
+        _sessionName = State(initialValue: sessionName)
+        _subtitles = State(initialValue: subtitles)
         self.onSessionNameChange = onSessionNameChange
         self.onSubtitlesChange = onSubtitlesChange
+        self._isAnyFieldFocused = isAnyFieldFocused
+        self.onClearFocus = onClearFocus
     }
 
     var body: some View {
@@ -260,9 +324,12 @@ struct FullSessionEditContent: View {
         }
         .onAppear {
             // モーダル表示時に自動でセッション名にフォーカス
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                focusedField = .sessionName
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [self] in
+                self.focusedField = .sessionName
             }
+        }
+        .onChange(of: focusedField) { _, newValue in
+            isAnyFieldFocused = newValue != nil
         }
     }
 
@@ -270,33 +337,18 @@ struct FullSessionEditContent: View {
 
     /// セッション名編集部分
     private var sessionNameSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Session Name")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .textCase(.uppercase)
-                    .tracking(0.5)
-
-                Spacer()
-
-                // "編集可能" を示すペンシルアイコン
-                Image(systemName: "pencil")
-                    .font(.caption)
-                    .foregroundColor(.blue)
-                    .accessibilityLabel("Editable session name")
-            }
-
-            TextField("Enter session name", text: $sessionName)
-                .textFieldStyle(.roundedBorder)
-                .focused($focusedField, equals: .sessionName)
-                .onChange(of: sessionName) { _, newValue in
-                    onSessionNameChange(newValue)
+        VStack(alignment: .leading) {
+            Text("Session Name")
+                .font(.headline)
+            TextField("Enter session name", text: Binding(
+                get: { [self] in self.sessionName },
+                set: { [self] newValue in
+                    self.sessionName = newValue
+                    self.onSessionNameChange(newValue)
                 }
-                .submitLabel(.next)
-                .onSubmit {
-                    focusedField = .subtitle(0)
-                }
+            ))
+            .textFieldStyle(.roundedBorder)
+            .focused(self.$focusedField, equals: .sessionName)
         }
     }
 
@@ -321,26 +373,24 @@ struct FullSessionEditContent: View {
                 .accessibilityLabel("Add description")
             }
 
-            ForEach(Array(subtitles.enumerated()), id: \.offset) { index, subtitle in
-                HStack {
-                    TextField("Description \(index + 1)", text: binding(for: index))
+            ForEach(Array(subtitles.enumerated()), id: \.offset) { [self] index, subtitle in
+                VStack(alignment: .leading) {
+                    TextField("Description \(index + 1)", text: self.binding(for: index))
                         .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: .subtitle(index))
-                        .submitLabel(index == subtitles.count - 1 ? .done : .next)
-                        .onSubmit {
-                            if index < subtitles.count - 1 {
-                                focusedField = .subtitle(index + 1)
+                        .focused(self.$focusedField, equals: .subtitle(index))
+                        .submitLabel(index == self.subtitles.count - 1 ? .done : .next)
+                        .onSubmit { [self] in
+                            if index < self.subtitles.count - 1 {
+                                self.focusedField = .subtitle(index + 1)
                             }
                         }
 
-                    // 削除ボタン
-                    if subtitles.count > 1 {
-                        Button(action: { removeSubtitle(at: index) }) {
+                    // 削除ボタン（最後の1つは削除不可）
+                    if self.subtitles.count > 1 {
+                        Button(action: { [self] in self.removeSubtitle(at: index) }) {
                             Image(systemName: "minus.circle.fill")
-                                .font(.caption)
                                 .foregroundColor(.red)
                         }
-                        .accessibilityLabel("Remove description")
                     }
                 }
             }
@@ -357,17 +407,17 @@ struct FullSessionEditContent: View {
 
     private func binding(for index: Int) -> Binding<String> {
         Binding(
-            get: {
-                if index < subtitles.count {
-                    return subtitles[index]
+            get: { [self] in
+                if index < self.subtitles.count {
+                    return self.subtitles[index]
                 } else {
                     return ""
                 }
             },
-            set: { newValue in
-                if index < subtitles.count {
-                    subtitles[index] = newValue
-                    onSubtitlesChange(subtitles)
+            set: { [self] newValue in
+                if index < self.subtitles.count {
+                    self.subtitles[index] = newValue
+                    self.onSubtitlesChange(self.subtitles)
                 }
             }
         )
@@ -376,8 +426,8 @@ struct FullSessionEditContent: View {
     private func addSubtitle() {
         subtitles.append("")
         onSubtitlesChange(subtitles)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            focusedField = .subtitle(subtitles.count - 1)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
+            self.focusedField = .subtitle(self.subtitles.count - 1)
         }
     }
 
@@ -407,15 +457,20 @@ struct SessionEditModal_Previews: PreviewProvider {
             EditableModal(
                 title: "Manage Descriptions",
                 onSave: { print("Save tapped") },
-                onCancel: { print("Cancel tapped") }
+                onCancel: { print("Cancel tapped") },
+                isKeyboardCloseVisible: false,
+                onKeyboardClose: {}
             ) {
                 SubtitleEditContent(
                     sessionName: "Work",
                     subtitles: ["SwiftUI development", "Code review"],
-                    editingIndex: 0
-                ) { newSubtitles in
-                    print("Subtitles changed: \(newSubtitles)")
-                }
+                    editingIndex: 0,
+                    onSubtitlesChange: { newSubtitles in
+                        print("Subtitles changed: \(newSubtitles)")
+                    },
+                    isAnyFieldFocused: .constant(false),
+                    onClearFocus: {}
+                )
             }
             .presentationDetents([.large])
             .previewDisplayName("Subtitle Edit")
@@ -424,16 +479,22 @@ struct SessionEditModal_Previews: PreviewProvider {
             EditableModal(
                 title: "Edit Session",
                 onSave: { print("Save tapped") },
-                onCancel: { print("Cancel tapped") }
+                onCancel: { print("Cancel tapped") },
+                isKeyboardCloseVisible: false,
+                onKeyboardClose: {}
             ) {
                 FullSessionEditContent(
                     sessionName: "My Custom Project",
-                    subtitles: ["Task 1", "Task 2", "Task 3"]
-                ) { newName in
-                    print("Session name changed: \(newName)")
-                } onSubtitlesChange: { newSubtitles in
-                    print("Subtitles changed: \(newSubtitles)")
-                }
+                    subtitles: ["Task 1", "Task 2", "Task 3"],
+                    onSessionNameChange: { newName in
+                        print("Session name changed: \(newName)")
+                    },
+                    onSubtitlesChange: { newSubtitles in
+                        print("Subtitles changed: \(newSubtitles)")
+                    },
+                    isAnyFieldFocused: .constant(false),
+                    onClearFocus: {}
+                )
             }
             .presentationDetents([.large])
             .previewDisplayName("Full Session Edit")

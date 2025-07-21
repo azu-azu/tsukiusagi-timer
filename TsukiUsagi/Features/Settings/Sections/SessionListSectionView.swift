@@ -18,6 +18,9 @@ struct SessionListSectionView: View {
     @State private var tempSessionName: String = ""
     @State private var tempSubtitles: [String] = []
     @State private var tempSubtitleText: String = ""
+    @State private var isViewFullyLoaded: Bool = false
+    @State private var hasScrolledOnce: Bool = false
+    @State private var isAnyFieldFocused: Bool = false
 
     var body: some View {
         RoundedCard(backgroundColor: DesignTokens.Colors.moonCardBG) {
@@ -48,17 +51,26 @@ struct SessionListSectionView: View {
                     },
                     onCancel: {
                         editingSessionContext = nil
+                    },
+                    isKeyboardCloseVisible: isAnyFieldFocused,
+                    onKeyboardClose: {
+                        KeyboardManager.hideKeyboard {
+                            isAnyFieldFocused = false
+                        }
                     }
                 ) {
                     SubtitleEditContent(
                         sessionName: context.sessionName,
                         subtitles: context.subtitles,
-                        editingIndex: context.subtitleIndex
-                    ) { newSubtitles in
-                        tempSubtitles = newSubtitles
-                    }
+                        editingIndex: context.subtitleIndex,
+                        onSubtitlesChange: { _ in },
+                        isAnyFieldFocused: $isAnyFieldFocused,
+                        onClearFocus: {
+                            isAnyFieldFocused = false
+                        }
+                    )
                 }
-                .presentationDetents([.large])  // 複数subtitle対応でlargeに
+                .presentationDetents([.large])
 
             case .fullSession:
                 // Custom Session: Session全体編集
@@ -70,18 +82,32 @@ struct SessionListSectionView: View {
                     },
                     onCancel: {
                         editingSessionContext = nil
+                    },
+                    isKeyboardCloseVisible: isAnyFieldFocused,
+                    onKeyboardClose: {
+                        KeyboardManager.hideKeyboard {
+                            isAnyFieldFocused = false
+                        }
                     }
                 ) {
                     FullSessionEditContent(
                         sessionName: context.sessionName,
-                        subtitles: context.subtitles
-                    ) { newName in
-                        tempSessionName = newName
-                    } onSubtitlesChange: { newSubtitles in
-                        tempSubtitles = newSubtitles
-                    }
+                        subtitles: context.subtitles,
+                        onSessionNameChange: { _ in },
+                        onSubtitlesChange: { _ in },
+                        isAnyFieldFocused: $isAnyFieldFocused,
+                        onClearFocus: {
+                            isAnyFieldFocused = false
+                        }
+                    )
                 }
                 .presentationDetents([.large])
+            }
+        }
+        .onChange(of: editingSessionContext) { _, newValue in
+            // モーダルが閉じられた時にフォーカス状態をリセット
+            if newValue == nil {
+                isAnyFieldFocused = false
             }
         }
     }
