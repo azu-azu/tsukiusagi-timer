@@ -49,34 +49,13 @@ struct TimerEditView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 40) {
-                        // ヘッダー
-                        HStack {
-                            Button("Cancel") {
-                                dismiss()
-                            }
-                            .foregroundColor(.moonTextSecondary)
-
-                            Spacer()
-
-                            Text("Edit Record")
-                                .font(DesignTokens.Fonts.labelBold)
-                                .foregroundColor(.moonTextPrimary)
-
-                            Spacer()
-
-                            Button("Save") {
-                                historyVM.updateLast(activity: editedActivity,
-                                                    subtitle: editedSubtitle,
-                                                    memo: editedMemo,
-                                                    end: editedEnd)
-                                timerVM.setEndTime(editedEnd)
-                                dismiss()
-                            }
-                            .foregroundColor(shouldDisableSave() ? .gray : .moonAccentBlue)
-                            .disabled(shouldDisableSave())
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 20)
+                        // ヘッダー（分割されたTimerEditHeaderViewを使用）
+                        TimerEditHeaderView(
+                            editedActivity: editedActivity,
+                            editedSubtitle: editedSubtitle,
+                            editedMemo: editedMemo,
+                            editedEnd: editedEnd
+                        )
 
                         // Session Label
                         section(title: "Session Label") {

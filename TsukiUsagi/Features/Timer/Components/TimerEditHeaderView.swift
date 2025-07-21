@@ -1,36 +1,46 @@
 import SwiftUI
 
-// MARK: - Settings用のヘッダービュー
-struct SettingsHeaderView: View {
+// MARK: - TimerEdit用のヘッダービュー
+struct TimerEditHeaderView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM: TimerViewModel
-    @AppStorage("activityLabel") private var activityLabel: String = "Work"
 
-    var onDismiss: (() -> Void)?
+    // TimerEditViewから渡される編集中の値
+    let editedActivity: String
+    let editedSubtitle: String
+    let editedMemo: String
+    let editedEnd: Date
 
     private var isCustomActivity: Bool {
-        !["Work", "Study", "Read"].contains(activityLabel)
+        let predefinedActivities = ["Work", "Study", "Read"]
+        return !predefinedActivities.contains { $0.lowercased() == editedActivity.lowercased() }
     }
 
     private func isActivityEmpty() -> Bool {
-        return activityLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return editedActivity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    private func shouldDisableDone() -> Bool {
+    private func shouldDisableSave() -> Bool {
         return isCustomActivity && isActivityEmpty()
     }
 
     var body: some View {
         CommonHeaderView(
-            configuration: .closeDone(
-                title: "Settings",
+            configuration: .cancelSave(
+                title: "Edit Record",
                 dismiss: dismiss,
-                customClose: onDismiss,
-                onDone: {
-                    timerVM.refreshAfterSettingsChange()
-                    onDismiss?() ?? dismiss()
+                onSave: {
+                    historyVM.updateLast(
+                        activity: editedActivity,
+                        subtitle: editedSubtitle,
+                        memo: editedMemo,
+                        end: editedEnd
+                    )
+                    timerVM.setEndTime(editedEnd)
+                    dismiss()
                 },
-                isDoneDisabled: shouldDisableDone()
+                isSaveDisabled: shouldDisableSave()
             )
         )
     }
@@ -38,18 +48,24 @@ struct SettingsHeaderView: View {
 
 // MARK: - プレビュー
 #if DEBUG
-struct SettingsHeaderView_Previews: PreviewProvider {
+struct TimerEditHeaderView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsHeaderView()
-            .environmentObject(TimerViewModel(
-                engine: DummyEngine(),
-                notificationService: DummyNotificationService(),
-                hapticService: DummyHapticService(),
-                historyService: DummyHistoryService(),
-                persistenceManager: DummyPersistenceManager(),
-                formatter: DummyFormatter()
-            ))
-            .background(Color.cosmosBackground)
+        TimerEditHeaderView(
+            editedActivity: "Work",
+            editedSubtitle: "Test subtitle",
+            editedMemo: "Test memo",
+            editedEnd: Date()
+        )
+        .environmentObject(HistoryViewModel())
+        .environmentObject(TimerViewModel(
+            engine: DummyEngine(),
+            notificationService: DummyNotificationService(),
+            hapticService: DummyHapticService(),
+            historyService: DummyHistoryService(),
+            persistenceManager: DummyPersistenceManager(),
+            formatter: DummyFormatter()
+        ))
+        .background(Color.cosmosBackground)
     }
 }
 
@@ -96,5 +112,9 @@ private class DummyPersistenceManager: TimerPersistenceManageable {
 private class DummyFormatter: TimeFormatterUtilable {
     func format(seconds: Int) -> String { return "" }
     func format(date: Date?) -> String { return "" }
+}
+
+private class HistoryViewModel: ObservableObject {
+    func updateLast(activity: String, subtitle: String, memo: String, end: Date) {}
 }
 #endif
