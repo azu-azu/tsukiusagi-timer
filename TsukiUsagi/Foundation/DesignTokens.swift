@@ -6,6 +6,9 @@ enum DesignTokens {
     // MARK: - Colors (Asset Catalog 参照)
 
     enum Colors {
+        /// 背景色（既存の拡張から）
+        static let cosmosBackground = Color.cosmosBackground
+
         /// カード背景色（Light/Dark モード対応）
         static let cosmosCardBG = Color.cosmosCardBackground
 
@@ -21,8 +24,6 @@ enum DesignTokens {
         /// ミュートテキスト色（Light/Dark モード対応）
         static let moonTextMuted = Color("moonTextMuted")
 
-        /// 背景色（既存の拡張から）
-        static let cosmosBackground = Color.cosmosBackground
 
         /// アクセント色（既存の拡張から）
         static let moonAccentBlue = Color.moonAccentBlue

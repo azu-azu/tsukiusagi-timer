@@ -3,28 +3,30 @@
 ```
 TsukiUsagi/
 ├── Assets.xcassets
+├── Visual/
+│   ├── Backgrounds/
+│   │   ├── BackgroundBlack.swift
+│   │   ├── BackgroundBlue.swift
+│   │   ├── BackgroundGradientView.swift
+│   │   ├── BackgroundLightPurple.swift
+│   │   └── BackgroundPurple.swift
+│   ├── Moon/
+│   │   ├── CraterView.swift
+│   │   ├── MoonShadow.swift
+│   │   ├── MoonShape.swift
+│   │   ├── MoonView.swift
+│   │   └── QuietMoonView.swift
+│   ├── Stars/
+│   │   ├── DiamondStarsView.swift
+│   │   ├── FlowingStarsView.swift
+│   │   ├── SparkleStarsView.swift
+│   │   └── StaticStarsView.swift
+│   └── Usagi/
+│       ├── MoonUsagiView.swift
+│       └── JumpingUsagiView.swift
 ├── Components/
-│   └── Visual/
-│       ├── Backgrounds/
-│       │   ├── BackgroundBlack.swift
-│       │   ├── BackgroundBlue.swift
-│       │   ├── BackgroundGradientView.swift
-│       │   ├── BackgroundLightPurple.swift
-│       │   └── BackgroundPurple.swift
-│       ├── Moon/
-│       │   ├── CraterView.swift
-│       │   ├── MoonShadow.swift
-│       │   ├── MoonShape.swift
-│       │   ├── MoonView.swift
-│       │   └── QuietMoonView.swift
-│       ├── Stars/
-│       │   ├── DiamondStarsView.swift
-│       │   ├── FlowingStarsView.swift
-│       │   ├── SparkleStarsView.swift
-│       │   └── StaticStarsView.swift
-│       └── Usagi/
-│           ├── MoonUsagiView.swift
-│           └── JumpingUsagiView.swift
+│   ├── FooterBar.swift
+│   └── MainPanel.swift
 ├── Entry/
 │   ├── Components/
 │   │   ├── FooterBar.swift
@@ -61,6 +63,8 @@ TsukiUsagi/
 │   │       ├── ViewHistorySectionView.swift
 │   │       └── WorkTimeSectionView.swift
 │   └── Timer/
+│       ├── Components/
+│       │   └── TimerEditHeaderView.swift
 │       ├── Views/
 │       │   ├── RecordedTimesView.swift
 │       │   ├── TimerEditView.swift
@@ -92,6 +96,9 @@ TsukiUsagi/
 │   │   ├── Buttons/
 │   │   │   ├── KeyboardCloseButton.swift   # キーボード閉じる共通UI/Modifier
 │   │   │   └── PlusMinusButton.swift
+│   │   ├── Headers/
+│   │   │   ├── CommonHeaderView.swift
+│   │   │   └── HeaderConfiguration.swift
 │   │   ├── CardContainer.swift
 │   │   ├── HiddenKeyboardWarmer.swift
 │   │   ├── NavigationCardView.swift
@@ -144,14 +151,3 @@ TsukiUsagi/
         └── blue.gif
 
 ```
-
----
-
-## 主要モジュール補足
-
-### Foundation/Components/Buttons/KeyboardCloseButton.swift
-- **役割**: キーボードを閉じるための共通UIコンポーネントとViewModifier（keyboardCloseButton）を提供
-- **使い方**: `.keyboardCloseButton(isVisible:action:)` を任意のViewに付与するだけで、フォーカス時に「Close」ボタンが表示され、キーボードを閉じるUI/UXを統一できる
-- **適用箇所**: `NewSessionFormView`, `SessionListSectionView`, `SessionLabelSection` など
-
----

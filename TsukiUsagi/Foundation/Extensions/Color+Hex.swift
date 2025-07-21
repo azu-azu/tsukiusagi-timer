@@ -29,7 +29,7 @@ extension Color {
     static let cosmosBackground = Color(hex: "#060c22").opacity(0.95)
 
     /// コスモスカード背景（セクションやボタン）
-    static let cosmosCardBackground = Color(hex: "#ffffff").opacity(0.15)
+    static let cosmosCardBackground = Color(hex: "#4b95ba").opacity(0.15)
 
     /// 月の光を思わせる青（アクセント、リンクカラー）
     static let moonAccentBlue = Color(red: 97 / 255, green: 163 / 255, blue: 242 / 255)
