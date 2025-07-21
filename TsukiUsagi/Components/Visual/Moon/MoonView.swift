@@ -14,6 +14,7 @@ struct MoonView: View {
     var moonSize: CGFloat
     var glitterText: String
     var size: CGSize
+    var isAnimationActive: Bool = true
 
     // 紫の影（アニメーション）
     var nearY: CGFloat { moonSize } // 上の位置
@@ -46,7 +47,13 @@ struct MoonView: View {
 
             // 🌘 紫の影（アニメーション）
             ZStack {
-                MoonShadow(moonSize: moonSize, duration: duration, nearY: nearY, farY: farY)
+                MoonShadow(
+                    moonSize: moonSize,
+                    duration: duration,
+                    nearY: nearY,
+                    farY: farY,
+                    isAnimationActive: isAnimationActive
+                )
 
                 // 🌑 クレーター（うっすらした内側の模様）
                 CraterCluster(scale: 1.0)
@@ -60,10 +67,12 @@ struct MoonView: View {
             )
 
             // ✨ キラキラ文字
-            Text(glitterText)
-                .glitter(size: moonSize * 0.18, resourceName: "black_yellow")
-                .minimumScaleFactor(0.5)
-                .offset(y: 18)
+            if isAnimationActive {
+                Text(glitterText)
+                    .glitter(size: moonSize * 0.18, resourceName: "black_yellow")
+                    .minimumScaleFactor(0.5)
+                    .offset(y: 18)
+            }
         }
         .onAppear {
             animate = true

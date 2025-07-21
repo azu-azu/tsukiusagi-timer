@@ -12,6 +12,7 @@ struct MainPanel: View {
     let moonLandscapeYOffsetRatio: CGFloat
     var isQuietMoonFocused: FocusState<Bool>.Binding
     @Binding var showingEditRecord: Bool
+    let isMoonAnimationActive: Bool
 
     var body: some View {
         // let _ = print(
@@ -48,7 +49,7 @@ struct MainPanel: View {
                     // 横画面：左右分割（最高品質版）
                     HStack(spacing: landscapeMargin) {
                         // 左側：QuietMoonView
-                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
+                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets, isAnimationActive: isMoonAnimationActive)
                             .frame(
                                 width: (contentSize.width - landscapeMargin) * 0.5,
                                 height: setHeight
@@ -60,7 +61,7 @@ struct MainPanel: View {
                             .accessibilityHint(
                                 "Displays inspirational messages after session completion"
                             )
-                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityAddTraits(AccessibilityTraits.isHeader)
                             .focused(isQuietMoonFocused)
 
                         // 右側：RecordedTimesView
@@ -96,12 +97,12 @@ struct MainPanel: View {
                     // let _ = print("🌙 MainPanel - Portrait QuietMoon")
                     // 縦画面：従来通り
                     VStack {
-                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets)
+                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets, isAnimationActive: isMoonAnimationActive)
                             .accessibilityLabel("Quiet Moon Message")
                             .accessibilityHint(
                                 "Displays inspirational messages after session completion"
                             )
-                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityAddTraits(AccessibilityTraits.isHeader)
                             .focused(isQuietMoonFocused)
                     }
                     .frame(width: contentSize.width, height: setHeight)
@@ -122,7 +123,8 @@ struct MainPanel: View {
                         MoonView(
                             moonSize: moonSize,
                             glitterText: moonTitle,
-                            size: size
+                            size: size,
+                            isAnimationActive: isMoonAnimationActive
                         )
                         .allowsHitTesting(false)
                         .frame(
@@ -157,7 +159,8 @@ struct MainPanel: View {
                         MoonView(
                             moonSize: moonSize,
                             glitterText: moonTitle,
-                            size: size
+                            size: size,
+                            isAnimationActive: isMoonAnimationActive
                         )
                         .allowsHitTesting(false)
 
