@@ -43,21 +43,23 @@ TsukiUsagi/
 │   │   └── Views/
 │   │       └── HistoryView.swift
 │   ├── Settings/
-│   │   ├── Screens/
-│   │   │   ├── SettingsView.swift
-│   │   │   └── SessionNameManagerView.swift
-│   │   ├── Sections/
-│   │   │   ├── WorkTimeSectionView.swift
-│   │   │   ├── BreakTimeSectionView.swift
-│   │   │   ├── ResetStopSectionView.swift
-│   │   │   ├── ViewHistorySectionView.swift
-│   │   │   ├── ManageSessionNamesSectionView.swift
-│   │   │   └── SessionListSectionView.swift
 │   │   ├── Components/
 │   │   │   ├── SessionRowView.swift
 │   │   │   └── SettingsHeaderView.swift
-│   │   └── Forms/
-│   │       └── NewSessionFormView.swift
+│   │   ├── Forms/
+│   │   │   └── NewSessionFormView.swift
+│   │   ├── Screens/
+│   │   │   ├── SessionNameManagerView.swift
+│   │   │   └── SettingsView.swift
+│   │   └── Sections/
+│   │       ├── BreakTimeSectionView.swift
+│   │       ├── ResetStopSectionView.swift
+│   │       ├── SessionListSectionView.swift
+│   │       ├── SubtitleEdit/
+│   │       │   ├── SubtitleEditModal.swift
+│   │       │   └── SubtitleEditModels.swift
+│   │       ├── ViewHistorySectionView.swift
+│   │       └── WorkTimeSectionView.swift
 │   └── Timer/
 │       ├── Views/
 │       │   ├── RecordedTimesView.swift
@@ -87,13 +89,20 @@ TsukiUsagi/
 │           └── PomodoroPhase.swift
 ├── Foundation/
 │   ├── Components/
+│   │   ├── Buttons/
+│   │   │   ├── KeyboardCloseButton.swift   # キーボード閉じる共通UI/Modifier
+│   │   │   └── PlusMinusButton.swift
+│   │   ├── CardContainer.swift
 │   │   ├── HiddenKeyboardWarmer.swift
+│   │   ├── NavigationCardView.swift
 │   │   ├── OptimizedStarBackground.swift
 │   │   ├── CardContainer.swift
 │   │   ├── NavigationCardView.swift
 │   │   └── Buttons/
 │   │       ├── PlusMinusButton.swift
 │   │       └── KeyboardCloseButton.swift   # ← ここに移動: キーボード閉じる共通UI/Modifier
+│   ├── Controllers/
+│   │   └── AdaptiveAnimationController.swift
 │   ├── Constants/
 │   │   └── AppConstants.swift
 │   ├── Extensions/
