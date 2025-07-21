@@ -47,109 +47,115 @@ struct TimerEditView: View {
                 // 背景（画面全体、clipされない）
                 Color.cosmosBackground.ignoresSafeArea()
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 40) {
-                        // ヘッダー（分割されたTimerEditHeaderViewを使用）
-                        TimerEditHeaderView(
-                            editedActivity: editedActivity,
-                            editedSubtitle: editedSubtitle,
-                            editedMemo: editedMemo,
-                            editedEnd: editedEnd
-                        )
+                // SettingsViewと同じ構造に統一
+                VStack(spacing: 0) {
+                    // ヘッダーを固定位置に配置（SettingsViewと同じ構造）
+                    TimerEditHeaderView(
+                        editedActivity: editedActivity,
+                        editedSubtitle: editedSubtitle,
+                        editedMemo: editedMemo,
+                        editedEnd: editedEnd
+                    )
+                    .background(Color.cosmosBackground)
+                    .zIndex(1)
 
-                        // Session Label
-                        section(title: "Session Label") {
-                            SessionLabelSection(
-                                activity: $editedActivity,
-                                subtitle: $editedSubtitle,
-                                isActivityFocused: $isActivityFocused,
-                                isSubtitleFocused: $isSubtitleFocused,
-                                labelCornerRadius: labelCornerRadius,
-                                showEmptyError: .constant(currentShowEmptyError),
-                                onDone: nil
-                            )
-                        }
-
-                        // Final Time
-                        section(title: "Final Time") {
-                            DatePicker(
-                                "Final Time",
-                                selection: $editedEnd,
-                                in: minEnd...,
-                                displayedComponents: [.hourAndMinute]
-                            )
-                            .datePickerStyle(.compact)
-                            .foregroundColor(.moonTextPrimary)
-                            .colorScheme(.dark)
-                        }
-
-                        // Memo
-                        section(title: "Memo") {
-                            ZStack(alignment: .topLeading) {
-                                if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    Text("Memo (optional)")
-                                        .foregroundColor(.gray)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 12)
-                                }
-
-                                TextEditor(text: $editedMemo)
-                                    .frame(minHeight: 120, maxHeight: UIScreen.main.bounds.height * 0.4)
-                                    .padding(8)
-                                    .scrollContentBackground(.hidden)
-                                    .background(Color.white.opacity(0.05))
-                                    .focused($isMemoFocused)
+                    // スクロール可能なコンテンツ
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 40) {
+                            // Session Label
+                            section(title: "Session Label") {
+                                SessionLabelSection(
+                                    activity: $editedActivity,
+                                    subtitle: $editedSubtitle,
+                                    isActivityFocused: $isActivityFocused,
+                                    isSubtitleFocused: $isSubtitleFocused,
+                                    labelCornerRadius: labelCornerRadius,
+                                    showEmptyError: .constant(currentShowEmptyError),
+                                    onDone: nil
+                                )
                             }
-                        }
 
-                        Spacer(minLength: 40)
+                            // Final Time
+                            section(title: "Final Time") {
+                                DatePicker(
+                                    "Final Time",
+                                    selection: $editedEnd,
+                                    in: minEnd...,
+                                    displayedComponents: [.hourAndMinute]
+                                )
+                                .datePickerStyle(.compact)
+                                .foregroundColor(.moonTextPrimary)
+                                .colorScheme(.dark)
+                            }
+
+                            // Memo
+                            section(title: "Memo") {
+                                ZStack(alignment: .topLeading) {
+                                    if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                        Text("Memo (optional)")
+                                            .foregroundColor(.gray)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 12)
+                                    }
+
+                                    TextEditor(text: $editedMemo)
+                                        .frame(minHeight: 120, maxHeight: UIScreen.main.bounds.height * 0.4)
+                                        .padding(8)
+                                        .scrollContentBackground(.hidden)
+                                        .background(Color.white.opacity(0.05))
+                                        .focused($isMemoFocused)
+                                }
+                            }
+
+                            Spacer(minLength: 40)
+                        }
+                        .padding()
                     }
-                    .padding()
+                    .scrollIndicators(.hidden) // スクロールインジケーター非表示
+                    .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
+                    .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
                 }
-                .scrollIndicators(.hidden) // スクロールインジケーター非表示
-                .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
-                .padding(.bottom, 20) // Safe Area対応
                 .clipShape(RoundedRectangle(cornerRadius: 30))
                 .padding(.top, topPadding)
                 .presentationDetents([.large])
-                .navigationBarHidden(true) // NavigationBarを非表示
-                .modifier(DismissKeyboardOnTap(
-                    isActivityFocused: $isActivityFocused,
-                    isSubtitleFocused: $isSubtitleFocused,
-                    isMemoFocused: $isMemoFocused,
-                    isKeyboardVisible: $isKeyboardVisible
-                ))
-                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isKeyboardVisible = true
-                    }
+            }
+            .navigationBarHidden(true) // NavigationBarを非表示
+            .modifier(DismissKeyboardOnTap(
+                isActivityFocused: $isActivityFocused,
+                isSubtitleFocused: $isSubtitleFocused,
+                isMemoFocused: $isMemoFocused,
+                isKeyboardVisible: $isKeyboardVisible
+            ))
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isKeyboardVisible = true
                 }
-                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isKeyboardVisible = false
-                    }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isKeyboardVisible = false
                 }
-                .toolbar {
-                    ToolbarItemGroup(placement: .keyboard) {
-                        Spacer()
-                        Button("Close") {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                isActivityFocused = false
-                                isSubtitleFocused = false
-                                isMemoFocused = false
-                                isKeyboardVisible = false
-                            }
+            }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Close") {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isActivityFocused = false
+                            isSubtitleFocused = false
+                            isMemoFocused = false
+                            isKeyboardVisible = false
                         }
                     }
                 }
-                .task {
-                    // 編集画面を開いた時、現在のセッションの値をセット
-                    editedEnd = timerVM.endTime ?? Date()
-                    minEnd = timerVM.startTime ?? Date()
-                    editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
-                    editedSubtitle = timerVM.currentSubtitleLabel
-                    editedMemo = ""
-                }
+            }
+            .task {
+                // 編集画面を開いた時、現在のセッションの値をセット
+                editedEnd = timerVM.endTime ?? Date()
+                minEnd = timerVM.startTime ?? Date()
+                editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
+                editedSubtitle = timerVM.currentSubtitleLabel
+                editedMemo = ""
             }
         }
     }

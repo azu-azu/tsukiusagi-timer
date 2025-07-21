@@ -3,30 +3,20 @@
 ```
 TsukiUsagi/
 ├── Assets.xcassets
-├── Visual/
-│   ├── Backgrounds/
-│   │   ├── BackgroundBlack.swift
-│   │   ├── BackgroundBlue.swift
-│   │   ├── BackgroundGradientView.swift
-│   │   ├── BackgroundLightPurple.swift
-│   │   └── BackgroundPurple.swift
-│   ├── Moon/
-│   │   ├── CraterView.swift
-│   │   ├── MoonShadow.swift
-│   │   ├── MoonShape.swift
-│   │   ├── MoonView.swift
-│   │   └── QuietMoonView.swift
-│   ├── Stars/
-│   │   ├── DiamondStarsView.swift
-│   │   ├── FlowingStarsView.swift
-│   │   ├── SparkleStarsView.swift
-│   │   └── StaticStarsView.swift
-│   └── Usagi/
-│       ├── MoonUsagiView.swift
-│       └── JumpingUsagiView.swift
 ├── Components/
-│   ├── FooterBar.swift
-│   └── MainPanel.swift
+│   ├── Buttons/
+│   │   ├── KeyboardCloseButton.swift   # キーボード閉じる共通UI/Modifier
+│   │   └── PlusMinusButton.swift
+│   ├── Headers/
+│   │   ├── CommonHeaderView.swift
+│   │   └── HeaderConfiguration.swift
+│   ├── CardContainer.swift
+│   ├── HiddenKeyboardWarmer.swift
+│   ├── NavigationCardView.swift
+│   ├── OptimizedStarBackground.swift
+│   ├── RoundedCard.swift
+│   ├── TotalCard.swift
+│   └── PlusMinusButton.swift
 ├── Entry/
 │   ├── Components/
 │   │   ├── FooterBar.swift
@@ -92,22 +82,6 @@ TsukiUsagi/
 │       └── Models/
 │           └── PomodoroPhase.swift
 ├── Foundation/
-│   ├── Components/
-│   │   ├── Buttons/
-│   │   │   ├── KeyboardCloseButton.swift   # キーボード閉じる共通UI/Modifier
-│   │   │   └── PlusMinusButton.swift
-│   │   ├── Headers/
-│   │   │   ├── CommonHeaderView.swift
-│   │   │   └── HeaderConfiguration.swift
-│   │   ├── CardContainer.swift
-│   │   ├── HiddenKeyboardWarmer.swift
-│   │   ├── NavigationCardView.swift
-│   │   ├── OptimizedStarBackground.swift
-│   │   ├── CardContainer.swift
-│   │   ├── NavigationCardView.swift
-│   │   └── Buttons/
-│   │       ├── PlusMinusButton.swift
-│   │       └── KeyboardCloseButton.swift   # ← ここに移動: キーボード閉じる共通UI/Modifier
 │   ├── Controllers/
 │   │   └── AdaptiveAnimationController.swift
 │   ├── Constants/
@@ -129,25 +103,47 @@ TsukiUsagi/
 │   ├── FeatureFlags.swift
 │   ├── PreviewData.swift
 │   └── Formatters/
-│       ├── DateFormatters.swift
-│       └── TimeFormatters.swift
-├── UIKitSupport/
-│   ├── UIKitWrappers/
-│   │   └── SelectableTextView.swift
-│   ├── GearButtonToolbar.swift
-│   ├── GlitterTextModifier.swift
-│   ├── GradientGlitterTextModifier.swift
-│   └── ViewModifiers.swift
+│   │   ├── DateFormatters.swift
+│   │   └── TimeFormatters.swift
+│   └── UIKitSupport/
+│       ├── ViewModifiers.swift
+│       ├── GlitterTextModifier.swift
+│       ├── GradientGlitterTextModifier.swift
+│       ├── GearButtonToolbar.swift
+│       └── UIKitWrappers/
+│           └── SelectableTextView.swift
 ├── Models/
 │   ├── SessionEntry.swift
 │   ├── SessionItem.swift
 │   ├── SessionName.swift
 │   └── MoonMessage.swift
 └── Resources/
-    └── gif/
-        ├── gold.gif
-        ├── black_yellow.gif
-        ├── black_red.gif
-        └── blue.gif
+│   └── gif/
+│       ├── gold.gif
+│       ├── black_yellow.gif
+│       ├── black_red.gif
+│       └── blue.gif
+├── Visual/
+│   ├── Backgrounds/
+│   │   ├── BackgroundBlack.swift
+│   │   ├── BackgroundBlue.swift
+│   │   ├── BackgroundGradientView.swift
+│   │   ├── BackgroundLightPurple.swift
+│   │   └── BackgroundPurple.swift
+│   ├── Moon/
+│   │   ├── CraterView.swift
+│   │   ├── MoonShadow.swift
+│   │   ├── MoonShape.swift
+│   │   ├── MoonView.swift
+│   │   └── QuietMoonView.swift
+│   ├── Stars/
+│   │   ├── DiamondStarsView.swift
+│   │   ├── FlowingStarsView.swift
+│   │   ├── SparkleStarsView.swift
+│   │   └── StaticStarsView.swift
+│   └── Usagi/
+│       ├── MoonUsagiView.swift
+│       └── JumpingUsagiView.swift
+
 
 ```
