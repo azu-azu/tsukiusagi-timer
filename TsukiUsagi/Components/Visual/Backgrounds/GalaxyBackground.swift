@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct BackgroundBlack: View {
+struct GalaxyBackground: View {
     var body: some View {
         LinearGradient(
             gradient: Gradient(stops: [
@@ -16,7 +16,7 @@ struct BackgroundBlack: View {
 }
 
 #Preview {
-    BackgroundBlack()
+    GalaxyBackground()
 }
 
 // このグラデーションは真っ黒一色よりも以下の理由で優れていると考えられます：

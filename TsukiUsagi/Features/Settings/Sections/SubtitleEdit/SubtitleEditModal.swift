@@ -42,7 +42,7 @@ struct EditableModal<Content: View>: View {
                 Spacer()
             }
             .padding()
-            .background(Color.moonBackground.ignoresSafeArea())
+            .background(Color.cosmosBackground.ignoresSafeArea())
             .keyboardCloseButton(
                 isVisible: isKeyboardCloseVisible,
                 action: onKeyboardClose
@@ -61,7 +61,7 @@ struct EditableModal<Content: View>: View {
                 }
             }
         }
-        .background(Color.moonBackground.ignoresSafeArea())
+        .background(Color.cosmosBackground.ignoresSafeArea())
         .interactiveDismissDisabled() // 意図しない閉じ操作を防ぐ
     }
 }
