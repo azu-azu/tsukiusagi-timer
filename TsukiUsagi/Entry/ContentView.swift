@@ -28,6 +28,7 @@ struct ContentView: View {
     @State private var showDiamondStars = false
     @State private var cachedIsLandscape: Bool = false
     @FocusState private var isQuietMoonFocused: Bool
+    @State private var isFlowingStarsActive: Bool = true
 
     private let moonTitle = "Centered"
 
@@ -105,16 +106,16 @@ struct ContentView: View {
                         StaticStarsView(starCount: staticStarCount)
 
                         // FlowingStarsViewなどの星エフェクトはタイマー進行中のみ
-                        if !timerVM.isSessionFinished {
-                            AdaptiveFlowingStarsView(
-                                baseStarCount: flowingStarCount,
+                        if !timerVM.isSessionFinished && isFlowingStarsActive {
+                            FlowingStarsView(
+                                starCount: flowingStarCount,
                                 angle: .degrees(90),
                                 durationRange: 24 ... 40,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
-                            AdaptiveFlowingStarsView(
-                                baseStarCount: flowingStarCount,
+                            FlowingStarsView(
+                                starCount: flowingStarCount,
                                 angle: .degrees(-90),
                                 durationRange: 24 ... 40,
                                 sizeRange: 2 ... 4,
@@ -134,6 +135,7 @@ struct ContentView: View {
                             moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
                             isQuietMoonFocused: $isQuietMoonFocused,
                             showingEditRecord: $showingEditRecord
+                            ,isMoonAnimationActive: isFlowingStarsActive
                         )
                         .onPreferenceChange(LandscapePreferenceKey.self) { _ in
                             updateOrientation(size: size)
@@ -212,6 +214,12 @@ struct ContentView: View {
                             .delay(0.1),
                         value: isLandscape
                     )
+                    .onChange(of: showingSettings) { _, newValue in
+                        isFlowingStarsActive = !newValue && timerVM.isRunning
+                    }
+                    .onChange(of: timerVM.isRunning) { _, newValue in
+                        isFlowingStarsActive = !showingSettings && newValue
+                    }
                 }
             }
         }

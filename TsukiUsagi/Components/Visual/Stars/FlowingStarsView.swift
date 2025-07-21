@@ -190,32 +190,34 @@ struct FlowingStarsView: View {
     let durationRange: ClosedRange<Double>
     let sizeRange: ClosedRange<CGFloat>
     let spawnArea: StarSpawnArea?
+    var isAnimationActive: Bool = true
 
-    @StateObject private var generator: FlowingStarsGenerator
-    @State private var lastSize: CGSize = .zero
-
+    // カスタムイニシャライザを追加
     init(
         starCount: Int,
         angle: Angle,
         durationRange: ClosedRange<Double>,
         sizeRange: ClosedRange<CGFloat>,
-        spawnArea: StarSpawnArea?
+        spawnArea: StarSpawnArea? = nil,
+        isAnimationActive: Bool = true
     ) {
+        self._generator = StateObject(wrappedValue: FlowingStarsGenerator(
+            starCount: starCount,
+            angle: angle,
+            durationRange: durationRange,
+            sizeRange: sizeRange,
+            spawnArea: spawnArea
+        ))
         self.starCount = starCount
         self.angle = angle
         self.durationRange = durationRange
         self.sizeRange = sizeRange
         self.spawnArea = spawnArea
-        _generator = StateObject(
-            wrappedValue: FlowingStarsGenerator(
-                starCount: starCount,
-                angle: angle,
-                durationRange: durationRange,
-                sizeRange: sizeRange,
-                spawnArea: spawnArea
-            )
-        )
+        self.isAnimationActive = isAnimationActive
     }
+
+    @StateObject private var generator: FlowingStarsGenerator
+    @State private var lastSize: CGSize = .zero
 
     var body: some View {
         GeometryReader { geo in
