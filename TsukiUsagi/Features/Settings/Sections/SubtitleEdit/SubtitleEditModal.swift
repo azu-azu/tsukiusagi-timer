@@ -127,8 +127,8 @@ struct DescriptionEditContent: View {
                 }
             }
         }
-        .onChange(of: focusedField) { _, newValue in
-            isAnyFieldFocused = newValue != nil
+        .onChange(of: focusedField) { _ in
+            isAnyFieldFocused = focusedField != nil
         }
     }
 
@@ -326,8 +326,8 @@ struct FullSessionEditContent: View {
                 self.focusedField = .sessionName
             }
         }
-        .onChange(of: focusedField) { _, newValue in
-            isAnyFieldFocused = newValue != nil
+        .onChange(of: focusedField) { _ in
+            isAnyFieldFocused = focusedField != nil
         }
     }
 
@@ -457,19 +457,20 @@ struct SessionEditModal_Previews: PreviewProvider {
                 onSave: { print("Save tapped") },
                 onCancel: { print("Cancel tapped") },
                 isKeyboardCloseVisible: false,
-                onKeyboardClose: {}
-            ) {
-                DescriptionEditContent(
-                    sessionName: "Work",
-                    descriptions: ["SwiftUI development", "Code review"],
-                    editingIndex: 0,
-                    onDescriptionsChange: { newDescriptions in
-                        print("Descriptions changed: \(newDescriptions)")
-                    },
-                    isAnyFieldFocused: .constant(false),
-                    onClearFocus: {}
-                )
-            }
+                onKeyboardClose: {},
+                content: {
+                    DescriptionEditContent(
+                        sessionName: "Work",
+                        descriptions: ["SwiftUI development", "Code review"],
+                        editingIndex: 0,
+                        onDescriptionsChange: { newDescriptions in
+                            print("Descriptions changed: \(newDescriptions)")
+                        },
+                        isAnyFieldFocused: .constant(false),
+                        onClearFocus: {}
+                    )
+                }
+            )
             .presentationDetents([.large])
             .previewDisplayName("Description Edit")
 
@@ -479,21 +480,22 @@ struct SessionEditModal_Previews: PreviewProvider {
                 onSave: { print("Save tapped") },
                 onCancel: { print("Cancel tapped") },
                 isKeyboardCloseVisible: false,
-                onKeyboardClose: {}
-            ) {
-                FullSessionEditContent(
-                    sessionName: "My Custom Project",
-                    descriptions: ["Task 1", "Task 2", "Task 3"],
-                    onSessionNameChange: { newName in
-                        print("Session name changed: \(newName)")
-                    },
-                    onDescriptionsChange: { newDescriptions in
-                        print("Descriptions changed: \(newDescriptions)")
-                    },
-                    isAnyFieldFocused: .constant(false),
-                    onClearFocus: {}
-                )
-            }
+                onKeyboardClose: {},
+                content: {
+                    FullSessionEditContent(
+                        sessionName: "My Custom Project",
+                        descriptions: ["Task 1", "Task 2", "Task 3"],
+                        onSessionNameChange: { newName in
+                            print("Session name changed: \(newName)")
+                        },
+                        onDescriptionsChange: { newDescriptions in
+                            print("Descriptions changed: \(newDescriptions)")
+                        },
+                        isAnyFieldFocused: .constant(false),
+                        onClearFocus: {}
+                    )
+                }
+            )
             .presentationDetents([.large])
             .previewDisplayName("Full Session Edit")
         }

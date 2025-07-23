@@ -99,12 +99,15 @@ struct SessionEditContext: Identifiable, Equatable {
         case .descriptionOnly(let index):
             if let index = index {
                 let descriptionText = descriptions.indices.contains(index) ? descriptions[index] : ""
-                return "SessionEditContext(session: \(sessionName), description[\(index)]: \"\(descriptionText)\")"
+                return "SessionEditContext(session: \(sessionName), " +
+                    "description[\(index)]: \"\(descriptionText)\")"
             } else {
-                return "SessionEditContext(session: \(sessionName), descriptionManagement, descriptions: \(descriptions.count))"
+                return "SessionEditContext(session: \(sessionName), " +
+                    "descriptionManagement, descriptions: \(descriptions.count))"
             }
         case .fullSession:
-            return "SessionEditContext(session: \(sessionName), fullEdit, descriptions: \(descriptions.count))"
+            return "SessionEditContext(session: \(sessionName), " +
+                "fullEdit, descriptions: \(descriptions.count))"
         }
     }
 }

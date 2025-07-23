@@ -14,7 +14,7 @@ struct SessionListSectionView: View {
     @State private var errorMessage: IdentifiableError?
 
     // Session編集用の状態管理
-    @State private var editingSessionContext: SessionEditContext? = nil
+    @State private var editingSessionContext: SessionEditContext?
     @State private var tempSessionName: String = ""
     @State private var tempDescriptions: [String] = []
     @State private var tempDescriptionText: String = ""
@@ -57,22 +57,23 @@ struct SessionListSectionView: View {
                         KeyboardManager.hideKeyboard {
                             isAnyFieldFocused = false
                         }
+                    },
+                    content: {
+                        DescriptionEditContent(
+                            sessionName: context.sessionName,
+                            descriptions: tempDescriptions, // 修正: contextではなくtempDescriptionsを使用
+                            editingIndex: context.descriptionIndex,
+                            onDescriptionsChange: { newDescriptions in
+                                // 修正: tempDescriptionsを更新してUIと同期
+                                tempDescriptions = newDescriptions
+                            },
+                            isAnyFieldFocused: $isAnyFieldFocused,
+                            onClearFocus: {
+                                isAnyFieldFocused = false
+                            }
+                        )
                     }
-                ) {
-                    DescriptionEditContent(
-                        sessionName: context.sessionName,
-                        descriptions: tempDescriptions, // 修正: contextではなくtempDescriptionsを使用
-                        editingIndex: context.descriptionIndex,
-                        onDescriptionsChange: { newDescriptions in
-                            // 修正: tempDescriptionsを更新してUIと同期
-                            tempDescriptions = newDescriptions
-                        },
-                        isAnyFieldFocused: $isAnyFieldFocused,
-                        onClearFocus: {
-                            isAnyFieldFocused = false
-                        }
-                    )
-                }
+                )
                 .presentationDetents([.large])
 
             case .fullSession:
@@ -91,25 +92,26 @@ struct SessionListSectionView: View {
                         KeyboardManager.hideKeyboard {
                             isAnyFieldFocused = false
                         }
+                    },
+                    content: {
+                        FullSessionEditContent(
+                            sessionName: tempSessionName, // 修正: contextではなくtempSessionNameを使用
+                            descriptions: tempDescriptions, // 修正: contextではなくtempDescriptionsを使用
+                            onSessionNameChange: { newName in
+                                // 修正: tempSessionNameを更新してUIと同期
+                                tempSessionName = newName
+                            },
+                            onDescriptionsChange: { newDescriptions in
+                                // 修正: tempDescriptionsを更新してUIと同期
+                                tempDescriptions = newDescriptions
+                            },
+                            isAnyFieldFocused: $isAnyFieldFocused,
+                            onClearFocus: {
+                                isAnyFieldFocused = false
+                            }
+                        )
                     }
-                ) {
-                    FullSessionEditContent(
-                        sessionName: tempSessionName, // 修正: contextではなくtempSessionNameを使用
-                        descriptions: tempDescriptions, // 修正: contextではなくtempDescriptionsを使用
-                        onSessionNameChange: { newName in
-                            // 修正: tempSessionNameを更新してUIと同期
-                            tempSessionName = newName
-                        },
-                        onDescriptionsChange: { newDescriptions in
-                            // 修正: tempDescriptionsを更新してUIと同期
-                            tempDescriptions = newDescriptions
-                        },
-                        isAnyFieldFocused: $isAnyFieldFocused,
-                        onClearFocus: {
-                            isAnyFieldFocused = false
-                        }
-                    )
-                }
+                )
                 .presentationDetents([.large])
             }
         }
@@ -172,9 +174,9 @@ struct SessionListSectionView: View {
                     }
                     .buttonStyle(.bordered)
 
-                    Button(role: .destructive) {
+                    Button(role: .destructive, action: {
                         sessionManager.deleteEntry(id: entry.id)
-                    } label: {
+                    }) {
                         Image(systemName: "trash")
                     }
                     .buttonStyle(.bordered)

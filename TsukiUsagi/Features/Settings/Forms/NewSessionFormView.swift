@@ -158,7 +158,8 @@ struct NewSessionFormView: View {
                 ForEach(descriptionTexts.indices, id: \.self) { idx in
                     HStack {
                         ZStack(alignment: .topLeading) {
-                            if descriptionTexts[safe: idx]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true {
+                            if descriptionTexts[safe: idx]?
+                                .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true {
                                 Text(idx == 0 ? "Description (optional)" : "Description \(idx + 1)")
                                     .foregroundColor(.gray)
                                     .padding(.horizontal, 8)
@@ -260,15 +261,13 @@ struct NewSessionFormView: View {
             .filter { !$0.isEmpty }
 
         do {
-			if sessionManager.sessionDatabase[trimmedName.lowercased()] != nil {
+            if sessionManager.sessionDatabase[trimmedName.lowercased()] != nil {
                 // 既存セッションの場合：descriptionを1つずつ追加
-                for description in descriptions {
-                    if !description.isEmpty {
-                        try sessionManager.addDescriptionToSession(
-                            sessionName: trimmedName,
-                            newDescription: description
-                        )
-                    }
+                for description in descriptions where !description.isEmpty {
+                    try sessionManager.addDescriptionToSession(
+                        sessionName: trimmedName,
+                        newDescription: description
+                    )
                 }
             } else {
                 // 新規セッションの場合
