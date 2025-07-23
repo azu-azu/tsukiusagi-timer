@@ -33,6 +33,14 @@ struct SettingsView: View {
             && activityLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    // ヘッダーの上余白を計算（小画面への配慮込み）
+    private var headerTopPadding: CGFloat {
+        // 画面高さが700未満の場合は控えめに、それ以外は標準的な余白
+        let basePadding: CGFloat = size.height < 700 ? 8 : 12
+        // Safe Areaがある場合はやや控えめに調整
+        return safeAreaInsets.top > 0 ? min(basePadding, 10) : basePadding
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -59,8 +67,9 @@ struct SettingsView: View {
 
                 // コンテンツ部分のみclipShape適用
                 VStack(spacing: 0) {
-                    // ヘッダーを固定位置に配置
+                    // ヘッダーを固定位置に配置（Safe Area対応の上余白を追加）
                     SettingsHeaderView(onDismiss: { dismiss() })
+                        .padding(.top, headerTopPadding)
                         .debugComponent("SettingsHeaderView", position: .topLeading)
                         .background(Color.cosmosBackground)
                         .zIndex(1)
