@@ -19,35 +19,35 @@ struct SessionEditContext: Identifiable, Equatable {
     /// 現在のセッション名
     let sessionName: String
 
-    /// 現在のSubtitleリスト
-    let subtitles: [String]
+    /// 現在のDescriptionリスト
+    let descriptions: [String]
 
     /// 編集モードの種類
     let editMode: EditMode
 
     /// 編集モードの定義
     enum EditMode: Equatable {
-        case subtitleOnly(index: Int?)  // Default Session: 特定のSubtitle編集 or 全Subtitle管理
-        case fullSession                // Custom Session: Session名 + 全Subtitle編集
+        case descriptionOnly(index: Int?)  // Default Session: 特定のDescription編集 or 全Description管理
+        case fullSession                // Custom Session: Session名 + 全Description編集
     }
 
-    /// Subtitle編集用の初期化
+    /// Description編集用の初期化
     /// - Parameters:
     ///   - entryId: 編集対象のSessionEntryのID
     ///   - sessionName: セッション名（Default Sessionの場合は固定値）
-    ///   - subtitles: 現在のSubtitleリスト
-    ///   - subtitleIndex: 編集対象のSubtitleのインデックス（既存編集の場合）
-    static func subtitleEdit(
+    ///   - descriptions: 現在のDescriptionリスト
+    ///   - descriptionIndex: 編集対象のDescriptionのインデックス（既存編集の場合）
+    static func descriptionEdit(
         entryId: UUID,
         sessionName: String,
-        subtitles: [String],
-        subtitleIndex: Int? = nil
+        descriptions: [String],
+        descriptionIndex: Int? = nil
     ) -> SessionEditContext {
         SessionEditContext(
             entryId: entryId,
             sessionName: sessionName,
-            subtitles: subtitles,
-            editMode: .subtitleOnly(index: subtitleIndex)
+            descriptions: descriptions,
+            editMode: .descriptionOnly(index: descriptionIndex)
         )
     }
 
@@ -55,16 +55,16 @@ struct SessionEditContext: Identifiable, Equatable {
     /// - Parameters:
     ///   - entryId: 編集対象のSessionEntryのID
     ///   - sessionName: 現在のセッション名
-    ///   - subtitles: 現在のSubtitleリスト
+    ///   - descriptions: 現在のDescriptionリスト
     static func fullSessionEdit(
         entryId: UUID,
         sessionName: String,
-        subtitles: [String]
+        descriptions: [String]
     ) -> SessionEditContext {
         SessionEditContext(
             entryId: entryId,
             sessionName: sessionName,
-            subtitles: subtitles,
+            descriptions: descriptions,
             editMode: .fullSession
         )
     }
@@ -75,20 +75,20 @@ struct SessionEditContext: Identifiable, Equatable {
         ["Work", "Study", "Life", "Personal", "Health"].contains(sessionName)
     }
 
-    /// 編集対象のSubtitleのインデックス（Subtitle編集時のみ）
-    var subtitleIndex: Int? {
-        if case .subtitleOnly(let index) = editMode {
+    /// 編集対象のDescriptionのインデックス（Description編集時のみ）
+    var descriptionIndex: Int? {
+        if case .descriptionOnly(let index) = editMode {
             return index
         }
         return nil
     }
 
-    /// 編集対象のSubtitleテキスト（特定のSubtitle編集時のみ）
-    var currentSubtitleText: String? {
-        if case .subtitleOnly(let optionalIndex) = editMode,
+    /// 編集対象のDescriptionテキスト（特定のDescription編集時のみ）
+    var currentDescriptionText: String? {
+        if case .descriptionOnly(let optionalIndex) = editMode,
             let index = optionalIndex,
-            index < subtitles.count {
-            return subtitles[index]
+            index < descriptions.count {
+            return descriptions[index]
         }
         return nil
     }
@@ -96,15 +96,15 @@ struct SessionEditContext: Identifiable, Equatable {
     /// 編集コンテキストの説明文字列（デバッグ用）
     var debugDescription: String {
         switch editMode {
-        case .subtitleOnly(let index):
+        case .descriptionOnly(let index):
             if let index = index {
-                let subtitleText = subtitles.indices.contains(index) ? subtitles[index] : ""
-                return "SessionEditContext(session: \(sessionName), subtitle[\(index)]: \"\(subtitleText)\")"
+                let descriptionText = descriptions.indices.contains(index) ? descriptions[index] : ""
+                return "SessionEditContext(session: \(sessionName), description[\(index)]: \"\(descriptionText)\")"
             } else {
-                return "SessionEditContext(session: \(sessionName), subtitleManagement, subtitles: \(subtitles.count))"
+                return "SessionEditContext(session: \(sessionName), descriptionManagement, descriptions: \(descriptions.count))"
             }
         case .fullSession:
-            return "SessionEditContext(session: \(sessionName), fullEdit, subtitles: \(subtitles.count))"
+            return "SessionEditContext(session: \(sessionName), fullEdit, descriptions: \(descriptions.count))"
         }
     }
 }
@@ -113,16 +113,16 @@ struct SessionEditContext: Identifiable, Equatable {
 
 extension SessionEditContext {
     /// テスト用のサンプルデータ
-    static let sampleSubtitleEdit = SessionEditContext.subtitleEdit(
+    static let sampleDescriptionEdit = SessionEditContext.descriptionEdit(
         entryId: UUID(),
         sessionName: "Work",
-        subtitles: ["SwiftUI development", "Code review"],
-        subtitleIndex: 0
+        descriptions: ["SwiftUI development", "Code review"],
+        descriptionIndex: 0
     )
 
     static let sampleFullSessionEdit = SessionEditContext.fullSessionEdit(
         entryId: UUID(),
         sessionName: "My Custom Project",
-        subtitles: ["Task 1", "Task 2", "Task 3"]
+        descriptions: ["Task 1", "Task 2", "Task 3"]
     )
 }
