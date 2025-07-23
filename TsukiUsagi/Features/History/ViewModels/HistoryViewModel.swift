@@ -70,7 +70,7 @@ class HistoryViewModel: ObservableObject {
         try sessionManager.addOrUpdateEntry(
             originalKey: "",
             sessionName: record.activity,
-            subtitles: record.subtitle != nil ? [record.subtitle!] : []
+            descriptions: record.subtitle != nil ? [record.subtitle!] : []
         )
         // 復元後、ViewでisDeletedを再判定すること
     }

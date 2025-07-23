@@ -66,9 +66,9 @@ struct TimerEditView: View {
                             section(title: "Session Label") {
                                 SessionLabelSection(
                                     activity: $editedActivity,
-                                    subtitle: $editedSubtitle,
+                                    descriptionText: $editedSubtitle,
                                     isActivityFocused: $isActivityFocused,
-                                    isSubtitleFocused: $isSubtitleFocused,
+                                    isDescriptionFocused: $isSubtitleFocused,
                                     labelCornerRadius: labelCornerRadius,
                                     showEmptyError: .constant(currentShowEmptyError),
                                     onDone: nil
@@ -194,7 +194,11 @@ struct TimerEditView: View {
             VStack(alignment: .leading, spacing: 10) {
                 content()
             }
-            .padding(isCompact ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12) : EdgeInsets())
+            .padding(
+                isCompact
+                ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+                : EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+            )
             .padding(isCompact ? .init() : .all)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(

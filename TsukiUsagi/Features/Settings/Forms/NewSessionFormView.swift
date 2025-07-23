@@ -3,11 +3,11 @@ import SwiftUI
 struct NewSessionFormView: View {
     @EnvironmentObject var sessionManager: SessionManager
     @State private var name: String = ""
-    @State private var subtitleTexts: [String] = [""]
+    @State private var descriptionTexts: [String] = [""]
     @State private var errorMessage: String?
     @State private var showErrorAlert = false
     @FocusState private var isNameFocused: Bool
-    @FocusState private var isSubtitleFocused: Bool
+    @FocusState private var isDescriptionFocused: Bool
     @State private var errorTitle: String = "Error"
 
     // SessionLabelSectionと同じ状態管理
@@ -25,21 +25,21 @@ struct NewSessionFormView: View {
 
     var isAddDisabled: Bool {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let subtitles = subtitleTexts.filter {
+        let descriptions = descriptionTexts.filter {
             !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
 
         // Session Nameが空の場合は無効
         if trimmedName.isEmpty { return true }
 
-        // subtitleが1つも入力されていない場合は無効
-        if subtitles.isEmpty { return true }
+        // descriptionが1つも入力されていない場合は無効
+        if descriptions.isEmpty { return true }
 
         // 文字数超過
         if trimmedName.count > SessionManager.maxNameLength { return true }
-        if subtitles.contains(where: { $0.count > SessionManager.maxSubtitleLength }) { return true }
+        if descriptions.contains(where: { $0.count > SessionManager.maxDescriptionLength }) { return true }
         // 最大数超過
-        if subtitles.count > SessionManager.maxSubtitleCount { return true }
+        if descriptions.count > SessionManager.maxDescriptionCount { return true }
         // セッション数超過（空文字でない場合のみチェック）
         if !trimmedName.isEmpty &&
             !sessionManager.defaultSessionNames.contains(trimmedName) &&
@@ -155,21 +155,21 @@ struct NewSessionFormView: View {
                 }
 
                 // Subtitle入力欄もSessionLabelSectionと同じスタイルに統一
-                ForEach(subtitleTexts.indices, id: \.self) { idx in
+                ForEach(descriptionTexts.indices, id: \.self) { idx in
                     HStack {
                         ZStack(alignment: .topLeading) {
-                            if subtitleTexts[safe: idx]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true {
-                                Text(idx == 0 ? "Subtitle (optional)" : "Subtitle \(idx + 1)")
+                            if descriptionTexts[safe: idx]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true {
+                                Text(idx == 0 ? "Description (optional)" : "Description \(idx + 1)")
                                     .foregroundColor(.gray)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 12)
                             }
 
                             TextEditor(text: Binding(
-                                get: { subtitleTexts[safe: idx] ?? "" },
+                                get: { descriptionTexts[safe: idx] ?? "" },
                                 set: { newValue in
-                                    if idx < subtitleTexts.count {
-                                        subtitleTexts[idx] = newValue
+                                    if idx < descriptionTexts.count {
+                                        descriptionTexts[idx] = newValue
                                     }
                                 }
                             ))
@@ -178,8 +178,8 @@ struct NewSessionFormView: View {
                             .scrollContentBackground(.hidden)
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(labelCornerRadius)
-                            .focused($isSubtitleFocused)
-                            .onChange(of: isSubtitleFocused) { _, newValue in
+                            .focused($isDescriptionFocused)
+                            .onChange(of: isDescriptionFocused) { _, newValue in
                                 if newValue {
                                 }
                             }
@@ -189,7 +189,7 @@ struct NewSessionFormView: View {
                         if idx > 0 {
                             Button(
                                 action: {
-                                    subtitleTexts.remove(at: idx)
+                                    descriptionTexts.remove(at: idx)
                                 },
                                 label: {
                                     Image(systemName: "minus.circle")
@@ -206,12 +206,12 @@ struct NewSessionFormView: View {
 
                 Button(
                     action: {
-                        subtitleTexts.append("")
+                        descriptionTexts.append("")
                     },
                     label: {
                         HStack(spacing: 4) {
                             Image(systemName: "plus.circle")
-                            Text("Add Subtitle")
+                            Text("Add Description")
                         }
                     }
                 )
@@ -220,7 +220,7 @@ struct NewSessionFormView: View {
                 .disabled(
                     name.isEmpty ||
                     (
-                        subtitleTexts.first?
+                        descriptionTexts.first?
                             .trimmingCharacters(in: .whitespacesAndNewlines)
                             .isEmpty ?? true
                     )
@@ -236,11 +236,11 @@ struct NewSessionFormView: View {
         }
         .debugForm(String(describing: Self.self), position: .topLeading)
         .keyboardCloseButton(
-            isVisible: isNameFocused || isSubtitleFocused,
+            isVisible: isNameFocused || isDescriptionFocused,
             action: {
                 KeyboardManager.hideKeyboard {
                     isNameFocused = false
-                    isSubtitleFocused = false
+                    isDescriptionFocused = false
                 }
             }
         )
@@ -255,18 +255,18 @@ struct NewSessionFormView: View {
 
     func addSession() {
         let trimmedName = name.trimmed
-        let subtitles = subtitleTexts
+        let descriptions = descriptionTexts
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
 
         do {
 			if sessionManager.sessionDatabase[trimmedName.lowercased()] != nil {
-                // 既存セッションの場合：subtitleを1つずつ追加
-                for subtitle in subtitles {
-                    if !subtitle.isEmpty {
-                        try sessionManager.addSubtitleToSession(
+                // 既存セッションの場合：descriptionを1つずつ追加
+                for description in descriptions {
+                    if !description.isEmpty {
+                        try sessionManager.addDescriptionToSession(
                             sessionName: trimmedName,
-                            newSubtitle: subtitle
+                            newDescription: description
                         )
                     }
                 }
@@ -275,13 +275,13 @@ struct NewSessionFormView: View {
                 try sessionManager.addOrUpdateEntry(
                     originalKey: "",
                     sessionName: trimmedName,
-                    subtitles: subtitles
+                    descriptions: descriptions
                 )
             }
 
             // 成功時のリセット
             name = ""
-            subtitleTexts = [""]
+            descriptionTexts = [""]
             isCustomInputMode = false
             isNameFocused = true
         } catch {
@@ -293,7 +293,7 @@ struct NewSessionFormView: View {
     func hideKeyboard() {
         KeyboardManager.hideKeyboard {
             isNameFocused = false
-            isSubtitleFocused = false
+            isDescriptionFocused = false
         }
     }
 }
