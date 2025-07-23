@@ -134,8 +134,8 @@ struct ContentView: View {
                             moonPortraitYOffsetRatio: moonPortraitYOffsetRatio,
                             moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
                             isQuietMoonFocused: $isQuietMoonFocused,
-                            showingEditRecord: $showingEditRecord
-                            ,isMoonAnimationActive: isFlowingStarsActive
+                            showingEditRecord: $showingEditRecord,
+                            isMoonAnimationActive: isFlowingStarsActive
                         )
                         .onPreferenceChange(LandscapePreferenceKey.self) { _ in
                             updateOrientation(size: size)
@@ -220,12 +220,14 @@ struct ContentView: View {
                             isFlowingStarsActive = false
                         } else {
                             // Settingsを閉じたとき、タイマーが動いていなければ星アニメON
-                            isFlowingStarsActive = timerVM.isRunning || (!timerVM.isRunning && !timerVM.isSessionFinished)
+                            isFlowingStarsActive = timerVM.isRunning ||
+                                (!timerVM.isRunning && !timerVM.isSessionFinished)
                         }
                     }
                     .onChange(of: timerVM.isRunning) { _, newValue in
                         // タイマー開始/停止時もアニメーション状態を制御
-                        isFlowingStarsActive = !showingSettings && (newValue || (!newValue && !timerVM.isSessionFinished))
+                        isFlowingStarsActive = !showingSettings &&
+                            (newValue || (!newValue && !timerVM.isSessionFinished))
                     }
                 }
             }
@@ -242,7 +244,8 @@ struct ContentView: View {
                 timerVM.stopTimer()
             } else {
                 // セッション完了後の再スタート時は設定値を使用
-                let secondsToStart = timerVM.isSessionFinished ? timerVM.workLengthMinutes * 60 : timerVM.timeRemaining
+                let secondsToStart = timerVM.isSessionFinished ?
+                    timerVM.workLengthMinutes * 60 : timerVM.timeRemaining
                 timerVM.startTimer(seconds: secondsToStart)
             }
         }

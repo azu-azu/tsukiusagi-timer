@@ -61,7 +61,7 @@ class SessionManager: ObservableObject {
                 sessionDatabase[key] = entry
             } else if sessionDatabase[key]?.isDefault == false {
                 // デフォルトセッションとして正しくマークしておく
-				let existingEntry = sessionDatabase[key]!
+                let existingEntry = sessionDatabase[key]!
                 let correctedEntry = SessionEntry(
                     id: existingEntry.id,
                     sessionName: existingEntry.sessionName,
@@ -132,8 +132,7 @@ class SessionManager: ObservableObject {
         // 重複禁止（空文字でない場合のみチェック）
         if !trimmedName.isEmpty,
            let existing = sessionDatabase[newKey],
-           !defaultSessionNames.contains(trimmedName)
-        {
+           !defaultSessionNames.contains(trimmedName) {
             // 元のキーと違う場合のみ重複エラー
             if newKey != oldKey && !existing.isDefault {
                 throw SessionManagerError.duplicateName
@@ -168,8 +167,7 @@ class SessionManager: ObservableObject {
 
     func deleteEntry(id: UUID) {
         for entry in sessionDatabase.values
-            where entry.id == id && !entry.isDefault // デフォルトは削除不可
-        {
+            where entry.id == id && !entry.isDefault { // デフォルトは削除不可
             sessionDatabase.removeValue(
                 forKey: entry.sessionName
                     .lowercased()

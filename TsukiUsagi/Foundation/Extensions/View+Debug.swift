@@ -24,7 +24,7 @@ struct DebugModuleNameModifier: ViewModifier {
                 Group {
                     if isVisible {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
@@ -54,7 +54,7 @@ struct DebugScreenModifier: ViewModifier {
                 Group {
                     if showModuleNames {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
@@ -83,7 +83,7 @@ struct DebugSectionModifier: ViewModifier {
                 Group {
                     if showModuleNames {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
@@ -112,7 +112,7 @@ struct DebugComponentModifier: ViewModifier {
                 Group {
                     if showModuleNames {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
@@ -141,7 +141,7 @@ struct DebugFormModifier: ViewModifier {
                 Group {
                     if showModuleNames {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
@@ -236,7 +236,7 @@ struct DynamicDebugScreenModifier: ViewModifier {
                 Group {
                     if isVisible {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
@@ -273,7 +273,7 @@ struct DynamicDebugSectionModifier: ViewModifier {
                 Group {
                     if isVisible {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
@@ -310,7 +310,7 @@ struct DynamicDebugComponentModifier: ViewModifier {
                 Group {
                     if isVisible {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
@@ -347,7 +347,7 @@ struct DynamicDebugFormModifier: ViewModifier {
                 Group {
                     if isVisible {
                         Text(moduleName)
-                            .font(.system(size: 8, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)

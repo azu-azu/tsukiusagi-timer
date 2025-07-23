@@ -210,7 +210,7 @@ struct DismissKeyboardOnTap: ViewModifier {
 private func safeIsLandscape(
     size: CGSize,
     horizontalClass: UserInterfaceSizeClass?,
-    verticalClass _: UserInterfaceSizeClass?
+    verticalClass: UserInterfaceSizeClass?
 ) -> Bool {
     return horizontalClass == .regular || size.width > size.height
 }
@@ -233,8 +233,7 @@ struct KeyboardHeightModifier: ViewModifier {
                 )
             ) { notification in
                 if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
-                    as? NSValue
-                {
+                    as? NSValue {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         keyboardHeight = keyboardFrame.cgRectValue.height
                     }

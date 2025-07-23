@@ -49,20 +49,24 @@ struct MainPanel: View {
                     // 横画面：左右分割（最高品質版）
                     HStack(spacing: landscapeMargin) {
                         // 左側：QuietMoonView
-                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets, isAnimationActive: isMoonAnimationActive)
-                            .frame(
-                                width: (contentSize.width - landscapeMargin) * 0.5,
-                                height: setHeight
-                            )
-                            .background(Color.clear)
-                            .zIndex(10)
-                            .layoutPriority(1)
-                            .accessibilityLabel("Quiet Moon Message")
-                            .accessibilityHint(
-                                "Displays inspirational messages after session completion"
-                            )
-                            .accessibilityAddTraits(AccessibilityTraits.isHeader)
-                            .focused(isQuietMoonFocused)
+                        QuietMoonView(
+                            size: size,
+                            safeAreaInsets: safeAreaInsets,
+                            isAnimationActive: isMoonAnimationActive
+                        )
+                        .frame(
+                            width: (contentSize.width - landscapeMargin) * 0.5,
+                            height: setHeight
+                        )
+                        .background(Color.clear)
+                        .zIndex(10)
+                        .layoutPriority(1)
+                        .accessibilityLabel("Quiet Moon Message")
+                        .accessibilityHint(
+                            "Displays inspirational messages after session completion"
+                        )
+                        .accessibilityAddTraits(AccessibilityTraits.isHeader)
+                        .focused(isQuietMoonFocused)
 
                         // 右側：RecordedTimesView
                         VStack {
@@ -97,13 +101,17 @@ struct MainPanel: View {
                     // let _ = print("🌙 MainPanel - Portrait QuietMoon")
                     // 縦画面：従来通り
                     VStack {
-                        QuietMoonView(size: size, safeAreaInsets: safeAreaInsets, isAnimationActive: isMoonAnimationActive)
-                            .accessibilityLabel("Quiet Moon Message")
-                            .accessibilityHint(
-                                "Displays inspirational messages after session completion"
-                            )
-                            .accessibilityAddTraits(AccessibilityTraits.isHeader)
-                            .focused(isQuietMoonFocused)
+                        QuietMoonView(
+                            size: size,
+                            safeAreaInsets: safeAreaInsets,
+                            isAnimationActive: isMoonAnimationActive
+                        )
+                        .accessibilityLabel("Quiet Moon Message")
+                        .accessibilityHint(
+                            "Displays inspirational messages after session completion"
+                        )
+                        .accessibilityAddTraits(AccessibilityTraits.isHeader)
+                        .focused(isQuietMoonFocused)
                     }
                     .frame(width: contentSize.width, height: setHeight)
                     .position(x: contentSize.width / 2, y: setCenterY)
@@ -172,10 +180,8 @@ struct MainPanel: View {
                                 maxHeight: timerHeight
                             )
                     }
-                    .frame(width: contentSize.width,
-                        height: setHeight)
-                    .position(x: contentSize.width / 2,
-                            y: setCenterY)
+                    .frame(width: contentSize.width, height: setHeight)
+                    .position(x: contentSize.width / 2, y: setCenterY)
                 }
             }
         }

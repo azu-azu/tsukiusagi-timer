@@ -24,7 +24,6 @@ enum DesignTokens {
         /// ミュートテキスト色（Light/Dark モード対応）
         static let moonTextMuted = Color("moonTextMuted")
 
-
         /// アクセント色（既存の拡張から）
         static let moonAccentBlue = Color.moonAccentBlue
 
