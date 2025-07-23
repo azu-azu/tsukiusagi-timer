@@ -1,23 +1,23 @@
 import SwiftUI
 
-struct DirectSubtitleEditTest: View {
-    @State private var testSubtitles: [String] = ["First item", "Second item"]
+struct DirectDescriptionEditTest: View {
+    @State private var testDescriptions: [String] = ["First item", "Second item"]
     @State private var isAnyFieldFocused: Bool = false
 
     var body: some View {
         NavigationView {
             VStack {
-                Text("Direct Test - Count: \(testSubtitles.count)")
+                Text("Direct Test - Count: \(testDescriptions.count)")
                     .font(.headline)
                     .padding()
 
-                SubtitleEditContent(
+                DescriptionEditContent(
                     sessionName: "Test Session",
-                    subtitles: testSubtitles,
+                    descriptions: testDescriptions,
                     editingIndex: nil,
-                    onSubtitlesChange: { newSubtitles in
-                        print("🟦🟦🟦 Direct test received change: \(newSubtitles)")
-                        testSubtitles = newSubtitles
+                    onDescriptionsChange: { newDescriptions in
+                        print("🟦🟦🟦 Direct test received change: \(newDescriptions)")
+                        testDescriptions = newDescriptions
                     },
                     isAnyFieldFocused: $isAnyFieldFocused,
                     onClearFocus: {
@@ -28,7 +28,7 @@ struct DirectSubtitleEditTest: View {
                 Spacer()
 
                 // 状態確認用
-                Text("Current subtitles: \(testSubtitles.joined(separator: ", "))")
+                Text("Current descriptions: \(testDescriptions.joined(separator: ", "))")
                     .font(.caption)
                     .padding()
             }
@@ -38,9 +38,9 @@ struct DirectSubtitleEditTest: View {
 }
 
 #if DEBUG
-struct DirectSubtitleEditTest_Previews: PreviewProvider {
+struct DirectDescriptionEditTest_Previews: PreviewProvider {
     static var previews: some View {
-        DirectSubtitleEditTest()
+        DirectDescriptionEditTest()
     }
 }
 #endif

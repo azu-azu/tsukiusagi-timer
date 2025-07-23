@@ -13,12 +13,12 @@ struct PreviewData {
         try? manager.addOrUpdateEntry(
             originalKey: "",
             sessionName: "Preview Work",
-            subtitles: ["Sample session"]
+            descriptions: ["Sample session"]
         )
         try? manager.addOrUpdateEntry(
             originalKey: "",
             sessionName: "Preview Study",
-            subtitles: ["Another sample"]
+            descriptions: ["Another sample"]
         )
         return manager
     }()
@@ -148,49 +148,49 @@ struct PreviewData {
         SessionItem(
             id: UUID(),
             name: "Work",
-            subtitle: "Professional tasks",
+            description: "Professional tasks",
             isFixed: true
         ),
         SessionItem(
             id: UUID(),
             name: "Study",
-            subtitle: "Learning activities",
+            description: "Learning activities",
             isFixed: true
         ),
         SessionItem(
             id: UUID(),
             name: "Read",
-            subtitle: "Reading time",
+            description: "Reading time",
             isFixed: true
         ),
         SessionItem(
             id: UUID(),
             name: "Exercise",
-            subtitle: "Physical activity",
+            description: "Physical activity",
             isFixed: false
         ),
         SessionItem(
             id: UUID(),
             name: "Meditation",
-            subtitle: "Mindfulness practice",
+            description: "Mindfulness practice",
             isFixed: false
         ),
         SessionItem(
             id: UUID(),
             name: "Creative Work",
-            subtitle: "Art and design",
+            description: "Art and design",
             isFixed: false
         ),
         SessionItem(
             id: UUID(),
             name: "Planning",
-            subtitle: "Strategy and planning",
+            description: "Strategy and planning",
             isFixed: false
         ),
         SessionItem(
             id: UUID(),
             name: "Review",
-            subtitle: "Reflection time",
+            description: "Reflection time",
             isFixed: false
         )
     ]

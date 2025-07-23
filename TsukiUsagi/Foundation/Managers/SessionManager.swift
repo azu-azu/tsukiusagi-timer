@@ -4,9 +4,9 @@ import Foundation
 class SessionManager: ObservableObject {
     // 定数一元管理
     static let maxSessionCount = 50
-    static let maxSubtitleCount = 50
-    static let maxNameLength = 30 // 文字数制限（将来UIにも反映）
-    static let maxSubtitleLength = 30
+    static let maxDescriptionCount = 50
+    static let maxNameLength = 30
+    static let maxDescriptionLength = 30
 
     // デフォルトセッション名（順序保持）
     let defaultSessionNames: Set<String> = [
@@ -34,49 +34,61 @@ class SessionManager: ObservableObject {
             return index1 < index2
         }
     }
+
     var customEntries: [SessionEntry] {
         sessionDatabase.values.filter {
             !defaultSessionNames.contains($0.sessionName) && !$0.isDefault
         }.sorted { $0.sessionName < $1.sessionName }
     }
+
     var allEntries: [SessionEntry] {
         (defaultEntries + customEntries)
     }
 
     init() {
         load()
-        // デフォルトセッションがなければ追加
-        for name in defaultSessionNames
-            where sessionDatabase[
-                name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-            ] == nil
-        {
+        // デフォルトセッションがなければ追加（永続化されたものがあればそれを優先）
+        for name in defaultSessionNames {
             let key = name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-            let entry = SessionEntry(
-                id: UUID(),
-                sessionName: name,
-                subtitles: [],
-                isDefault: true
-            )
-            sessionDatabase[key] = entry
+            if sessionDatabase[key] == nil {
+                // デフォルトセッションが存在しないときのみ追加
+                let entry = SessionEntry(
+                    id: UUID(),
+                    sessionName: name,
+                    descriptions: [],
+                    isDefault: true
+                )
+                sessionDatabase[key] = entry
+            } else if sessionDatabase[key]?.isDefault == false {
+                // デフォルトセッションとして正しくマークしておく
+				let existingEntry = sessionDatabase[key]!
+                let correctedEntry = SessionEntry(
+                    id: existingEntry.id,
+                    sessionName: existingEntry.sessionName,
+                    descriptions: existingEntry.descriptions,
+                    isDefault: true // 正しくデフォルトとしてマーク
+                )
+                sessionDatabase[key] = correctedEntry
+                save() // 修正内容を永続化
+            }
         }
     }
 
-    // サブタイトル取得
-    func getSubtitles(for sessionName: String) -> [String] {
+    // 説明（description）取得
+    func getDescriptions(for sessionName: String) -> [String] {
         let key = sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        return sessionDatabase[key]?.subtitles ?? []
+        return sessionDatabase[key]?.descriptions ?? []
     }
 
-    // 追加・更新
+    // エラー定義
     enum SessionManagerError: Error, LocalizedError {
         case duplicateName
         case sessionLimitExceeded
-        case subtitleLimitExceeded
+        case descriptionLimitExceeded
         case nameTooLong
-        case subtitleTooLong
+        case descriptionTooLong
         case notFound
-        case duplicateSubtitle
+        case duplicateDescription
 
         var errorDescription: String? {
             switch self {
@@ -84,16 +96,16 @@ class SessionManager: ObservableObject {
                 return "This session name is already registered."
             case .sessionLimitExceeded:
                 return "You have reached the maximum number of sessions."
-            case .subtitleLimitExceeded:
-                return "You have reached the maximum number of subtitles."
+            case .descriptionLimitExceeded:
+                return "You have reached the maximum number of descriptions."
             case .nameTooLong:
                 return "Session name is too long."
-            case .subtitleTooLong:
-                return "Subtitle is too long."
+            case .descriptionTooLong:
+                return "Description is too long."
             case .notFound:
                 return "Session not found."
-            case .duplicateSubtitle:
-                return "Duplicate subtitles are not allowed."
+            case .duplicateDescription:
+                return "Duplicate descriptions are not allowed."
             }
         }
     }
@@ -101,11 +113,12 @@ class SessionManager: ObservableObject {
     func addOrUpdateEntry(
         originalKey: String,
         sessionName: String,
-        subtitles: [String]
+        descriptions: [String]
     ) throws {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         let newKey = trimmedName.lowercased()
         let oldKey = originalKey.trimmingCharacters(in: .whitespacesAndNewlines)
+
         // バリデーション
         if trimmedName.count > Self.maxNameLength {
             throw SessionManagerError.nameTooLong
@@ -115,6 +128,7 @@ class SessionManager: ObservableObject {
             sessionDatabase[newKey] == nil {
             throw SessionManagerError.sessionLimitExceeded
         }
+
         // 重複禁止（空文字でない場合のみチェック）
         if !trimmedName.isEmpty,
            let existing = sessionDatabase[newKey],
@@ -125,25 +139,25 @@ class SessionManager: ObservableObject {
                 throw SessionManagerError.duplicateName
             }
         }
-        // サブタイトル最大数
-        if subtitles.count > Self.maxSubtitleCount {
-            throw SessionManagerError.subtitleLimitExceeded
+
+        // 説明最大数
+        if descriptions.count > Self.maxDescriptionCount {
+            throw SessionManagerError.descriptionLimitExceeded
         }
-        // サブタイトル文字数
-        for subtitle in subtitles where subtitle.count > Self.maxSubtitleLength {
-            throw SessionManagerError.subtitleTooLong
+
+        // 説明文字数
+        for description in descriptions where description.count > Self.maxDescriptionLength {
+            throw SessionManagerError.descriptionTooLong
         }
-        // サブタイトル重複禁止（現状は許容、将来有効化）
-        // let uniqueCount = Set(subtitles.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }).count
-        // if uniqueCount != subtitles.count { throw SessionManagerError.duplicateSubtitle }
 
         let isDefault = defaultSessionNames.contains(trimmedName)
         let entry = SessionEntry(
             id: sessionDatabase[oldKey]?.id ?? UUID(),
             sessionName: trimmedName,
-            subtitles: subtitles,
+            descriptions: descriptions,
             isDefault: isDefault
         )
+
         // キーが変わった場合は元のエントリを削除
         if oldKey != newKey {
             sessionDatabase.removeValue(forKey: oldKey)
@@ -166,14 +180,30 @@ class SessionManager: ObservableObject {
         save()
     }
 
-    // --- 永続化 ---
+    // --- 永続化（修正版：デフォルトセッションも含める） ---
     private func save() {
-        let custom = customEntries
-        if let data = try? JSONEncoder().encode(custom) {
-            UserDefaults.standard.set(data, forKey: "customEntriesV2")
+        // 全セッションを永続化する
+        let allSessionEntries = Array(sessionDatabase.values)
+        if let data = try? JSONEncoder().encode(allSessionEntries) {
+            UserDefaults.standard.set(data, forKey: "allSessionEntriesV3") // キー名変更
         }
     }
+
     private func load() {
+        // --- マイグレーション処理: subtitles→descriptions ---
+        if let data = UserDefaults.standard.data(forKey: "allSessionEntriesV3"),
+           let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
+            sessionDatabase.removeAll()
+            for entry in decoded where !entry.sessionName.isEmpty {
+                let key = entry.sessionName
+                    .lowercased()
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                sessionDatabase[key] = entry
+            }
+            return
+        }
+
+        // 既存のカスタムセッションデータがあれば移行（互換性のため）
         if let data = UserDefaults.standard.data(forKey: "customEntriesV2"),
            let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
             for entry in decoded where !entry.sessionName.isEmpty {
@@ -182,19 +212,23 @@ class SessionManager: ObservableObject {
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 sessionDatabase[key] = entry
             }
+            // 移行後は新しいキーで保存
+            save()
+            // 古いデータを削除
+            UserDefaults.standard.removeObject(forKey: "customEntriesV2")
         }
     }
 }
 
-// MARK: - Subtitle Management Extension
+// MARK: - Description Management Extension
 
 extension SessionManager {
 
-    /// 指定されたセッションのSubtitle配列を完全に更新する
+    /// 指定されたセッションのDescription配列を完全に更新する
     /// - Parameters:
     ///   - sessionName: セッション名
-    ///   - newSubtitles: 新しいSubtitle配列
-    func updateSessionSubtitles(sessionName: String, newSubtitles: [String]) throws {
+    ///   - newDescriptions: 新しいDescription配列
+    func updateSessionDescriptions(sessionName: String, newDescriptions: [String]) throws {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         let key = trimmedName.lowercased()
 
@@ -204,34 +238,34 @@ extension SessionManager {
         }
 
         // バリデーション
-        if newSubtitles.count > Self.maxSubtitleCount {
-            throw SessionManagerError.subtitleLimitExceeded
+        if newDescriptions.count > Self.maxDescriptionCount {
+            throw SessionManagerError.descriptionLimitExceeded
         }
 
-        for subtitle in newSubtitles where subtitle.count > Self.maxSubtitleLength {
-            throw SessionManagerError.subtitleTooLong
+        for description in newDescriptions where description.count > Self.maxDescriptionLength {
+            throw SessionManagerError.descriptionTooLong
         }
 
-        // Subtitleのみ更新（他のプロパティは保持）
+        // Descriptionのみ更新（他のプロパティは保持）
         let updatedEntry = SessionEntry(
             id: existingEntry.id,
             sessionName: existingEntry.sessionName,
-            subtitles: newSubtitles,
+            descriptions: newDescriptions,
             isDefault: existingEntry.isDefault
         )
 
         sessionDatabase[key] = updatedEntry
-        save()
+        save() // デフォルトセッションも永続化される
     }
 
-    /// 指定されたセッションにSubtitleを追加する
+    /// 指定されたセッションにDescriptionを追加する
     /// - Parameters:
     ///   - sessionName: セッション名
-    ///   - newSubtitle: 追加するSubtitle
-    func addSubtitleToSession(sessionName: String, newSubtitle: String) throws {
+    ///   - newDescription: 追加するDescription
+    func addDescriptionToSession(sessionName: String, newDescription: String) throws {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         let key = trimmedName.lowercased()
-        let trimmedSubtitle = newSubtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedDescription = newDescription.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // 既存のエントリを確認
         guard let existingEntry = sessionDatabase[key] else {
@@ -239,31 +273,31 @@ extension SessionManager {
         }
 
         // バリデーション
-        if existingEntry.subtitles.count >= Self.maxSubtitleCount {
-            throw SessionManagerError.subtitleLimitExceeded
+        if existingEntry.descriptions.count >= Self.maxDescriptionCount {
+            throw SessionManagerError.descriptionLimitExceeded
         }
 
-        if trimmedSubtitle.count > Self.maxSubtitleLength {
-            throw SessionManagerError.subtitleTooLong
+        if trimmedDescription.count > Self.maxDescriptionLength {
+            throw SessionManagerError.descriptionTooLong
         }
 
-        // 新しいSubtitle配列を作成
-        var newSubtitles = existingEntry.subtitles
-        newSubtitles.append(trimmedSubtitle)
+        // 新しいDescription配列を作成
+        var newDescriptions = existingEntry.descriptions
+        newDescriptions.append(trimmedDescription)
 
         // 更新
-        try updateSessionSubtitles(sessionName: sessionName, newSubtitles: newSubtitles)
+        try updateSessionDescriptions(sessionName: sessionName, newDescriptions: newDescriptions)
     }
 
-    /// 指定されたセッションの特定のSubtitleを更新する
+    /// 指定されたセッションの特定のDescriptionを更新する
     /// - Parameters:
     ///   - sessionName: セッション名
-    ///   - index: 更新するSubtitleのインデックス
-    ///   - newSubtitle: 新しいSubtitleテキスト
-    func updateSubtitle(sessionName: String, at index: Int, newSubtitle: String) throws {
+    ///   - index: 更新するDescriptionのインデックス
+    ///   - newDescription: 新しいDescriptionテキスト
+    func updateDescription(sessionName: String, at index: Int, newDescription: String) throws {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         let key = trimmedName.lowercased()
-        let trimmedSubtitle = newSubtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedDescription = newDescription.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // 既存のエントリを確認
         guard let existingEntry = sessionDatabase[key] else {
@@ -271,28 +305,28 @@ extension SessionManager {
         }
 
         // インデックスチェック
-        guard index >= 0 && index < existingEntry.subtitles.count else {
+        guard index >= 0 && index < existingEntry.descriptions.count else {
             throw SessionManagerError.notFound
         }
 
         // バリデーション
-        if trimmedSubtitle.count > Self.maxSubtitleLength {
-            throw SessionManagerError.subtitleTooLong
+        if trimmedDescription.count > Self.maxDescriptionLength {
+            throw SessionManagerError.descriptionTooLong
         }
 
-        // 新しいSubtitle配列を作成
-        var newSubtitles = existingEntry.subtitles
-        newSubtitles[index] = trimmedSubtitle
+        // 新しいDescription配列を作成
+        var newDescriptions = existingEntry.descriptions
+        newDescriptions[index] = trimmedDescription
 
         // 更新
-        try updateSessionSubtitles(sessionName: sessionName, newSubtitles: newSubtitles)
+        try updateSessionDescriptions(sessionName: sessionName, newDescriptions: newDescriptions)
     }
 
-    /// 指定されたセッションからSubtitleを削除する
+    /// 指定されたセッションからDescriptionを削除する
     /// - Parameters:
     ///   - sessionName: セッション名
-    ///   - index: 削除するSubtitleのインデックス
-    func removeSubtitle(sessionName: String, at index: Int) throws {
+    ///   - index: 削除するDescriptionのインデックス
+    func removeDescription(sessionName: String, at index: Int) throws {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         let key = trimmedName.lowercased()
 
@@ -302,16 +336,16 @@ extension SessionManager {
         }
 
         // インデックスチェック
-        guard index >= 0 && index < existingEntry.subtitles.count else {
+        guard index >= 0 && index < existingEntry.descriptions.count else {
             throw SessionManagerError.notFound
         }
 
-        // 新しいSubtitle配列を作成
-        var newSubtitles = existingEntry.subtitles
-        newSubtitles.remove(at: index)
+        // 新しいDescription配列を作成
+        var newDescriptions = existingEntry.descriptions
+        newDescriptions.remove(at: index)
 
         // 更新
-        try updateSessionSubtitles(sessionName: sessionName, newSubtitles: newSubtitles)
+        try updateSessionDescriptions(sessionName: sessionName, newDescriptions: newDescriptions)
     }
 }
 
@@ -322,47 +356,47 @@ extension SessionManager {
         let samples: [SessionEntry] = [
             SessionEntry(
                 sessionName: "Sample Session 1",
-                subtitles: ["Test subtitle"],
+                descriptions: ["Test description"],
                 isDefault: false
             ),
             SessionEntry(
                 sessionName: "Sample Session 2",
-                subtitles: [],
+                descriptions: [],
                 isDefault: false
             ),
             SessionEntry(
-                sessionName: "Multi Subtitle Session",
-                subtitles: [
-                    "First subtitle",
-                    "Second subtitle",
-                    "Third subtitle"
+                sessionName: "Multi Description Session",
+                descriptions: [
+                    "First description",
+                    "Second description",
+                    "Third description"
                 ],
                 isDefault: false
             ),
             SessionEntry(
-                sessionName: "No Subtitle Session",
-                subtitles: [],
+                sessionName: "No Description Session",
+                descriptions: [],
                 isDefault: false
             ),
             SessionEntry(
                 sessionName:
                     "This is a very long session name to test how the UI handles overflow " +
                     "and wrapping in the list row",
-                subtitles: [
-                    "Long subtitle for testing purposes"
+                descriptions: [
+                    "Long description for testing purposes"
                 ],
                 isDefault: false
             ),
             SessionEntry(
                 sessionName: "Special!@#¥%&*()_+{}|:<>? Session",
-                subtitles: ["Emoji 😊🚀✨", "Symbols #$%&"],
+                descriptions: ["Emoji 😊🚀✨", "Symbols #$%&"],
                 isDefault: false
             ),
-            SessionEntry(sessionName: "Session 3", subtitles: [], isDefault: false),
-            SessionEntry(sessionName: "Session 4", subtitles: [], isDefault: false),
-            SessionEntry(sessionName: "Session 5", subtitles: [], isDefault: false),
-            SessionEntry(sessionName: "Session 6", subtitles: [], isDefault: false),
-            SessionEntry(sessionName: "Session 7", subtitles: [], isDefault: false)
+            SessionEntry(sessionName: "Session 3", descriptions: [], isDefault: false),
+            SessionEntry(sessionName: "Session 4", descriptions: [], isDefault: false),
+            SessionEntry(sessionName: "Session 5", descriptions: [], isDefault: false),
+            SessionEntry(sessionName: "Session 6", descriptions: [], isDefault: false),
+            SessionEntry(sessionName: "Session 7", descriptions: [], isDefault: false)
         ]
         for entry in samples {
             let key = entry.sessionName

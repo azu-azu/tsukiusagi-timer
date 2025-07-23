@@ -16,8 +16,8 @@ struct SessionListSectionView: View {
     // Session編集用の状態管理
     @State private var editingSessionContext: SessionEditContext? = nil
     @State private var tempSessionName: String = ""
-    @State private var tempSubtitles: [String] = []
-    @State private var tempSubtitleText: String = ""
+    @State private var tempDescriptions: [String] = []
+    @State private var tempDescriptionText: String = ""
     @State private var isViewFullyLoaded: Bool = false
     @State private var hasScrolledOnce: Bool = false
     @State private var isAnyFieldFocused: Bool = false
@@ -41,12 +41,12 @@ struct SessionListSectionView: View {
         // Session編集モーダル
         .sheet(item: $editingSessionContext) { context in
             switch context.editMode {
-            case .subtitleOnly:
-                // Default Session: Subtitle管理（追加/編集/削除）
+            case .descriptionOnly:
+                // Default Session: Description管理（追加/編集/削除）
                 EditableModal(
                     title: "Manage Descriptions",
                     onSave: {
-                        saveSubtitleEdit(context: context)
+                        saveDescriptionEdit(context: context)
                         editingSessionContext = nil
                     },
                     onCancel: {
@@ -59,11 +59,14 @@ struct SessionListSectionView: View {
                         }
                     }
                 ) {
-                    SubtitleEditContent(
+                    DescriptionEditContent(
                         sessionName: context.sessionName,
-                        subtitles: context.subtitles,
-                        editingIndex: context.subtitleIndex,
-                        onSubtitlesChange: { _ in },
+                        descriptions: tempDescriptions, // 修正: contextではなくtempDescriptionsを使用
+                        editingIndex: context.descriptionIndex,
+                        onDescriptionsChange: { newDescriptions in
+                            // 修正: tempDescriptionsを更新してUIと同期
+                            tempDescriptions = newDescriptions
+                        },
                         isAnyFieldFocused: $isAnyFieldFocused,
                         onClearFocus: {
                             isAnyFieldFocused = false
@@ -91,10 +94,16 @@ struct SessionListSectionView: View {
                     }
                 ) {
                     FullSessionEditContent(
-                        sessionName: context.sessionName,
-                        subtitles: context.subtitles,
-                        onSessionNameChange: { _ in },
-                        onSubtitlesChange: { _ in },
+                        sessionName: tempSessionName, // 修正: contextではなくtempSessionNameを使用
+                        descriptions: tempDescriptions, // 修正: contextではなくtempDescriptionsを使用
+                        onSessionNameChange: { newName in
+                            // 修正: tempSessionNameを更新してUIと同期
+                            tempSessionName = newName
+                        },
+                        onDescriptionsChange: { newDescriptions in
+                            // 修正: tempDescriptionsを更新してUIと同期
+                            tempDescriptions = newDescriptions
+                        },
                         isAnyFieldFocused: $isAnyFieldFocused,
                         onClearFocus: {
                             isAnyFieldFocused = false
@@ -156,10 +165,10 @@ struct SessionListSectionView: View {
                         editingSessionContext = SessionEditContext.fullSessionEdit(
                             entryId: entry.id,
                             sessionName: entry.sessionName,
-                            subtitles: entry.subtitles
+                            descriptions: entry.descriptions
                         )
                         tempSessionName = entry.sessionName
-                        tempSubtitles = entry.subtitles
+                        tempDescriptions = entry.descriptions
                     }
                     .buttonStyle(.bordered)
 
@@ -173,15 +182,15 @@ struct SessionListSectionView: View {
             }
 
             // Subtitles with different behavior for Default vs Custom Sessions
-            if !entry.subtitles.isEmpty {
+            if !entry.descriptions.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(Array(entry.subtitles.enumerated()), id: \.offset) { index, subtitle in
+                    ForEach(Array(entry.descriptions.enumerated()), id: \.offset) { index, description in
                         if isDefault {
-                            // Default Session: subtitle編集可能（モーダルで）
-                            subtitleEditableRow(subtitle: subtitle, entry: entry, index: index)
+                            // Default Session: description編集可能（モーダルで）
+                            descriptionEditableRow(description: description, entry: entry, index: index)
                         } else {
-                            // Custom Session: subtitle表示のみ（session全体編集はEditボタンで）
-                            subtitleDisplayRow(subtitle: subtitle)
+                            // Custom Session: description表示のみ（session全体編集はEditボタンで）
+                            descriptionDisplayRow(description: description)
                         }
                     }
                 }
@@ -207,12 +216,12 @@ struct SessionListSectionView: View {
         )
     }
 
-    // MARK: - Subtitle Row Builders
+    // MARK: - Description Row Builders
 
     @ViewBuilder
-    private func subtitleEditableRow(subtitle: String, entry: SessionEntry, index: Int) -> some View {
+    private func descriptionEditableRow(description: String, entry: SessionEntry, index: Int) -> some View {
         HStack {
-            Text(subtitle)
+            Text(description)
                 .font(.subheadline)
                 .italic()
                 .foregroundColor(.white.opacity(0.6))
@@ -232,25 +241,25 @@ struct SessionListSectionView: View {
                 .background(Color.white.opacity(0.02))
         )
         .contentShape(Rectangle())
-        .accessibilityLabel("Edit subtitle: \(subtitle)")
+        .accessibilityLabel("Edit description: \(description)")
         .accessibilityAddTraits(.isButton)
         .onTapGesture {
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
 
-            editingSessionContext = SessionEditContext.subtitleEdit(
+            editingSessionContext = SessionEditContext.descriptionEdit(
                 entryId: entry.id,
                 sessionName: entry.sessionName,
-                subtitles: entry.subtitles,
-                subtitleIndex: index  // 特定のsubtitle編集
+                descriptions: entry.descriptions,
+                descriptionIndex: index  // 特定のdescription編集
             )
-            tempSubtitles = entry.subtitles
+            tempDescriptions = entry.descriptions
         }
     }
 
     @ViewBuilder
-    private func subtitleDisplayRow(subtitle: String) -> some View {
-        Text(subtitle)
+    private func descriptionDisplayRow(description: String) -> some View {
+        Text(description)
             .font(.subheadline)
             .foregroundColor(.secondary)
             .padding(.leading, 16)
@@ -258,12 +267,12 @@ struct SessionListSectionView: View {
 
     // MARK: - Save Methods
 
-    private func saveSubtitleEdit(context: SessionEditContext) {
+    private func saveDescriptionEdit(context: SessionEditContext) {
         do {
-            // 新しいSessionManagerメソッドを使用
-            try sessionManager.updateSessionSubtitles(
+            // tempDescriptionsを使用（UIで編集された最新状態）
+            try sessionManager.updateSessionDescriptions(
                 sessionName: context.sessionName,
-                newSubtitles: tempSubtitles
+                newDescriptions: tempDescriptions
             )
         } catch {
             errorMessage = IdentifiableError(message: error.localizedDescription)
@@ -274,11 +283,11 @@ struct SessionListSectionView: View {
         guard case .fullSession = context.editMode else { return }
 
         do {
-            // Custom Sessionの更新
+            // tempSessionName と tempSubtitles を使用（UIで編集された最新状態）
             try sessionManager.addOrUpdateEntry(
                 originalKey: context.sessionName.lowercased(),
                 sessionName: tempSessionName,
-                subtitles: tempSubtitles
+                descriptions: tempDescriptions
             )
         } catch {
             errorMessage = IdentifiableError(message: error.localizedDescription)

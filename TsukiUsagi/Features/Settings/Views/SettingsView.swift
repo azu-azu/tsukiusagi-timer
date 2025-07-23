@@ -29,7 +29,8 @@ struct SettingsView: View {
 
     private var currentShowEmptyError: Bool {
         let isCustomActivity = !["Work", "Study", "Read"].contains(activityLabel)
-        return isCustomActivity && activityLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return isCustomActivity
+            && activityLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
@@ -149,9 +150,9 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 10) {
                 SessionLabelSection(
                     activity: $activityLabel,
-                    subtitle: $subtitleLabel,
+                    descriptionText: $subtitleLabel,
                     isActivityFocused: $isActivityFocused,
-                    isSubtitleFocused: $isSubtitleFocused,
+                    isDescriptionFocused: $isSubtitleFocused,
                     labelCornerRadius: labelCornerRadius,
                     showEmptyError: .constant(currentShowEmptyError),
                     onDone: nil
@@ -222,13 +223,17 @@ struct KeyboardHeightModifier: ViewModifier {
                     for: UIResponder.keyboardWillShowNotification
                 )
             ) { notification in
-                if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+                if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
+                    as? NSValue
+                {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         keyboardHeight = keyboardFrame.cgRectValue.height
                     }
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            ) { _ in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     keyboardHeight = 0
                 }
