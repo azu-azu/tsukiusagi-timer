@@ -1,46 +1,6 @@
 import Foundation
 
-/// SessionManagerのバリデーション処理を担当
-///
-/// 責務:
-/// - セッション名のバリデーション
-/// - Description配列のバリデーション
-/// - 重複チェック
-/// - 制限値チェック
-struct SessionManagerValidator {
-
-    /// セッションエントリのバリデーション（引数数制限対応版）
-    static func validateSessionEntry(
-        sessionName: String,
-        descriptions: [String],
-        validationContext: SessionValidationContext
-    ) throws {
-        // セッション名の長さチェック
-        try validateSessionNameLength(sessionName)
-
-        // セッション数制限チェック
-        try validateSessionCount(
-            isNewSession: validationContext.isNewSession,
-            currentCustomCount: validationContext.currentCustomCount,
-            isDefaultSession: validationContext.isDefaultSession
-        )
-
-        // 重複チェック
-        try validateDuplicateSession(
-            sessionName: sessionName,
-            validationContext: validationContext
-        )
-
-        // Description配列のバリデーション
-        try validateDescriptions(descriptions)
-    }
-
-/// バリデーション用のコンテキスト構造体
-///
-/// 責務:
-/// - 複数の関連パラメータをまとめて管理
-/// - 関数の引数数制限への対応
-/// - バリデーション処理の可読性向上
+/// バリデーション時に必要な文脈情報をまとめた構造体
 struct SessionValidationContext {
     let isNewSession: Bool
     let currentCustomCount: Int
@@ -50,66 +10,143 @@ struct SessionValidationContext {
     let newKey: String
 }
 
-    /// Description配列のバリデーション
-    static func validateDescriptions(_ descriptions: [String]) throws {
-        // Description数制限チェック
-        if descriptions.count > SessionManager.maxDescriptionCount {
-            throw SessionManagerError.descriptionLimitExceeded
-        }
+/// セッション管理のエラー
+enum SessionManagerError: Error {
+    case notFound
+    case descriptionLimitExceeded
+    case descriptionTooLong
 
-        // 各Descriptionの文字数チェック
-        for description in descriptions where description.count > SessionManager.maxDescriptionLength {
-            throw SessionManagerError.descriptionTooLong
-        }
-    }
-
-    /// セッション名の長さバリデーション
-    static func validateSessionNameLength(_ sessionName: String) throws {
-        if sessionName.count > SessionManager.maxNameLength {
-            throw SessionManagerError.nameTooLong
+    var localizedDescription: String {
+        switch self {
+        case .notFound:
+            return "セッションが見つかりません"
+        case .descriptionLimitExceeded:
+            return "説明の数が上限に達しています（最大\(SessionManager.maxDescriptionCount)個）"
+        case .descriptionTooLong:
+            return "説明が長すぎます（最大\(SessionManager.maxDescriptionLength)文字）"
         }
     }
+}
 
-    /// セッション数制限のバリデーション
-    static func validateSessionCount(
-        isNewSession: Bool,
-        currentCustomCount: Int,
-        isDefaultSession: Bool
-    ) throws {
-        if !isDefaultSession &&
-            currentCustomCount >= SessionManager.maxSessionCount &&
-            isNewSession {
-            throw SessionManagerError.sessionLimitExceeded
+/// セッションバリデーションエラー
+enum SessionValidationError: Error {
+    case emptySessionName
+    case sessionNameTooLong
+    case maxSessionCountExceeded
+    case duplicateSessionName
+    case tooManyDescriptions
+    case descriptionTooLong
+    case sessionNotFound
+    case invalidIndex
+
+    var localizedDescription: String {
+        switch self {
+        case .emptySessionName:
+            return "セッション名が空です"
+        case .sessionNameTooLong:
+            return "セッション名が長すぎます（最大\(SessionManager.maxNameLength)文字）"
+        case .maxSessionCountExceeded:
+            return "セッション数が上限に達しています（最大\(SessionManager.maxSessionCount)個）"
+        case .duplicateSessionName:
+            return "同じ名前のセッションが既に存在します"
+        case .tooManyDescriptions:
+            return "説明が多すぎます（最大\(SessionManager.maxDescriptionCount)個）"
+        case .descriptionTooLong:
+            return "説明が長すぎます（最大\(SessionManager.maxDescriptionLength)文字）"
+        case .sessionNotFound:
+            return "指定されたセッションが見つかりません"
+        case .invalidIndex:
+            return "無効なインデックスです"
         }
     }
+}
 
-    /// セッション重複のバリデーション
-    static func validateDuplicateSession(
+/// セッション管理のバリデーションを行うクラス
+class SessionManagerValidator {
+
+    /// セッションエントリのバリデーション
+    static func validateSessionEntry(
         sessionName: String,
+        descriptions: [String],
         validationContext: SessionValidationContext
     ) throws {
-        // 重複禁止（空文字でない場合のみチェック）
-        if !sessionName.isEmpty,
-           let existing = validationContext.existingEntry,
-           !validationContext.isDefaultSession {
-            // 元のキーと違う場合のみ重複エラー
-            if validationContext.newKey != validationContext.oldKey && !existing.isDefault {
-                throw SessionManagerError.duplicateName
+
+        // セッション名の検証
+        try validateSessionName(sessionName, context: validationContext)
+
+        // 説明の検証
+        try validateDescriptionsInternal(descriptions)
+    }
+
+    /// セッション名のバリデーション
+    private static func validateSessionName(
+        _ sessionName: String,
+        context: SessionValidationContext
+    ) throws {
+
+        // 空文字チェック
+        guard !sessionName.isEmpty else {
+            throw SessionValidationError.emptySessionName
+        }
+
+        // 文字数制限チェック
+        guard sessionName.count <= SessionManager.maxNameLength else {
+            throw SessionValidationError.sessionNameTooLong
+        }
+
+        // 新規セッション時のカウント制限チェック
+        if context.isNewSession && !context.isDefaultSession {
+            guard context.currentCustomCount < SessionManager.maxSessionCount else {
+                throw SessionValidationError.maxSessionCountExceeded
             }
         }
-    }
 
-    /// 既存セッションの存在チェック
-    static func validateSessionExists(_ sessionEntry: SessionEntry?) throws {
-        guard sessionEntry != nil else {
-            throw SessionManagerError.notFound
+        // 同名セッションの重複チェック（キー変更時）
+        if context.oldKey != context.newKey && context.existingEntry != nil {
+            throw SessionValidationError.duplicateSessionName
         }
     }
 
-    /// インデックスの有効性チェック
+    /// セッションの存在チェック（SessionEntry?版）
+    static func validateSessionExists(_ entry: SessionEntry?) throws {
+        guard entry != nil else {
+            throw SessionValidationError.sessionNotFound
+        }
+    }
+
+    /// セッションの存在チェック（sessionName版）
+    static func validateSessionExists(sessionName: String, in sessionDatabase: [String: SessionEntry]) throws {
+        let key = sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        guard sessionDatabase[key] != nil else {
+            throw SessionValidationError.sessionNotFound
+        }
+    }
+
+    /// インデックスの妥当性チェック
     static func validateIndex(_ index: Int, for descriptions: [String]) throws {
         guard index >= 0 && index < descriptions.count else {
-            throw SessionManagerError.notFound
+            throw SessionValidationError.invalidIndex
+        }
+    }
+
+    /// 説明のバリデーション（public版）
+    static func validateDescriptions(_ descriptions: [String]) throws {
+        try validateDescriptionsInternal(descriptions)
+    }
+
+    /// 説明のバリデーション（内部用）
+    private static func validateDescriptionsInternal(_ descriptions: [String]) throws {
+
+        // 説明数の制限チェック
+        guard descriptions.count <= SessionManager.maxDescriptionCount else {
+            throw SessionValidationError.tooManyDescriptions
+        }
+
+        // 各説明の文字数チェック
+        for description in descriptions {
+            guard description.count <= SessionManager.maxDescriptionLength else {
+                throw SessionValidationError.descriptionTooLong
+            }
         }
     }
 }
