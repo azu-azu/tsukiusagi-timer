@@ -28,7 +28,7 @@ struct ContentView: View {
     @State private var showDiamondStars = false
     @State private var cachedIsLandscape: Bool = false
     @FocusState private var isQuietMoonFocused: Bool
-    @State private var isFlowingStarsActive: Bool = true
+    @State private var isFlowingStarsActive: Bool = true  // ✅ 復活: アニメーション制御用
 
     private let moonTitle = "Centered"
 
@@ -105,18 +105,19 @@ struct ContentView: View {
                         AwakeEnablerView(hidden: true)
                         StaticStarsView(starCount: staticStarCount)
 
-                        // FlowingStarsViewなどの星エフェクトはタイマー進行中のみ
+                        // ✅ 修正: セッション未完了かつアニメーション有効時に星エフェクト表示
+                        // 初回起動時(タイマー未開始)でも表示、PAUSE時は非表示
                         if !timerVM.isSessionFinished && isFlowingStarsActive {
                             FlowingStarsView(
                                 starCount: flowingStarCount,
-                                angle: .degrees(90),
+                                angle: .degrees(90), // 下向き
                                 durationRange: 24 ... 40,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
                             FlowingStarsView(
                                 starCount: flowingStarCount,
-                                angle: .degrees(-90),
+                                angle: .degrees(-90), // 上向き
                                 durationRange: 24 ... 40,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
@@ -135,7 +136,7 @@ struct ContentView: View {
                             moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
                             isQuietMoonFocused: $isQuietMoonFocused,
                             showingEditRecord: $showingEditRecord,
-                            isMoonAnimationActive: isFlowingStarsActive
+                            isMoonAnimationActive: isFlowingStarsActive  // ✅ 修正: 星と月のアニメーション連動
                         )
                         .onPreferenceChange(LandscapePreferenceKey.self) { _ in
                             updateOrientation(size: size)
@@ -199,6 +200,31 @@ struct ContentView: View {
                             }
                         }
                     }
+                    // ✅ 復活: Settings画面制御
+                    .onChange(of: showingSettings) { _, newValue in
+                        if newValue {
+                            // Settingsを開いたときはアニメーションOFF
+                            isFlowingStarsActive = false
+                        } else {
+                            // Settingsを閉じたとき、タイマーが実行中の場合のみ星アニメON
+                            isFlowingStarsActive = timerVM.isRunning
+                        }
+                    }
+                    // ✅ 修正: タイマー状態制御（PAUSE時のみアニメーション停止）
+                    .onChange(of: timerVM.isRunning) { _, newValue in
+                        // Settings画面が開いていない場合のみ制御
+                        if !showingSettings {
+                            // PAUSEされた場合のみアニメーション停止
+                            // 初回起動時（タイマー未開始）は動作を継続
+                            if !newValue && timerVM.timeRemaining < (timerVM.workLengthMinutes * 60) {
+                                // タイマーが進行していてPAUSEされた場合
+                                isFlowingStarsActive = false
+                            } else if newValue {
+                                // タイマー開始時
+                                isFlowingStarsActive = true
+                            }
+                        }
+                    }
                     // デバッグ用の状態変化追跡
                     .onReceive(timerVM.$isSessionFinished) { _ in
                         // print("ContentView: isSessionFinished changed to \(isFinished)")
@@ -214,21 +240,6 @@ struct ContentView: View {
                             .delay(0.1),
                         value: isLandscape
                     )
-                    .onChange(of: showingSettings) { _, newValue in
-                        if newValue {
-                            // Settingsを開いたときはアニメーションOFF
-                            isFlowingStarsActive = false
-                        } else {
-                            // Settingsを閉じたとき、タイマーが動いていなければ星アニメON
-                            isFlowingStarsActive = timerVM.isRunning ||
-                                (!timerVM.isRunning && !timerVM.isSessionFinished)
-                        }
-                    }
-                    .onChange(of: timerVM.isRunning) { _, newValue in
-                        // タイマー開始/停止時もアニメーション状態を制御
-                        isFlowingStarsActive = !showingSettings &&
-                            (newValue || (!newValue && !timerVM.isSessionFinished))
-                    }
                 }
             }
         }
@@ -244,8 +255,7 @@ struct ContentView: View {
                 timerVM.stopTimer()
             } else {
                 // セッション完了後の再スタート時は設定値を使用
-                let secondsToStart = timerVM.isSessionFinished ?
-                    timerVM.workLengthMinutes * 60 : timerVM.timeRemaining
+                let secondsToStart = timerVM.isSessionFinished ? timerVM.workLengthMinutes * 60 : timerVM.timeRemaining
                 timerVM.startTimer(seconds: secondsToStart)
             }
         }
