@@ -63,9 +63,8 @@ struct SessionRowView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .focused($isNameFocused)
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.nameField)
-                    .onChange(of: isNameFocused) { _, newValue in
-                        if newValue {
-                        }
+                    .onChange(of: isNameFocused) {  // ✅ iOS 17.0対応: 新しいonChange形式
+                        // Focus handling
                     }
 
                 Button("Select Existing") {
@@ -196,9 +195,8 @@ struct SessionRowView: View {
             .textFieldStyle(RoundedBorderTextFieldStyle())
             .accessibilityIdentifier(AccessibilityIDs.SessionManager.descriptionField)
             .focused($isSubtitleFocused)
-            .onChange(of: isSubtitleFocused) { _, newValue in
-                if newValue {
-                }
+            .onChange(of: isSubtitleFocused) {  // ✅ iOS 17.0対応: 新しいonChange形式
+                // Focus handling
             }
 
             Button(action: { editingDescriptions.remove(at: idx) }, label: {

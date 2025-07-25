@@ -72,10 +72,10 @@ struct SessionLabelSection: View {
                                         isActivityFocused = false
                                         onDone?()
                                     }
-                                    .onChange(of: isActivityFocused) { _ in
+                                    .onChange(of: isActivityFocused) {
                                         // Haptic feedback removed
                                     }
-                                    .onChange(of: activity) { _ in
+                                    .onChange(of: activity) {
                                         // セッション名が変更されたらdescriptionもリセット
                                         descriptionText = ""
                                         isCustomDescriptionMode = false
@@ -168,7 +168,7 @@ struct SessionLabelSection: View {
                         .background(Color.white.opacity(0.05))
                         .cornerRadius(6)
                         .focused($isDescriptionFocused)
-                        .onChange(of: isDescriptionFocused) { _ in
+                        .onChange(of: isDescriptionFocused) {
                             // Haptic feedback removed
                         }
                 }
@@ -235,7 +235,7 @@ struct SessionLabelSection: View {
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(6)
                             .focused($isDescriptionFocused)
-                            .onChange(of: isDescriptionFocused) { _ in
+                            .onChange(of: isDescriptionFocused) {
                                 // Haptic feedback removed
                             }
                     }
@@ -253,14 +253,14 @@ struct SessionLabelSection: View {
                 }
             }
         )
-        .onChange(of: isActivityFocused) { _ in
+        .onChange(of: isActivityFocused) {
             // Haptic feedback removed
             // フォーカス時にツールバーを強制更新
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 toolbarID = UUID()
             }
         }
-        .onChange(of: isDescriptionFocused) { _ in
+        .onChange(of: isDescriptionFocused) {
             // Haptic feedback removed
             // フォーカス時にツールバーを強制更新
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
