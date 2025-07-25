@@ -113,15 +113,19 @@ class SessionManager: ObservableObject {
         let oldKey = originalKey.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // バリデーション実行
-        try SessionManagerValidator.validateSessionEntry(
-            sessionName: trimmedName,
-            descriptions: descriptions,
+        let validationContext = SessionValidationContext(
             isNewSession: sessionDatabase[newKey] == nil,
             currentCustomCount: customEntries.count,
             isDefaultSession: defaultSessionNames.contains(trimmedName),
             existingEntry: sessionDatabase[newKey],
             oldKey: oldKey,
             newKey: newKey
+        )
+
+        try SessionManagerValidator.validateSessionEntry(
+            sessionName: trimmedName,
+            descriptions: descriptions,
+            validationContext: validationContext
         )
 
         let isDefault = defaultSessionNames.contains(trimmedName)
