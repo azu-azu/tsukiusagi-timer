@@ -201,12 +201,14 @@ struct SessionListSectionView: View {
             }
             .buttonStyle(.bordered)
 
+            // ✅ 修正: role付きButtonの正しい書き方
             Button(
                 role: .destructive,
-                action: { sessionManager.deleteEntry(id: entry.id) }
-            ) {
-                Image(systemName: "trash")
-            }
+                action: { sessionManager.deleteEntry(id: entry.id) },
+                label: {
+                    Image(systemName: "trash")
+                }
+            )
             .buttonStyle(.bordered)
         }
     }

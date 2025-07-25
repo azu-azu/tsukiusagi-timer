@@ -147,13 +147,14 @@ struct DescriptionEditContent: View {
                         }
                     }
 
-                    if descriptions.count > 1 {
-                        Button(action: {
-                            removeDescription(at: index)
-                        }) {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundColor(.red)
-                        }
+                    if self.descriptions.count > 1 {
+                        Button(
+                            action: { self.removeDescription(at: index) },
+                            label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.red)
+                            }
+                        )
                     }
                 }
             }
