@@ -268,6 +268,7 @@ struct SessionListSectionView: View {
         .contentShape(Rectangle())
         .accessibilityLabel("Edit description: \(description)")
         .accessibilityAddTraits(.isButton)
+
         .onTapGesture {
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
