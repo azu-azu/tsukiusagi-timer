@@ -117,7 +117,7 @@ struct FullSessionEditContent: View {
                 .accessibilityLabel("Add description")
             }
 
-            ForEach(Array(descriptions.enumerated()), id: \.offset) { [self] index, _ in
+            ForEach(Array(descriptions.enumerated()), id: \.offset) { index, _ in
                 VStack(alignment: .leading) {
                     TextField(
                         "Description \(index + 1)",
@@ -126,7 +126,7 @@ struct FullSessionEditContent: View {
                     .textFieldStyle(.roundedBorder)
                     .focused(self.$focusedField, equals: .description(index))
                     .submitLabel(index == self.descriptions.count - 1 ? .done : .next)
-                    .onSubmit { [self] in
+                    .onSubmit {
                         if index < self.descriptions.count - 1 {
                             self.focusedField = .description(index + 1)
                         }
@@ -135,7 +135,7 @@ struct FullSessionEditContent: View {
                     // 削除ボタン（最後の1つは削除不可）
                     if self.descriptions.count > 1 {
                         Button(
-                            action: { [self] in self.removeDescription(at: index) }
+                            action: { self.removeDescription(at: index) }
                         ) {
                             Image(systemName: "minus.circle.fill")
                                 .foregroundColor(.red)
