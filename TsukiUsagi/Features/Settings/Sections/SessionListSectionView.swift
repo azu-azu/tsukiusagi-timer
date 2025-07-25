@@ -38,89 +38,99 @@ struct SessionListSectionView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-        // Session編集モーダル
         .sheet(item: $editingSessionContext) { context in
-            switch context.editMode {
-            case .descriptionOnly:
-                // Default Session: Description管理（追加/編集/削除）
-                EditableModal(
-                    title: "Manage Descriptions",
-                    onSave: {
-                        saveDescriptionEdit(context: context)
-                        editingSessionContext = nil
-                    },
-                    onCancel: {
-                        editingSessionContext = nil
-                    },
-                    isKeyboardCloseVisible: isAnyFieldFocused,
-                    onKeyboardClose: {
-                        KeyboardManager.hideKeyboard {
-                            isAnyFieldFocused = false
-                        }
-                    },
-                    content: {
-                        DescriptionEditContent(
-                            sessionName: context.sessionName,
-                            descriptions: tempDescriptions, // 修正: contextではなくtempDescriptionsを使用
-                            editingIndex: context.descriptionIndex,
-                            onDescriptionsChange: { newDescriptions in
-                                // 修正: tempDescriptionsを更新してUIと同期
-                                tempDescriptions = newDescriptions
-                            },
-                            isAnyFieldFocused: $isAnyFieldFocused,
-                            onClearFocus: {
-                                isAnyFieldFocused = false
-                            }
-                        )
-                    }
-                )
-                .presentationDetents([.large])
-
-            case .fullSession:
-                // Custom Session: Session全体編集
-                EditableModal(
-                    title: "Edit Session",
-                    onSave: {
-                        saveFullSessionEdit(context: context)
-                        editingSessionContext = nil
-                    },
-                    onCancel: {
-                        editingSessionContext = nil
-                    },
-                    isKeyboardCloseVisible: isAnyFieldFocused,
-                    onKeyboardClose: {
-                        KeyboardManager.hideKeyboard {
-                            isAnyFieldFocused = false
-                        }
-                    },
-                    content: {
-                        FullSessionEditContent(
-                            sessionName: tempSessionName, // 修正: contextではなくtempSessionNameを使用
-                            descriptions: tempDescriptions, // 修正: contextではなくtempDescriptionsを使用
-                            onSessionNameChange: { newName in
-                                // 修正: tempSessionNameを更新してUIと同期
-                                tempSessionName = newName
-                            },
-                            onDescriptionsChange: { newDescriptions in
-                                // 修正: tempDescriptionsを更新してUIと同期
-                                tempDescriptions = newDescriptions
-                            },
-                            isAnyFieldFocused: $isAnyFieldFocused,
-                            onClearFocus: {
-                                isAnyFieldFocused = false
-                            }
-                        )
-                    }
-                )
-                .presentationDetents([.large])
-            }
+            sessionEditSheet(for: context)
         }
-        .onChange(of: editingSessionContext) { _, newValue in
+        .onChange(of: editingSessionContext) {  // ✅ iOS 17.0対応: 新しいonChange形式
             // モーダルが閉じられた時にフォーカス状態をリセット
-            if newValue == nil {
+            if editingSessionContext == nil {
                 isAnyFieldFocused = false
             }
         }
+    }
+
+    // MARK: - Sheet Builder (Function Body Length対策で分離)
+
+    @ViewBuilder
+    private func sessionEditSheet(for context: SessionEditContext) -> some View {
+        switch context.editMode {
+        case .descriptionOnly:
+            descriptionEditModal(context: context)
+        case .fullSession:
+            fullSessionEditModal(context: context)
+        }
+    }
+
+    @ViewBuilder
+    private func descriptionEditModal(context: SessionEditContext) -> some View {
+        EditableModal(
+            title: "Manage Descriptions",
+            onSave: {
+                saveDescriptionEdit(context: context)
+                editingSessionContext = nil
+            },
+            onCancel: {
+                editingSessionContext = nil
+            },
+            isKeyboardCloseVisible: isAnyFieldFocused,
+            onKeyboardClose: {
+                KeyboardManager.hideKeyboard {
+                    isAnyFieldFocused = false
+                }
+            },
+            content: {
+                DescriptionEditContent(
+                    sessionName: context.sessionName,
+                    descriptions: tempDescriptions,
+                    editingIndex: context.descriptionIndex,
+                    onDescriptionsChange: { newDescriptions in
+                        tempDescriptions = newDescriptions
+                    },
+                    isAnyFieldFocused: $isAnyFieldFocused,
+                    onClearFocus: {
+                        isAnyFieldFocused = false
+                    }
+                )
+            }
+        )
+        .presentationDetents([.large])
+    }
+
+    @ViewBuilder
+    private func fullSessionEditModal(context: SessionEditContext) -> some View {
+        EditableModal(
+            title: "Edit Session",
+            onSave: {
+                saveFullSessionEdit(context: context)
+                editingSessionContext = nil
+            },
+            onCancel: {
+                editingSessionContext = nil
+            },
+            isKeyboardCloseVisible: isAnyFieldFocused,
+            onKeyboardClose: {
+                KeyboardManager.hideKeyboard {
+                    isAnyFieldFocused = false
+                }
+            },
+            content: {
+                FullSessionEditContent(
+                    sessionName: tempSessionName,
+                    descriptions: tempDescriptions,
+                    onSessionNameChange: { newName in
+                        tempSessionName = newName
+                    },
+                    onDescriptionsChange: { newDescriptions in
+                        tempDescriptions = newDescriptions
+                    },
+                    isAnyFieldFocused: $isAnyFieldFocused,
+                    onClearFocus: {
+                        isAnyFieldFocused = false
+                    }
+                )
+            }
+        )
+        .presentationDetents([.large])
     }
 
     // MARK: - Section Builder
@@ -154,68 +164,80 @@ struct SessionListSectionView: View {
     @ViewBuilder
     private func displaySessionRow(entry: SessionEntry, isDefault: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top) {
-                Text(entry.sessionName)
-                    .font(.body)
-                    .foregroundColor(.primary)
-                Spacer()
-                if !isDefault {
-                    Button("Edit") {
-                        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                        impactFeedback.impactOccurred()
+            sessionRowHeader(entry: entry, isDefault: isDefault)
+            sessionRowDescriptions(entry: entry, isDefault: isDefault)
+        }
+        .padding()
+        .background(sessionRowBackground(isDefault: isDefault))
+    }
 
-                        editingSessionContext = SessionEditContext.fullSessionEdit(
-                            entryId: entry.id,
-                            sessionName: entry.sessionName,
-                            descriptions: entry.descriptions
-                        )
-                        tempSessionName = entry.sessionName
-                        tempDescriptions = entry.descriptions
-                    }
-                    .buttonStyle(.bordered)
-
-                    Button(role: .destructive, action: {
-                        sessionManager.deleteEntry(id: entry.id)
-                    }) {
-                        Image(systemName: "trash")
-                    }
-                    .buttonStyle(.bordered)
-                }
+    @ViewBuilder
+    private func sessionRowHeader(entry: SessionEntry, isDefault: Bool) -> some View {
+        HStack(alignment: .top) {
+            Text(entry.sessionName)
+                .font(.body)
+                .foregroundColor(.primary)
+            Spacer()
+            if !isDefault {
+                sessionRowButtons(entry: entry)
             }
+        }
+    }
 
-            // Subtitles with different behavior for Default vs Custom Sessions
-            if !entry.descriptions.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(Array(entry.descriptions.enumerated()), id: \.offset) { index, description in
-                        if isDefault {
-                            // Default Session: description編集可能（モーダルで）
-                            descriptionEditableRow(description: description, entry: entry, index: index)
-                        } else {
-                            // Custom Session: description表示のみ（session全体編集はEditボタンで）
-                            descriptionDisplayRow(description: description)
-                        }
+    @ViewBuilder
+    private func sessionRowButtons(entry: SessionEntry) -> some View {
+        HStack {
+            Button("Edit") {
+                let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                impactFeedback.impactOccurred()
+
+                editingSessionContext = SessionEditContext.fullSessionEdit(
+                    entryId: entry.id,
+                    sessionName: entry.sessionName,
+                    descriptions: entry.descriptions
+                )
+                tempSessionName = entry.sessionName
+                tempDescriptions = entry.descriptions
+            }
+            .buttonStyle(.bordered)
+
+            Button(role: .destructive, action: {
+                sessionManager.deleteEntry(id: entry.id)
+            }) {
+                Image(systemName: "trash")
+            }
+            .buttonStyle(.bordered)
+        }
+    }
+
+    @ViewBuilder
+    private func sessionRowDescriptions(entry: SessionEntry, isDefault: Bool) -> some View {
+        if !entry.descriptions.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(Array(entry.descriptions.enumerated()), id: \.offset) { index, description in
+                    if isDefault {
+                        descriptionEditableRow(description: description, entry: entry, index: index)
+                    } else {
+                        descriptionDisplayRow(description: description)
                     }
                 }
             }
         }
-        .padding()
-        .background(
-            Group {
-                if !isDefault {
-                    // 編集可能な項目は背景で一体感を演出
+    }
+
+    @ViewBuilder
+    private func sessionRowBackground(isDefault: Bool) -> some View {
+        if !isDefault {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white.opacity(0.05))
+                .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.05))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                        )
-                } else {
-                    // デフォルト項目はシンプルに
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.02))
-                }
-            }
-        )
+                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                )
+        } else {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white.opacity(0.02))
+        }
     }
 
     // MARK: - Description Row Builders
@@ -253,7 +275,7 @@ struct SessionListSectionView: View {
                 entryId: entry.id,
                 sessionName: entry.sessionName,
                 descriptions: entry.descriptions,
-                descriptionIndex: index  // 特定のdescription編集
+                descriptionIndex: index
             )
             tempDescriptions = entry.descriptions
         }
@@ -271,7 +293,6 @@ struct SessionListSectionView: View {
 
     private func saveDescriptionEdit(context: SessionEditContext) {
         do {
-            // tempDescriptionsを使用（UIで編集された最新状態）
             try sessionManager.updateSessionDescriptions(
                 sessionName: context.sessionName,
                 newDescriptions: tempDescriptions
@@ -285,7 +306,6 @@ struct SessionListSectionView: View {
         guard case .fullSession = context.editMode else { return }
 
         do {
-            // tempSessionName と tempSubtitles を使用（UIで編集された最新状態）
             try sessionManager.addOrUpdateEntry(
                 originalKey: context.sessionName.lowercased(),
                 sessionName: tempSessionName,
