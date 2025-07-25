@@ -201,9 +201,10 @@ struct SessionListSectionView: View {
             }
             .buttonStyle(.bordered)
 
-            Button(role: .destructive, action: {
-                sessionManager.deleteEntry(id: entry.id)
-            }) {
+            Button(
+                role: .destructive,
+                action: { sessionManager.deleteEntry(id: entry.id) }
+            ) {
                 Image(systemName: "trash")
             }
             .buttonStyle(.bordered)
@@ -289,32 +290,6 @@ struct SessionListSectionView: View {
             .padding(.leading, 16)
     }
 
-    // MARK: - Save Methods
-
-    private func saveDescriptionEdit(context: SessionEditContext) {
-        do {
-            try sessionManager.updateSessionDescriptions(
-                sessionName: context.sessionName,
-                newDescriptions: tempDescriptions
-            )
-        } catch {
-            errorMessage = IdentifiableError(message: error.localizedDescription)
-        }
-    }
-
-    private func saveFullSessionEdit(context: SessionEditContext) {
-        guard case .fullSession = context.editMode else { return }
-
-        do {
-            try sessionManager.addOrUpdateEntry(
-                originalKey: context.sessionName.lowercased(),
-                sessionName: tempSessionName,
-                descriptions: tempDescriptions
-            )
-        } catch {
-            errorMessage = IdentifiableError(message: error.localizedDescription)
-        }
-    }
 }
 
 // MARK: - Preview

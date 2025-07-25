@@ -134,21 +134,26 @@ struct DescriptionEditContent: View {
                 .accessibilityLabel("Add description")
             }
 
-            ForEach(Array(descriptions.enumerated()), id: \.offset) { [self] index, _ in  // ✅ SwiftLint修正: unused parameter
+            ForEach(Array(descriptions.enumerated()), id: \.offset) { [self] index, _ in
                 VStack(alignment: .leading) {
-                    TextField("Description \(index + 1)", text: self.binding(for: index))
-                        .textFieldStyle(.roundedBorder)
-                        .focused(self.$focusedField, equals: index)
-                        .submitLabel(index == self.descriptions.count - 1 ? .done : .next)
-                        .onSubmit { [self] in
-                            if index < self.descriptions.count - 1 {
-                                self.focusedField = index + 1
-                            }
+                    TextField(
+                        "Description \(index + 1)",
+                        text: self.binding(for: index)
+                    )
+                    .textFieldStyle(.roundedBorder)
+                    .focused(self.$focusedField, equals: index)
+                    .submitLabel(index == self.descriptions.count - 1 ? .done : .next)
+                    .onSubmit { [self] in
+                        if index < self.descriptions.count - 1 {
+                            self.focusedField = index + 1
                         }
+                    }
 
                     // 削除ボタン（最後の1つは削除不可）
                     if self.descriptions.count > 1 {
-                        Button(action: { [self] in self.removeDescription(at: index) }) {
+                        Button(
+                            action: { [self] in self.removeDescription(at: index) }
+                        ) {
                             Image(systemName: "minus.circle.fill")
                                 .foregroundColor(.red)
                         }
