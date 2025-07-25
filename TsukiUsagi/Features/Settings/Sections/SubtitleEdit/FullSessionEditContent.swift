@@ -135,11 +135,12 @@ struct FullSessionEditContent: View {
                     // 削除ボタン（最後の1つは削除不可）
                     if self.descriptions.count > 1 {
                         Button(
-                            action: { self.removeDescription(at: index) }
-                        ) {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundColor(.red)
-                        }
+                            action: { self.removeDescription(at: index) },
+                            label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.red)
+                            }
+                        )
                     }
                 }
             }
