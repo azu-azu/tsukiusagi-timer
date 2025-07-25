@@ -63,15 +63,15 @@ struct DescriptionEditContent: View {
             descriptionsSection
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [self] in
-                if let editingIndex = self.editingIndex {
-                    self.focusedField = editingIndex
-                } else if !self.descriptions.isEmpty {
-                    self.focusedField = self.descriptions.count - 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                if let editingIndex {
+                    focusedField = editingIndex
+                } else if !descriptions.isEmpty {
+                    focusedField = descriptions.count - 1
                 }
             }
         }
-        .onChange(of: focusedField) {  // ✅ iOS 17.0対応: 新しいonChange形式
+        .onChange(of: focusedField) {
             isAnyFieldFocused = focusedField != nil
         }
     }
@@ -95,7 +95,6 @@ struct DescriptionEditContent: View {
 
                 Spacer()
 
-                // "固定" を示すロックアイコン
                 Image(systemName: "lock.fill")
                     .font(.caption)
                     .foregroundColor(.gray)
@@ -125,7 +124,6 @@ struct DescriptionEditContent: View {
 
                 Spacer()
 
-                // 追加ボタン
                 Button(action: addDescription) {
                     Image(systemName: "plus.circle.fill")
                         .font(.caption)
@@ -134,26 +132,25 @@ struct DescriptionEditContent: View {
                 .accessibilityLabel("Add description")
             }
 
-            ForEach(Array(descriptions.enumerated()), id: \.offset) { [self] index, _ in
+            ForEach(Array(descriptions.enumerated()), id: \.offset) { index, _ in
                 VStack(alignment: .leading) {
                     TextField(
                         "Description \(index + 1)",
-                        text: self.binding(for: index)
+                        text: binding(for: index)
                     )
                     .textFieldStyle(.roundedBorder)
-                    .focused(self.$focusedField, equals: index)
-                    .submitLabel(index == self.descriptions.count - 1 ? .done : .next)
-                    .onSubmit { [self] in
-                        if index < self.descriptions.count - 1 {
-                            self.focusedField = index + 1
+                    .focused($focusedField, equals: index)
+                    .submitLabel(index == descriptions.count - 1 ? .done : .next)
+                    .onSubmit {
+                        if index < descriptions.count - 1 {
+                            focusedField = index + 1
                         }
                     }
 
-                    // 削除ボタン（最後の1つは削除不可）
-                    if self.descriptions.count > 1 {
-                        Button(
-                            action: { [self] in self.removeDescription(at: index) }
-                        ) {
+                    if descriptions.count > 1 {
+                        Button(action: {
+                            removeDescription(at: index)
+                        }) {
                             Image(systemName: "minus.circle.fill")
                                 .foregroundColor(.red)
                         }
@@ -161,7 +158,6 @@ struct DescriptionEditContent: View {
                 }
             }
 
-            // 入力ヒント
             Text("Add descriptions for what you'll work on during this session")
                 .font(.caption2)
                 .foregroundColor(.secondary)
@@ -173,17 +169,17 @@ struct DescriptionEditContent: View {
 
     private func binding(for index: Int) -> Binding<String> {
         Binding(
-            get: { [self] in
-                if index < self.descriptions.count {
-                    return self.descriptions[index]
+            get: {
+                if index < descriptions.count {
+                    return descriptions[index]
                 } else {
                     return ""
                 }
             },
-            set: { [self] newValue in
-                if index < self.descriptions.count {
-                    self.descriptions[index] = newValue
-                    self.onDescriptionsChange(self.descriptions)
+            set: { newValue in
+                if index < descriptions.count {
+                    descriptions[index] = newValue
+                    onDescriptionsChange(descriptions)
                 }
             }
         )
@@ -192,8 +188,8 @@ struct DescriptionEditContent: View {
     private func addDescription() {
         descriptions.append("")
         onDescriptionsChange(descriptions)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
-            self.focusedField = self.descriptions.count - 1
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            focusedField = descriptions.count - 1
         }
     }
 
@@ -202,7 +198,6 @@ struct DescriptionEditContent: View {
         descriptions.remove(at: index)
         onDescriptionsChange(descriptions)
 
-        // フォーカス調整
         if focusedField == index {
             if index > 0 {
                 focusedField = index - 1
