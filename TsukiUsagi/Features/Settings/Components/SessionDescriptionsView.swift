@@ -17,12 +17,12 @@ struct SessionDescriptionsView: View {
     private var descriptionHeaderView: some View {
         HStack {
             Text("Descriptions")
-                .font(.caption)
+                .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
             if !editingName.isEmpty {
                 Text("for \"\(editingName)\"")
-                    .font(.caption)
+                    .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
         }

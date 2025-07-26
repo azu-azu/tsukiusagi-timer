@@ -114,7 +114,7 @@ struct SessionRowComponent: View {
     private var sessionHeader: some View {
         HStack(alignment: .top) {
             Text(entry.sessionName)
-                .font(.body)
+                .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
             Spacer()
             if !isDefault {
@@ -158,7 +158,7 @@ struct SessionRowComponent: View {
     private func editableDescriptionRow(description: String, index: Int) -> some View {
         HStack {
             Text(description)
-                .font(.subheadline)
+                .font(DesignTokens.Fonts.caption)
                 .italic()
                 .foregroundColor(.white.opacity(0.6))
                 .padding(.leading, 16)
@@ -166,7 +166,7 @@ struct SessionRowComponent: View {
             Spacer()
 
             Image(systemName: "pencil")
-                .font(.caption)
+                .font(DesignTokens.Fonts.caption)
                 .foregroundColor(.white.opacity(0.3))
                 .padding(.trailing, 8)
         }
@@ -192,7 +192,7 @@ struct SessionRowComponent: View {
 
     private func displayDescriptionRow(description: String) -> some View {
         Text(description)
-            .font(.subheadline)
+            .font(DesignTokens.Fonts.caption)
             .foregroundColor(DesignTokens.MoonColors.textSecondary)
             .padding(.leading, 16)
     }
