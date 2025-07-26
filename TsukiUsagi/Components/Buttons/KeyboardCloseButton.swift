@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - 純粋なUI要素（適応型改良版）
 struct KeyboardCloseButton: View {
     let action: () -> Void
     var isCompact: Bool = false
@@ -12,16 +11,11 @@ struct KeyboardCloseButton: View {
         }
         .foregroundColor(DesignTokens.MoonColors.textPrimary)
         .padding(isCompact ? 4 : 6)
-        .background(
-            Circle()
-                .fill(Color.black.opacity(0.8))
-        )
+        .background(Circle().fill(Color.black.opacity(0.8)))
     }
 }
 
-// MARK: - 機能的な拡張（位置調整版）
 extension View {
-    /// キーボードクローズボタンを条件付きで表示（位置調整版）
     func adaptiveKeyboardCloseButton(
         isVisible: Bool,
         position: KeyboardCloseButtonPosition = .topTrailing,
@@ -41,7 +35,6 @@ extension View {
         }
     }
 
-    /// キーボードクローズボタンを条件付きで表示（レガシー版・カスタマイズ可能）
     func keyboardCloseButton(
         isVisible: Bool,
         isCompact: Bool = false,
@@ -63,11 +56,7 @@ extension View {
         return ZStack {
             self
             if isVisible {
-                buttonPositionView(
-                    position: position,
-                    action: action,
-                    config: config
-                )
+                buttonPositionView(position: position, action: action, config: config)
             }
         }
         .transition(.opacity)
@@ -95,10 +84,7 @@ extension View {
         }
     }
 
-    private func topTrailingButton(
-        action: @escaping () -> Void,
-        config: ButtonConfig
-    ) -> some View {
+    private func topTrailingButton(action: @escaping () -> Void, config: ButtonConfig) -> some View {
         VStack {
             HStack {
                 Spacer()
@@ -110,10 +96,7 @@ extension View {
         }
     }
 
-    private func topLeadingButton(
-        action: @escaping () -> Void,
-        config: ButtonConfig
-    ) -> some View {
+    private func topLeadingButton(action: @escaping () -> Void, config: ButtonConfig) -> some View {
         VStack {
             HStack {
                 KeyboardCloseButton(action: action, isCompact: config.isCompact)
@@ -125,10 +108,7 @@ extension View {
         }
     }
 
-    private func bottomTrailingButton(
-        action: @escaping () -> Void,
-        config: ButtonConfig
-    ) -> some View {
+    private func bottomTrailingButton(action: @escaping () -> Void, config: ButtonConfig) -> some View {
         VStack {
             Spacer()
             HStack {
@@ -140,10 +120,7 @@ extension View {
         }
     }
 
-    private func bottomLeadingButton(
-        action: @escaping () -> Void,
-        config: ButtonConfig
-    ) -> some View {
+    private func bottomLeadingButton(action: @escaping () -> Void, config: ButtonConfig) -> some View {
         VStack {
             Spacer()
             HStack {
@@ -155,10 +132,7 @@ extension View {
         }
     }
 
-    private func centerTrailingButton(
-        action: @escaping () -> Void,
-        config: ButtonConfig
-    ) -> some View {
+    private func centerTrailingButton(action: @escaping () -> Void, config: ButtonConfig) -> some View {
         HStack {
             Spacer()
             KeyboardCloseButton(action: action, isCompact: config.isCompact)
@@ -166,10 +140,7 @@ extension View {
         }
     }
 
-    private func centerLeadingButton(
-        action: @escaping () -> Void,
-        config: ButtonConfig
-    ) -> some View {
+    private func centerLeadingButton(action: @escaping () -> Void, config: ButtonConfig) -> some View {
         HStack {
             KeyboardCloseButton(action: action, isCompact: config.isCompact)
                 .padding(.leading, config.leadingPadding)
@@ -179,7 +150,6 @@ extension View {
 }
 }
 
-// MARK: - Button Configuration
 struct ButtonConfig {
     let isCompact: Bool
     let topPadding: CGFloat
@@ -188,17 +158,10 @@ struct ButtonConfig {
     let bottomPadding: CGFloat
 }
 
-// MARK: - ボタン配置位置の定義
 enum KeyboardCloseButtonPosition {
-    case topTrailing
-    case topLeading
-    case bottomTrailing
-    case bottomLeading
-    case centerTrailing
-    case centerLeading
+    case topTrailing, topLeading, bottomTrailing, bottomLeading, centerTrailing, centerLeading
 }
 
-// MARK: - 適応型オーバーレイコンポーネント（位置対応版）
 struct AdaptiveKeyboardCloseButtonOverlay: View {
     let geometry: GeometryProxy
     let position: KeyboardCloseButtonPosition
@@ -208,28 +171,12 @@ struct AdaptiveKeyboardCloseButtonOverlay: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @State private var keyboardHeight: CGFloat = 0
 
-    private var isLandscape: Bool {
-        verticalSizeClass == .compact
-    }
-
-    private var isKeyboardVisible: Bool {
-        keyboardHeight > 0
-    }
-
-    private var adjustedPadding: CGFloat {
-        if isLandscape && isKeyboardVisible {
-            return 8
-        } else {
-            return 16
-        }
-    }
-
+    private var isLandscape: Bool { verticalSizeClass == .compact }
+    private var isKeyboardVisible: Bool { keyboardHeight > 0 }
+    private var adjustedPadding: CGFloat { isLandscape && isKeyboardVisible ? 8 : 16 }
     private var shouldUseCompactMode: Bool {
-        if isLandscape && isKeyboardVisible {
-            return true
-        } else if isLandscape {
-            return horizontalSizeClass == .compact
-        }
+        if isLandscape && isKeyboardVisible { return true }
+        else if isLandscape { return horizontalSizeClass == .compact }
         return false
     }
 
@@ -237,21 +184,15 @@ struct AdaptiveKeyboardCloseButtonOverlay: View {
         buttonView
             .transition(.opacity)
             .animation(.easeInOut(duration: 0.2), value: isKeyboardVisible)
-            .onReceive(
-                NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
-            ) { notification in
-                handleKeyboardShow(notification: notification)
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) {
+                handleKeyboardShow(notification: $0)
             }
-            .onReceive(
-                NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
-            ) { _ in
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
                 handleKeyboardHide()
             }
     }
 
-    private func handleKeyboardShow(
-        notification: Notification
-    ) {
+    private func handleKeyboardShow(notification: Notification) {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
             let keyboardRectangle = keyboardFrame.cgRectValue
             withAnimation(.easeInOut(duration: 0.3)) {
@@ -349,23 +290,13 @@ struct AdaptiveKeyboardCloseButtonOverlay: View {
     }
 }
 
-// MARK: - KeyboardHelper（ヘルパー）
 struct KeyboardHelper {
     static func hideKeyboard(completion: (() -> Void)? = nil) {
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder),
-            to: nil,
-            from: nil,
-            for: nil
-        )
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            completion?()
-        }
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { completion?() }
     }
 }
 
-// MARK: - 使用例（位置指定版）
 struct SafePositionExampleUsage: View {
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
@@ -378,11 +309,9 @@ struct SafePositionExampleUsage: View {
                 TextField("Name", text: $name)
                     .focused($isNameFocused)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-
                 TextField("Subtitle", text: $subtitle)
                     .focused($isSubtitleFocused)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-
                 Spacer()
             }
             .padding()
@@ -400,10 +329,8 @@ struct SafePositionExampleUsage: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        // Save処理
-                    }
-                    .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                    Button("Save") { }
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
             }
         }
