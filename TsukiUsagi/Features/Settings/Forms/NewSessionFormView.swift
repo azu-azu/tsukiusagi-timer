@@ -221,8 +221,8 @@ struct NewSessionFormView: View {
         )
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text(errorTitle),
-                  message: Text(errorMessage ?? ""),
-                  dismissButton: .default(Text("OK")))
+                message: Text(errorMessage ?? ""),
+                dismissButton: .default(Text("OK")))
         }
         .onAppear { isCustomInputMode = false }
     }
