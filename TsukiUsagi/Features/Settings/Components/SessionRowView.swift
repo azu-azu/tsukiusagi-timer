@@ -130,10 +130,10 @@ struct SessionRowView: View {
     private var menuLabelView: some View {
         HStack {
             Text(editingName.isEmpty ? "Select Session" : editingName)
-                .foregroundColor(editingName.isEmpty ? .secondary : .primary)
+                .foregroundColor(editingName.isEmpty ? DesignTokens.Colors.moonTextSecondary : .moonTextPrimary)
             Spacer()
             Image(systemName: "chevron.down")
-                .foregroundColor(.secondary)
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -157,12 +157,12 @@ struct SessionRowView: View {
         HStack {
             Text("Descriptions")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
 
             if !editingName.isEmpty {
                 Text("for \"\(editingName)\"")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
             }
         }
     }

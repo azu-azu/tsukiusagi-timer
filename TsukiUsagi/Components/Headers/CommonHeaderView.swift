@@ -31,7 +31,7 @@ struct CommonHeaderView: View {
 
             Text(configuration.title)
                 .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(.moonTextPrimary)
+                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
 
             Spacer()
 

@@ -79,7 +79,7 @@ struct SessionEditModal_Previews: PreviewProvider {
 
                         Text("This is a demonstration of the reusable EditableModal component.")
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                             .multilineTextAlignment(.center)
                             .padding()
                     }

@@ -13,7 +13,7 @@ struct FooterBar: View {
             HStack {
                 Text(dateString)
                     .font(DesignTokens.Fonts.footerDate)
-                    .foregroundColor(.white)
+                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                     .frame(height: buttonHeight, alignment: .bottom)
 
                 Spacer(minLength: 0)
@@ -26,7 +26,7 @@ struct FooterBar: View {
                         .frame(width: buttonHeight,
                                 height: buttonHeight,
                                 alignment: .bottom)
-                        .foregroundColor(DesignTokens.Colors.textWhite)
+                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 }
             }
             startPauseButton
