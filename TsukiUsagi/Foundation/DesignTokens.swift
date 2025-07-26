@@ -272,7 +272,6 @@ extension DesignTokens {
 }
 
 // MARK: - Color Extension for Semantic Shortcuts
-import SwiftUI
 
 extension Color {
     // Pure Colors への直接アクセス
