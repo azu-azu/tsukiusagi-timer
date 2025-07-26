@@ -85,7 +85,7 @@ struct NewSessionFormView: View {
                                 }
 
                                 TextField("", text: $name)
-                                    .foregroundColor(.moonTextPrimary)
+                                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                                     .padding(.horizontal, 12)
                                     .frame(height: labelHeight)
                                     .focused($isNameFocused)
@@ -141,7 +141,7 @@ struct NewSessionFormView: View {
                         } label: {
                             HStack {
                                 Text(name.isEmpty ? "Select Session" : name)
-                                    .foregroundColor(name.isEmpty ? .secondary : .moonTextPrimary)
+                                    .foregroundColor(name.isEmpty ? DesignTokens.Colors.moonTextSecondary : .moonTextPrimary)
                                 Image(systemName: "chevron.down")
                                     .foregroundColor(.moonTextMuted)
                             }

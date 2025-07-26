@@ -12,14 +12,14 @@ enum DesignTokens {
         /// カード背景色（Light/Dark モード対応）
         static let cosmosCardBG = Color.cosmosCardBackground
 
-        /// プライマリテキスト色（Light/Dark モード対応）
+        /// プライマリテキスト色（Light/Dark モード対応） ※優しい白
         static let moonTextPrimary = Color("moonTextPrimary")
+
+        /// セカンダリテキスト色（Light/Dark モード対応） ※primaryよりも薄い白
+        static let moonTextSecondary = Color("moonTextSecondary")
 
         /// 白テキスト色（全体統一用）
         static let textWhite = Color.white
-
-        /// セカンダリテキスト色（Light/Dark モード対応）
-        static let moonTextSecondary = Color("moonTextSecondary")
 
         /// ミュートテキスト色（Light/Dark モード対応）
         static let moonTextMuted = Color("moonTextMuted")
@@ -226,3 +226,16 @@ extension DesignTokens {
         }
     }
 }
+
+// MARK: - Color Extension for Semantic Shortcuts
+import SwiftUI
+
+extension Color {
+    static let textWhite = DesignTokens.Colors.textWhite
+}
+
+// | ケース                                           | textWhite を使う理由                       |
+// | --------------------------------------------- | ------------------------------------- |
+// | 🎯 完全な黒背景に浮かせるアイコン（小さい）                       | `.moonTextPrimary` やとαがかかって**ぼやける**から |
+// | 🎯 アニメーションやエフェクト内の強調白                         | セマンティック無視の**視覚的アクセント**として使う           |
+// | 🎯 エラー時の「×」やチェックマークなど、**文字以外**のグラフィックで白が必要なとき | 記号的意味が強くて、意味ではなく「色」としての白が必要な場合        |

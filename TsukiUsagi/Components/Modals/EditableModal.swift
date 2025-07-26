@@ -66,7 +66,7 @@ struct EditableModal<Content: View>: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel", action: onCancel)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save", action: onSave)

@@ -24,7 +24,7 @@ struct GearButtonToolbar: ViewModifier {
                         } label: {
                             Image(systemName: "gearshape.fill")
                                 .symbolRenderingMode(.hierarchical)
-                                .foregroundColor(DesignTokens.Colors.textWhite)
+                                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                         }
                     }
                 }

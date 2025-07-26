@@ -102,7 +102,7 @@ struct FullSessionEditContent: View {
             HStack {
                 Text("Descriptions")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
 
@@ -148,7 +148,7 @@ struct FullSessionEditContent: View {
             // 入力ヒント
             Text("Add descriptions for what you'll work on during this session")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                 .padding(.top, 4)
         }
     }

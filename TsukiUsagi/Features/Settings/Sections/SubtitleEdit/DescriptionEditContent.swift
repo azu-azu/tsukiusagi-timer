@@ -83,7 +83,7 @@ struct DescriptionEditContent: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Session Category")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                 .textCase(.uppercase)
                 .tracking(0.5)
 
@@ -91,7 +91,7 @@ struct DescriptionEditContent: View {
                 Text(sessionName)
                     .font(.title2)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
 
                 Spacer()
 
@@ -118,7 +118,7 @@ struct DescriptionEditContent: View {
             HStack {
                 Text("Descriptions")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
 
@@ -161,7 +161,7 @@ struct DescriptionEditContent: View {
 
             Text("Add descriptions for what you'll work on during this session")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
                 .padding(.top, 4)
         }
     }

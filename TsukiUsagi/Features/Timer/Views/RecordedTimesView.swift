@@ -16,14 +16,14 @@ struct RecordedTimesView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.Colors.textWhite)
+                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
             }
 
             // ３行目の分数表示
             Text("-- \(actualSessionMinutes) min")
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.Colors.textWhite)
+                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                 .frame(maxWidth: 110)
 
             // ✏️

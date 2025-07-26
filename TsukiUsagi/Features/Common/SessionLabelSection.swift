@@ -63,7 +63,7 @@ struct SessionLabelSection: View {
                                 }
 
                                 TextField("", text: $activity)
-                                    .foregroundColor(.moonTextPrimary)
+                                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                                     .padding(.horizontal, 12)
                                     .frame(height: labelHeight)
                                     .focused($isActivityFocused)
@@ -139,7 +139,7 @@ struct SessionLabelSection: View {
                         } label: {
                             HStack {
                                 Text(activity.isEmpty ? "Custom" : activity)
-                                    .foregroundColor(.moonTextPrimary)
+                                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
                                 Image(systemName: "chevron.down")
                                     .foregroundColor(.moonTextMuted)
                             }
