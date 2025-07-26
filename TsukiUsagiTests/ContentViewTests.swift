@@ -6,6 +6,7 @@ class ContentViewTests: XCTestCase {
     var historyVM: HistoryViewModel!
     var timerVM: TimerViewModel!
 
+    @MainActor
     override func setUp() {
         super.setUp()
         historyVM = HistoryViewModel()
@@ -32,6 +33,7 @@ class ContentViewTests: XCTestCase {
         }
         class DummyHaptic: HapticServiceable {
             func heavyImpact() {}
+            func lightImpact() {}
         }
         class DummyHistory: SessionHistoryServiceable {
             func add(parameters: AddSessionParameters) {}
