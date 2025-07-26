@@ -175,8 +175,11 @@ struct AdaptiveKeyboardCloseButtonOverlay: View {
     private var isKeyboardVisible: Bool { keyboardHeight > 0 }
     private var adjustedPadding: CGFloat { isLandscape && isKeyboardVisible ? 8 : 16 }
     private var shouldUseCompactMode: Bool {
-        if isLandscape && isKeyboardVisible { return true }
-        else if isLandscape { return horizontalSizeClass == .compact }
+        if isLandscape && isKeyboardVisible {
+            return true
+        } else if isLandscape {
+            return horizontalSizeClass == .compact
+        }
         return false
     }
 
