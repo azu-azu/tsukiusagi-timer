@@ -85,7 +85,7 @@ struct HistoryView: View {
     @ViewBuilder
     private func dayModeContent() -> some View {
         // Total 表示（日モード）
-        TotalCard(text: TimeFormatting.totalText(totalMinutes()))
+        TotalCard(text: TimeFormatters.totalText(totalMinutes()))
 
         // 日モードのレコード表示
         dayModeRecordsSection()
@@ -104,7 +104,7 @@ struct HistoryView: View {
     @ViewBuilder
     private func monthModeContent() -> some View {
         // Total 表示（月モード）
-        TotalCard(text: TimeFormatting.totalText(totalMinutes()))
+        TotalCard(text: TimeFormatters.totalText(totalMinutes()))
 
         // 月モードの集計表示
         activitySummarySection()
@@ -285,7 +285,7 @@ struct HistoryView: View {
                         .padding(.leading, 8)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     Spacer()
-                    Text(TimeFormatting.totalText(s.total))
+                    Text(TimeFormatters.totalText(s.total))
                         .monospacedDigit()
                         .frame(width: timeWidth, alignment: .trailing)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
