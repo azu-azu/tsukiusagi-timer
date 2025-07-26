@@ -10,7 +10,7 @@ struct KeyboardCloseButton: View {
             Image(systemName: "keyboard.chevron.compact.down")
                 .font(isCompact ? .caption : .body) // より小さなサイズに調整
         }
-        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+        .foregroundColor(DesignTokens.MoonColors.textPrimary)
         .padding(isCompact ? 4 : 6) // より小さなパディング
         .background(
             Circle()

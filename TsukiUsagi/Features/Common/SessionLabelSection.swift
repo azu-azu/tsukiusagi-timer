@@ -63,7 +63,7 @@ struct SessionLabelSection: View {
                                 }
 
                                 TextField("", text: $activity)
-                                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                     .padding(.horizontal, 12)
                                     .frame(height: labelHeight)
                                     .focused($isActivityFocused)
@@ -97,7 +97,7 @@ struct SessionLabelSection: View {
                                 isCustomDescriptionMode = false
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.moonTextMuted)
+                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
                                     .font(DesignTokens.Fonts.label)
                             }
                         }
@@ -139,9 +139,9 @@ struct SessionLabelSection: View {
                         } label: {
                             HStack {
                                 Text(activity.isEmpty ? "Custom" : activity)
-                                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 Image(systemName: "chevron.down")
-                                    .foregroundColor(.moonTextMuted)
+                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
                             }
                             .padding(.horizontal, 12)
                             .frame(height: labelHeight)
@@ -211,7 +211,7 @@ struct SessionLabelSection: View {
                                 .lineLimit(1)
                             Spacer()
                             Image(systemName: "chevron.down")
-                                .foregroundColor(.moonTextMuted)
+                                .foregroundColor(DesignTokens.MoonColors.textMuted)
                         }
                         .padding(.horizontal, 12)
                         .frame(height: labelHeight)

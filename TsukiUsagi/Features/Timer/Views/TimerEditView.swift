@@ -84,7 +84,7 @@ struct TimerEditView: View {
                                     displayedComponents: [.hourAndMinute]
                                 )
                                 .datePickerStyle(.compact)
-                                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                                .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 .colorScheme(.dark)
                             }
 
@@ -173,14 +173,14 @@ struct TimerEditView: View {
                 Text(title)
                     .font(DesignTokens.Fonts.sectionTitle)
                     .fontWeight(.semibold)
-                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .padding(.horizontal, 4)
                 Spacer()
                 if showDone, let action = doneAction {
                     Button("Done") {
                         action()
                     }
-                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(
@@ -203,7 +203,7 @@ struct TimerEditView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(DesignTokens.Colors.cosmosCardBG)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
             )
         }
     }

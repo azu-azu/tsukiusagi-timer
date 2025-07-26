@@ -76,7 +76,7 @@ struct OptimizedStarBackground: ViewModifier {
             ) { _ in
                 ZStack {
                     // 背景色
-                    DesignTokens.Colors.cosmosBackground
+                    DesignTokens.CosmosColors.background
                         .ignoresSafeArea()
 
                     // 固定星
@@ -160,7 +160,7 @@ extension View {
         VStack {
             Text("Standard Background")
                 .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
         }
         .frame(height: 200)
         .frame(maxWidth: .infinity)
@@ -170,7 +170,7 @@ extension View {
         VStack {
             Text("Light Background")
                 .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
         }
         .frame(height: 200)
         .frame(maxWidth: .infinity)
@@ -180,7 +180,7 @@ extension View {
         VStack {
             Text("Adaptive Background")
                 .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
         }
         .frame(height: 200)
         .frame(maxWidth: .infinity)

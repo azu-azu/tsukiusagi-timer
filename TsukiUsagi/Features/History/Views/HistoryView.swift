@@ -40,13 +40,13 @@ struct HistoryView: View {
                     Image(systemName: "chevron.left")
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
                 Spacer()
 
                 Text(titleString())
                     .font(DesignTokens.Fonts.labelBold)
-                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
                 Spacer()
 
@@ -54,7 +54,7 @@ struct HistoryView: View {
                     Image(systemName: "chevron.right")
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .disabled(isAtLatest())
             }
             .padding(.horizontal)
@@ -128,24 +128,24 @@ struct HistoryView: View {
         HStack(spacing: 0) {
             Text(rec.start.formatted(date: .omitted, time: .shortened))
                 .monospacedDigit()
-                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
             Spacer().frame(width: 8)
 
             Image(systemName: "arrow.right")
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
             Spacer().frame(width: 8)
 
             Text(rec.end.formatted(date: .omitted, time: .shortened))
                 .monospacedDigit()
-                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
             Spacer(minLength: 8)
 
             Text("\(displayName) \(durationMinutes(rec)) min")
-                .foregroundColor(isDeleted ? .gray : DesignTokens.Colors.moonTextPrimary)
+                .foregroundColor(isDeleted ? .gray : DesignTokens.MoonColors.textPrimary)
                 .opacity(isDeleted ? 0.5 : 1.0)
 
             if isDeleted {
@@ -166,7 +166,7 @@ struct HistoryView: View {
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(DesignTokens.Colors.cosmosCardBG)
+                .fill(DesignTokens.CosmosColors.cardBackground)
         )
     }
 
@@ -277,18 +277,18 @@ struct HistoryView: View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
                 .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
             ForEach(summaries, id: \.label) { s in
                 HStack {
                     Text(s.label)
                         .padding(.leading, 8)
-                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     Spacer()
                     Text(TimeFormatting.totalText(s.total))
                         .monospacedDigit()
                         .frame(width: timeWidth, alignment: .trailing)
-                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 }
                 .summaryCardStyle(
                     height: summaryCardHeight
@@ -320,12 +320,12 @@ struct HistoryView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("📝 Memos")
                     .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
                 ForEach(memos, id: \.self) { memo in
                     Text(memo)
                         .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
                         .padding(8)
                         .roundedCard()
                 }
@@ -346,7 +346,7 @@ extension View {
     func summaryCardStyle(
         height: CGFloat = 32,
         cornerRadius: CGFloat = 6,
-        backgroundColor: Color = DesignTokens.Colors.cosmosCardBG,
+        backgroundColor: Color = DesignTokens.CosmosColors.cardBackground,
         padding: EdgeInsets = EdgeInsets(
             top: 4,
             leading: DesignTokens.Padding.cardHorizontal,

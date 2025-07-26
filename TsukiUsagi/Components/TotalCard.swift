@@ -41,8 +41,8 @@ struct TotalCard: View {
     ) {
         self.text = text
         self.cornerRadius = cornerRadius
-        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.cosmosCardBG.opacity(0.2)
-        self.textColor = textColor ?? DesignTokens.Colors.moonTextPrimary
+        self.backgroundColor = backgroundColor ?? DesignTokens.CosmosColors.cardBackground.opacity(0.2)
+        self.textColor = textColor ?? DesignTokens.MoonColors.textPrimary
         self.showGlitter = showGlitter
         self.glitterSize = glitterSize
         self.glitterResource = glitterResource
@@ -62,8 +62,8 @@ struct TotalCard: View {
     ) {
         self.text = text
         self.cornerRadius = cornerRadius
-        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.cosmosCardBG.opacity(0.15)
-        self.textColor = textColor ?? DesignTokens.Colors.moonTextPrimary
+        self.backgroundColor = backgroundColor ?? DesignTokens.CosmosColors.cardBackground.opacity(0.15)
+        self.textColor = textColor ?? DesignTokens.MoonColors.textPrimary
         showGlitter = false
         glitterSize = 0
         glitterResource = ""
@@ -150,7 +150,7 @@ extension View {
         TotalCard(
             text: "Custom Style",
             cornerRadius: DesignTokens.CornerRadius.large,
-            backgroundColor: DesignTokens.Colors.moonErrorBackground.opacity(0.3),
+            backgroundColor: DesignTokens.MoonColors.errorBackground.opacity(0.3),
             textColor: .white,
             showGlitter: false
         )
@@ -163,6 +163,6 @@ extension View {
         )
     }
     .padding()
-    .background(DesignTokens.Colors.cosmosBackground)
+    .background(DesignTokens.CosmosColors.background)
     .previewColorSchemes()
 }

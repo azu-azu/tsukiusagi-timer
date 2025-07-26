@@ -10,10 +10,10 @@ struct NavigationCardView<Destination: View>: View {
             NavigationLink(destination: destination) {
                 HStack {
                     Text(title)
-                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(DesignTokens.Colors.moonTextMuted)
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
                 }
                 .padding(.vertical, 8)
             }

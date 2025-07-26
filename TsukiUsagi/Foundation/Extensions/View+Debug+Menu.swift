@@ -13,8 +13,12 @@ struct DebugMenuView: View {
 
     var body: some View {
         #if DEBUG
-        Section("Debug Options") {
+        Section {
             Toggle("Show Module Names", isOn: $showModuleNames)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+        } header: {
+            Text("Debug Options")
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
         }
         #endif
     }

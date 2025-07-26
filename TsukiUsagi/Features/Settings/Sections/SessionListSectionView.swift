@@ -52,7 +52,7 @@ struct SessionListSectionView: View {
 
     var body: some View {
         KeyboardDismissibleContainer {
-            RoundedCard(backgroundColor: DesignTokens.Colors.cosmosCardBG) {
+            RoundedCard(backgroundColor: DesignTokens.CosmosColors.cardBackground) {
                 VStack(alignment: .leading, spacing: 16) {
                     defaultSessionsSection
                     customSessionsSection

@@ -34,6 +34,7 @@ struct SessionSectionBuilder: View {
     private var sectionHeader: some View {
         Text(title)
             .font(DesignTokens.Fonts.sectionTitle)
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
             .padding(.horizontal)
     }
 
@@ -49,7 +50,7 @@ struct SessionSectionBuilder: View {
 
     private var emptyStateView: some View {
         Text(isDefault ? "No default sessions." : "No custom sessions. Tap + to add.")
-            .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+            .foregroundColor(DesignTokens.MoonColors.textSecondary)
             .italic()
             .padding(.horizontal)
             .padding(.vertical, 8)
@@ -114,7 +115,7 @@ struct SessionRowComponent: View {
         HStack(alignment: .top) {
             Text(entry.sessionName)
                 .font(.body)
-                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
             Spacer()
             if !isDefault {
                 actionButtons
@@ -192,7 +193,7 @@ struct SessionRowComponent: View {
     private func displayDescriptionRow(description: String) -> some View {
         Text(description)
             .font(.subheadline)
-            .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+            .foregroundColor(DesignTokens.MoonColors.textSecondary)
             .padding(.leading, 16)
     }
 

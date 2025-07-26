@@ -33,7 +33,7 @@ struct PerformanceDebugView: View {
             Text("Memory: \(controller.memoryPressure)")
         }
         .font(.caption)
-        .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+        .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
 }
 
