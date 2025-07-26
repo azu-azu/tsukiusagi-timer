@@ -8,7 +8,7 @@ enum FormatterConstants {
         static let hoursMinutes = "HH:mm"
         static let fallbackTime = "--:--"
     }
-    
+
     /// Duration text templates
     enum DurationText {
         static let hoursAndMinutes = "%d h %d min"
