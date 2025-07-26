@@ -326,7 +326,7 @@ struct SafePositionExampleUsage: View {
                     Button("Save") {
                         // Save処理
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
             }
         }

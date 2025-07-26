@@ -85,7 +85,7 @@ struct SessionLabelSection: View {
                             .background(
                                 (showEmptyError && activity.isEmpty) ?
                                     Color.moonErrorBackground.opacity(0.3) :
-                                    Color.white.opacity(0.05)
+                                    DesignTokens.WhiteColors.surface
                             )
                             .cornerRadius(labelCornerRadius)
 
@@ -165,7 +165,7 @@ struct SessionLabelSection: View {
                         .frame(height: inputHeight)
                         .padding(8)
                         .scrollContentBackground(.hidden)
-                        .background(Color.white.opacity(0.05))
+                        .background(DesignTokens.WhiteColors.surface)
                         .cornerRadius(6)
                         .focused($isDescriptionFocused)
                         .onChange(of: isDescriptionFocused) {
@@ -215,7 +215,7 @@ struct SessionLabelSection: View {
                         }
                         .padding(.horizontal, 12)
                         .frame(height: labelHeight)
-                        .background(Color.white.opacity(0.05))
+                        .background(DesignTokens.WhiteColors.surface)
                         .cornerRadius(6)
                     }
                 } else {
@@ -232,7 +232,7 @@ struct SessionLabelSection: View {
                             .frame(height: inputHeight)
                             .padding(8)
                             .scrollContentBackground(.hidden)
-                            .background(Color.white.opacity(0.05))
+                            .background(DesignTokens.WhiteColors.surface)
                             .cornerRadius(6)
                             .focused($isDescriptionFocused)
                             .onChange(of: isDescriptionFocused) {

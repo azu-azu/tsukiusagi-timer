@@ -71,7 +71,7 @@ struct EditableModal<Content: View>: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save", action: onSave)
                         .fontWeight(.semibold)
-                        .foregroundColor(.blue)
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
             }
         }

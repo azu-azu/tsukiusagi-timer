@@ -95,7 +95,7 @@ struct NewSessionFormView: View {
                                     }
                             }
                             .frame(height: labelHeight)
-                            .background(Color.white.opacity(0.05))
+                            .background(DesignTokens.WhiteColors.surface)
                             .cornerRadius(labelCornerRadius)
                             .frame(maxWidth: .infinity)
 
@@ -180,7 +180,7 @@ struct NewSessionFormView: View {
                             .frame(height: inputHeight)
                             .padding(8)
                             .scrollContentBackground(.hidden)
-                            .background(Color.white.opacity(0.05))
+                            .background(DesignTokens.WhiteColors.surface)
                             .cornerRadius(labelCornerRadius)
                             .focused($isDescriptionFocused)
                             .onChange(of: isDescriptionFocused) { _, newValue in

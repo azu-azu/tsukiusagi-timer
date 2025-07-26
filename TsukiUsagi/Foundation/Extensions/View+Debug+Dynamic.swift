@@ -108,7 +108,7 @@ struct DynamicDebugComponentModifier: ViewModifier {
                             .padding(.vertical, 2)
                             .background(
                                 RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.red.opacity(0.8))
+                                    .fill(DesignTokens.MoonColors.errorBackground)
                             )
                     }
                 },

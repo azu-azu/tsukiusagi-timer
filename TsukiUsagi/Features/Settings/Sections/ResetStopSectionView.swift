@@ -23,7 +23,7 @@ struct ResetStopSectionView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .tint(.red.opacity(0.8))
+                .tint(DesignTokens.MoonColors.errorBackground)
 
                 // 🛑 Stop
                 if timerVM.canForceFinish {
@@ -37,7 +37,7 @@ struct ResetStopSectionView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .tint(.blue)
+                    .tint(DesignTokens.MoonColors.accentBlue)
                 } else {
                     HStack(spacing: 8) {
                         Image(systemName: "forward.end")
