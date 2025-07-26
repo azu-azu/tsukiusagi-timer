@@ -102,7 +102,7 @@ struct TimerEditView: View {
                                         .frame(minHeight: 120, maxHeight: UIScreen.main.bounds.height * 0.4)
                                         .padding(8)
                                         .scrollContentBackground(.hidden)
-                                        .background(Color.white.opacity(0.05))
+                                        .background(DesignTokens.WhiteColors.surface)
                                         .focused($isMemoFocused)
                                 }
                             }
@@ -185,7 +185,7 @@ struct TimerEditView: View {
                     .padding(.vertical, 6)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.white.opacity(0.15))
+                            .fill(DesignTokens.WhiteColors.stroke)
                     )
                     .transition(.opacity)
                     .animation(.easeInOut(duration: 0.2), value: showDone)

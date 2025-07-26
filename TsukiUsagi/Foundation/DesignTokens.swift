@@ -12,8 +12,7 @@ enum DesignTokens {
         static let textPrimary = Color("moonTextPrimary")
 
         /// セカンダリテキスト色（Light/Dark モード対応）
-        // primaryよりも薄い白
-        // 用途：タイトルラベル、ヘッダー
+        /// primaryよりも薄い白
         static let textSecondary = Color("moonTextSecondary")
 
         /// ミュートテキスト色（Light/Dark モード対応）
@@ -52,6 +51,28 @@ enum DesignTokens {
         /// | 🎯 アニメーションやエフェクト内の強調白                         | セマンティック無視の**視覚的アクセント**として使う           |
         /// | 🎯 エラー時の「×」やチェックマークなど、**文字以外**のグラフィックで白が必要なとき | 記号的意味が強くて、意味ではなく「色」としての白が必要な場合        |
         static let textWhite = Color.white
+    }
+
+    /// 白ベースの用途別カラー（意味づけされたopacity）
+    enum WhiteColors {
+        /// プライマリ白（完全な白）
+        static let primary = Color.white
+
+        /// セカンダリ白（テキスト弱め表示用）
+        /// 用途: サブテキスト、説明文、非アクティブな状態
+        static let secondary = Color.white.opacity(0.6)
+
+        /// プレースホルダー白（アイコンや補助要素用）
+        /// 用途: 編集アイコン、補助記号、ヒント表示
+        static let placeholder = Color.white.opacity(0.3)
+
+        /// サーフェス白（背景ガラス風）
+        /// 用途: カード背景、入力欄背景、レイヤー分け
+        static let surface = Color.white.opacity(0.05)
+
+        /// ストローク白（枠線用）
+        /// 用途: カード枠線、区切り線、ボーダー
+        static let stroke = Color.white.opacity(0.15)
     }
 
     // MARK: - Corner Radius

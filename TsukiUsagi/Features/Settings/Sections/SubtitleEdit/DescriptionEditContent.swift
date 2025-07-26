@@ -127,7 +127,7 @@ struct DescriptionEditContent: View {
                 Button(action: addDescription) {
                     Image(systemName: "plus.circle.fill")
                         .font(.caption)
-                        .foregroundColor(.blue)
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
                 .accessibilityLabel("Add description")
             }

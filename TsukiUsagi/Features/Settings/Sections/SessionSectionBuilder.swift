@@ -199,7 +199,7 @@ struct SessionRowComponent: View {
 
     private var editableRowBackground: some View {
         RoundedRectangle(cornerRadius: 6)
-            .stroke(Color.white.opacity(0.15), lineWidth: 1)
+            .stroke(DesignTokens.WhiteColors.stroke, lineWidth: 1)
             .background(Color.white.opacity(0.02))
     }
 
@@ -207,7 +207,7 @@ struct SessionRowComponent: View {
         Group {
             if !isDefault {
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white.opacity(0.05))
+                    .fill(DesignTokens.WhiteColors.surface)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(Color.white.opacity(0.1), lineWidth: 1)

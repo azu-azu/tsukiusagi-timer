@@ -158,7 +158,7 @@ struct HistoryView: View {
                     }
                 }
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(.blue)
+                .foregroundColor(DesignTokens.MoonColors.accentBlue)
             }
         }
         .font(DesignTokens.Fonts.label)
