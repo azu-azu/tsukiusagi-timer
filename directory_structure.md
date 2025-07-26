@@ -34,24 +34,45 @@ TsukiUsagi/
 │   │   │   └── HistoryViewModel.swift
 │   │   └── Views/
 │   │       └── HistoryView.swift
-│   ├── Settings/
-│   │   ├── Components/
-│   │   │   ├── SessionRowView.swift
-│   │   │   └── SettingsHeaderView.swift
-│   │   ├── Forms/
-│   │   │   └── NewSessionFormView.swift
-│   │   ├── Screens/
-│   │   │   ├── SessionNameManagerView.swift
-│   │   │   └── SettingsView.swift
-│   │   └── Sections/
-│   │       ├── BreakTimeSectionView.swift
-│   │       ├── ResetStopSectionView.swift
-│   │       ├── SessionListSectionView.swift
-│   │       ├── SubtitleEdit/
-│   │       │   ├── SubtitleEditModal.swift
-│   │       │   └── SubtitleEditModels.swift
-│   │       ├── ViewHistorySectionView.swift
-│   │       └── WorkTimeSectionView.swift
+├── Settings/
+│   ├── Screens/                        ← 一画面単位（外から使われる表示の“顔”）
+│   │   ├── SettingsView.swift
+│   │   └── SessionNameManagerView.swift
+│   │
+│   ├── Components/                     ← 再利用可能なUI部品
+│   │   ├── SessionNameCustomInputView.swift
+│   │   ├── SessionNameSelectionView.swift
+│   │   ├── SessionRowDisplayView.swift
+│   │   ├── SessionRowEditingView.swift
+│   │   ├── SessionRowView.swift
+│   │   ├── SessionDescriptionsView.swift
+│   │   └── SettingsHeaderView.swift
+│   │
+│   ├── Forms/                          ← 入力専用のコンポジットフォーム
+│   │   └── NewSessionFormView.swift
+│   │
+│   ├── Sections/                       ← 画面内のセクション群（責務が大きめ）
+│   │   ├── SessionList/               ← サブフォルダで整理（今はファイル名と一致）
+│   │   │   ├── SessionListSectionView.swift
+│   │   │   └── SessionSectionBuilder.swift
+│   │   │
+│   │   ├── SubtitleEdit/              ← 機能単位で固めて正解！
+│   │   │   ├── DescriptionEditContent.swift
+│   │   │   ├── FullSessionEditContent.swift
+│   │   │   ├── SessionEditModal+Preview.swift
+│   │   │   └── SubtitleEditModels.swift
+│   │   │
+│   │   ├── WorkTime/
+│   │   │   └── WorkTimeSectionView.swift
+│   │   ├── BreakTime/
+│   │   │   └── BreakTimeSectionView.swift
+│   │   ├── ResetStop/
+│   │   │   └── ResetStopSectionView.swift
+│   │   ├── ViewHistory/
+│   │   │   └── ViewHistorySectionView.swift
+│   │
+│   ├── SheetBuilders/                 ← モーダル・シートなどを組む責務の場所
+│   │   └── SessionEditSheetBuilder.swift
 │   └── Timer/
 │       ├── Components/
 │       │   └── TimerEditHeaderView.swift
