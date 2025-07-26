@@ -200,14 +200,18 @@ struct ContentView: View {
                             }
                         }
                     }
-                    // ✅ 復活: Settings画面制御
+                    // ✅ 修正: Settings画面制御
                     .onChange(of: showingSettings) { _, newValue in
                         if newValue {
                             // Settingsを開いたときはアニメーションOFF
                             isFlowingStarsActive = false
                         } else {
-                            // Settingsを閉じたとき、タイマーが実行中の場合のみ星アニメON
-                            isFlowingStarsActive = timerVM.isRunning
+                            // Settingsを閉じたとき：
+                            // 1. タイマーが実行中の場合
+                            // 2. タイマーが未開始の場合（初期状態）
+                            // のいずれかでアニメーションON
+                            let isTimerNotStarted = timerVM.timeRemaining == (timerVM.workLengthMinutes * 60)
+                            isFlowingStarsActive = timerVM.isRunning || isTimerNotStarted
                         }
                     }
                     // ✅ 修正: タイマー状態制御（PAUSE時のみアニメーション停止）
