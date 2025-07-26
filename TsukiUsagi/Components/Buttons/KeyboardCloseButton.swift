@@ -8,10 +8,10 @@ struct KeyboardCloseButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "keyboard.chevron.compact.down")
-                .font(isCompact ? .caption : .body) // より小さなサイズに調整
+                .font(isCompact ? .caption : .body)
         }
         .foregroundColor(DesignTokens.MoonColors.textPrimary)
-        .padding(isCompact ? 4 : 6) // より小さなパディング
+        .padding(isCompact ? 4 : 6)
         .background(
             Circle()
                 .fill(Color.black.opacity(0.8))
@@ -22,13 +22,6 @@ struct KeyboardCloseButton: View {
 // MARK: - 機能的な拡張（位置調整版）
 extension View {
     /// キーボードクローズボタンを条件付きで表示（位置調整版）
-    ///
-    /// - Note: Saveボタンなどの右上要素と重ならないよう、位置を調整可能
-    ///
-    /// - Parameters:
-    ///   - isVisible: ボタンの表示状態
-    ///   - position: ボタンの配置位置
-    ///   - action: ボタンタップ時のアクション
     func adaptiveKeyboardCloseButton(
         isVisible: Bool,
         position: KeyboardCloseButtonPosition = .topTrailing,
@@ -37,7 +30,6 @@ extension View {
         GeometryReader { geometry in
             ZStack {
                 self
-
                 if isVisible {
                     AdaptiveKeyboardCloseButtonOverlay(
                         geometry: geometry,
@@ -50,18 +42,6 @@ extension View {
     }
 
     /// キーボードクローズボタンを条件付きで表示（レガシー版・カスタマイズ可能）
-    ///
-    /// - Note: このmodifierは対象Viewの指定位置にボタンを配置します
-    ///
-    /// - Parameters:
-    ///   - isVisible: ボタンの表示状態
-    ///   - isCompact: コンパクト表示するかどうか
-    ///   - topPadding: 上部からのパディング（デフォルト16）
-    ///   - trailingPadding: 右端からのパディング（デフォルト16）
-    ///   - leadingPadding: 左端からのパディング（左配置時のみ）
-    ///   - bottomPadding: 下部からのパディング（下配置時のみ）
-    ///   - position: ボタンの配置位置
-    ///   - action: ボタンタップ時のアクション
     func keyboardCloseButton(
         isVisible: Bool,
         isCompact: Bool = false,
@@ -74,77 +54,132 @@ extension View {
     ) -> some View {
         ZStack {
             self
-
             if isVisible {
-                switch position {
-                case .topTrailing:
-                    VStack {
-                        HStack {
-                            Spacer()
-                            KeyboardCloseButton(action: action, isCompact: isCompact)
-                                .padding(.trailing, trailingPadding)
-                                .padding(.top, topPadding)
-                        }
-                        Spacer()
-                    }
-                case .topLeading:
-                    VStack {
-                        HStack {
-                            KeyboardCloseButton(action: action, isCompact: isCompact)
-                                .padding(.leading, leadingPadding)
-                                .padding(.top, topPadding)
-                            Spacer()
-                        }
-                        Spacer()
-                    }
-                case .bottomTrailing:
-                    VStack {
-                        Spacer()
-                        HStack {
-                            Spacer()
-                            KeyboardCloseButton(action: action, isCompact: isCompact)
-                                .padding(.trailing, trailingPadding)
-                                .padding(.bottom, bottomPadding)
-                        }
-                    }
-                case .bottomLeading:
-                    VStack {
-                        Spacer()
-                        HStack {
-                            KeyboardCloseButton(action: action, isCompact: isCompact)
-                                .padding(.leading, leadingPadding)
-                                .padding(.bottom, bottomPadding)
-                            Spacer()
-                        }
-                    }
-                case .centerTrailing:
-                    HStack {
-                        Spacer()
-                        KeyboardCloseButton(action: action, isCompact: isCompact)
-                            .padding(.trailing, trailingPadding)
-                    }
-                case .centerLeading:
-                    HStack {
-                        KeyboardCloseButton(action: action, isCompact: isCompact)
-                            .padding(.leading, leadingPadding)
-                        Spacer()
-                    }
-                }
+                buttonPositionView(
+                    position: position,
+                    action: action,
+                    isCompact: isCompact,
+                    topPadding: topPadding,
+                    trailingPadding: trailingPadding,
+                    leadingPadding: leadingPadding,
+                    bottomPadding: bottomPadding
+                )
             }
         }
         .transition(.opacity)
         .animation(.easeInOut(duration: 0.2), value: isVisible)
     }
+
+    private func buttonPositionView(
+        position: KeyboardCloseButtonPosition,
+        action: @escaping () -> Void,
+        isCompact: Bool,
+        topPadding: CGFloat,
+        trailingPadding: CGFloat,
+        leadingPadding: CGFloat,
+        bottomPadding: CGFloat
+    ) -> some View {
+        switch position {
+        case .topTrailing:
+            return AnyView(topTrailingButton(action: action, isCompact: isCompact,
+                                           topPadding: topPadding, trailingPadding: trailingPadding))
+        case .topLeading:
+            return AnyView(topLeadingButton(action: action, isCompact: isCompact,
+                                          topPadding: topPadding, leadingPadding: leadingPadding))
+        case .bottomTrailing:
+            return AnyView(bottomTrailingButton(action: action, isCompact: isCompact,
+                                              bottomPadding: bottomPadding, trailingPadding: trailingPadding))
+        case .bottomLeading:
+            return AnyView(bottomLeadingButton(action: action, isCompact: isCompact,
+                                             bottomPadding: bottomPadding, leadingPadding: leadingPadding))
+        case .centerTrailing:
+            return AnyView(centerTrailingButton(action: action, isCompact: isCompact,
+                                              trailingPadding: trailingPadding))
+        case .centerLeading:
+            return AnyView(centerLeadingButton(action: action, isCompact: isCompact,
+                                             leadingPadding: leadingPadding))
+        }
+    }
+
+    private func topTrailingButton(action: @escaping () -> Void, isCompact: Bool,
+                                 topPadding: CGFloat, trailingPadding: CGFloat) -> some View {
+        VStack {
+            HStack {
+                Spacer()
+                KeyboardCloseButton(action: action, isCompact: isCompact)
+                    .padding(.trailing, trailingPadding)
+                    .padding(.top, topPadding)
+            }
+            Spacer()
+        }
+    }
+
+    private func topLeadingButton(action: @escaping () -> Void, isCompact: Bool,
+                                topPadding: CGFloat, leadingPadding: CGFloat) -> some View {
+        VStack {
+            HStack {
+                KeyboardCloseButton(action: action, isCompact: isCompact)
+                    .padding(.leading, leadingPadding)
+                    .padding(.top, topPadding)
+                Spacer()
+            }
+            Spacer()
+        }
+    }
+
+    private func bottomTrailingButton(action: @escaping () -> Void, isCompact: Bool,
+                                    bottomPadding: CGFloat, trailingPadding: CGFloat) -> some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                KeyboardCloseButton(action: action, isCompact: isCompact)
+                    .padding(.trailing, trailingPadding)
+                    .padding(.bottom, bottomPadding)
+            }
+        }
+    }
+
+    private func bottomLeadingButton(action: @escaping () -> Void, isCompact: Bool,
+                                   bottomPadding: CGFloat, leadingPadding: CGFloat) -> some View {
+        VStack {
+            Spacer()
+            HStack {
+                KeyboardCloseButton(action: action, isCompact: isCompact)
+                    .padding(.leading, leadingPadding)
+                    .padding(.bottom, bottomPadding)
+                Spacer()
+            }
+        }
+    }
+
+    private func centerTrailingButton(action: @escaping () -> Void, isCompact: Bool,
+                                    trailingPadding: CGFloat) -> some View {
+        HStack {
+            Spacer()
+            KeyboardCloseButton(action: action, isCompact: isCompact)
+                .padding(.trailing, trailingPadding)
+        }
+    }
+
+    private func centerLeadingButton(action: @escaping () -> Void, isCompact: Bool,
+                                   leadingPadding: CGFloat) -> some View {
+        HStack {
+            KeyboardCloseButton(action: action, isCompact: isCompact)
+                .padding(.leading, leadingPadding)
+            Spacer()
+        }
+    }
 }
 
 // MARK: - ボタン配置位置の定義
 enum KeyboardCloseButtonPosition {
-    case topTrailing      // 右上（デフォルト）
-    case topLeading       // 左上（Saveボタンと重ならない）
-    case bottomTrailing   // 右下
-    case bottomLeading    // 左下
-    case centerTrailing   // 右中央
-    case centerLeading    // 左中央
+    case topTrailing
+    case topLeading
+    case bottomTrailing
+    case bottomLeading
+    case centerTrailing
+    case centerLeading
 }
 
 // MARK: - 適応型オーバーレイコンポーネント（位置対応版）
@@ -163,10 +198,6 @@ struct AdaptiveKeyboardCloseButtonOverlay: View {
 
     private var isKeyboardVisible: Bool {
         keyboardHeight > 0
-    }
-
-    private var availableHeight: CGFloat {
-        geometry.size.height - geometry.safeAreaInsets.top - geometry.safeAreaInsets.bottom
     }
 
     private var adjustedPadding: CGFloat {
@@ -193,79 +224,109 @@ struct AdaptiveKeyboardCloseButtonOverlay: View {
             .onReceive(
                 NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
             ) { notification in
-                if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
-                    as? NSValue
-                {
-                    let keyboardRectangle = keyboardFrame.cgRectValue
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        keyboardHeight = keyboardRectangle.height
-                    }
-                }
+                handleKeyboardShow(notification: notification)
             }
             .onReceive(
                 NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
             ) { _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    keyboardHeight = 0
-                }
+                handleKeyboardHide()
             }
+    }
+
+    private func handleKeyboardShow(notification: Notification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardRectangle = keyboardFrame.cgRectValue
+            withAnimation(.easeInOut(duration: 0.3)) {
+                keyboardHeight = keyboardRectangle.height
+            }
+        }
+    }
+
+    private func handleKeyboardHide() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            keyboardHeight = 0
+        }
     }
 
     @ViewBuilder
     private var buttonView: some View {
         switch position {
         case .topTrailing:
-            VStack {
-                HStack {
-                    Spacer()
-                    KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
-                        .padding(.trailing, adjustedPadding)
-                        .padding(.top, adjustedPadding)
-                }
-                Spacer()
-            }
+            topTrailingView
         case .topLeading:
-            VStack {
-                HStack {
-                    KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
-                        .padding(.leading, adjustedPadding)
-                        .padding(.top, adjustedPadding)
-                    Spacer()
-                }
-                Spacer()
-            }
+            topLeadingView
         case .bottomTrailing:
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
-                        .padding(.trailing, adjustedPadding)
-                        .padding(.bottom, adjustedPadding)
-                }
-            }
+            bottomTrailingView
         case .bottomLeading:
-            VStack {
-                Spacer()
-                HStack {
-                    KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
-                        .padding(.leading, adjustedPadding)
-                        .padding(.bottom, adjustedPadding)
-                    Spacer()
-                }
-            }
+            bottomLeadingView
         case .centerTrailing:
+            centerTrailingView
+        case .centerLeading:
+            centerLeadingView
+        }
+    }
+
+    private var topTrailingView: some View {
+        VStack {
             HStack {
                 Spacer()
                 KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
                     .padding(.trailing, adjustedPadding)
+                    .padding(.top, adjustedPadding)
             }
-        case .centerLeading:
+            Spacer()
+        }
+    }
+
+    private var topLeadingView: some View {
+        VStack {
             HStack {
                 KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
                     .padding(.leading, adjustedPadding)
+                    .padding(.top, adjustedPadding)
                 Spacer()
             }
+            Spacer()
+        }
+    }
+
+    private var bottomTrailingView: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
+                    .padding(.trailing, adjustedPadding)
+                    .padding(.bottom, adjustedPadding)
+            }
+        }
+    }
+
+    private var bottomLeadingView: some View {
+        VStack {
+            Spacer()
+            HStack {
+                KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
+                    .padding(.leading, adjustedPadding)
+                    .padding(.bottom, adjustedPadding)
+                Spacer()
+            }
+        }
+    }
+
+    private var centerTrailingView: some View {
+        HStack {
+            Spacer()
+            KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
+                .padding(.trailing, adjustedPadding)
+        }
+    }
+
+    private var centerLeadingView: some View {
+        HStack {
+            KeyboardCloseButton(action: action, isCompact: shouldUseCompactMode)
+                .padding(.leading, adjustedPadding)
+            Spacer()
         }
     }
 }
@@ -280,7 +341,6 @@ struct KeyboardHelper {
             for: nil
         )
 
-        // 少し遅延してからコールバック実行
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             completion?()
         }
@@ -288,7 +348,6 @@ struct KeyboardHelper {
 }
 
 // MARK: - 使用例（位置指定版）
-
 struct SafePositionExampleUsage: View {
     @FocusState private var isNameFocused: Bool
     @FocusState private var isSubtitleFocused: Bool
@@ -311,7 +370,7 @@ struct SafePositionExampleUsage: View {
             .padding()
             .adaptiveKeyboardCloseButton(
                 isVisible: isNameFocused || isSubtitleFocused,
-                position: .topLeading, // 左上に配置してSaveボタンと重ならない
+                position: .topLeading,
                 action: {
                     KeyboardHelper.hideKeyboard {
                         isNameFocused = false
@@ -332,29 +391,3 @@ struct SafePositionExampleUsage: View {
         }
     }
 }
-
-// MARK: - 設計方針
-/*
-✅ 位置選択可能：
-  - .topLeading: Saveボタンと重ならない左上
-  - .bottomTrailing: 右下（キーボードから離れた位置）
-  - .centerLeading: 左中央（視認性と操作性のバランス）
-  - その他の位置も選択可能
-
-✅ 推奨配置：
-  - 右上にSaveボタンがある場合: .topLeading
-  - 右下にボタンがある場合: .topTrailing
-  - 画面が狭い場合: .centerLeading
-
-✅ 適応性：
-  - 横向き時は自動的にコンパクト表示
-  - キーボード表示時は位置とサイズを自動調整
-  - 利用可能スペースに基づく最適化
-
-使用例:
-.adaptiveKeyboardCloseButton(
-    isVisible: keyboardIsVisible,
-    position: .topLeading, // Saveボタンと重ならない
-    action: { hideKeyboard() }
-)
-*/
