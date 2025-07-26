@@ -8,6 +8,9 @@ struct SessionNameManagerView: View {
     @State private var errorTitle: String = "Error"
     @State private var isKeyboardVisible: Bool = false
 
+    // 画面を閉じるためのプレゼンテーション用
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         ZStack {
             // 背景（画面全体、clipされない）
@@ -31,27 +34,44 @@ struct SessionNameManagerView: View {
                 // }
             }
 
-            // コンテンツ
-            ScrollView {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
-                    NewSessionFormView()
-                    // --- ここから登録済みセッションの明示的な表示 ---
-                    SessionListSectionView()
-                    // --- ここまで ---
+            // メインコンテンツ
+            VStack(spacing: 0) {
+                // CommonHeaderViewを使用（追加の上余白付き）
+                CommonHeaderView(
+                    configuration: HeaderConfiguration(
+                        title: "Manage Session Names",
+                        leftButton: HeaderButton(
+                            title: "Close",
+                            action: {
+                                dismiss()
+                            }
+                        ),
+                        rightButton: HeaderButton(
+                            title: "Done",
+                            action: {
+                                // 必要に応じて保存処理などを実行
+                                dismiss()
+                            }
+                        )
+                    )
+                )
+                .padding(.top, 8) // 追加の上余白
+
+                // コンテンツエリア
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
+                        NewSessionFormView()
+                        // --- ここから登録済みセッションの明示的な表示 ---
+                        SessionListSectionView()
+                        // --- ここまで ---
+                    }
+                    .padding()
                 }
-                .padding()
+                .dismissKeyboardOnTap()
             }
-            .dismissKeyboardOnTap()
         }
         .debugScreen(String(describing: Self.self))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("Manage Session Names")
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    .font(DesignTokens.Fonts.title)
-            }
-        }
+        .navigationBarHidden(true) // ナビゲーションバーを非表示にしてCommonHeaderViewを使用
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
         }
