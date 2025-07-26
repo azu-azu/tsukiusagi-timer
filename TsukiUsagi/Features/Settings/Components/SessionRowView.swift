@@ -73,6 +73,7 @@ struct SessionRowView: View {
                     editingDescriptions = sessionManager.getDescriptions(for: editingName)
                 }
                 .font(DesignTokens.Fonts.caption)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 .buttonStyle(.bordered)
             }
         }
@@ -105,6 +106,7 @@ struct SessionRowView: View {
                     editingDescriptions = entry.descriptions
                 } label: {
                     Text(entry.sessionName)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 }
             }
             Divider()
@@ -115,6 +117,7 @@ struct SessionRowView: View {
                     editingDescriptions = entry.descriptions
                 } label: {
                     Text(entry.sessionName)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 }
             }
             Divider()
@@ -123,6 +126,7 @@ struct SessionRowView: View {
                 editingName = ""
                 editingDescriptions = [""]
             }
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
         }
     }
 
@@ -130,10 +134,10 @@ struct SessionRowView: View {
     private var menuLabelView: some View {
         HStack {
             Text(editingName.isEmpty ? "Select Session" : editingName)
-                .foregroundColor(editingName.isEmpty ? DesignTokens.Colors.moonTextSecondary : .moonTextPrimary)
+                .foregroundColor(editingName.isEmpty ? DesignTokens.MoonColors.textSecondary : .moonTextPrimary)
             Spacer()
             Image(systemName: "chevron.down")
-                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -157,12 +161,12 @@ struct SessionRowView: View {
         HStack {
             Text("Descriptions")
                 .font(.caption)
-                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
             if !editingName.isEmpty {
                 Text("for \"\(editingName)\"")
                     .font(.caption)
-                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
         }
     }
@@ -201,6 +205,7 @@ struct SessionRowView: View {
 
             Button(action: { editingDescriptions.remove(at: idx) }, label: {
                 Image(systemName: "minus.circle")
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
             })
             .buttonStyle(.plain)
             .disabled(editingDescriptions.count == 1)
@@ -220,6 +225,7 @@ struct SessionRowView: View {
                     Image(systemName: "plus.circle")
                     Text("Add Subtitle")
                 }
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
             })
             .font(DesignTokens.Fonts.caption)
             .buttonStyle(.plain)
@@ -253,6 +259,7 @@ struct SessionRowView: View {
                 isCustomInputMode = false
             })
             .font(DesignTokens.Fonts.caption)
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
             .accessibilityIdentifier(AccessibilityIDs.SessionManager.cancelButton)
         }
     }
@@ -262,12 +269,12 @@ struct SessionRowView: View {
         VStack(alignment: .leading) {
             Text(session.name)
                 .fontWeight(.semibold)
-                .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
             ForEach(session.subtitles) { subtitle in
                 Text(subtitle.text)
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
         }
     }
@@ -282,13 +289,14 @@ struct SessionRowView: View {
                 isCustomInputMode = false  // 編集開始時は既存セッション選択モード
             })
             .font(DesignTokens.Fonts.caption)
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
             .accessibilityIdentifier(AccessibilityIDs.SessionManager.editButton)
 
             Button(role: .destructive, action: {
                 showDeleteAlert = AlertID(id: session.id)
             }, label: {
                 Image(systemName: "trash")
-                    .foregroundColor(DesignTokens.Colors.moonTextMuted)
+                    .foregroundColor(DesignTokens.MoonColors.textMuted)
             })
             .accessibilityIdentifier(AccessibilityIDs.SessionManager.deleteButton)
             .alert(item: $showDeleteAlert, content: { alertID in

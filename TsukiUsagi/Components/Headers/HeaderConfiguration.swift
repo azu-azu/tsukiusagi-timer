@@ -34,9 +34,9 @@ struct HeaderButton {
 
         switch role {
         case .normal, .cancel:
-            return DesignTokens.Colors.moonTextSecondary
+            return DesignTokens.MoonColors.textSecondary
         case .primary:
-            return DesignTokens.Colors.moonAccentBlue
+            return DesignTokens.MoonColors.accentBlue
         case .destructive:
             return .red
         }

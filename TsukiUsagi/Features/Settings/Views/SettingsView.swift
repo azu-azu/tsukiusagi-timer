@@ -154,7 +154,7 @@ struct SettingsView: View {
         ) {
             Text("Session Label")
                 .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
             VStack(alignment: .leading, spacing: 10) {
                 SessionLabelSection(
@@ -171,7 +171,7 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(DesignTokens.Colors.cosmosCardBG)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
             )
         }
     }

@@ -44,8 +44,14 @@ struct SessionNameManagerView: View {
             .dismissKeyboardOnTap()
         }
         .debugScreen(String(describing: Self.self))
-        .navigationTitle("Manage Session Names")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Manage Session Names")
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .font(DesignTokens.Fonts.title)
+            }
+        }
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
         }

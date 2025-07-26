@@ -3,32 +3,55 @@ import SwiftUI
 /// デザイン定数の一元管理
 /// Asset Catalog からカラーを参照し、Light/Dark モードに対応
 enum DesignTokens {
-    // MARK: - Colors (Asset Catalog 参照)
+    // MARK: - Colors (意味別グルーピング)
 
-    enum Colors {
-        /// 背景色（既存の拡張から）
-        static let cosmosBackground = Color.cosmosBackground
+    /// 月の光をテーマにしたテキストカラー
+    enum MoonColors {
+        /// プライマリテキスト色（Light/Dark モード対応）
+        /// 優しい白
+        static let textPrimary = Color("moonTextPrimary")
 
-        /// カード背景色（Light/Dark モード対応）
-        static let cosmosCardBG = Color.cosmosCardBackground
-
-        /// プライマリテキスト色（Light/Dark モード対応） ※優しい白
-        static let moonTextPrimary = Color("moonTextPrimary")
-
-        /// セカンダリテキスト色（Light/Dark モード対応） ※primaryよりも薄い白
-        static let moonTextSecondary = Color("moonTextSecondary")
-
-        /// 白テキスト色（全体統一用）
-        static let textWhite = Color.white
+        /// セカンダリテキスト色（Light/Dark モード対応）
+        // primaryよりも薄い白
+        // 用途：タイトルラベル、ヘッダー
+        static let textSecondary = Color("moonTextSecondary")
 
         /// ミュートテキスト色（Light/Dark モード対応）
-        static let moonTextMuted = Color("moonTextMuted")
+        /// Color.white.opacity(0.45) // Dark mode
+        /// Color.white.opacity(0.35) // Light mode
+        ///
+        /// | シーン例               | Why            |
+        /// | ------------------ | -------------- |
+        /// | 💬 説明テキストの補足       | 読まなくてもいい情報をぼかす |
+        /// | ⏱ 時間表示の単位（秒とかms）   | 主数値より弱く見せたい    |
+        /// | 🕳 非アクティブなラベル、状態表示 | グレー系代わりの白系ミュート |
+        static let textMuted = Color("moonTextMuted")
 
         /// アクセント色（既存の拡張から）
-        static let moonAccentBlue = Color.moonAccentBlue
+        static let accentBlue = Color.moonAccentBlue
 
         /// エラー背景色（既存の拡張から）
-        static let moonErrorBackground = Color.moonErrorBackground
+        static let errorBackground = Color.moonErrorBackground
+    }
+
+    /// 宇宙空間をテーマにした背景カラー
+    enum CosmosColors {
+        /// 背景色（既存の拡張から）
+        static let background = Color.cosmosBackground
+
+        /// カード背景色（Light/Dark モード対応）
+        static let cardBackground = Color.cosmosCardBackground
+    }
+
+    /// セマンティック無視の純粋な色（視覚的アクセント用）
+    enum PureColors {
+        /// 白テキスト色（全体統一用）
+        /// | ケース                                           | textWhite を使う理由                       |
+        /// | --------------------------------------------- | ------------------------------------- |
+        /// | 🎯 完全な黒背景に浮かせるアイコン（小さい）                       | `.moonTextPrimary` やとαがかかって**ぼやける**から |
+        /// | 🎯 アニメーションやエフェクト内の強調白                         | セマンティック無視の**視覚的アクセント**として使う           |
+        /// | 🎯 エラー時の「×」やチェックマークなど、**文字以外**のグラフィックで白が必要なとき | 記号的意味が強くて、意味ではなく「色」としての白が必要な場合        |
+        static let textWhite = Color.white
     }
 
     // MARK: - Corner Radius
@@ -231,11 +254,6 @@ extension DesignTokens {
 import SwiftUI
 
 extension Color {
-    static let textWhite = DesignTokens.Colors.textWhite
+    // Pure Colors への直接アクセス
+    static let textWhite = DesignTokens.PureColors.textWhite
 }
-
-// | ケース                                           | textWhite を使う理由                       |
-// | --------------------------------------------- | ------------------------------------- |
-// | 🎯 完全な黒背景に浮かせるアイコン（小さい）                       | `.moonTextPrimary` やとαがかかって**ぼやける**から |
-// | 🎯 アニメーションやエフェクト内の強調白                         | セマンティック無視の**視覚的アクセント**として使う           |
-// | 🎯 エラー時の「×」やチェックマークなど、**文字以外**のグラフィックで白が必要なとき | 記号的意味が強くて、意味ではなく「色」としての白が必要な場合        |

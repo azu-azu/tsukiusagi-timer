@@ -38,7 +38,7 @@ struct RoundedCard<Content: View>: View {
         self.content = content()
         self.cornerRadius = cornerRadius
         self.padding = padding
-        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.cosmosCardBG
+        self.backgroundColor = backgroundColor ?? DesignTokens.CosmosColors.cardBackground
     }
 
     /// コンパクト/大きなカード（パディング切り替え）
@@ -79,7 +79,7 @@ struct RoundedCard<Content: View>: View {
                 trailing: DesignTokens.Padding.card
             )
         }
-        self.backgroundColor = backgroundColor ?? DesignTokens.Colors.cosmosCardBG
+        self.backgroundColor = backgroundColor ?? DesignTokens.CosmosColors.cardBackground
     }
 
     // MARK: - Body
@@ -160,7 +160,7 @@ extension View {
                     .font(DesignTokens.Fonts.sectionTitle)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundColor(DesignTokens.Colors.moonTextMuted)
+                    .foregroundColor(DesignTokens.MoonColors.textMuted)
             }
         }
 
@@ -181,13 +181,13 @@ extension View {
         // カスタム背景色
         RoundedCard(
             cornerRadius: DesignTokens.CornerRadius.medium,
-            backgroundColor: DesignTokens.Colors.moonErrorBackground.opacity(0.3)
+            backgroundColor: DesignTokens.MoonColors.errorBackground.opacity(0.3)
         ) {
             Text("Custom Background")
                 .font(DesignTokens.Fonts.label)
         }
     }
     .padding()
-    .background(DesignTokens.Colors.cosmosBackground)
+    .background(DesignTokens.CosmosColors.background)
     .previewColorSchemes()
 }

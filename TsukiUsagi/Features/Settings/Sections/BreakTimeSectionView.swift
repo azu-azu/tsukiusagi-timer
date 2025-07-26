@@ -12,12 +12,12 @@ struct BreakTimeSectionView: View {
             HStack {
                 Text("BREAK")
                     .font(DesignTokens.Fonts.labelBold)
-                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .frame(width: timeTitleWidth, alignment: .leading)
 
                 Text(String(format: "%2d min", breakMinutes))
                     .font(DesignTokens.Fonts.numericLabel)
-                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
                 Spacer()
 
@@ -58,7 +58,7 @@ struct BreakTimeSectionView: View {
             if !title.isEmpty {
                 Text(title)
                     .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
 
             VStack(alignment: .leading, spacing: 10) {
@@ -71,7 +71,7 @@ struct BreakTimeSectionView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(DesignTokens.Colors.cosmosCardBG)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
             )
         }
     }

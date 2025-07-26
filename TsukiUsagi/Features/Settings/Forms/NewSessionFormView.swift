@@ -70,7 +70,7 @@ struct NewSessionFormView: View {
     }
 
     var body: some View {
-        RoundedCard(backgroundColor: DesignTokens.Colors.cosmosCardBG) {
+        RoundedCard(backgroundColor: DesignTokens.CosmosColors.cardBackground) {
             VStack(alignment: .leading, spacing: 12) {
                 // SessionLabelSectionと同じ構造のSession Name選択部分
                 HStack(alignment: .top) {
@@ -85,7 +85,7 @@ struct NewSessionFormView: View {
                                 }
 
                                 TextField("", text: $name)
-                                    .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                     .padding(.horizontal, 12)
                                     .frame(height: labelHeight)
                                     .focused($isNameFocused)
@@ -105,7 +105,7 @@ struct NewSessionFormView: View {
                                 isNameFocused = false
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.moonTextMuted)
+                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
                                     .font(DesignTokens.Fonts.label)
                             }
                         }
@@ -118,6 +118,7 @@ struct NewSessionFormView: View {
                                     isCustomInputMode = false
                                 } label: {
                                     Text(entry.sessionName)
+                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 }
                             }
                             Divider()
@@ -128,6 +129,7 @@ struct NewSessionFormView: View {
                                     isCustomInputMode = false
                                 } label: {
                                     Text(entry.sessionName)
+                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 }
                             }
                             Divider()
@@ -138,12 +140,13 @@ struct NewSessionFormView: View {
                                     isNameFocused = true
                                 }
                             }
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
                         } label: {
                             HStack {
                                 Text(name.isEmpty ? "Select Session" : name)
-                                    .foregroundColor(name.isEmpty ? DesignTokens.Colors.moonTextSecondary : .moonTextPrimary)
+                                    .foregroundColor(name.isEmpty ? DesignTokens.MoonColors.textSecondary : .moonTextPrimary)
                                 Image(systemName: "chevron.down")
-                                    .foregroundColor(.moonTextMuted)
+                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
                             }
                             .padding(.horizontal, 12)
                             .frame(height: labelHeight)
@@ -194,6 +197,7 @@ struct NewSessionFormView: View {
                                 },
                                 label: {
                                     Image(systemName: "minus.circle")
+                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 }
                             )
                             .buttonStyle(.plain)
@@ -214,6 +218,7 @@ struct NewSessionFormView: View {
                             Image(systemName: "plus.circle")
                             Text("Add Description")
                         }
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     }
                 )
                 .font(DesignTokens.Fonts.caption)

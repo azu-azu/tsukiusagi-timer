@@ -11,10 +11,10 @@ struct ViewHistorySectionView: View {
             NavigationLink(destination: HistoryView().environmentObject(historyVM)) {
                 HStack {
                     Text("View History")
-                        .foregroundColor(DesignTokens.Colors.moonTextPrimary)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(DesignTokens.Colors.moonTextMuted)
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
                 }
                 .padding(.vertical, 8)
             }
@@ -37,7 +37,7 @@ struct ViewHistorySectionView: View {
             if !title.isEmpty {
                 Text(title)
                     .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
 
             VStack(alignment: .leading, spacing: 10) {
@@ -50,7 +50,7 @@ struct ViewHistorySectionView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(DesignTokens.Colors.cosmosCardBG)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
             )
         }
     }

@@ -196,20 +196,20 @@ extension View {
                 action: {},
                 size: 16,
                 padding: 12,
-                backgroundColor: DesignTokens.Colors.moonAccentBlue.opacity(0.3),
-                foregroundColor: DesignTokens.Colors.moonAccentBlue
+                backgroundColor: DesignTokens.MoonColors.accentBlue.opacity(0.3),
+                foregroundColor: DesignTokens.MoonColors.accentBlue
             )
             PlusMinusButton(
                 systemName: "plus",
                 action: {},
                 size: 16,
                 padding: 12,
-                backgroundColor: DesignTokens.Colors.moonAccentBlue.opacity(0.3),
-                foregroundColor: DesignTokens.Colors.moonAccentBlue
+                backgroundColor: DesignTokens.MoonColors.accentBlue.opacity(0.3),
+                foregroundColor: DesignTokens.MoonColors.accentBlue
             )
         }
     }
     .padding()
-    .background(DesignTokens.Colors.cosmosBackground)
+    .background(DesignTokens.CosmosColors.background)
     .previewColorSchemes()
 }

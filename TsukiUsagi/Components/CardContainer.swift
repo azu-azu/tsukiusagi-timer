@@ -28,7 +28,7 @@ struct CardContainer<Content: View>: View {
             if !title.isEmpty {
                 Text(title)
                     .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.Colors.moonTextSecondary)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
             VStack(alignment: .leading, spacing: 10) {
                 content()
@@ -40,7 +40,7 @@ struct CardContainer<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(DesignTokens.Colors.cosmosCardBG)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
             )
         }
     }
