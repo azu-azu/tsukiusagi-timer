@@ -127,15 +127,19 @@ struct NewSessionFormView: View {
                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
                             } label: {
                                 HStack {
-                                Text(name.isEmpty ? "Select Session" : name)
-                                    .foregroundColor(name.isEmpty ? DesignTokens.MoonColors.textSecondary : .moonTextPrimary)
-                                Image(systemName: "chevron.down")
-                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                    Text(name.isEmpty ? "Select Session" : name)
+                                        .foregroundColor(
+                                            name.isEmpty ?
+                                            DesignTokens.MoonColors.textSecondary :
+                                            .moonTextPrimary
+                                        )
+                                    Image(systemName: "chevron.down")
+                                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                }
+                                .padding(.horizontal, 12)
+                                .frame(height: labelHeight)
+                                .cornerRadius(labelCornerRadius)
                             }
-                            .padding(.horizontal, 12)
-                            .frame(height: labelHeight)
-                            .cornerRadius(labelCornerRadius)
-                        }
                     }
 
                     Spacer(minLength: 8)
@@ -163,7 +167,7 @@ struct NewSessionFormView: View {
                             .frame(height: inputHeight)
                             .padding(8)
                             .scrollContentBackground(.hidden)
-                            .background(Color.white.opacity(0.05))
+                            .background(DesignTokens.WhiteColors.surface)
                             .cornerRadius(labelCornerRadius)
                             .focused($isDescriptionFocused)
                             .onChange(of: isDescriptionFocused) { _, _ in }
