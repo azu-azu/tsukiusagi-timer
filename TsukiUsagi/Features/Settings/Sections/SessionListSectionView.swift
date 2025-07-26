@@ -1,5 +1,32 @@
 import SwiftUI
 
+// MARK: - シンプルなキーボード無効化コンテナ
+
+struct KeyboardDismissibleContainer<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        ZStack {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder),
+                        to: nil, from: nil, for: nil
+                    )
+                }
+
+            content
+        }
+    }
+}
+
+// MARK: - メインビュー
+
 struct IdentifiableError: Identifiable {
     let id = UUID()
     let message: String
@@ -12,6 +39,7 @@ struct IdentifiableError: Identifiable {
 /// - イベントハンドリング
 /// - エラー表示
 /// - モーダル制御
+/// - キーボード無効化対応
 struct SessionListSectionView: View {
     @EnvironmentObject var sessionManager: SessionManager
 
@@ -23,14 +51,16 @@ struct SessionListSectionView: View {
     @State private var isAnyFieldFocused: Bool = false
 
     var body: some View {
-        RoundedCard(backgroundColor: DesignTokens.Colors.cosmosCardBG) {
-            VStack(alignment: .leading, spacing: 16) {
-                defaultSessionsSection
-                customSessionsSection
+        KeyboardDismissibleContainer {
+            RoundedCard(backgroundColor: DesignTokens.Colors.cosmosCardBG) {
+                VStack(alignment: .leading, spacing: 16) {
+                    defaultSessionsSection
+                    customSessionsSection
+                }
+                .padding(.bottom, 8)
             }
-            .padding(.bottom, 8)
+            .debugSection(String(describing: Self.self), position: .topLeading)
         }
-        .debugSection(String(describing: Self.self), position: .topLeading)
         .alert(item: $errorMessage, content: errorAlert)
         .sheet(item: $editingSessionContext, content: editSheet)
         .onChange(of: editingSessionContext) {

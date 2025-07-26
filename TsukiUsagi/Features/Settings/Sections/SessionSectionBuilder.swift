@@ -19,6 +19,14 @@ struct SessionSectionBuilder: View {
             sectionHeader
             sectionContent
         }
+        .onTapGesture {
+            // 空の部分をタップしたらキーボードを閉じる
+            hideKeyboard()
+        }
+    }
+
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     // MARK: - Private Views
@@ -57,9 +65,15 @@ struct SessionSectionBuilder: View {
                     onDelete: { onDeleteSession(entry) },
                     onEditDescription: { index in onEditDescription(entry, index) }
                 )
+                .allowsHitTesting(true) // 明示的にタッチイベントを許可
             }
         }
         .padding(.horizontal)
+        .contentShape(Rectangle()) // タッチ領域を明確に定義
+        .onTapGesture {
+            // セッション一覧の空の部分をタップしたらキーボードを閉じる
+            hideKeyboard()
+        }
     }
 }
 
@@ -83,6 +97,15 @@ struct SessionRowComponent: View {
         }
         .padding()
         .background(sessionBackground)
+        .contentShape(Rectangle()) // タッチ領域を明確に定義
+        .onTapGesture {
+            // セッション行の空の部分をタップしたらキーボードを閉じる
+            hideKeyboard()
+        }
+    }
+
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     // MARK: - Private Views
@@ -156,6 +179,14 @@ struct SessionRowComponent: View {
             impactFeedback.impactOccurred()
             onEditDescription(index)
         }
+        .simultaneousGesture(
+            // 編集用のタップと同時に実行される場合のハンドリング
+            TapGesture()
+                .onEnded { _ in
+                    // 編集開始時は他のキーボードを閉じる
+                    hideKeyboard()
+                }
+        )
     }
 
     private func displayDescriptionRow(description: String) -> some View {
