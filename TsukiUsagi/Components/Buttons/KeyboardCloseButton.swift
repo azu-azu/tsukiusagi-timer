@@ -148,7 +148,6 @@ extension View {
         }
     }
 }
-}
 
 struct ButtonConfig {
     let isCompact: Bool

@@ -9,17 +9,13 @@ struct NewSessionFormView: View {
     @FocusState private var isNameFocused: Bool
     @FocusState private var isDescriptionFocused: Bool
     @State private var errorTitle: String = "Error"
-
-    // SessionLabelSectionと同じ状態管理
     @State private var isCustomInputMode: Bool = false
 
-    // SessionLabelSectionと同じ定数
     private let inputHeight: CGFloat = 28
     private let labelHeight: CGFloat = 28
     private let labelCornerRadius: CGFloat = 6
 
     private var isCustomActivity: Bool {
-        // NewSessionFormView用に調整：明示的にCustom Inputが選択された場合のみtrue
         return isCustomInputMode
     }
 
@@ -29,16 +25,12 @@ struct NewSessionFormView: View {
             !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
 
-        // Session Nameが空の場合は無効
         if trimmedName.isEmpty { return true }
-
-        // descriptionが1つも入力されていない場合は無効
         if descriptions.isEmpty { return true }
-
-        // 文字数超過
         if trimmedName.count > SessionManager.maxNameLength { return true }
-        if descriptions.contains(where: { $0.count > SessionManager.maxDescriptionLength }) { return true }
-        // 最大数超過
+        if descriptions.contains(where: { $0.count > SessionManager.maxDescriptionLength }) {
+            return true
+        }
         if descriptions.count > SessionManager.maxDescriptionCount { return true }
         // セッション数超過（空文字でない場合のみチェック）
         if !trimmedName.isEmpty &&
@@ -58,21 +50,16 @@ struct NewSessionFormView: View {
 
     var saveButtonTitle: String {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // 既存のセッション名が選択されている場合
         if !trimmedName.isEmpty &&
             sessionManager.allEntries.map({ $0.sessionName }).contains(trimmedName) {
             return "Update \"\(trimmedName)\""
         }
-
-        // 新規セッション作成の場合
         return "Create Session"
     }
 
     var body: some View {
         RoundedCard(backgroundColor: DesignTokens.CosmosColors.cardBackground) {
             VStack(alignment: .leading, spacing: 12) {
-                // SessionLabelSectionと同じ構造のSession Name選択部分
                 HStack(alignment: .top) {
                     if isCustomActivity {
                         HStack(spacing: 8) {
@@ -95,7 +82,7 @@ struct NewSessionFormView: View {
                                     }
                             }
                             .frame(height: labelHeight)
-                            .background(DesignTokens.WhiteColors.surface)
+                            .background(Color.white.opacity(0.05))
                             .cornerRadius(labelCornerRadius)
                             .frame(maxWidth: .infinity)
 
@@ -141,8 +128,8 @@ struct NewSessionFormView: View {
                                 }
                             }
                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        } label: {
-                            HStack {
+                            } label: {
+                                HStack {
                                 Text(name.isEmpty ? "Select Session" : name)
                                     .foregroundColor(name.isEmpty ? DesignTokens.MoonColors.textSecondary : .moonTextPrimary)
                                 Image(systemName: "chevron.down")
@@ -157,7 +144,6 @@ struct NewSessionFormView: View {
                     Spacer(minLength: 8)
                 }
 
-                // Subtitle入力欄もSessionLabelSectionと同じスタイルに統一
                 ForEach(descriptionTexts.indices, id: \.self) { idx in
                     HStack {
                         ZStack(alignment: .topLeading) {
@@ -180,7 +166,7 @@ struct NewSessionFormView: View {
                             .frame(height: inputHeight)
                             .padding(8)
                             .scrollContentBackground(.hidden)
-                            .background(DesignTokens.WhiteColors.surface)
+                            .background(Color.white.opacity(0.05))
                             .cornerRadius(labelCornerRadius)
                             .focused($isDescriptionFocused)
                             .onChange(of: isDescriptionFocused) { _, newValue in
@@ -202,7 +188,6 @@ struct NewSessionFormView: View {
                             )
                             .buttonStyle(.plain)
                         } else {
-                            // 1個目は透明なスペーサーで横幅を統一
                             Color.clear
                                 .frame(width: 24, height: 24)
                         }
@@ -254,7 +239,6 @@ struct NewSessionFormView: View {
             Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
         }
         .onAppear {
-            // NewSessionFormView用：初期状態は常にMenu選択モード
             isCustomInputMode = false
         }
     }
@@ -267,7 +251,6 @@ struct NewSessionFormView: View {
 
         do {
             if sessionManager.sessionDatabase[trimmedName.lowercased()] != nil {
-                // 既存セッションの場合：descriptionを1つずつ追加
                 for description in descriptions where !description.isEmpty {
                     try sessionManager.addDescriptionToSession(
                         sessionName: trimmedName,
@@ -275,7 +258,6 @@ struct NewSessionFormView: View {
                     )
                 }
             } else {
-                // 新規セッションの場合
                 try sessionManager.addOrUpdateEntry(
                     originalKey: "",
                     sessionName: trimmedName,
@@ -283,7 +265,6 @@ struct NewSessionFormView: View {
                 )
             }
 
-            // 成功時のリセット
             name = ""
             descriptionTexts = [""]
             isCustomInputMode = false
