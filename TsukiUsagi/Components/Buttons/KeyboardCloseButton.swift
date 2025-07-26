@@ -52,17 +52,21 @@ extension View {
         position: KeyboardCloseButtonPosition = .topTrailing,
         action: @escaping () -> Void
     ) -> some View {
-        ZStack {
+        let config = ButtonConfig(
+            isCompact: isCompact,
+            topPadding: topPadding,
+            trailingPadding: trailingPadding,
+            leadingPadding: leadingPadding,
+            bottomPadding: bottomPadding
+        )
+
+        return ZStack {
             self
             if isVisible {
                 buttonPositionView(
                     position: position,
                     action: action,
-                    isCompact: isCompact,
-                    topPadding: topPadding,
-                    trailingPadding: trailingPadding,
-                    leadingPadding: leadingPadding,
-                    bottomPadding: bottomPadding
+                    config: config
                 )
             }
         }
@@ -73,103 +77,115 @@ extension View {
     private func buttonPositionView(
         position: KeyboardCloseButtonPosition,
         action: @escaping () -> Void,
-        isCompact: Bool,
-        topPadding: CGFloat,
-        trailingPadding: CGFloat,
-        leadingPadding: CGFloat,
-        bottomPadding: CGFloat
+        config: ButtonConfig
     ) -> some View {
         switch position {
         case .topTrailing:
-            return AnyView(topTrailingButton(action: action, isCompact: isCompact,
-                                           topPadding: topPadding, trailingPadding: trailingPadding))
+            return AnyView(topTrailingButton(action: action, config: config))
         case .topLeading:
-            return AnyView(topLeadingButton(action: action, isCompact: isCompact,
-                                          topPadding: topPadding, leadingPadding: leadingPadding))
+            return AnyView(topLeadingButton(action: action, config: config))
         case .bottomTrailing:
-            return AnyView(bottomTrailingButton(action: action, isCompact: isCompact,
-                                              bottomPadding: bottomPadding, trailingPadding: trailingPadding))
+            return AnyView(bottomTrailingButton(action: action, config: config))
         case .bottomLeading:
-            return AnyView(bottomLeadingButton(action: action, isCompact: isCompact,
-                                             bottomPadding: bottomPadding, leadingPadding: leadingPadding))
+            return AnyView(bottomLeadingButton(action: action, config: config))
         case .centerTrailing:
-            return AnyView(centerTrailingButton(action: action, isCompact: isCompact,
-                                              trailingPadding: trailingPadding))
+            return AnyView(centerTrailingButton(action: action, config: config))
         case .centerLeading:
-            return AnyView(centerLeadingButton(action: action, isCompact: isCompact,
-                                             leadingPadding: leadingPadding))
+            return AnyView(centerLeadingButton(action: action, config: config))
         }
     }
 
-    private func topTrailingButton(action: @escaping () -> Void, isCompact: Bool,
-                                 topPadding: CGFloat, trailingPadding: CGFloat) -> some View {
+    private func topTrailingButton(
+        action: @escaping () -> Void,
+        config: ButtonConfig
+    ) -> some View {
         VStack {
             HStack {
                 Spacer()
-                KeyboardCloseButton(action: action, isCompact: isCompact)
-                    .padding(.trailing, trailingPadding)
-                    .padding(.top, topPadding)
+                KeyboardCloseButton(action: action, isCompact: config.isCompact)
+                    .padding(.trailing, config.trailingPadding)
+                    .padding(.top, config.topPadding)
             }
             Spacer()
         }
     }
 
-    private func topLeadingButton(action: @escaping () -> Void, isCompact: Bool,
-                                topPadding: CGFloat, leadingPadding: CGFloat) -> some View {
+    private func topLeadingButton(
+        action: @escaping () -> Void,
+        config: ButtonConfig
+    ) -> some View {
         VStack {
             HStack {
-                KeyboardCloseButton(action: action, isCompact: isCompact)
-                    .padding(.leading, leadingPadding)
-                    .padding(.top, topPadding)
+                KeyboardCloseButton(action: action, isCompact: config.isCompact)
+                    .padding(.leading, config.leadingPadding)
+                    .padding(.top, config.topPadding)
                 Spacer()
             }
             Spacer()
         }
     }
 
-    private func bottomTrailingButton(action: @escaping () -> Void, isCompact: Bool,
-                                    bottomPadding: CGFloat, trailingPadding: CGFloat) -> some View {
+    private func bottomTrailingButton(
+        action: @escaping () -> Void,
+        config: ButtonConfig
+    ) -> some View {
         VStack {
             Spacer()
             HStack {
                 Spacer()
-                KeyboardCloseButton(action: action, isCompact: isCompact)
-                    .padding(.trailing, trailingPadding)
-                    .padding(.bottom, bottomPadding)
+                KeyboardCloseButton(action: action, isCompact: config.isCompact)
+                    .padding(.trailing, config.trailingPadding)
+                    .padding(.bottom, config.bottomPadding)
             }
         }
     }
 
-    private func bottomLeadingButton(action: @escaping () -> Void, isCompact: Bool,
-                                   bottomPadding: CGFloat, leadingPadding: CGFloat) -> some View {
+    private func bottomLeadingButton(
+        action: @escaping () -> Void,
+        config: ButtonConfig
+    ) -> some View {
         VStack {
             Spacer()
             HStack {
-                KeyboardCloseButton(action: action, isCompact: isCompact)
-                    .padding(.leading, leadingPadding)
-                    .padding(.bottom, bottomPadding)
+                KeyboardCloseButton(action: action, isCompact: config.isCompact)
+                    .padding(.leading, config.leadingPadding)
+                    .padding(.bottom, config.bottomPadding)
                 Spacer()
             }
         }
     }
 
-    private func centerTrailingButton(action: @escaping () -> Void, isCompact: Bool,
-                                    trailingPadding: CGFloat) -> some View {
+    private func centerTrailingButton(
+        action: @escaping () -> Void,
+        config: ButtonConfig
+    ) -> some View {
         HStack {
             Spacer()
-            KeyboardCloseButton(action: action, isCompact: isCompact)
-                .padding(.trailing, trailingPadding)
+            KeyboardCloseButton(action: action, isCompact: config.isCompact)
+                .padding(.trailing, config.trailingPadding)
         }
     }
 
-    private func centerLeadingButton(action: @escaping () -> Void, isCompact: Bool,
-                                   leadingPadding: CGFloat) -> some View {
+    private func centerLeadingButton(
+        action: @escaping () -> Void,
+        config: ButtonConfig
+    ) -> some View {
         HStack {
-            KeyboardCloseButton(action: action, isCompact: isCompact)
-                .padding(.leading, leadingPadding)
+            KeyboardCloseButton(action: action, isCompact: config.isCompact)
+                .padding(.leading, config.leadingPadding)
             Spacer()
         }
     }
+}
+}
+
+// MARK: - Button Configuration
+struct ButtonConfig {
+    let isCompact: Bool
+    let topPadding: CGFloat
+    let trailingPadding: CGFloat
+    let leadingPadding: CGFloat
+    let bottomPadding: CGFloat
 }
 
 // MARK: - ボタン配置位置の定義
@@ -233,7 +249,9 @@ struct AdaptiveKeyboardCloseButtonOverlay: View {
             }
     }
 
-    private func handleKeyboardShow(notification: Notification) {
+    private func handleKeyboardShow(
+        notification: Notification
+    ) {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
             let keyboardRectangle = keyboardFrame.cgRectValue
             withAnimation(.easeInOut(duration: 0.3)) {
