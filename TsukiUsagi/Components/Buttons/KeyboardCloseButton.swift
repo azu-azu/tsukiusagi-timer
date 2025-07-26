@@ -7,7 +7,7 @@ struct KeyboardCloseButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "keyboard.chevron.compact.down")
-                .font(isCompact ? .caption : .body)
+                .font(isCompact ? DesignTokens.Fonts.caption : DesignTokens.Fonts.label)
         }
         .foregroundColor(DesignTokens.MoonColors.textPrimary)
         .padding(isCompact ? 4 : 6)

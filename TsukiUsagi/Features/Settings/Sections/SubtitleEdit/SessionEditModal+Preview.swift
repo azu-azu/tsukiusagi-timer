@@ -74,11 +74,11 @@ struct SessionEditModal_Previews: PreviewProvider {
                 content: {
                     VStack {
                         Text("Sample Content")
-                            .font(.title2)
+                            .font(DesignTokens.Fonts.title)
                             .padding()
 
                         Text("This is a demonstration of the reusable EditableModal component.")
-                            .font(.body)
+                            .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.MoonColors.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding()

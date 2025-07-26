@@ -82,21 +82,21 @@ struct DescriptionEditContent: View {
     private var sessionCategorySection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Session Category")
-                .font(.caption)
+                .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .textCase(.uppercase)
                 .tracking(0.5)
 
             HStack {
                 Text(sessionName)
-                    .font(.title2)
+                    .font(DesignTokens.Fonts.title)
                     .fontWeight(.medium)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
                 Spacer()
 
                 Image(systemName: "lock.fill")
-                    .font(.caption)
+                    .font(DesignTokens.Fonts.caption)
                     .foregroundColor(.gray)
                     .accessibilityLabel("Fixed category")
             }
@@ -117,7 +117,7 @@ struct DescriptionEditContent: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Descriptions")
-                    .font(.caption)
+                    .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
@@ -126,7 +126,7 @@ struct DescriptionEditContent: View {
 
                 Button(action: addDescription) {
                     Image(systemName: "plus.circle.fill")
-                        .font(.caption)
+                        .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
                 .accessibilityLabel("Add description")
@@ -160,7 +160,7 @@ struct DescriptionEditContent: View {
             }
 
             Text("Add descriptions for what you'll work on during this session")
-                .font(.caption2)
+                .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .padding(.top, 4)
         }

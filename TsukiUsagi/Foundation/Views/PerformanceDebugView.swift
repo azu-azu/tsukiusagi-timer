@@ -19,7 +19,7 @@ struct PerformanceDebugView: View {
 
     private var debugHeader: some View {
         Text("🎛 Performance Monitor")
-            .font(.headline)
+            .font(DesignTokens.Fonts.labelBold)
     }
 
     private var debugMetrics: some View {
@@ -32,7 +32,7 @@ struct PerformanceDebugView: View {
             Text("Background: \(controller.isBackgroundMode ? "ON" : "OFF")")
             Text("Memory: \(controller.memoryPressure)")
         }
-        .font(.caption)
+        .font(DesignTokens.Fonts.caption)
         .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
 }

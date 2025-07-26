@@ -83,7 +83,7 @@ struct FullSessionEditContent: View {
     private var sessionNameSection: some View {
         VStack(alignment: .leading) {
             Text("Session Name")
-                .font(.headline)
+                .font(DesignTokens.Fonts.labelBold)
             TextField("Enter session name", text: Binding(
                 get: { [self] in self.sessionName },
                 set: { [self] newValue in
@@ -101,7 +101,7 @@ struct FullSessionEditContent: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Descriptions")
-                    .font(.caption)
+                    .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
@@ -111,7 +111,7 @@ struct FullSessionEditContent: View {
                 // 追加ボタン
                 Button(action: addDescription) {
                     Image(systemName: "plus.circle.fill")
-                        .font(.caption)
+                        .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
                 .accessibilityLabel("Add description")
@@ -147,7 +147,7 @@ struct FullSessionEditContent: View {
 
             // 入力ヒント
             Text("Add descriptions for what you'll work on during this session")
-                .font(.caption2)
+                .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .padding(.top, 4)
         }

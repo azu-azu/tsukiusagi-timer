@@ -8,7 +8,7 @@ struct DirectDescriptionEditTest: View {
         NavigationView {
             VStack {
                 Text("Direct Test - Count: \(testDescriptions.count)")
-                    .font(.headline)
+                    .font(DesignTokens.Fonts.labelBold)
                     .padding()
 
                 DescriptionEditContent(
@@ -29,7 +29,7 @@ struct DirectDescriptionEditTest: View {
 
                 // 状態確認用
                 Text("Current descriptions: \(testDescriptions.joined(separator: ", "))")
-                    .font(.caption)
+                    .font(DesignTokens.Fonts.caption)
                     .padding()
             }
             .navigationTitle("Direct Test")
