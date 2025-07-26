@@ -76,13 +76,10 @@ struct NewSessionFormView: View {
                                     .padding(.horizontal, 12)
                                     .frame(height: labelHeight)
                                     .focused($isNameFocused)
-                                    .onChange(of: isNameFocused) { _, newValue in
-                                        if newValue {
-                                        }
-                                    }
+                                    .onChange(of: isNameFocused) { _, _ in }
                             }
                             .frame(height: labelHeight)
-                            .background(Color.white.opacity(0.05))
+                            .background(DesignTokens.WhiteColors.surface)
                             .cornerRadius(labelCornerRadius)
                             .frame(maxWidth: .infinity)
 
@@ -169,18 +166,13 @@ struct NewSessionFormView: View {
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(labelCornerRadius)
                             .focused($isDescriptionFocused)
-                            .onChange(of: isDescriptionFocused) { _, newValue in
-                                if newValue {
-                                }
-                            }
+                            .onChange(of: isDescriptionFocused) { _, _ in }
                         }
 
                         // 2個目以降にのみマイナスボタンを表示、1個目はスペース確保
                         if idx > 0 {
                             Button(
-                                action: {
-                                    descriptionTexts.remove(at: idx)
-                                },
+                                action: { descriptionTexts.remove(at: idx) },
                                 label: {
                                     Image(systemName: "minus.circle")
                                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
@@ -188,41 +180,29 @@ struct NewSessionFormView: View {
                             )
                             .buttonStyle(.plain)
                         } else {
-                            Color.clear
-                                .frame(width: 24, height: 24)
+                            Color.clear.frame(width: 24, height: 24)
                         }
                     }
                 }
 
-                Button(
-                    action: {
-                        descriptionTexts.append("")
-                    },
-                    label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus.circle")
-                            Text("Add Description")
-                        }
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                Button(action: { descriptionTexts.append("") }, label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle")
+                        Text("Add Description")
                     }
-                )
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                })
                 .font(DesignTokens.Fonts.caption)
                 .buttonStyle(.plain)
                 .disabled(
                     name.isEmpty ||
-                    (
-                        descriptionTexts.first?
-                            .trimmingCharacters(in: .whitespacesAndNewlines)
-                            .isEmpty ?? true
-                    )
+                    (descriptionTexts.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
                 )
 
-                Button(saveButtonTitle, action: {
-                    addSession()
-                })
-                .buttonStyle(.borderedProminent)
-                .disabled(isAddDisabled)
-                .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
+                Button(saveButtonTitle, action: { addSession() })
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isAddDisabled)
+                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
             }
         }
         .debugForm(String(describing: Self.self), position: .topLeading)
@@ -236,11 +216,11 @@ struct NewSessionFormView: View {
             }
         )
         .alert(isPresented: $showErrorAlert) {
-            Alert(title: Text(errorTitle), message: Text(errorMessage ?? ""), dismissButton: .default(Text("OK")))
+            Alert(title: Text(errorTitle),
+                  message: Text(errorMessage ?? ""),
+                  dismissButton: .default(Text("OK")))
         }
-        .onAppear {
-            isCustomInputMode = false
-        }
+        .onAppear { isCustomInputMode = false }
     }
 
     func addSession() {
@@ -253,16 +233,11 @@ struct NewSessionFormView: View {
             if sessionManager.sessionDatabase[trimmedName.lowercased()] != nil {
                 for description in descriptions where !description.isEmpty {
                     try sessionManager.addDescriptionToSession(
-                        sessionName: trimmedName,
-                        newDescription: description
-                    )
+                        sessionName: trimmedName, newDescription: description)
                 }
             } else {
                 try sessionManager.addOrUpdateEntry(
-                    originalKey: "",
-                    sessionName: trimmedName,
-                    descriptions: descriptions
-                )
+                    originalKey: "", sessionName: trimmedName, descriptions: descriptions)
             }
 
             name = ""
@@ -286,8 +261,7 @@ struct NewSessionFormView: View {
 #if DEBUG
 struct NewSessionFormView_Previews: PreviewProvider {
     static var previews: some View {
-        NewSessionFormView()
-            .environmentObject(SessionManager())
+        NewSessionFormView().environmentObject(SessionManager())
     }
 }
 #endif
