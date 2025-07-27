@@ -24,9 +24,16 @@ struct AddSessionParameters {
     let memo: String?
 }
 
+// MARK: - Supporting Types
+// MonthSummary は別ファイルで定義済み
+
 @MainActor
 class HistoryViewModel: ObservableObject {
     @Published private(set) var history: [SessionRecord] = []
+
+    // ✅ カレンダー機能用の新規追加
+    @Published private(set) var fixedDate: Date?
+
     private let store = HistoryStore() // 下で定義
 
     init() { history = store.load() } // 起動時に読込
@@ -75,7 +82,104 @@ class HistoryViewModel: ObservableObject {
         // 復元後、ViewでisDeletedを再判定すること
     }
 
-    // MARK: - Helper Methods
+    // MARK: - Calendar Support Methods (新規追加)
+
+    func setCalendarFixedDate(_ date: Date) {
+        fixedDate = Calendar.current.startOfDay(for: date)
+    }
+
+    func clearCalendarFixedDate() {
+        fixedDate = nil
+    }
+
+    /// 指定月の全日についてDailyHistoryを取得
+    func getCalendarDailyHistories(for month: Date) -> [Date: DailyHistory] {
+        let calendar = Calendar.current
+        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month)),
+              let range = calendar.range(of: .day, in: .month, for: month) else {
+            return [:]
+        }
+
+        var results: [Date: DailyHistory] = [:]
+
+        for day in range {
+            guard let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) else {
+                continue
+            }
+
+            if let dailyHistory = getCalendarDailyHistory(for: date) {
+                results[date] = dailyHistory
+            }
+        }
+
+        return results
+    }
+
+    /// 指定日のDailyHistoryを取得
+    func getCalendarDailyHistory(for date: Date) -> DailyHistory? {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+
+        let daySessions = history.filter { record in
+            calendar.isDate(record.start, inSameDayAs: startOfDay)
+        }
+
+        let totalMinutes = daySessions.reduce(0) { total, record in
+            total + calendarDurationMinutes(record)
+        }
+
+        let activities = Dictionary(grouping: daySessions) { record in
+            record.activity // 既存のactivityプロパティを直接使用
+        }.mapValues { sessions in
+            sessions.reduce(0) { total, record in
+                total + calendarDurationMinutes(record)
+            }
+        }
+
+        return DailyHistory(
+            date: startOfDay,
+            totalMinutes: totalMinutes,
+            sessionCount: daySessions.count,
+            activities: activities,
+            hasRecords: !daySessions.isEmpty
+        )
+    }
+
+    /// 月間サマリーを取得
+    func getCalendarMonthSummary(for month: Date) -> MonthSummary {
+        let dailyHistories = getCalendarDailyHistories(for: month)
+        let values = Array(dailyHistories.values)
+
+        let totalMinutes = values.reduce(0) { $0 + $1.totalMinutes }
+        let totalSessions = values.reduce(0) { $0 + $1.sessionCount }
+        let activeDays = values.filter { $0.hasRecords }.count
+
+        // 全アクティビティを集計
+        var allActivities: [String: Int] = [:]
+        for daily in values {
+            for (activity, minutes) in daily.activities {
+                allActivities[activity, default: 0] += minutes
+            }
+        }
+
+        return MonthSummary(
+            month: month,
+            totalMinutes: totalMinutes,
+            totalSessions: totalSessions,
+            activeDays: activeDays,
+            topActivities: allActivities.sorted { $0.value > $1.value }.prefix(5).map(\.key)
+        )
+    }
+
+    // MARK: - Calendar Private Helpers (新規追加)
+
+    /// SessionRecordの時間を分に変換（カレンダー用）
+    private func calendarDurationMinutes(_ record: SessionRecord) -> Int {
+        let seconds = record.duration // 既存のdurationプロパティを使用
+        return max(Int(seconds) / 60, 1)
+    }
+
+    // MARK: - Helper Methods (既存)
 
     /// 固定値のIDを生成（日時ベース）
     private func generateFixedId(from date: Date) -> String {
