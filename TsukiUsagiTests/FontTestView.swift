@@ -161,11 +161,9 @@ struct FontTestView: View {
         allFontFamilies = UIFont.familyNames.sorted()
         nunitoFonts = []
 
-        for family in UIFont.familyNames {
-            if family.lowercased().contains("nunito") {
-                let fontNames = UIFont.fontNames(forFamilyName: family)
-                nunitoFonts.append(contentsOf: fontNames)
-            }
+        for family in UIFont.familyNames where family.lowercased().contains("nunito") {
+            let fontNames = UIFont.fontNames(forFamilyName: family)
+            nunitoFonts.append(contentsOf: fontNames)
         }
         nunitoFonts.sort()
     }
