@@ -170,7 +170,7 @@ struct AchievementsSectionView: View {
                     ForEach(streakManager.achievements.filter { $0.isUnlocked }) { achievement in
                         VStack(spacing: 4) {
                             Text(achievement.iconName)
-                                .font(.system(size: 24))
+                                .font(DesignTokens.Fonts.title)
                             Text(achievement.title)
                                 .font(DesignTokens.Fonts.caption)
                                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
