@@ -1,7 +1,14 @@
 import SwiftUI
 import Foundation
 
-/// 粒度：日 or 月
+/// 表示モード
+private enum ViewMode: String, CaseIterable, Identifiable {
+    case calendar = "Calendar"
+    case timeline = "Timeline"
+    var id: Self { self }
+}
+
+/// 粒度：日 or 月（タイムラインモード用）
 private enum Granularity: String, CaseIterable, Identifiable {
     case day = "Day"
     case month = "Month"
@@ -12,6 +19,7 @@ struct HistoryView: View {
     @EnvironmentObject var historyVM: HistoryViewModel
     @EnvironmentObject var sessionManager: SessionManager
 
+    @State private var viewMode: ViewMode = .calendar // デフォルトをカレンダーに
     @State private var selectedDate = Calendar.current.startOfDay(for: Date()) // 基準日
     @State private var mode: Granularity = .day // 粒度
     @State private var restoreError: String?
@@ -27,14 +35,40 @@ struct HistoryView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            // ① 粒度切替
+            // ① ビューモード切替
+            Picker("View Mode", selection: $viewMode) {
+                ForEach(ViewMode.allCases) { Text($0.rawValue) }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+
+            // ② 条件分岐表示
+            switch viewMode {
+            case .calendar:
+                CalendarHistoryView()
+            case .timeline:
+                timelineContent()
+            }
+        }
+        .alert(isPresented: $showRestoreAlert) {
+            Alert(title: Text("Restore Error"), message: Text(restoreError ?? ""), dismissButton: .default(Text("OK")))
+        }
+        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+    }
+
+    // MARK: - Timeline Content
+
+    @ViewBuilder
+    private func timelineContent() -> some View {
+        VStack(spacing: 12) {
+            // 粒度切替（タイムラインモードのみ）
             Picker("Mode", selection: $mode) {
                 ForEach(Granularity.allCases) { Text($0.rawValue) }
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
 
-            // ② ナビゲーションバー
+            // ナビゲーションバー
             HStack {
                 Button { change(by: -1) } label: {
                     Image(systemName: "chevron.left")
@@ -59,7 +93,7 @@ struct HistoryView: View {
             }
             .padding(.horizontal)
 
-            // ③ リスト（日 or 月）
+            // リスト（日 or 月）
             ScrollView {
                 LazyVStack(spacing: 16) {
                     if mode == .day {
@@ -71,10 +105,6 @@ struct HistoryView: View {
                 .padding(.horizontal)
             }
         }
-        .alert(isPresented: $showRestoreAlert) {
-            Alert(title: Text("Restore Error"), message: Text(restoreError ?? ""), dismissButton: .default(Text("OK")))
-        }
-        .adaptiveStarBackground()
     }
 
     // ─────────────────────────────
@@ -175,13 +205,16 @@ struct HistoryView: View {
     // MARK: - Record 抽出・集計
 
     private func records() -> [SessionRecord] {
-        historyVM.history
+        // fixedDate があればそれを使用、なければ selectedDate を使用
+        let targetDate = historyVM.fixedDate ?? selectedDate
+
+        return historyVM.history
             .filter { rec in
                 switch mode {
                 case .day:
-                    return cal.isDate(rec.start, inSameDayAs: selectedDate)
+                    return cal.isDate(rec.start, inSameDayAs: targetDate)
                 case .month:
-                    return cal.isDate(rec.start, equalTo: selectedDate, toGranularity: .month)
+                    return cal.isDate(rec.start, equalTo: targetDate, toGranularity: .month)
                 }
             }
             .sorted { $0.start < $1.start }
@@ -242,20 +275,22 @@ struct HistoryView: View {
     }
 
     private func titleString() -> String {
+        let targetDate = historyVM.fixedDate ?? selectedDate
         switch mode {
         case .day:
-            return DateFormatters.displayDate.string(from: selectedDate)
+            return DateFormatters.displayDate.string(from: targetDate)
         case .month:
-            return selectedDate.formatted(.dateTime.year().month())
+            return targetDate.formatted(.dateTime.year().month())
         }
     }
 
     private func isAtLatest() -> Bool {
+        let targetDate = historyVM.fixedDate ?? selectedDate
         switch mode {
         case .day:
-            return cal.isDateInToday(selectedDate)
+            return cal.isDateInToday(targetDate)
         case .month:
-            return cal.isDate(selectedDate, equalTo: Date(), toGranularity: .month)
+            return cal.isDate(targetDate, equalTo: Date(), toGranularity: .month)
         }
     }
 

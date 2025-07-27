@@ -428,12 +428,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSUserNotificationUsageDescription = "This app uses notifications to alert you when your Pomodoro sessions start and end.";
-				INFOPLIST_KEY_UIAppFonts = (
-					"Nunito-Bold.ttf",
-					"Nunito-Italic.ttf",
-					"Nunito-Medium.ttf",
-					"Nunito-Regular.ttf",
-				);
+				INFOPLIST_KEY_UIAppFonts = "Nunito-Bold.ttf Nunito-Italic.ttf Nunito-Medium.ttf Nunito-Regular.ttf";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -463,12 +458,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSUserNotificationUsageDescription = "This app uses notifications to alert you when your Pomodoro sessions start and end.";
-				INFOPLIST_KEY_UIAppFonts = (
-					"Nunito-Bold.ttf",
-					"Nunito-Italic.ttf",
-					"Nunito-Medium.ttf",
-					"Nunito-Regular.ttf",
-				);
+				INFOPLIST_KEY_UIAppFonts = "Nunito-Bold.ttf Nunito-Italic.ttf Nunito-Medium.ttf Nunito-Regular.ttf";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
