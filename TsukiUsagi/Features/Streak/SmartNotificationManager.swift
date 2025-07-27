@@ -10,7 +10,7 @@ struct UsagePattern {
     let averageStreakLength: Int
     let totalUsageDays: Int
     let isNewUser: Bool
-    
+
     init(
         preferredTimeSlots: [DateComponents] = [],
         weekdayConsistency: Double = 0.0,
@@ -31,7 +31,7 @@ struct UsagePattern {
 struct TimeSlot {
     let hour: Int
     let frequency: Int
-    
+
     var dateComponents: DateComponents {
         var components = DateComponents()
         components.hour = hour
@@ -44,47 +44,51 @@ struct TimeSlot {
 
 class SmartNotificationManager: ObservableObject {
     static let shared = SmartNotificationManager()
-    
+
     private let notificationCenter = UNUserNotificationCenter.current()
     private let userDefaults = UserDefaults.standard
-    
+
     // User preference keys
     private let smartNotificationEnabledKey = "smart_notification_enabled"
     private let lastAnalysisDateKey = "last_usage_analysis_date"
     private let cachedPatternKey = "cached_usage_pattern"
+
+    @Published private var _isSmartNotificationEnabled: Bool
     
-    @Published var isSmartNotificationEnabled: Bool {
-        didSet {
-            userDefaults.set(isSmartNotificationEnabled, forKey: smartNotificationEnabledKey)
-            if isSmartNotificationEnabled {
+    var isSmartNotificationEnabled: Bool {
+        get { _isSmartNotificationEnabled }
+        set {
+            _isSmartNotificationEnabled = newValue
+            userDefaults.set(newValue, forKey: smartNotificationEnabledKey)
+            if newValue {
                 scheduleSmartNotifications()
             } else {
                 cancelSmartNotifications()
             }
         }
     }
-    
+
     private init() {
-        self.isSmartNotificationEnabled = userDefaults.bool(forKey: smartNotificationEnabledKey)
+        self._isSmartNotificationEnabled = userDefaults.bool(forKey: smartNotificationEnabledKey)
     }
-    
+
     // MARK: - Usage Pattern Analysis
-    
+
     /// Analyze user's timer usage patterns from historical data
     func analyzeUsagePattern(from streakData: StreakData) -> UsagePattern {
         let totalDays = streakData.totalDaysUsed
         let currentStreak = streakData.totalContinuousStreak
-        
+
         // For new users (less than 3 days of usage)
         if totalDays < 3 {
             return UsagePattern(isNewUser: true)
         }
-        
+
         // Analyze current week usage for time patterns
         let timeSlots = analyzePreferredTimeSlots(from: streakData)
         let weekdayConsistency = calculateWeekdayConsistency(from: streakData)
         let weekendConsistency = calculateWeekendConsistency(from: streakData)
-        
+
         return UsagePattern(
             preferredTimeSlots: timeSlots.map { $0.dateComponents },
             weekdayConsistency: weekdayConsistency,
@@ -94,11 +98,11 @@ class SmartNotificationManager: ObservableObject {
             isNewUser: false
         )
     }
-    
+
     private func analyzePreferredTimeSlots(from streakData: StreakData) -> [TimeSlot] {
         // For this phase, we'll use a simplified approach
         // In a real implementation, we'd store historical usage times
-        
+
         // Default preferred time slots based on common usage patterns
         let commonSlots = [
             TimeSlot(hour: 9, frequency: 3),   // Morning routine
@@ -106,29 +110,32 @@ class SmartNotificationManager: ObservableObject {
             TimeSlot(hour: 20, frequency: 5),  // Evening most common
             TimeSlot(hour: 22, frequency: 1)   // Late evening
         ]
-        
+
         return commonSlots.sorted { $0.frequency > $1.frequency }
     }
-    
+
     private func calculateWeekdayConsistency(from streakData: StreakData) -> Double {
         let currentWeek = streakData.currentWeek
         let weekdayUsage = currentWeek.usedDays.filter { $0 >= 1 && $0 <= 5 } // Mon-Fri
         return Double(weekdayUsage.count) / 5.0
     }
-    
+
     private func calculateWeekendConsistency(from streakData: StreakData) -> Double {
         let currentWeek = streakData.currentWeek
         let weekendUsage = currentWeek.usedDays.filter { $0 == 0 || $0 == 6 } // Sat-Sun
         return Double(weekendUsage.count) / 2.0
     }
-    
+
     // MARK: - Notification Content Generation
-    
+
     /// Generate personalized notification content based on usage pattern
-    func generateNotificationMessage(for pattern: UsagePattern, currentStreak: Int) -> (title: String, body: String) {
+    func generateNotificationMessage(
+        for pattern: UsagePattern,
+        currentStreak: Int
+    ) -> (title: String, body: String) {
         let title: String
         let body: String
-        
+
         if pattern.isNewUser || pattern.totalUsageDays < 3 {
             title = "🌱 Start Your Focus Journey"
             body = "Let's build your new habit today! Even 5 minutes counts."
@@ -151,12 +158,12 @@ class SmartNotificationManager: ObservableObject {
             title = "🎖 Elite Focus Master"
             body = "\(currentStreak) days! You've mastered the art of consistency. Legendary!"
         }
-        
+
         return (title, body)
     }
-    
+
     // MARK: - Smart Notification Scheduling
-    
+
     /// Request notification permissions
     func requestNotificationPermissions() async -> Bool {
         do {
@@ -167,66 +174,69 @@ class SmartNotificationManager: ObservableObject {
             return false
         }
     }
-    
+
     /// Schedule smart notifications based on usage pattern
     func scheduleSmartNotifications() {
         guard isSmartNotificationEnabled else { return }
-        
+
         Task {
             let hasPermission = await requestNotificationPermissions()
             guard hasPermission else {
                 print("🔔 Smart notifications disabled: no permission")
                 return
             }
-            
+
             await MainActor.run {
                 scheduleNextReminder()
             }
         }
     }
-    
+
     private func scheduleNextReminder() {
         // Cancel existing smart notifications
         cancelSmartNotifications()
-        
+
         // Get optimal time slot (default to 8 PM if no pattern available)
         let reminderHour = getOptimalReminderTime()
-        
+
         // Schedule notification for tomorrow at optimal time
         scheduleNotification(at: reminderHour)
-        
+
         print("🔔 Smart notification scheduled for \(reminderHour):00")
     }
-    
+
     private func getOptimalReminderTime() -> Int {
         // For this phase, use a default optimal time
         // In future versions, this would use the analyzed pattern
         return 20 // 8 PM
     }
-    
+
     private func scheduleNotification(at hour: Int) {
         let content = UNMutableNotificationContent()
-        
+
         // We'll generate content dynamically when the notification fires
         // For now, use a default message
         content.title = "🔥 Time to Focus"
         content.body = "Your daily focus session is waiting! Keep your streak alive."
         content.sound = .default
         content.badge = 1
-        
+
         // Schedule for the specified hour
         var dateComponents = DateComponents()
         dateComponents.hour = hour
         dateComponents.minute = 0
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        
+
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: dateComponents,
+            repeats: true
+        )
+
         let request = UNNotificationRequest(
             identifier: "smart_daily_reminder",
             content: content,
             trigger: trigger
         )
-        
+
         notificationCenter.add(request) { error in
             if let error = error {
                 print("🔔 Failed to schedule smart notification: \(error)")
@@ -235,36 +245,39 @@ class SmartNotificationManager: ObservableObject {
             }
         }
     }
-    
+
     /// Update notification content based on current streak and pattern
     func updateNotificationContent(streakData: StreakData) {
         guard isSmartNotificationEnabled else { return }
-        
+
         let pattern = analyzeUsagePattern(from: streakData)
         let (title, body) = generateNotificationMessage(for: pattern, currentStreak: streakData.totalContinuousStreak)
-        
+
         // Cancel and reschedule with updated content
         cancelSmartNotifications()
-        
+
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
         content.badge = 1
-        
+
         let reminderHour = getOptimalReminderTime()
         var dateComponents = DateComponents()
         dateComponents.hour = reminderHour
         dateComponents.minute = 0
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        
+
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: dateComponents,
+            repeats: true
+        )
+
         let request = UNNotificationRequest(
             identifier: "smart_daily_reminder",
             content: content,
             trigger: trigger
         )
-        
+
         notificationCenter.add(request) { error in
             if let error = error {
                 print("🔔 Failed to update smart notification: \(error)")
@@ -273,25 +286,25 @@ class SmartNotificationManager: ObservableObject {
             }
         }
     }
-    
+
     /// Cancel all smart notifications
     func cancelSmartNotifications() {
         notificationCenter.removePendingNotificationRequests(withIdentifiers: ["smart_daily_reminder"])
         print("🔔 Smart notifications cancelled")
     }
-    
+
     // MARK: - Public Interface
-    
+
     /// Enable smart notifications and start scheduling
     func enableSmartNotifications() {
         isSmartNotificationEnabled = true
     }
-    
+
     /// Disable smart notifications and cancel all scheduled ones
     func disableSmartNotifications() {
         isSmartNotificationEnabled = false
     }
-    
+
     /// Check if notifications are properly configured
     func checkNotificationStatus() async -> UNAuthorizationStatus {
         let settings = await notificationCenter.notificationSettings()

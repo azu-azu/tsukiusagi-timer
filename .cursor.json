@@ -1,0 +1,8 @@
+{
+  "experimental": {
+    "lsp": {
+      "semanticTokens": false,
+      "xcodeWorkspacePath": "TsukiUsagi.xcodeproj"
+    }
+  }
+}
