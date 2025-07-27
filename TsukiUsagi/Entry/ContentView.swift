@@ -67,13 +67,13 @@ struct ContentView: View {
     private var adjustedFontSize: CGFloat {
         switch sizeCategory {
         case .accessibilityExtraExtraExtraLarge:
-            return 14
+            return DesignTokens.FontSize.accessibilityExtraLarge
         case .accessibilityExtraExtraLarge:
-            return 16
+            return DesignTokens.FontSize.accessibilityLarge
         case .accessibilityExtraLarge:
-            return 18
+            return DesignTokens.FontSize.accessibilityMedium
         default:
-            return 20
+            return DesignTokens.FontSize.defaultSize
         }
     }
 

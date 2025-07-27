@@ -66,6 +66,7 @@ struct NewSessionFormView: View {
                             ZStack(alignment: .topLeading) {
                                 if name.isEmpty {
                                     Text("Enter session name...")
+                                        .font(DesignTokens.Fonts.label)
                                         .foregroundColor(.gray)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)

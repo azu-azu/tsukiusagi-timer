@@ -22,7 +22,7 @@ struct SessionRowDisplayView: View {
     private var sessionInfoView: some View {
         VStack(alignment: .leading) {
             Text(session.name)
-                .fontWeight(.semibold)
+                .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
             ForEach(session.subtitles) { subtitle in
