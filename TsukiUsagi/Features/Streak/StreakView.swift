@@ -58,7 +58,7 @@ struct StreakView: View {
 
             HStack {
                 Text("[\(streakManager.streakData.totalContinuousStreak)]")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(DesignTokens.Fonts.largeTitle)
                     .foregroundColor(.pink)
                 Spacer()
             }
@@ -111,7 +111,7 @@ struct StreakView: View {
                 Group {
                     if isUsed {
                         Text("✓")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(DesignTokens.Fonts.caption)
                             .foregroundColor(.white)
                     } else if isToday && !isFutureDay {
                         Circle()
@@ -143,7 +143,7 @@ struct StreakCardView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("🔥 \(streakManager.streakData.totalContinuousStreak)")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .font(DesignTokens.Fonts.title)
                     .foregroundColor(.pink)
 
                 Spacer()
