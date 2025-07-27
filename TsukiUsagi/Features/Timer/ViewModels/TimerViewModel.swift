@@ -22,7 +22,7 @@ final class TimerViewModel: ObservableObject {
     private let historyService: SessionHistoryServiceable
     private let persistenceManager: TimerPersistenceManageable
     private let formatter: TimeFormatterUtilable
-    
+
     // Streak tracking
     @StateObject private var streakManager = StreakManager()
 
@@ -153,18 +153,22 @@ final class TimerViewModel: ObservableObject {
             self.triggerStartAnimations()
         }
     }
+
     func pauseTimer() {
         engine.pause()
         isRunning = engine.isRunning
     }
+
     func resumeTimer() {
         engine.resume()
         isRunning = engine.isRunning
     }
+
     func stopTimer() {
         engine.stop()
         isRunning = engine.isRunning
     }
+
     func resetTimer(to seconds: Int) {
         engine.reset(to: seconds)
         isRunning = engine.isRunning
@@ -197,7 +201,7 @@ final class TimerViewModel: ObservableObject {
                 memo: nil
             )
             historyService.add(parameters: parameters)
-            
+
             // Record streak for manually finished work session
             streakManager.recordTimerUsage()
         }
@@ -249,6 +253,7 @@ final class TimerViewModel: ObservableObject {
         persistenceManager.isWorkSession = isWorkSession
         persistenceManager.saveTimerState()
     }
+
     /// タイマー状態を復元
     @MainActor
     func restoreTimerState() {
@@ -284,7 +289,7 @@ final class TimerViewModel: ObservableObject {
             memo: nil
         )
         historyService.add(parameters: parameters)
-        
+
         // Record streak if this was a work session
         if sessionInfo.phase == .focus {
             streakManager.recordTimerUsage()
