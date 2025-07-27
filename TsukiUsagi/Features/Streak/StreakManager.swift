@@ -516,12 +516,12 @@ class StreakManager: ObservableObject {
             return "Daily timer usage"
         case .weeklyCompletion:
             return "Weekly completion"
-		case .streakMilestone(_):
-            return "\\(days)-day streak milestone"
+        case .streakMilestone:
+            return "Streak milestone"
         case .perfectWeek:
             return "Perfect week (7 days)"
-		case .comeback(_):
-            return "Comeback after \\(gapDays) day break"
+        case .comeback:
+            return "Comeback bonus"
         }
     }
 
