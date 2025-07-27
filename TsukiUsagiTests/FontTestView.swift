@@ -281,7 +281,10 @@ struct FontTestView: View {
 
             ForEach(fontFiles, id: \.self) { fontFile in
                 HStack {
-                    if Bundle.main.url(forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""), withExtension: "ttf") != nil {
+                    if Bundle.main.url(
+                        forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""),
+                        withExtension: "ttf"
+                    ) != nil
                         Text("✅ \(fontFile)")
                             .font(.caption)
                             .foregroundColor(.green)
@@ -311,7 +314,10 @@ struct FontTestView: View {
         let fontFiles = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
 
         for fontFile in fontFiles {
-            guard let fontURL = Bundle.main.url(forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""), withExtension: "ttf") else {
+            guard let fontURL = Bundle.main.url(
+                forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""),
+                withExtension: "ttf"
+            ) else {
                 print("❌ フォントファイルが見つかりません: \(fontFile)")
                 continue
             }

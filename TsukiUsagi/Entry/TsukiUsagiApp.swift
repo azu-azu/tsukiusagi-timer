@@ -58,7 +58,7 @@ struct TsukiUsagiApp: App {
             print(ok ? "Notification authorization granted."
                 : "Notification authorization denied.")
         }
-        
+
         // カスタムフォントの登録
         registerCustomFonts()
     }
@@ -71,21 +71,24 @@ struct TsukiUsagiApp: App {
                 .environmentObject(sessionManager)
         }
     }
-    
+
     private func registerCustomFonts() {
         print("🔤 カスタムフォント登録開始...")
-        
+
         let fontFiles = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
-        
+
         for fontFile in fontFiles {
-            guard let fontURL = Bundle.main.url(forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""), withExtension: "ttf") else {
+            guard let fontURL = Bundle.main.url(
+                forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""),
+                withExtension: "ttf"
+            ) else {
                 print("❌ フォントファイルが見つかりません: \(fontFile)")
                 continue
             }
-            
+
             var error: Unmanaged<CFError>?
             let success = CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error)
-            
+
             if success {
                 print("✅ フォント登録成功: \(fontFile)")
             } else {
@@ -93,7 +96,7 @@ struct TsukiUsagiApp: App {
                 print("❌ フォント登録失敗: \(fontFile) - \(errorDescription)")
             }
         }
-        
+
         print("🔤 カスタムフォント登録完了")
     }
 }
