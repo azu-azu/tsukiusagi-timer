@@ -13,49 +13,42 @@ struct CalendarHistoryView: View {
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
 
     var body: some View {
-        VStack(spacing: 0) {
-            // カレンダー部分（上半分）
+        ScrollView {
             VStack(spacing: 0) {
-                // 月ナビゲーションヘッダー
-                monthNavigationHeader()
+                // カレンダーカード（月ナビゲーション + 曜日ヘッダー + グリッド）
+                VStack(spacing: 0) {
+                    // 月ナビゲーションヘッダー
+                    monthNavigationHeader()
 
-                // 曜日ヘッダー
-                weekdayHeader()
+                    // 曜日ヘッダー
+                    weekdayHeader()
 
-                // カレンダーグリッド
-                calendarGridView()
-                    .padding(.bottom, 20) // 下に少し余白を追加
-            }
-            .padding(.horizontal)
-            .padding(.top)
+                    // カレンダーグリッド
+                    calendarGridView()
+                }
+                .padding()
+                .background(DesignTokens.CosmosColors.cardBackground)
+                .cornerRadius(16)
+                .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+                .padding(.horizontal)
+                .padding(.top)
 
-            // 境界線にうっすら影をつける
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.black.opacity(0.08),
-                            Color.clear
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
+                // 選択日の詳細表示
+                if let selectedDate = selectedDate {
+                    DailyDetailView(
+                        date: selectedDate,
+                        dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
                     )
-                )
-                .frame(height: 8)
-
-            // 選択日の詳細表示（下半分）
-            if let selectedDate = selectedDate {
-                DailyDetailView(
-                    date: selectedDate,
-                    dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
-                )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .padding(.top, 10)
-            } else {
-                Spacer()
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.top, 16)
+                }
+                
+                // 下部余白を確保
+                Spacer(minLength: 100)
             }
         }
-        .background(Color.cosmosBackground)
+        .scrollIndicators(.hidden)
+        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
         .onAppear {
             loadMonthData()
         }
@@ -288,8 +281,9 @@ struct DailyDetailView: View {
             }
         }
         .padding()
-        .background(Color.cosmosBackground)
+        .background(DesignTokens.CosmosColors.cardBackground)
         .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
         .padding(.horizontal)
     }
 
@@ -378,7 +372,7 @@ struct DailyTimelineView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-        .background(Color.cosmosBackground.ignoresSafeArea())
+        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
     }
 
     // MARK: - Records Section
@@ -438,7 +432,7 @@ struct DailyTimelineView: View {
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(Color.cosmosBackground)
+                .fill(DesignTokens.CosmosColors.cardBackground)
         )
     }
 
@@ -551,5 +545,28 @@ struct DailyTimelineView: View {
             }
             .padding(.top, 16)
         }
+    }
+}
+
+// 共通サマリーカードスタイル
+extension View {
+    func summaryCardStyle(
+        height: CGFloat = 32,
+        cornerRadius: CGFloat = 6,
+        backgroundColor: Color = DesignTokens.CosmosColors.cardBackground,
+        padding: EdgeInsets = EdgeInsets(
+            top: 4,
+            leading: DesignTokens.Padding.cardHorizontal,
+            bottom: 4,
+            trailing: DesignTokens.Padding.cardHorizontal
+        )
+    ) -> some View {
+        font(DesignTokens.Fonts.label)
+            .padding(padding)
+            .frame(height: height)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(backgroundColor)
+            )
     }
 }
