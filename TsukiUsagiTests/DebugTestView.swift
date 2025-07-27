@@ -4,11 +4,11 @@ struct FontDebugTestView: View {
     var body: some View {
         VStack(spacing: 24) {
             Text("Nunito Bold Test")
-                .font(.custom("Nunito-Bold", size: 24))
+                .font(DesignTokens.Fonts.title)
                 .foregroundColor(.blue)
 
             Text("System Font Test")
-                .font(.system(size: 24))
+                .font(DesignTokens.Fonts.title)
                 .foregroundColor(.gray)
         }
         .onAppear {
