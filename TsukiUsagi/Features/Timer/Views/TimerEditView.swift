@@ -93,6 +93,7 @@ struct TimerEditView: View {
                                 ZStack(alignment: .topLeading) {
                                     if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                         Text("Memo (optional)")
+                                            .font(DesignTokens.Fonts.label)
                                             .foregroundColor(.gray)
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 12)

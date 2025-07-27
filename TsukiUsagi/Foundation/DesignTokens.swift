@@ -150,11 +150,11 @@ enum DesignTokens {
         /// キャプション（12pt）
         static let caption: CGFloat = 12
 
-        /// ボディ（17pt）
-        static let body: CGFloat = 17
-
         /// サブヘッドライン（15pt）
         static let subheadline: CGFloat = 15
+
+        /// ボディ（17pt）
+        static let body: CGFloat = 17
 
         /// ヘッドライン（17pt）
         static let headline: CGFloat = 17
@@ -167,42 +167,78 @@ enum DesignTokens {
 
         /// タイトル（28pt）
         static let title: CGFloat = 28
+
+        /// フッター日付（16pt）
+        static let footerDate: CGFloat = 16
+
+        /// タイマー表示（65pt）
+        static let timerDisplay: CGFloat = 65
+
+        // MARK: - Dynamic Type 対応サイズ
+
+        /// アクセシビリティ特大（14pt）
+        static let accessibilityExtraLarge: CGFloat = 14
+
+        /// アクセシビリティ大（16pt）
+        static let accessibilityLarge: CGFloat = 16
+
+        /// アクセシビリティ中（18pt）
+        static let accessibilityMedium: CGFloat = 18
+
+        /// デフォルト（20pt）
+        static let defaultSize: CGFloat = 20
     }
 
     // MARK: - Fonts
 
     enum Fonts {
+        /// ラベル用フォント（Nunitoのやわらかさ）
         static var label: Font {
-            // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 17, weight: .regular, design: .default)
+            Font.custom("Nunito-Regular", size: FontSize.body)
         }
+
+        /// 太字ラベル用フォント（Nunitoのやわらかさ）
         static var labelBold: Font {
-            // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 17, weight: .bold, design: .default)
+            Font.custom("Nunito-Bold", size: FontSize.body)
         }
+
+        /// セクションタイトル用フォント（Nunitoのやわらかさ）
         static var sectionTitle: Font {
-            // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 15, weight: .regular, design: .default)
+            Font.custom("Nunito-Regular", size: FontSize.subheadline)
         }
+
+        /// 数値表示用フォント（宇宙船ディスプレイ感）
         static var numericLabel: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 17, weight: .regular, design: .default)
+            Font.system(size: FontSize.body, weight: .regular, design: .monospaced)
         }
+
+        /// キャプション用フォント（Nunitoのやわらかさ）
         static var caption: Font {
-            // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 12, weight: .regular, design: .default)
+            Font.custom("Nunito-Regular", size: FontSize.caption)
         }
+
+        /// タイトル用フォント（Nunitoのやわらかさ）
         static var title: Font {
-            // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 20, weight: .bold, design: .default)
+            Font.custom("Nunito-Bold", size: FontSize.title3)
         }
+
+        /// タイマー表示用フォント（🚨 重要：絶対に変更禁止 🚨）
+        /// 必ずシステムフォント .rounded を使用すること
+        /// 理由：視認性・読みやすさ・数字表示最適化のため
+        /// カスタムフォント（Nunitoなど）は使用しないこと
         static var timerDisplay: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 65, weight: .bold, design: .rounded)
+            Font.system(size: FontSize.timerDisplay, weight: .bold, design: .rounded)
         }
+
+        /// フッター日付用フォント（🚨 重要：絶対に変更禁止 🚨）
+        /// 必ずシステムフォント .monospaced を使用すること
+        /// 理由：宇宙船ディスプレイ感・日付の正確性・等幅表示のため
+        /// カスタムフォント（Nunitoなど）は使用しないこと
         static var footerDate: Font {
             // swiftlint:disable:next discouraged-font-usage
-            Font.system(size: 16, weight: .bold, design: .monospaced)
+            Font.system(size: FontSize.footerDate, weight: .bold, design: .monospaced)
         }
     }
 
@@ -253,7 +289,7 @@ extension DesignTokens {
     enum UIKitFonts {
         static var numericLabel: UIFont {
             #if canImport(UIKit)
-                return UIFont.monospacedDigitSystemFont(ofSize: 18, weight: .medium)
+                return UIFont.monospacedDigitSystemFont(ofSize: FontSize.body, weight: .medium)
             #else
                 fatalError("UIFont is only available on UIKit platforms.")
             #endif

@@ -57,6 +57,7 @@ struct SessionLabelSection: View {
                             ZStack(alignment: .topLeading) {
                                 if activity.isEmpty {
                                     Text("Enter session name...")
+                                        .font(DesignTokens.Fonts.label)
                                         .foregroundColor(.gray)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
@@ -112,6 +113,7 @@ struct SessionLabelSection: View {
                                     isCustomDescriptionMode = false
                                 } label: {
                                     Text(entry.sessionName)
+                                        .font(DesignTokens.Fonts.label)
                                 }
                             }
                             Divider()
@@ -124,6 +126,7 @@ struct SessionLabelSection: View {
                                     isCustomDescriptionMode = false
                                 } label: {
                                     Text(entry.sessionName)
+                                        .font(DesignTokens.Fonts.label)
                                 }
                             }
                             Divider()
@@ -139,6 +142,7 @@ struct SessionLabelSection: View {
                         } label: {
                             HStack {
                                 Text(activity.isEmpty ? "Custom" : activity)
+                                    .font(DesignTokens.Fonts.label)
                                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 Image(systemName: "chevron.down")
                                     .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -156,6 +160,7 @@ struct SessionLabelSection: View {
                 ZStack(alignment: .topLeading) {
                     if descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Text("Description (optional)")
+                            .font(DesignTokens.Fonts.label)
                             .foregroundColor(.gray)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 12)

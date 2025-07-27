@@ -7,6 +7,7 @@ struct AwakeEnablerView: View {
     var body: some View {
         VStack {
             Text("タイマー中")
+                .font(DesignTokens.Fonts.caption)
         }
         .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }

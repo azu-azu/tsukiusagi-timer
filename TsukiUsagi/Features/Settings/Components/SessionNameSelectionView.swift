@@ -32,6 +32,7 @@ struct SessionNameSelectionView: View {
                     editingDescriptions = entry.descriptions
                 } label: {
                     Text(entry.sessionName)
+                        .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 }
             }
@@ -43,6 +44,7 @@ struct SessionNameSelectionView: View {
                     editingDescriptions = entry.descriptions
                 } label: {
                     Text(entry.sessionName)
+                        .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 }
             }
@@ -60,6 +62,7 @@ struct SessionNameSelectionView: View {
     private var menuLabelView: some View {
         HStack {
             Text(editingName.isEmpty ? "Select Session" : editingName)
+                .font(DesignTokens.Fonts.label)
                 .foregroundColor(editingName.isEmpty ? DesignTokens.MoonColors.textSecondary : .moonTextPrimary)
             Spacer()
             Image(systemName: "chevron.down")

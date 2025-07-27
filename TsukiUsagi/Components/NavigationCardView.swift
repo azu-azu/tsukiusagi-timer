@@ -10,6 +10,7 @@ struct NavigationCardView<Destination: View>: View {
             NavigationLink(destination: destination) {
                 HStack {
                     Text(title)
+                        .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     Spacer()
                     Image(systemName: "chevron.right")

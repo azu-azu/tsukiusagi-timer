@@ -20,6 +20,7 @@ struct ResetStopSectionView: View {
                             ? "Reset Timer (No Save)"
                             : "Reset Timer (already saved)"
                         )
+                        .font(DesignTokens.Fonts.label)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -34,6 +35,7 @@ struct ResetStopSectionView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "forward.end")
                             Text("Stop (Save)")
+                                .font(DesignTokens.Fonts.label)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -43,6 +45,7 @@ struct ResetStopSectionView: View {
                         Image(systemName: "forward.end")
                             .foregroundColor(.gray.opacity(0.6))
                         Text("Stop (Save)")
+                            .font(DesignTokens.Fonts.label)
                             .foregroundColor(.gray.opacity(0.6))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
