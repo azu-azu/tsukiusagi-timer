@@ -188,7 +188,7 @@ struct AchievementsSectionView: View {
                     if streakManager.achievements.filter({ $0.isUnlocked }).isEmpty {
                         VStack(spacing: 4) {
                             Text("🎯")
-                                .font(.system(size: 24))
+                                .font(DesignTokens.Fonts.title)
                                 .opacity(0.3)
                             Text("Start your first session!")
                                 .font(DesignTokens.Fonts.caption)
