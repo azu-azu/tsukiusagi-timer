@@ -28,4 +28,3 @@ struct FontDebugTestView: View {
 #Preview {
     FontDebugTestView()
 }
-

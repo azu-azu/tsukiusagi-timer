@@ -42,7 +42,7 @@ struct CalendarHistoryView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .padding(.top, 16)
                 }
-                
+
                 // 下部余白を確保
                 Spacer(minLength: 100)
             }
@@ -141,7 +141,13 @@ struct CalendarHistoryView: View {
     }
 
     private func changeMonth(by offset: Int) {
-        guard let newMonth = calendar.date(byAdding: .month, value: offset, to: selectedMonth) else { return }
+        guard let newMonth = calendar.date(
+            byAdding: .month,
+            value: offset,
+            to: selectedMonth
+        ) else {
+            return
+        }
         selectedMonth = newMonth
         selectedDate = nil // 選択をクリア
     }

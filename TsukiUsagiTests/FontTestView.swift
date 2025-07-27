@@ -278,7 +278,7 @@ struct FontTestView: View {
                 .foregroundColor(.gray)
 
             let fontFiles = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
-            
+
             ForEach(fontFiles, id: \.self) { fontFile in
                 HStack {
                     if Bundle.main.url(forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""), withExtension: "ttf") != nil {
@@ -307,20 +307,20 @@ struct FontTestView: View {
 
     private func registerFontsManually() {
         print("📝 手動フォント登録開始...")
-        
+
         let fontFiles = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
-        
+
         for fontFile in fontFiles {
             guard let fontURL = Bundle.main.url(forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""), withExtension: "ttf") else {
                 print("❌ フォントファイルが見つかりません: \(fontFile)")
                 continue
             }
-            
+
             print("📂 フォントURL: \(fontURL)")
-            
+
             var error: Unmanaged<CFError>?
             let success = CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error)
-            
+
             if success {
                 print("✅ フォント登録成功: \(fontFile)")
             } else {
@@ -328,7 +328,7 @@ struct FontTestView: View {
                 print("❌ フォント登録失敗: \(fontFile) - \(errorDescription)")
             }
         }
-        
+
         print("🔄 フォント情報を再読み込み中...")
         loadFontInfo()
     }

@@ -303,7 +303,8 @@ extension DesignTokens {
         /// ナビゲーションタイトル用UIFont（Nunitoのやわらかさ）
         static var navigationTitle: UIFont {
             #if canImport(UIKit)
-                return UIFont(name: "Nunito-Bold", size: FontSize.headline) ?? UIFont.boldSystemFont(ofSize: FontSize.headline)
+                return UIFont(name: "Nunito-Bold", size: FontSize.headline)
+                    ?? UIFont.boldSystemFont(ofSize: FontSize.headline)
             #else
                 fatalError("UIFont is only available on UIKit platforms.")
             #endif
