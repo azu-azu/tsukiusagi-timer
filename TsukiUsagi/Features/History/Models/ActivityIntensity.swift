@@ -1,10 +1,10 @@
 import SwiftUI
 
 enum ActivityIntensity: String, Codable, CaseIterable {
-    case none = "none"
-    case low = "low"
-    case medium = "medium"
-    case high = "high"
+    case none
+    case low
+    case medium
+    case high
 
     init(totalMinutes: Int) {
         switch totalMinutes {
