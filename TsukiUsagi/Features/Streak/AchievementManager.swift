@@ -94,7 +94,7 @@ struct Achievement: Codable, Identifiable {
 class AchievementManager {
     private let userDefaults = UserDefaults.standard
     private let achievementsKey = "streak_achievements"
-    
+
     /// Check for new achievements and unlock them
     func checkForNewAchievements(
         streakData: StreakData,
@@ -105,7 +105,7 @@ class AchievementManager {
 
         // Check each achievement type
         for achievementType in Achievement.AchievementType.allCases {
-            if !isAchievementUnlocked(achievementType, in: achievements) && 
+            if !isAchievementUnlocked(achievementType, in: achievements) &&
                shouldUnlockAchievement(achievementType, streakData: streakData) {
                 var newAchievement = achievementType.defaultAchievement
                 newAchievement = Achievement(
@@ -133,7 +133,7 @@ class AchievementManager {
         if !newlyUnlocked.isEmpty {
             saveAchievements(achievements)
         }
-        
+
         return newlyUnlocked
     }
 
