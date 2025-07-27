@@ -146,13 +146,16 @@ struct AchievementsSectionView: View {
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 Spacer()
 
-                Button(action: {
-                    streakManager.shareStreak()
-                }) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.caption)
-                        .foregroundColor(.pink)
-                }
+                Button(
+                    action: {
+                        streakManager.shareStreak()
+                    },
+                    label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.caption)
+                            .foregroundColor(.pink)
+                    }
+                )
 
                 NavigationLink(destination: AchievementsView(achievements: streakManager.achievements)) {
                     Text("View All")
