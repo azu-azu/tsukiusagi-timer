@@ -2,26 +2,26 @@ import SwiftUI
 
 struct StreakView: View {
     @StateObject private var streakManager = StreakManager()
-    
+
     private let weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-    
+
     var body: some View {
         VStack(spacing: 16) {
             // Level Display
             LevelView(level: streakManager.currentLevel)
-            
+
             // Total Streak Display
             totalStreakSection
-            
+
             // Weekly Usage
             weeklyUsageSection
-            
+
             // Weekly Calendar
             weeklyCalendarSection
-            
+
             // Achievements
             AchievementsSectionView(streakManager: streakManager)
-            
+
             // Smart Notifications Toggle
             SmartNotificationToggleView(streakManager: streakManager)
         }
@@ -33,9 +33,9 @@ struct StreakView: View {
             streakManager.checkWeekTransition()
         }
     }
-    
+
     // MARK: - View Components
-    
+
     private var totalStreakSection: some View {
         VStack(spacing: 8) {
             HStack {
@@ -45,7 +45,7 @@ struct StreakView: View {
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 Spacer()
-                
+
                 // Share button
                 Button(action: {
                     streakManager.shareStreak()
@@ -55,7 +55,7 @@ struct StreakView: View {
                         .foregroundColor(.pink)
                 }
             }
-            
+
             HStack {
                 Text("[\(streakManager.streakData.totalContinuousStreak)]")
                     .font(.system(size: 32, weight: .bold, design: .rounded))
@@ -64,7 +64,7 @@ struct StreakView: View {
             }
         }
     }
-    
+
     private var weeklyUsageSection: some View {
         HStack {
             Text("📅")
@@ -75,7 +75,7 @@ struct StreakView: View {
             Spacer()
         }
     }
-    
+
     private var weeklyCalendarSection: some View {
         VStack(spacing: 12) {
             // Weekday labels
@@ -87,7 +87,7 @@ struct StreakView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            
+
             // Day circles
             HStack(spacing: 0) {
                 ForEach(0..<7, id: \.self) { dayIndex in
@@ -97,13 +97,13 @@ struct StreakView: View {
             }
         }
     }
-    
+
     private func dayCircle(for dayIndex: Int) -> some View {
         let isUsed = streakManager.streakData.currentWeek.usedDays.contains(dayIndex)
         let isToday = Date().dayOfWeek == dayIndex
         let dayDate = Date().dateForDayOfWeek(dayIndex)
         let isFutureDay = dayDate > Date()
-        
+
         return Circle()
             .fill(circleColor(isUsed: isUsed, isToday: isToday, isFutureDay: isFutureDay))
             .frame(width: 32, height: 32)
@@ -122,7 +122,7 @@ struct StreakView: View {
             .scaleEffect(isToday ? 1.1 : 1.0)
             .animation(.easeInOut(duration: 0.2), value: isToday)
     }
-    
+
     private func circleColor(isUsed: Bool, isToday: Bool, isFutureDay: Bool) -> Color {
         if isUsed {
             return .pink
@@ -138,26 +138,26 @@ struct StreakView: View {
 
 struct StreakCardView: View {
     @StateObject private var streakManager = StreakManager()
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("🔥 \(streakManager.streakData.totalContinuousStreak)")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.pink)
-                
+
                 Spacer()
-                
+
                 Text("streak")
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
-            
+
             HStack {
                 Text("This week: \(streakManager.streakData.currentWeek.weeklyUsageCount)/7")
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                
+
                 Spacer()
             }
         }

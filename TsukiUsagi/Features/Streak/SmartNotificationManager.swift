@@ -54,7 +54,7 @@ class SmartNotificationManager: ObservableObject {
     private let cachedPatternKey = "cached_usage_pattern"
 
     @Published private var _isSmartNotificationEnabled: Bool
-    
+
     var isSmartNotificationEnabled: Bool {
         get { _isSmartNotificationEnabled }
         set {
