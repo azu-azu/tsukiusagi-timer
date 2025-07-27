@@ -2,6 +2,9 @@ import SwiftUI
 import UIKit
 
 struct FontTestView: View {
+    @State private var allFontFamilies: [String] = []
+    @State private var nunitoFonts: [String] = []
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -9,6 +12,9 @@ struct FontTestView: View {
                     Text("Font Loading Test")
                         .font(.largeTitle)
                         .padding(.bottom)
+                    
+                    // System info
+                    systemInfoSection()
                     
                     // Test each Nunito font individually
                     fontTestSection(
@@ -46,10 +52,19 @@ struct FontTestView: View {
                     
                     // Available fonts list
                     availableFontsSection()
+                    
+                    // PostScript names section
+                    postScriptNamesSection()
+                    
+                    // All font families
+                    allFontFamiliesSection()
                 }
                 .padding()
             }
             .navigationTitle("Font Test")
+        }
+        .onAppear {
+            loadFontInfo()
         }
     }
     
@@ -135,6 +150,116 @@ struct FontTestView: View {
         let requiredFonts = ["Nunito-Regular", "Nunito-Bold", "Nunito-Medium", "Nunito-Italic"]
         return requiredFonts.filter { fontName in
             UIFont(name: fontName, size: 17) == nil
+        }
+    }
+    
+    private func loadFontInfo() {
+        allFontFamilies = UIFont.familyNames.sorted()
+        nunitoFonts = []
+        
+        for family in UIFont.familyNames {
+            if family.lowercased().contains("nunito") {
+                let fontNames = UIFont.fontNames(forFamilyName: family)
+                nunitoFonts.append(contentsOf: fontNames)
+            }
+        }
+        nunitoFonts.sort()
+    }
+    
+    private func systemInfoSection() -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("System Information")
+                .font(.headline)
+                .foregroundColor(.blue)
+            
+            Text("iOS Version: \(UIDevice.current.systemVersion)")
+                .font(.caption)
+            
+            Text("Bundle Identifier: \(Bundle.main.bundleIdentifier ?? "Unknown")")
+                .font(.caption)
+            
+            if let infoPlist = Bundle.main.infoDictionary,
+               let fonts = infoPlist["UIAppFonts"] as? [String] {
+                Text("UIAppFonts in Info.plist: \(fonts.count) fonts")
+                    .font(.caption)
+                    .foregroundColor(.green)
+                
+                ForEach(fonts, id: \.self) { fontFile in
+                    Text("  • \(fontFile)")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                }
+            } else {
+                Text("❌ UIAppFonts not found in Info.plist")
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
+            
+            Divider()
+        }
+    }
+    
+    private func postScriptNamesSection() -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("PostScript Font Names")
+                .font(.headline)
+                .foregroundColor(.purple)
+            
+            Text("These are the exact names to use in .custom() calls:")
+                .font(.caption)
+                .foregroundColor(.gray)
+            
+            if nunitoFonts.isEmpty {
+                Text("❌ No Nunito fonts found in system")
+                    .font(.caption)
+                    .foregroundColor(.red)
+            } else {
+                ForEach(nunitoFonts, id: \.self) { fontName in
+                    HStack {
+                        Text("✓ \(fontName)")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                        
+                        Spacer()
+                        
+                        Text("Sample")
+                            .font(.custom(fontName, size: 14))
+                    }
+                }
+            }
+            
+            Divider()
+        }
+    }
+    
+    private func allFontFamiliesSection() -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("All Font Families (\(allFontFamilies.count))")
+                .font(.headline)
+                .foregroundColor(.orange)
+            
+            Text("Looking for Nunito family...")
+                .font(.caption)
+                .foregroundColor(.gray)
+            
+            ForEach(allFontFamilies.prefix(10), id: \.self) { family in
+                if family.lowercased().contains("nunito") {
+                    Text("✅ \(family)")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                        .bold()
+                } else {
+                    Text("• \(family)")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                }
+            }
+            
+            if allFontFamilies.count > 10 {
+                Text("... and \(allFontFamilies.count - 10) more families")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+            }
         }
     }
 }
