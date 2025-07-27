@@ -223,6 +223,11 @@ enum DesignTokens {
             Font.custom("Nunito-Bold", size: FontSize.title3)
         }
 
+        /// ナビゲーションタイトル用フォント（Nunitoのやわらかさ）
+        static var navigationTitle: Font {
+            Font.custom("Nunito-Bold", size: FontSize.headline)
+        }
+
         /// タイマー表示用フォント（🚨 重要：絶対に変更禁止 🚨）
         /// 必ずシステムフォント .rounded を使用すること
         /// 理由：視認性・読みやすさ・数字表示最適化のため
@@ -290,6 +295,15 @@ extension DesignTokens {
         static var numericLabel: UIFont {
             #if canImport(UIKit)
                 return UIFont.monospacedDigitSystemFont(ofSize: FontSize.body, weight: .medium)
+            #else
+                fatalError("UIFont is only available on UIKit platforms.")
+            #endif
+        }
+
+        /// ナビゲーションタイトル用UIFont（Nunitoのやわらかさ）
+        static var navigationTitle: UIFont {
+            #if canImport(UIKit)
+                return UIFont(name: "Nunito-Bold", size: FontSize.headline) ?? UIFont.boldSystemFont(ofSize: FontSize.headline)
             #else
                 fatalError("UIFont is only available on UIKit platforms.")
             #endif

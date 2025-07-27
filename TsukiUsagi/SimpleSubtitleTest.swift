@@ -5,34 +5,50 @@ struct DirectDescriptionEditTest: View {
     @State private var isAnyFieldFocused: Bool = false
 
     var body: some View {
-        NavigationView {
-            VStack {
-                Text("Direct Test - Count: \(testDescriptions.count)")
-                    .font(DesignTokens.Fonts.labelBold)
-                    .padding()
+        // ✅ まずはNavigationStackなしで試してみる
+        VStack {
+            Text("Direct Test - Count: \(testDescriptions.count)")
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary) // ✅ 月光色
+                .padding()
 
-                DescriptionEditContent(
-                    sessionName: "Test Session",
-                    descriptions: testDescriptions,
-                    editingIndex: nil,
-                    onDescriptionsChange: { newDescriptions in
-                        print("🟦🟦🟦 Direct test received change: \(newDescriptions)")
-                        testDescriptions = newDescriptions
-                    },
-                    isAnyFieldFocused: $isAnyFieldFocused,
-                    onClearFocus: {
-                        isAnyFieldFocused = false
-                    }
-                )
+            Text("Direct Test - Count: \(testDescriptions.count)")
+                .font(DesignTokens.Fonts.labelBold)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary) // ✅ 月光色
+                .padding()
 
-                Spacer()
+            DescriptionEditContent(
+                sessionName: "Test Session",
+                descriptions: testDescriptions,
+                editingIndex: nil,
+                onDescriptionsChange: { newDescriptions in
+                    print("🟦🟦🟦 Direct test received change: \(newDescriptions)")
+                    testDescriptions = newDescriptions
+                },
+                isAnyFieldFocused: $isAnyFieldFocused,
+                onClearFocus: {
+                    isAnyFieldFocused = false
+                }
+            )
 
-                // 状態確認用
-                Text("Current descriptions: \(testDescriptions.joined(separator: ", "))")
-                    .font(DesignTokens.Fonts.caption)
-                    .padding()
+            Spacer()
+
+            // 状態確認用
+            Text("Current descriptions: \(testDescriptions.joined(separator: ", "))")
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary) // ✅ セカンダリ月光色
+                .padding()
+        }
+        .background(DesignTokens.CosmosColors.background.ignoresSafeArea()) // ✅ 宇宙背景色
+        .navigationTitle("Direct Test")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // ✅ カスタムナビゲーションタイトル（デザイントークンのフォント適用）
+            ToolbarItem(placement: .principal) {
+                Text("Direct Test")
+                    .font(DesignTokens.Fonts.labelBold) // Nunito太字
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
             }
-            .navigationTitle("Direct Test")
         }
     }
 }
@@ -40,7 +56,10 @@ struct DirectDescriptionEditTest: View {
 #if DEBUG
 struct DirectDescriptionEditTest_Previews: PreviewProvider {
     static var previews: some View {
-        DirectDescriptionEditTest()
+        // ✅ プレビューでNavigationStackを提供
+        NavigationStack {
+            DirectDescriptionEditTest()
+        }
     }
 }
 #endif
