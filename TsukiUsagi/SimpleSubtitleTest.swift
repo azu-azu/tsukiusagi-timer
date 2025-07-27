@@ -49,6 +49,15 @@ struct DirectDescriptionEditTest: View {
                     .font(DesignTokens.Fonts.labelBold) // Nunito太字
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
             }
+            
+            // Font Test Navigation
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink("Debug") {
+                    FontTestView()
+                }
+                .font(DesignTokens.Fonts.caption)
+                .foregroundColor(DesignTokens.MoonColors.accentBlue)
+            }
         }
     }
 }
