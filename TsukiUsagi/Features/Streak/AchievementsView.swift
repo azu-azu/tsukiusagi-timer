@@ -2,7 +2,7 @@ import SwiftUI
 
 struct LevelView: View {
     let level: UserLevel
-    
+
     var body: some View {
         VStack(spacing: 8) {
             HStack {
@@ -13,7 +13,7 @@ struct LevelView: View {
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 Spacer()
             }
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("\\(level.currentXP) / \\(level.requiredXP) XP")
@@ -24,7 +24,7 @@ struct LevelView: View {
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(.pink)
                 }
-                
+
                 ProgressView(value: level.progress)
                     .progressViewStyle(.linear)
                     .tint(.pink)
@@ -45,12 +45,12 @@ struct LevelView: View {
 
 struct AchievementsView: View {
     let achievements: [Achievement]
-    
+
     private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-    
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -70,27 +70,31 @@ struct AchievementsView: View {
 
 struct AchievementCardView: View {
     let achievement: Achievement
-    
+
     var body: some View {
         VStack(spacing: 12) {
             // Icon
             Text(achievement.iconName)
                 .font(.system(size: 40))
                 .opacity(achievement.isUnlocked ? 1.0 : 0.3)
-            
+
             // Title
             Text(achievement.title)
                 .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(achievement.isUnlocked ? DesignTokens.MoonColors.textPrimary : DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(
+                    achievement.isUnlocked
+                        ? DesignTokens.MoonColors.textPrimary
+                        : DesignTokens.MoonColors.textSecondary
+                )
                 .multilineTextAlignment(.center)
-            
+
             // Description
             Text(achievement.description)
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(3)
-            
+
             // Unlock date
             if achievement.isUnlocked {
                 Text("Unlocked \\(formatDate(achievement.unlockedAt!))")
@@ -106,7 +110,11 @@ struct AchievementCardView: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(achievement.isUnlocked ? DesignTokens.CosmosColors.cardBackground : DesignTokens.CosmosColors.cardBackground.opacity(0.5))
+                .fill(
+                    achievement.isUnlocked
+                        ? DesignTokens.CosmosColors.cardBackground
+                        : DesignTokens.CosmosColors.cardBackground.opacity(0.5)
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(achievement.isUnlocked ? Color.pink.opacity(0.3) : Color.clear, lineWidth: 1)
@@ -115,7 +123,7 @@ struct AchievementCardView: View {
         .scaleEffect(achievement.isUnlocked ? 1.0 : 0.95)
         .animation(.easeInOut(duration: 0.2), value: achievement.isUnlocked)
     }
-    
+
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
@@ -127,7 +135,7 @@ struct AchievementCardView: View {
 
 struct AchievementsSectionView: View {
     @ObservedObject var streakManager: StreakManager
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -137,7 +145,7 @@ struct AchievementsSectionView: View {
                     .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 Spacer()
-                
+
                 Button(action: {
                     streakManager.shareStreak()
                 }) {
@@ -145,14 +153,14 @@ struct AchievementsSectionView: View {
                         .font(.caption)
                         .foregroundColor(.pink)
                 }
-                
+
                 NavigationLink(destination: AchievementsView(achievements: streakManager.achievements)) {
                     Text("View All")
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(.pink)
                 }
             }
-            
+
             // Show unlocked achievements in a horizontal scroll
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
@@ -172,7 +180,7 @@ struct AchievementsSectionView: View {
                         )
                         .frame(width: 60)
                     }
-                    
+
                     // Add achievement count if no unlocked achievements
                     if streakManager.achievements.filter({ $0.isUnlocked }).isEmpty {
                         VStack(spacing: 4) {
@@ -209,7 +217,7 @@ struct AchievementsView_Previews: PreviewProvider {
             ),
             Achievement(
                 type: .weekWarrior,
-                title: "Week Warrior", 
+                title: "Week Warrior",
                 description: "Use the timer all 7 days in a week",
                 iconName: "🗓️",
                 unlockedAt: nil
@@ -222,17 +230,17 @@ struct AchievementsView_Previews: PreviewProvider {
                 unlockedAt: nil
             )
         ]
-        
+
         Group {
             // Level View Preview
             LevelView(level: UserLevel.calculateLevel(from: 250))
                 .padding()
                 .previewDisplayName("Level View - Level 2")
-            
+
             // Achievements View Preview
             AchievementsView(achievements: sampleAchievements)
                 .previewDisplayName("Achievements View")
-            
+
             // High Level Preview
             LevelView(level: UserLevel.calculateLevel(from: 5000))
                 .padding()
