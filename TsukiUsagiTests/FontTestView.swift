@@ -282,7 +282,7 @@ struct FontTestView: View {
                     if Bundle.main.url(
                         forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""),
                         withExtension: "ttf"
-                    ) != nil
+                    ) != nil {
                         Text("✅ \(fontFile)")
                             .font(.caption)
                             .foregroundColor(.green)
