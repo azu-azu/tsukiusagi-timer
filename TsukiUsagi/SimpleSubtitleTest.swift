@@ -49,7 +49,7 @@ struct DirectDescriptionEditTest: View {
                     .font(DesignTokens.Fonts.labelBold) // Nunito太字
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
             }
-            
+
             // Font Test Navigation
             ToolbarItem(placement: .navigationBarTrailing) {
                 NavigationLink("Debug") {
@@ -57,6 +57,15 @@ struct DirectDescriptionEditTest: View {
                 }
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.accentBlue)
+            }
+        }
+        .onAppear {
+            print("📝 📦 Available Fonts:")
+            for family in UIFont.familyNames.sorted() {
+                print("📂 Family: \(family)")
+                for name in UIFont.fontNames(forFamilyName: family) {
+                    print("  🔤 Font: \(name)")
+                }
             }
         }
     }
