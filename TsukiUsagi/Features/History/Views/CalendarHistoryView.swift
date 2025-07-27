@@ -189,7 +189,7 @@ struct CalendarDayCell: View {
         VStack(spacing: 2) {
             // 日付（大きく表示）
             Text("\(calendar.component(.day, from: date))")
-                .font(.system(size: 18, weight: .medium))
+                .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(textColor)
 
             // 活動インジケーター
