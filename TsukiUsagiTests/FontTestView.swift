@@ -97,16 +97,16 @@ struct FontTestView: View {
                 .foregroundColor(.green)
 
             Text("Nunito-Regular Direct")
-                .font(.custom("Nunito-Regular", size: 17))
+                .font(DesignTokens.Fonts.label)
 
             Text("Nunito-Bold Direct")
-                .font(.custom("Nunito-Bold", size: 17))
+                .font(DesignTokens.Fonts.labelBold)
 
             Text("Nunito-Medium Direct")
-                .font(.custom("Nunito-Medium", size: 17))
+                .font(DesignTokens.Fonts.label)
 
             Text("Nunito-Italic Direct")
-                .font(.custom("Nunito-Italic", size: 17))
+                .font(DesignTokens.Fonts.label)
 
             Divider()
         }
@@ -225,7 +225,7 @@ struct FontTestView: View {
                         Spacer()
 
                         Text("Sample")
-                            .font(.custom(fontName, size: 14))
+                            .font(DesignTokens.Fonts.caption)
                     }
                 }
             }
