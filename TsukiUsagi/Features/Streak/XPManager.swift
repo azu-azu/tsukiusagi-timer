@@ -65,7 +65,7 @@ struct UserLevel {
 // MARK: - XP Manager
 
 class XPManager {
-    
+
     /// Calculate and award XP for current session
     static func calculateAndAwardXP(
         for streakData: inout StreakData,
@@ -108,7 +108,7 @@ class XPManager {
         if newLevel.level > oldLevel {
             print("🎉 Level Up! You are now Level \\(newLevel.level) - \\(newLevel.title)")
         }
-        
+
         return (xpActions, newLevel)
     }
 

@@ -68,7 +68,7 @@ class StreakManager: ObservableObject {
 
     private let userDefaults = UserDefaults.standard
     private let streakDataKey = "streak_current_data"
-    
+
     // Managers
     private let achievementManager = AchievementManager()
 
