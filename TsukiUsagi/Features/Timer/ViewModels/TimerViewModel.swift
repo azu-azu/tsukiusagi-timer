@@ -22,6 +22,9 @@ final class TimerViewModel: ObservableObject {
     private let historyService: SessionHistoryServiceable
     private let persistenceManager: TimerPersistenceManageable
     private let formatter: TimeFormatterUtilable
+    
+    // Streak tracking
+    @StateObject private var streakManager = StreakManager()
 
     // 3. @PublishedなどUIバインディング用プロパティ
     @Published var timeRemaining: Int = 25 * 60 // 初期値を25分に設定
@@ -194,6 +197,9 @@ final class TimerViewModel: ObservableObject {
                 memo: nil
             )
             historyService.add(parameters: parameters)
+            
+            // Record streak for manually finished work session
+            streakManager.recordTimerUsage()
         }
         stopTimer()
         isSessionFinished = true
@@ -233,6 +239,7 @@ final class TimerViewModel: ObservableObject {
     // 公開getter
     public var currentActivityLabel: String { activityLabel }
     public var currentSubtitleLabel: String { subtitleLabel }
+    public var currentStreakManager: StreakManager { streakManager }
 
     /// タイマー状態を永続化
     @MainActor
@@ -277,6 +284,11 @@ final class TimerViewModel: ObservableObject {
             memo: nil
         )
         historyService.add(parameters: parameters)
+        
+        // Record streak if this was a work session
+        if sessionInfo.phase == .focus {
+            streakManager.recordTimerUsage()
+        }
 
         // 永続化
         persistenceManager.saveTimerState()
