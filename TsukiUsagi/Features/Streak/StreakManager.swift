@@ -8,7 +8,7 @@ enum XPAction {
     case streakMilestone(Int)     // +5 per day
     case perfectWeek               // +100
     case comeback(gapDays: Int)   // max(20 - gapDays, 5)
-    
+
     var xpValue: Int {
         switch self {
         case .dailyUsage:
@@ -30,7 +30,7 @@ struct UserLevel {
     let currentXP: Int
     let requiredXP: Int
     let title: String
-    
+
     var progress: Double {
         Double(currentXP) / Double(requiredXP)
     }
@@ -41,7 +41,7 @@ struct UserLevel {
         let nextLevelXP = level * level * 100
         let currentXP = totalXP - currentLevelXP
         let requiredXP = nextLevelXP - currentLevelXP
-        
+
         return UserLevel(
             level: level,
             currentXP: currentXP,
@@ -49,7 +49,7 @@ struct UserLevel {
             title: levelTitle(for: level)
         )
     }
-    
+
     private static func levelTitle(for level: Int) -> String {
         switch level {
         case 1...5: return "Beginner"
@@ -69,18 +69,18 @@ struct Achievement: Codable, Identifiable {
     let description: String
     let iconName: String
     let unlockedAt: Date?
-    
+
     var isUnlocked: Bool {
         unlockedAt != nil
     }
-    
+
     enum AchievementType: String, Codable, CaseIterable {
         case firstDay = "first_day"
         case weekWarrior = "week_warrior"
         case consistency = "consistency"
         case centurion = "centurion"
         case phoenix = "phoenix"
-        
+
         var defaultAchievement: Achievement {
             switch self {
             case .firstDay:
@@ -131,8 +131,15 @@ struct Achievement: Codable, Identifiable {
             }
         }
     }
-    
-    init(id: UUID = UUID(), type: AchievementType, title: String, description: String, iconName: String, unlockedAt: Date?) {
+
+    init(
+        id: UUID = UUID(),
+        type: AchievementType,
+        title: String,
+        description: String,
+        iconName: String,
+        unlockedAt: Date?
+    ) {
         self.id = id
         self.type = type
         self.title = title
@@ -162,7 +169,7 @@ struct WeeklyTimerUsage: Codable {
         self.createdAt = Date()
         self.lastUpdated = Date()
     }
-    
+
     init(weekStartDate: Date, usedDays: Set<Int>, createdAt: Date, lastUpdated: Date) {
         self.weekStartDate = weekStartDate
         self.usedDays = usedDays
@@ -178,11 +185,11 @@ struct StreakData: Codable {
     var longestStreak: Int
     var lastUsedDate: Date?
     var totalDaysUsed: Int
-    
+
     // Achievement tracking
     var consecutiveWeeksWithFivePlusDays: Int
     var lastBreakDate: Date?
-    
+
     // XP tracking
     var totalXP: Int
     var lastStreakMilestone: Int
@@ -211,7 +218,7 @@ class StreakManager: ObservableObject {
     private let userDefaults = UserDefaults.standard
     private let streakDataKey = "streak_current_data"
     private let achievementsKey = "streak_achievements"
-    
+
     // Smart notification integration
     private let smartNotificationManager = SmartNotificationManager.shared
 
@@ -247,13 +254,13 @@ class StreakManager: ObservableObject {
 
         // Update last used date
         streakData.lastUsedDate = today
-        
+
         // Check for new achievements
         checkForNewAchievements()
-        
+
         // Calculate and award XP
         calculateAndAwardXP()
-        
+
         // Update smart notifications with new streak data
         updateSmartNotifications()
 
@@ -293,7 +300,8 @@ class StreakManager: ObservableObject {
 
             // Check if streak continues from last week
             if let lastUsedDate = streakData.lastUsedDate {
-                let daysSinceLastUse = Calendar.current.dateComponents([.day], from: lastUsedDate, to: today).day ?? 0
+                let daysSinceLastUse = Calendar.current.dateComponents([.day], from: lastUsedDate, to: today)
+                    .day ?? 0
 
                 // If more than 1 day has passed, reset the streak
                 if daysSinceLastUse > 1 {
@@ -305,7 +313,7 @@ class StreakManager: ObservableObject {
                 } else {
                     // Streak continues, reset weekly streak counter
                     streakData.currentWeeklyStreak = 0
-                    print("📅 Streak Manager: Week transition, streak continues: \(streakData.totalContinuousStreak)")
+                    print("📅 Streak Manager: Week transition, streak continues: \(streakData.totalContinuousStreak)\n")
                 }
             }
 
@@ -442,32 +450,32 @@ class StreakManager: ObservableObject {
             return StreakData(weekStartDate: today.startOfWeek)
         }
     }
-    
+
     // MARK: - XP System
-    
+
     /// Calculate and award XP for current session
     private func calculateAndAwardXP() {
         var xpActions: [XPAction] = []
         let oldLevel = currentLevel.level
-        
+
         // Daily usage XP
         xpActions.append(.dailyUsage)
-        
+
         // Check for perfect week
         if streakData.currentWeek.weeklyUsageCount == 7 {
             xpActions.append(.perfectWeek)
         }
-        
+
         // Check for streak milestones (every 10 days)
         let currentStreak = streakData.totalContinuousStreak
         let milestoneThreshold = 10
         let currentMilestone = (currentStreak / milestoneThreshold) * milestoneThreshold
-        
+
         if currentMilestone > streakData.lastStreakMilestone && currentMilestone > 0 {
             xpActions.append(.streakMilestone(currentMilestone))
             streakData.lastStreakMilestone = currentMilestone
         }
-        
+
         // Check for comeback (if this is the first day after a break)
         if currentStreak == 1, let lastBreak = streakData.lastBreakDate {
             let gapDays = Calendar.current.dateComponents([.day], from: lastBreak, to: Date()).day ?? 0
@@ -475,10 +483,10 @@ class StreakManager: ObservableObject {
                 xpActions.append(.comeback(gapDays: gapDays))
             }
         }
-        
+
         // Award XP and update level
         awardXP(for: xpActions)
-        
+
         // Check for level up
         let newLevel = UserLevel.calculateLevel(from: streakData.totalXP)
         if newLevel.level > oldLevel {
@@ -486,44 +494,44 @@ class StreakManager: ObservableObject {
         }
         currentLevel = newLevel
     }
-    
+
     /// Award XP for specific actions
     private func awardXP(for actions: [XPAction]) {
         let totalXP = actions.reduce(0) { $0 + $1.xpValue }
         streakData.totalXP += totalXP
-        
+
         if totalXP > 0 {
             print("💫 Awarded \\(totalXP) XP! Total: \\(streakData.totalXP)")
         }
-        
+
         for action in actions {
-            let description = getXPActionDescription(action)
+			_ = getXPActionDescription(action)
             print("  • \\(description): +\\(action.xpValue) XP")
         }
     }
-    
+
     private func getXPActionDescription(_ action: XPAction) -> String {
         switch action {
         case .dailyUsage:
             return "Daily timer usage"
         case .weeklyCompletion:
             return "Weekly completion"
-        case .streakMilestone(let days):
+		case .streakMilestone(_):
             return "\\(days)-day streak milestone"
         case .perfectWeek:
             return "Perfect week (7 days)"
-        case .comeback(let gapDays):
+		case .comeback(_):
             return "Comeback after \\(gapDays) day break"
         }
     }
-    
+
     // MARK: - Achievement System
-    
+
     /// Check for new achievements and unlock them
     func checkForNewAchievements() {
         let today = Date()
         var newlyUnlocked: [Achievement] = []
-        
+
         // Check each achievement type
         for achievementType in Achievement.AchievementType.allCases {
             if !isAchievementUnlocked(achievementType) && shouldUnlockAchievement(achievementType) {
@@ -536,56 +544,56 @@ class StreakManager: ObservableObject {
                     iconName: newAchievement.iconName,
                     unlockedAt: today
                 )
-                
+
                 // Find and update the achievement in the array
                 if let index = achievements.firstIndex(where: { $0.type == achievementType }) {
                     achievements[index] = newAchievement
                 } else {
                     achievements.append(newAchievement)
                 }
-                
+
                 newlyUnlocked.append(newAchievement)
                 print("🏆 Achievement Unlocked: \\(newAchievement.title)")
             }
         }
-        
+
         // Save achievements if any were unlocked
         if !newlyUnlocked.isEmpty {
             saveAchievements()
         }
     }
-    
+
     private func isAchievementUnlocked(_ type: Achievement.AchievementType) -> Bool {
         return achievements.first(where: { $0.type == type })?.isUnlocked ?? false
     }
-    
+
     private func shouldUnlockAchievement(_ type: Achievement.AchievementType) -> Bool {
         switch type {
         case .firstDay:
             return streakData.totalDaysUsed >= 1
-            
+
         case .weekWarrior:
             return streakData.currentWeek.weeklyUsageCount == 7
-            
+
         case .consistency:
             // Check if current week has 5+ days
             if streakData.currentWeek.weeklyUsageCount >= 5 {
                 return streakData.consecutiveWeeksWithFivePlusDays >= 4
             }
             return false
-            
+
         case .centurion:
             return streakData.totalContinuousStreak >= 100
-            
+
         case .phoenix:
             guard let lastBreak = streakData.lastBreakDate,
                   let lastUsed = streakData.lastUsedDate else { return false }
-            
+
             let daysBetween = Calendar.current.dateComponents([.day], from: lastBreak, to: lastUsed).day ?? 0
             return daysBetween >= 7 && streakData.totalContinuousStreak > 0
         }
     }
-    
+
     private func saveAchievements() {
         do {
             let data = try JSONEncoder().encode(achievements)
@@ -595,18 +603,18 @@ class StreakManager: ObservableObject {
             print("🏆 Failed to save achievements - \\(error)")
         }
     }
-    
+
     private static func loadAchievements() -> [Achievement] {
         let userDefaults = UserDefaults.standard
         let achievementsKey = "streak_achievements"
-        
+
         guard let data = userDefaults.data(forKey: achievementsKey) else {
             // No existing achievements, create default set
             let defaultAchievements = Achievement.AchievementType.allCases.map { $0.defaultAchievement }
             print("🏆 Created default achievement set")
             return defaultAchievements
         }
-        
+
         do {
             let achievements = try JSONDecoder().decode([Achievement].self, from: data)
             print("🏆 Loaded \\(achievements.count) achievements")
@@ -616,9 +624,9 @@ class StreakManager: ObservableObject {
             return Achievement.AchievementType.allCases.map { $0.defaultAchievement }
         }
     }
-    
+
     // MARK: - Share Functionality
-    
+
     /// Generate and present share sheet for current streak
     func shareStreak() {
         let message = ShareManager.generateShareMessage(
@@ -626,32 +634,32 @@ class StreakManager: ObservableObject {
             currentLevel: currentLevel,
             achievements: achievements
         )
-        
+
         ShareManager.presentShareSheet(message: message)
     }
-    
+
     // MARK: - Smart Notification Integration
-    
+
     /// Update smart notifications based on current streak data
     private func updateSmartNotifications() {
         smartNotificationManager.updateNotificationContent(streakData: streakData)
     }
-    
+
     /// Enable smart notifications
     func enableSmartNotifications() {
         smartNotificationManager.enableSmartNotifications()
     }
-    
+
     /// Disable smart notifications
     func disableSmartNotifications() {
         smartNotificationManager.disableSmartNotifications()
     }
-    
+
     /// Check if smart notifications are enabled
     var isSmartNotificationEnabled: Bool {
         smartNotificationManager.isSmartNotificationEnabled
     }
-    
+
     /// Get current usage pattern analysis
     func getCurrentUsagePattern() -> UsagePattern {
         return smartNotificationManager.analyzeUsagePattern(from: streakData)

@@ -77,6 +77,14 @@ struct SettingsView: View {
                     // スクロール可能なコンテンツ
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
+                            // StreakSummaryRowView() をコメントアウトまたは一時的な代替ビューに置き換え
+                            // StreakSummaryRowView()
+                            //     .padding(.bottom, betweenCardSpaceNarrow)
+
+                            // 一時的な代替ビュー（必要に応じて）
+                            streakSummaryPlaceholder()
+                                .padding(.bottom, betweenCardSpaceNarrow)
+
                             WorkTimeSectionView()
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
@@ -144,6 +152,27 @@ struct SettingsView: View {
                 isMemoFocused: $dummyMemoFocused,
                 isKeyboardVisible: $isKeyboardVisible
             ))
+        }
+    }
+
+    // 一時的なプレースホルダービュー
+    private func streakSummaryPlaceholder() -> some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            Text("Streak Summary")
+                .font(DesignTokens.Fonts.sectionTitle)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+
+            HStack {
+                Text("Coming Soon")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                Spacer()
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
+            )
         }
     }
 
