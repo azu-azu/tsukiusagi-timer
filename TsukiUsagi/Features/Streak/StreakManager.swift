@@ -166,7 +166,7 @@ class StreakManager: ObservableObject {
                 } else {
                     // Streak continues, reset weekly streak counter
                     streakData.currentWeeklyStreak = 0
-                    print("📅 Streak Manager: Week transition, streak continues: \\(streakData.totalContinuousStreak)\\n")
+                    print("📅 Streak Manager: Week transition: \\(streakData.totalContinuousStreak)\n")
                 }
             }
 
@@ -294,7 +294,7 @@ class StreakManager: ObservableObject {
 
         do {
             let streakData = try JSONDecoder().decode(StreakData.self, from: data)
-            print("📅 Streak Manager: Loaded existing streak data - Total streak: \\(streakData.totalContinuousStreak)")
+            print("📅 Streak Manager: existing streak data - Total streak: \\(streakData.totalContinuousStreak)")
             return streakData
         } catch {
             // Failed to decode, create new
