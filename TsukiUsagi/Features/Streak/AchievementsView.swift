@@ -75,7 +75,7 @@ struct AchievementCardView: View {
         VStack(spacing: 12) {
             // Icon
             Text(achievement.iconName)
-                .font(DesignTokens.Fonts.largeTitle)
+                .font(DesignTokens.Fonts.title)
                 .opacity(achievement.isUnlocked ? 1.0 : 0.3)
 
             // Title

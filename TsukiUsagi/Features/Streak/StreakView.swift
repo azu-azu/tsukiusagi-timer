@@ -61,7 +61,7 @@ struct StreakView: View {
 
             HStack {
                 Text("[\(streakManager.streakData.totalContinuousStreak)]")
-                    .font(DesignTokens.Fonts.largeTitle)
+                    .font(DesignTokens.Fonts.title)
                     .foregroundColor(.pink)
                 Spacer()
             }
