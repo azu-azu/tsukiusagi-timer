@@ -202,3 +202,4 @@ struct SystemInfoSectionView: View {
         return expectedFonts.filter { !availableFonts.contains($0) }
     }
 }
+
