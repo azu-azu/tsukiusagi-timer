@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @StateObject private var streakManager = StreakManager()
+
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var sessionManager: SessionManager
@@ -77,12 +79,8 @@ struct SettingsView: View {
                     // スクロール可能なコンテンツ
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
-                            // StreakSummaryRowView() をコメントアウトまたは一時的な代替ビューに置き換え
-                            // StreakSummaryRowView()
-                            //     .padding(.bottom, betweenCardSpaceNarrow)
 
-                            // 一時的な代替ビュー（必要に応じて）
-                            streakSummaryPlaceholder()
+                            WeeklyCalendarSectionView(streakManager: streakManager)
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
                             WorkTimeSectionView()

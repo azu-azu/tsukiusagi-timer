@@ -122,7 +122,7 @@ class XPManager {
         }
 
         for action in actions {
-            let description = getXPActionDescription(action)
+			_ = getXPActionDescription(action)
             print("  • \\(description): +\\(action.xpValue) XP")
         }
     }
