@@ -368,3 +368,4 @@ extension StreakManager {
         markTodayAsUsed()
     }
 }
+

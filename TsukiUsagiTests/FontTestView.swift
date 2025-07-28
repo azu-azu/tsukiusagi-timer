@@ -169,141 +169,19 @@ struct FontTestView: View {
     }
 
     private func systemInfoSection() -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("System Information")
-                .font(.headline)
-                .foregroundColor(.blue)
-
-            Text("iOS Version: \(UIDevice.current.systemVersion)")
-                .font(.caption)
-
-            Text("Bundle Identifier: \(Bundle.main.bundleIdentifier ?? "Unknown")")
-                .font(.caption)
-
-            if let infoPlist = Bundle.main.infoDictionary,
-               let fonts = infoPlist["UIAppFonts"] as? [String] {
-                Text("UIAppFonts in Info.plist: \(fonts.count) fonts")
-                    .font(.caption)
-                    .foregroundColor(.green)
-
-                ForEach(fonts, id: \.self) { fontFile in
-                    Text("  • \(fontFile)")
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                }
-            } else {
-                Text("❌ UIAppFonts not found in Info.plist")
-                    .font(.caption)
-                    .foregroundColor(.red)
-            }
-
-            Divider()
-        }
+        SystemInfoSectionView()
     }
 
     private func postScriptNamesSection() -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("PostScript Font Names")
-                .font(.headline)
-                .foregroundColor(.purple)
-
-            Text("These are the exact names to use in .custom() calls:")
-                .font(.caption)
-                .foregroundColor(.gray)
-
-            if nunitoFonts.isEmpty {
-                Text("❌ No Nunito fonts found in system")
-                    .font(.caption)
-                    .foregroundColor(.red)
-            } else {
-                ForEach(nunitoFonts, id: \.self) { fontName in
-                    HStack {
-                        Text("✓ \(fontName)")
-                            .font(.caption)
-                            .foregroundColor(.green)
-
-                        Spacer()
-
-                        Text("Sample")
-                            .font(DesignTokens.Fonts.caption)
-                    }
-                }
-            }
-
-            Divider()
-        }
+        PostScriptNamesSectionView(nunitoFonts: nunitoFonts)
     }
 
     private func allFontFamiliesSection() -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("All Font Families (\(allFontFamilies.count))")
-                .font(.headline)
-                .foregroundColor(.orange)
-
-            Text("Looking for Nunito family...")
-                .font(.caption)
-                .foregroundColor(.gray)
-
-            ForEach(allFontFamilies.prefix(10), id: \.self) { family in
-                if family.lowercased().contains("nunito") {
-                    Text("✅ \(family)")
-                        .font(.caption)
-                        .foregroundColor(.green)
-                        .bold()
-                } else {
-                    Text("• \(family)")
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            if allFontFamilies.count > 10 {
-                Text("... and \(allFontFamilies.count - 10) more families")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-            }
-        }
+        FontInfoSectionView(allFontFamilies: allFontFamilies)
     }
 
     private func bundleDebugSection() -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Bundle Debug")
-                .font(.headline)
-                .foregroundColor(.orange)
-
-            Text("フォントファイルの実際の存在確認:")
-                .font(.caption)
-                .foregroundColor(.gray)
-
-            let fontFiles = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
-
-            ForEach(fontFiles, id: \.self) { fontFile in
-                HStack {
-                    if Bundle.main.url(
-                        forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""),
-                        withExtension: "ttf"
-                    ) != nil {
-                        Text("✅ \(fontFile)")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    } else {
-                        Text("❌ \(fontFile)")
-                            .font(.caption)
-                            .foregroundColor(.red)
-                    }
-                    Spacer()
-                }
-            }
-
-            Button("手動フォント登録テスト") {
-                registerFontsManually()
-            }
-            .font(.caption)
-            .foregroundColor(.blue)
-            .padding(.top, 4)
-
-            Divider()
-        }
+        BundleDebugSectionView()
     }
 
     private func registerFontsManually() {
