@@ -6,7 +6,7 @@ import CoreText
 
 struct FontInfoSectionView: View {
     let allFontFamilies: [String]
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("All Font Families (\(allFontFamilies.count))")
@@ -41,7 +41,7 @@ struct FontInfoSectionView: View {
 
 struct PostScriptNamesSectionView: View {
     let nunitoFonts: [String]
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("PostScript Font Names")
@@ -117,7 +117,7 @@ struct BundleDebugSectionView: View {
             Divider()
         }
     }
-    
+
     private func registerFontsManually() {
         print("📝 手動フォント登録開始...")
 
@@ -182,11 +182,11 @@ struct SystemInfoSectionView: View {
             Divider()
         }
     }
-    
+
     private func checkAvailableFonts() -> [String] {
         guard let resourcePath = Bundle.main.resourcePath else { return [] }
         let fontPath = "\(resourcePath)/Fonts"
-        
+
         do {
             let contents = try FileManager.default.contentsOfDirectory(atPath: fontPath)
             return contents.filter { $0.hasSuffix(".ttf") || $0.hasSuffix(".otf") }
@@ -198,7 +198,7 @@ struct SystemInfoSectionView: View {
     private func checkMissingFonts() -> [String] {
         let expectedFonts = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
         let availableFonts = checkAvailableFonts()
-        
+
         return expectedFonts.filter { !availableFonts.contains($0) }
     }
 }
