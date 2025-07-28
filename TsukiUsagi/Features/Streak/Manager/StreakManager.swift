@@ -359,12 +359,3 @@ class StreakManager: ObservableObject {
         return smartNotificationManager.analyzeUsagePattern(from: streakData)
     }
 }
-
-// MARK: - Integration Helper
-
-extension StreakManager {
-    /// Call this method when a timer session completes
-    func recordTimerUsage() {
-        markTodayAsUsed()
-    }
-}

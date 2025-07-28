@@ -11,13 +11,13 @@ struct StreakView: View {
             LevelView(level: streakManager.currentLevel)
 
             // Total Streak Display
-            totalStreakSection
+            TotalStreakSectionView(streakManager: streakManager)
 
             // Weekly Usage
-            weeklyUsageSection
+            WeeklyUsageSectionView(streakManager: streakManager)
 
             // Weekly Calendar
-            weeklyCalendarSection
+            WeeklyCalendarSectionView(streakManager: streakManager)
 
             // Achievements
             AchievementsSectionView(streakManager: streakManager)
@@ -35,71 +35,6 @@ struct StreakView: View {
     }
 
     // MARK: - View Components
-
-    private var totalStreakSection: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Text("🔥")
-                    .font(.title2)
-                Text("Your streak")
-                    .font(DesignTokens.Fonts.labelBold)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                Spacer()
-
-                // Share button
-                Button(
-                    action: {
-                        streakManager.shareStreak()
-                    },
-                    label: {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.title3)
-                            .foregroundColor(.pink)
-                    }
-                )
-            }
-
-            HStack {
-                Text("[\(streakManager.streakData.totalContinuousStreak)]")
-                    .font(DesignTokens.Fonts.title)
-                    .foregroundColor(.pink)
-                Spacer()
-            }
-        }
-    }
-
-    private var weeklyUsageSection: some View {
-        HStack {
-            Text("📅")
-                .font(.title3)
-            Text("This week: \(streakManager.streakData.currentWeek.weeklyUsageCount) days")
-                .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-            Spacer()
-        }
-    }
-
-    private var weeklyCalendarSection: some View {
-        VStack(spacing: 12) {
-            // Weekday labels
-            HStack(spacing: 0) {
-                ForEach(0..<7, id: \.self) { dayIndex in
-                    Text(weekdays[dayIndex])
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-
-            // Day circles
-            HStack(spacing: 0) {
-                ForEach(0..<7, id: \.self) { dayIndex in
-                    dayCircle(for: dayIndex)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-        }
-    }
 
     private func dayCircle(for dayIndex: Int) -> some View {
         let isUsed = streakManager.streakData.currentWeek.usedDays.contains(dayIndex)
