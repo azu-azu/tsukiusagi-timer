@@ -81,10 +81,7 @@ struct SettingsView: View {
 
                             weeklyCalendarSection()
 
-                            WorkTimeSectionView()
-                                .padding(.bottom, betweenCardSpaceNarrow)
-
-                            BreakTimeSectionView()
+                            DurationSectionView()
                                 .padding(.bottom, breakBottomPadding)
 
                             sessionLabelSection()
