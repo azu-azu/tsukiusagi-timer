@@ -31,16 +31,16 @@ enum DesignTokens {
 
         /// エラー背景色（既存の拡張から）
         static let errorBackground = Color.moonErrorBackground
-        
+
         /// サーフェス色（薄いグレーの代替）
         static let surfaceSecondary = Color.white.opacity(0.1)
-        
+
         /// サーフェス色（より薄いグレーの代替）
         static let surfaceTertiary = Color.white.opacity(0.3)
-        
+
         /// シャドウ色（影効果用）
         static let shadowColor = Color.black
-        
+
         /// 成功状態色（緑の代替）
         static let statusSuccess = Color.green
     }

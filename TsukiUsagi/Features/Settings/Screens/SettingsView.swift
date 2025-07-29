@@ -80,8 +80,18 @@ struct SettingsView: View {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
 
-                            WeeklyCalendarSectionView(streakManager: streakManager)
-                                .padding(.bottom, betweenCardSpaceNarrow)
+                            VStack(spacing: 16) {
+                                Text("Your Weekly Progress")
+                                    .font(DesignTokens.Fonts.labelBold)
+                                    .foregroundColor(Color.textWhite)
+
+                                WeeklyCalendarSectionView(streakManager: streakManager)
+                            }
+                            .padding()
+                            .background(.black)
+
+                            // WeeklyCalendarSectionView(streakManager: streakManager)
+                            //     .padding(.bottom, betweenCardSpaceNarrow)
 
                             WorkTimeSectionView()
                                 .padding(.bottom, betweenCardSpaceNarrow)

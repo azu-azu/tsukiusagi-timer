@@ -117,7 +117,12 @@ struct AchievementCardView: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(achievement.isUnlocked ? DesignTokens.MoonColors.accentBlue.opacity(0.3) : Color.clear, lineWidth: 1)
+                        .stroke(
+                            achievement.isUnlocked
+                                ? DesignTokens.MoonColors.accentBlue.opacity(0.3)
+                                : Color.clear,
+                            lineWidth: 1
+                        )
                 )
         )
         .scaleEffect(achievement.isUnlocked ? 1.0 : 0.95)
