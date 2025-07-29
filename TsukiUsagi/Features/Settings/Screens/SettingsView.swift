@@ -47,6 +47,8 @@ struct SettingsView: View {
         NavigationStack {
             ZStack {
                 // 背景（画面全体、clipされない）
+                // 分割しておく理由の例）
+                // 動くグラデーション,ぼかしエフェクト,ノイズテクスチャ等を置きたいとき、コンテンツをクリップしたまま下に敷ける。
                 ZStack {
                     Color.cosmosBackground.ignoresSafeArea()
 
@@ -70,28 +72,14 @@ struct SettingsView: View {
                 // コンテンツ部分のみclipShape適用
                 VStack(spacing: 0) {
                     // ヘッダーを固定位置に配置（Safe Area対応の上余白を追加）
-                    SettingsHeaderView(onDismiss: { dismiss() })
-                        .padding(.top, headerTopPadding)
-                        .debugComponent("SettingsHeaderView", position: .topLeading)
-                        .background(Color.cosmosBackground)
+                    settingsHeaderSection()
                         .zIndex(1)
 
                     // スクロール可能なコンテンツ
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0) {
 
-                            VStack(spacing: 16) {
-                                Text("Your Weekly Progress")
-                                    .font(DesignTokens.Fonts.labelBold)
-                                    .foregroundColor(Color.textWhite)
-
-                                WeeklyCalendarSectionView(streakManager: streakManager)
-                            }
-                            .padding()
-                            .background(.black)
-
-                            // WeeklyCalendarSectionView(streakManager: streakManager)
-                            //     .padding(.bottom, betweenCardSpaceNarrow)
+                            weeklyCalendarSection()
 
                             WorkTimeSectionView()
                                 .padding(.bottom, betweenCardSpaceNarrow)
@@ -102,30 +90,30 @@ struct SettingsView: View {
                             sessionLabelSection()
                                 .padding(.bottom, betweenCardSpaceNarrow)
 
-                            NavigationCardView(
-                                title: "Manage Session Names",
-                                destination: SessionNameManagerView().environmentObject(sessionManager),
-                                isCompact: true
-                            )
-                            .padding(.bottom, betweenCardSpace)
-
                             ResetStopSectionView()
-                                .padding(.bottom, betweenCardSpace)
+                                .padding(.bottom, betweenCardSpaceNarrow)
 
                             NavigationCardView(
                                 title: "View History",
                                 destination: HistoryView().environmentObject(historyVM),
                                 isCompact: true
                             )
-                            .padding(.bottom, betweenCardSpace)
+                            .padding(.bottom, betweenCardSpaceNarrow)
+
+                            NavigationCardView(
+                                title: "Manage Session Names",
+                                destination: SessionNameManagerView().environmentObject(sessionManager),
+                                isCompact: true
+                            )
+                            .padding(.bottom, betweenCardSpaceNarrow)
 
                             #if DEBUG
                             DebugMenuView()
                                 .debugSection("DebugMenuView", position: .topLeading)
-                                .padding(.bottom, betweenCardSpace)
+                                .padding(.bottom, betweenCardSpaceNarrow)
                             #endif
                         }
-                        .padding()
+                        .padding(.horizontal)
                     }
                     .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
                     .scrollIndicators(.hidden) // スクロールインジケーターを非表示
@@ -163,27 +151,6 @@ struct SettingsView: View {
         }
     }
 
-    // 一時的なプレースホルダービュー
-    private func streakSummaryPlaceholder() -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-            Text("Streak Summary")
-                .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-            HStack {
-                Text("Coming Soon")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                Spacer()
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
-            )
-        }
-    }
-
     private func sessionLabelSection() -> some View {
         VStack(
             alignment: .leading,
@@ -211,6 +178,25 @@ struct SettingsView: View {
                     .fill(DesignTokens.CosmosColors.cardBackground)
             )
         }
+    }
+
+    private func settingsHeaderSection() -> some View {
+        SettingsHeaderView(onDismiss: { dismiss() })
+            .padding(.top, headerTopPadding)
+            .debugComponent("SettingsHeaderView", position: .topLeading)
+            .background(Color.cosmosBackground)
+    }
+
+    private func weeklyCalendarSection() -> some View {
+        VStack(spacing: 16) {
+            Text("Your Weekly Progress")
+                .font(DesignTokens.Fonts.labelBold)
+                .foregroundColor(Color.textWhite)
+
+            WeeklyCalendarSectionView(streakManager: streakManager)
+        }
+        .padding()
+        .background(.black)
     }
 }
 

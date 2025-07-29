@@ -23,8 +23,8 @@ final class TimerViewModel: ObservableObject {
     private let persistenceManager: TimerPersistenceManageable
     private let formatter: TimeFormatterUtilable
 
-    // Streak tracking
-    @StateObject private var streakManager = StreakManager()
+    // Streak tracking - @StateObjectではなく通常のプロパティに変更
+    private let streakManager: StreakManager
 
     // 3. @PublishedなどUIバインディング用プロパティ
     @Published var timeRemaining: Int = 25 * 60 // 初期値を25分に設定
@@ -62,14 +62,15 @@ final class TimerViewModel: ObservableObject {
         isWorkSession && startTime != nil
     }
 
-    // 4. DIイニシャライザ
+    // 4. DIイニシャライザ - StreakManagerもDIで受け取るように変更
     init(
         engine: TimerEngineable,
         notificationService: PhaseNotificationServiceable,
         hapticService: HapticServiceable,
         historyService: SessionHistoryServiceable,
         persistenceManager: TimerPersistenceManageable,
-        formatter: TimeFormatterUtilable
+        formatter: TimeFormatterUtilable,
+        streakManager: StreakManager = StreakManager() // デフォルト値を提供
     ) {
         // 3. Engine設定
         self.engine = engine
@@ -78,6 +79,7 @@ final class TimerViewModel: ObservableObject {
         self.formatter = formatter
         self.historyService = historyService
         self.persistenceManager = persistenceManager
+        self.streakManager = streakManager
 
         // 4. Engineのコールバック設定（notificationService初期化後）
         self.engine.onTick = { [weak self] seconds in
