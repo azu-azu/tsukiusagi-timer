@@ -7,8 +7,13 @@ struct ResetStopSectionView: View {
     private let cardCornerRadius: CGFloat = 8
 
     var body: some View {
-        section(title: "", isCompact: false) {
-            VStack(spacing: 14) {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            // セクションタイトル
+            Text("SESSION CONTROL")
+                .font(DesignTokens.Fonts.sectionTitle)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            
+            VStack(alignment: .leading, spacing: 14) {
                 // 🛑 Reset
                 if timerVM.canForceFinish {
                     Button {
@@ -40,6 +45,9 @@ struct ResetStopSectionView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
+                // 区切り線
+                Divider()
+
                 // 🛑 Stop
                 if timerVM.canForceFinish {
                     Button {
@@ -65,42 +73,16 @@ struct ResetStopSectionView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
+            .padding(.all)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
+            )
         }
         .debugSection(String(describing: Self.self), position: .topLeading)
     }
 
-    @ViewBuilder
-    private func section<Content: View>(
-        title: String,
-        isCompact: Bool = false,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(
-            alignment: .leading,
-            spacing: isCompact
-                ? DesignTokens.Spacing.extraSmall
-                : DesignTokens.Spacing.small
-        ) {
-            if !title.isEmpty {
-                Text(title)
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-            }
-
-            VStack(alignment: .leading, spacing: 10) {
-                content()
-            }
-            .padding(isCompact
-                ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
-                : EdgeInsets())
-            .padding(isCompact ? .init() : .all)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
-            )
-        }
-    }
 }
 
 #if DEBUG

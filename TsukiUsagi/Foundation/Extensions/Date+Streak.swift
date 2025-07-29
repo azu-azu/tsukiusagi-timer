@@ -3,20 +3,24 @@ import Foundation
 extension Date {
     /// Returns the start of the week (Sunday) for this date
     var startOfWeek: Date {
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .current
         let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self)
         return calendar.date(from: components) ?? self
     }
 
     /// Returns the day of week as integer (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
     var dayOfWeek: Int {
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .current
         return calendar.component(.weekday, from: self) - 1
     }
 
     /// Checks if this date is the same day as another date
     func isSameDay(as other: Date) -> Bool {
-        Calendar.current.isDate(self, inSameDayAs: other)
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .current
+        return calendar.isDate(self, inSameDayAs: other)
     }
 
     /// Checks if this date is the consecutive day after another date
@@ -29,9 +33,22 @@ extension Date {
 
     /// Returns the date for a specific day of the week within the same week
     func dateForDayOfWeek(_ dayOfWeek: Int) -> Date {
-        let calendar = Calendar.current
-        let startOfWeek = self.startOfWeek
-        return calendar.date(byAdding: .day, value: dayOfWeek, to: startOfWeek) ?? self
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .current
+        
+        let today = calendar.startOfDay(for: self)
+        let currentWeekday = calendar.component(.weekday, from: today) - 1
+        var offset = dayOfWeek - currentWeekday
+        if offset < 0 { offset += 7 }
+        
+        let result = calendar.date(byAdding: .day, value: offset, to: today) ?? self
+        
+        // デバッグ用ログ（必要に応じて削除）
+        #if DEBUG
+        print("[DEBUG] Target Date for index \(dayOfWeek): \(result) | Now: \(Date())")
+        #endif
+        
+        return result
     }
 
     /// Returns a short day name (Su, Mo, Tu, etc.)
