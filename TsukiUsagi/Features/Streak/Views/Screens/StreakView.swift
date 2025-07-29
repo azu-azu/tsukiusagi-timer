@@ -10,7 +10,10 @@ struct StreakView: View {
             // Level Display
             LevelView(level: streakManager.currentLevel)
 
-            // Total Streak Display
+            // Weekly Usage
+            WeeklyUsageSectionView(streakManager: streakManager)
+
+            // Weekly Calendar
             VStack(spacing: 16) {
                 Text("Your Weekly Progress")
                     .font(DesignTokens.Fonts.labelBold)
@@ -20,13 +23,9 @@ struct StreakView: View {
             }
             .padding()
             .background(Color.black)
-            // TotalStreakSectionView(streakManager: streakManager)
 
-            // Weekly Usage
-            WeeklyUsageSectionView(streakManager: streakManager)
-
-            // Weekly Calendar
-            WeeklyCalendarSectionView(streakManager: streakManager)
+            // Total Streak Display
+            TotalStreakSectionView(streakManager: streakManager)
 
             // Achievements
             AchievementsSectionView(streakManager: streakManager)

@@ -9,22 +9,36 @@ struct ResetStopSectionView: View {
     var body: some View {
         section(title: "", isCompact: false) {
             VStack(spacing: 14) {
-                Button {
-                    timerVM.resetTimer()
-                    dismiss()
-                } label: {
+                // 🛑 Reset
+                if timerVM.canForceFinish {
+                    Button {
+                        timerVM.resetTimer()
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.uturn.backward")
+                            Text(timerVM.isWorkSession
+                                ? "Reset Timer (No Save)"
+                                : "Reset Timer (already saved)"
+                            )
+                            .font(DesignTokens.Fonts.label)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .tint(DesignTokens.MoonColors.errorBackground)
+                } else {
                     HStack(spacing: 8) {
-                        // 🛑 Reset
                         Image(systemName: "arrow.uturn.backward")
+                            .foregroundColor(DesignTokens.MoonColors.textMuted)
                         Text(timerVM.isWorkSession
                             ? "Reset Timer (No Save)"
                             : "Reset Timer (already saved)"
                         )
                         .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .tint(DesignTokens.MoonColors.errorBackground)
 
                 // 🛑 Stop
                 if timerVM.canForceFinish {
