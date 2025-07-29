@@ -3,6 +3,7 @@ import SwiftUI
 struct DayCircleView: View {
     let dayIndex: Int
     let isUsed: Bool
+    let weekdayText: String
 
     private var isToday: Bool {
         Date().dayOfWeek == dayIndex
@@ -17,24 +18,25 @@ struct DayCircleView: View {
             .fill(circleColor)
             .frame(width: 32, height: 32)
             .overlay(
-                Group {
-                    if isUsed {
-                        Text("✓")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    } else if isToday && !isFutureDay {
-                        Circle()
-                            .stroke(DesignTokens.MoonColors.accentBlue, lineWidth: 2)
-                    }
-                }
+                Text(weekdayText)
+                    .font(DesignTokens.Fonts.caption)
+                    .foregroundColor(isUsed ? .white : DesignTokens.MoonColors.textSecondary)
             )
+            .overlay(alignment: .bottom) {
+                if isToday && !isUsed && !isFutureDay {
+                    Circle()
+                        .fill(Color(hex: "0A84FF"))
+                        .frame(width: 6, height: 6)
+                        .offset(y: 9)
+                }
+            }
             .scaleEffect(isToday ? 1.1 : 1.0)
             .animation(.easeInOut(duration: 0.2), value: isToday)
     }
 
     private var circleColor: Color {
         if isUsed {
-            return DesignTokens.MoonColors.accentBlue
+            return Color(hex: "0A84FF")
         } else if isFutureDay {
             return DesignTokens.MoonColors.surfaceSecondary
         } else {

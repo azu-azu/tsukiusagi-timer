@@ -190,7 +190,7 @@ struct SettingsView: View {
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(Color.textWhite)
 
-            WeeklyCalendarSectionView(streakManager: streakManager)
+            WeeklyCalendarSectionView(streakManager: streakManager, weekdays: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"])
         }
         .padding()
         .background(.black)

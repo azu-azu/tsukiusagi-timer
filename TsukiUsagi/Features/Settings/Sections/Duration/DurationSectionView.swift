@@ -3,24 +3,24 @@ import SwiftUI
 struct DurationSectionView: View {
     @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
-    
+
     // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
     private let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
             // セクションタイトル
             Text("DURATION")
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
-            
+
             VStack(alignment: .leading, spacing: 10) {
                 // Work Duration
                 workDurationRow()
-                
+
                 // 区切り線
                 Divider()
-                
+
                 // Break Duration
                 breakDurationRow()
             }
@@ -32,12 +32,12 @@ struct DurationSectionView: View {
             )
         }
     }
-    
+
     @ViewBuilder
     private func workDurationRow() -> some View {
         HStack(spacing: 0) {
             // 左ブロック
-            Text("Work Duration")
+            Text("Work")
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .frame(minWidth: 100, alignment: .leading)
@@ -49,6 +49,7 @@ struct DurationSectionView: View {
                 Text(String(format: "%d", workMinutes))
                     .font(DesignTokens.Fonts.numericLabel)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .frame(width: 24, alignment: .trailing)
 
                 Text("min")
                     .font(DesignTokens.Fonts.numericLabel)
@@ -89,12 +90,12 @@ struct DurationSectionView: View {
             .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
-    
+
     @ViewBuilder
     private func breakDurationRow() -> some View {
         HStack(spacing: 0) {
             // 左ブロック
-            Text("Break Duration")
+            Text("Break")
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .frame(minWidth: 100, alignment: .leading)
@@ -106,6 +107,7 @@ struct DurationSectionView: View {
                 Text(String(format: "%d", breakMinutes))
                     .font(DesignTokens.Fonts.numericLabel)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .frame(width: 24, alignment: .trailing) //固定幅で右寄せ
 
                 Text("min")
                     .font(DesignTokens.Fonts.numericLabel)

@@ -43,11 +43,8 @@ struct SessionLabelSection: View {
 struct SettingsView: View {
     var body: some View {
         VStack {
-            WorkTimeSectionView()
-                .debugSection("WorkTimeSectionView", position: .topLeading)
-
-            BreakTimeSectionView()
-                .debugSection("BreakTimeSectionView", position: .topLeading)
+            DurationSectionView()
+                .debugSection("DurationSectionView", position: .topLeading)
         }
         .debugScreen("SettingsView")
     }
