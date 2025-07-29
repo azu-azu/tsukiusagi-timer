@@ -28,5 +28,19 @@ struct WeeklyCalendarSectionView: View {
                 }
             }
         }
+        .padding()
+
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(DesignTokens.CosmosColors.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.pink.opacity(0.2), lineWidth: 1)
+                )
+        )
+
+        // .background(DesignTokens.CosmosColors.cardBackground) // カード風背景
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.1), radius: 8, y: 4) // やわらか影
     }
 }

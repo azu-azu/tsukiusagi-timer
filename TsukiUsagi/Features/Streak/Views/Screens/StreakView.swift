@@ -11,7 +11,16 @@ struct StreakView: View {
             LevelView(level: streakManager.currentLevel)
 
             // Total Streak Display
-            TotalStreakSectionView(streakManager: streakManager)
+            VStack(spacing: 16) {
+                Text("Your Weekly Progress")
+                    .font(DesignTokens.Fonts.labelBold)
+                    .foregroundColor(.white)
+
+                WeeklyCalendarSectionView(streakManager: streakManager)
+            }
+            .padding()
+            .background(Color.black)
+            // TotalStreakSectionView(streakManager: streakManager)
 
             // Weekly Usage
             WeeklyUsageSectionView(streakManager: streakManager)
@@ -26,9 +35,9 @@ struct StreakView: View {
             SmartNotificationToggleView(streakManager: streakManager)
         }
         .padding()
-        .background(Color(UIColor.systemBackground))
+        .background(DesignTokens.CosmosColors.background)
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+        .shadow(color: DesignTokens.MoonColors.shadowColor.opacity(0.1), radius: 8, y: 4)
         .onAppear {
             streakManager.checkWeekTransition()
         }
@@ -50,10 +59,10 @@ struct StreakView: View {
                     if isUsed {
                         Text("✓")
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     } else if isToday && !isFutureDay {
                         Circle()
-                            .stroke(Color.pink, lineWidth: 2)
+                            .stroke(DesignTokens.MoonColors.accentBlue, lineWidth: 2)
                     }
                 }
             )
@@ -63,11 +72,11 @@ struct StreakView: View {
 
     private func circleColor(isUsed: Bool, isToday: Bool, isFutureDay: Bool) -> Color {
         if isUsed {
-            return .pink
+            return DesignTokens.MoonColors.accentBlue
         } else if isFutureDay {
-            return Color.gray.opacity(0.1)
+            return DesignTokens.MoonColors.surfaceSecondary
         } else {
-            return Color.gray.opacity(0.3)
+            return DesignTokens.MoonColors.surfaceTertiary
         }
     }
 }
@@ -82,7 +91,7 @@ struct StreakCardView: View {
             HStack {
                 Text("🔥 \(streakManager.streakData.totalContinuousStreak)")
                     .font(DesignTokens.Fonts.title)
-                    .foregroundColor(.pink)
+                    .foregroundColor(DesignTokens.MoonColors.accentBlue)
 
                 Spacer()
 
@@ -102,7 +111,7 @@ struct StreakCardView: View {
         .padding()
         .background(DesignTokens.CosmosColors.cardBackground)
         .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
+        .shadow(color: DesignTokens.MoonColors.shadowColor.opacity(0.05), radius: 4, y: 2)
         .onAppear {
             streakManager.checkWeekTransition()
         }

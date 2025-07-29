@@ -7,7 +7,7 @@ struct LevelView: View {
         VStack(spacing: 8) {
             HStack {
                 Text("⭐")
-                    .font(.title2)
+                    .font(DesignTokens.Fonts.title)
                 Text("Level \\(level.level) - \\(level.title)")
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
@@ -22,12 +22,12 @@ struct LevelView: View {
                     Spacer()
                     Text("\\(Int(level.progress * 100))%")
                         .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(.pink)
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
 
                 ProgressView(value: level.progress)
                     .progressViewStyle(.linear)
-                    .tint(.pink)
+                    .tint(DesignTokens.MoonColors.accentBlue)
                     .scaleEffect(y: 1.5)
             }
         }
@@ -37,7 +37,7 @@ struct LevelView: View {
                 .fill(DesignTokens.CosmosColors.cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.pink.opacity(0.2), lineWidth: 1)
+                        .stroke(DesignTokens.MoonColors.accentBlue.opacity(0.2), lineWidth: 1)
                 )
         )
     }
@@ -99,7 +99,7 @@ struct AchievementCardView: View {
             if achievement.isUnlocked {
                 Text("Unlocked \\(formatDate(achievement.unlockedAt!))")
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(.pink)
+                    .foregroundColor(DesignTokens.MoonColors.accentBlue)
             } else {
                 Text("Locked")
                     .font(DesignTokens.Fonts.caption)
@@ -117,7 +117,7 @@ struct AchievementCardView: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(achievement.isUnlocked ? Color.pink.opacity(0.3) : Color.clear, lineWidth: 1)
+                        .stroke(achievement.isUnlocked ? DesignTokens.MoonColors.accentBlue.opacity(0.3) : Color.clear, lineWidth: 1)
                 )
         )
         .scaleEffect(achievement.isUnlocked ? 1.0 : 0.95)
@@ -140,7 +140,7 @@ struct AchievementsSectionView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("🏆")
-                    .font(.title3)
+                    .font(DesignTokens.Fonts.sectionTitle)
                 Text("Achievements")
                     .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
@@ -153,14 +153,14 @@ struct AchievementsSectionView: View {
                     label: {
                         Image(systemName: "square.and.arrow.up")
                             .font(.caption)
-                            .foregroundColor(.pink)
+                            .foregroundColor(DesignTokens.MoonColors.accentBlue)
                     }
                 )
 
                 NavigationLink(destination: AchievementsView(achievements: streakManager.achievements)) {
                     Text("View All")
                         .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(.pink)
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
             }
 

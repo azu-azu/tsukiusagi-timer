@@ -7,7 +7,7 @@ struct TotalStreakSectionView: View {
         VStack(spacing: 8) {
             HStack {
                 Text("🔥")
-                    .font(.title2)
+                    .font(DesignTokens.Fonts.title)
                 Text("Your streak")
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
@@ -19,8 +19,8 @@ struct TotalStreakSectionView: View {
                     },
                     label: {
                         Image(systemName: "square.and.arrow.up")
-                            .font(.title3)
-                            .foregroundColor(.pink)
+                            .font(DesignTokens.Fonts.sectionTitle)
+                            .foregroundColor(DesignTokens.MoonColors.accentBlue)
                     }
                 )
             }
@@ -28,7 +28,7 @@ struct TotalStreakSectionView: View {
             HStack {
                 Text("[\(streakManager.streakData.totalContinuousStreak)]")
                     .font(DesignTokens.Fonts.title)
-                    .foregroundColor(.pink)
+                    .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 Spacer()
             }
         }
