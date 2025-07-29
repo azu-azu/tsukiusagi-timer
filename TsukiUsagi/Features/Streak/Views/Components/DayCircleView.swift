@@ -21,10 +21,10 @@ struct DayCircleView: View {
                     if isUsed {
                         Text("✓")
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     } else if isToday && !isFutureDay {
                         Circle()
-                            .stroke(Color.pink, lineWidth: 2)
+                            .stroke(DesignTokens.MoonColors.accentBlue, lineWidth: 2)
                     }
                 }
             )
@@ -34,11 +34,11 @@ struct DayCircleView: View {
 
     private var circleColor: Color {
         if isUsed {
-            return .pink
+            return DesignTokens.MoonColors.accentBlue
         } else if isFutureDay {
-            return Color.gray.opacity(0.1)
+            return DesignTokens.MoonColors.surfaceSecondary
         } else {
-            return Color.gray.opacity(0.3)
+            return DesignTokens.MoonColors.surfaceTertiary
         }
     }
 }

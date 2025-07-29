@@ -10,7 +10,7 @@ struct SmartNotificationToggleView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("🤖")
-                    .font(.title3)
+                    .font(DesignTokens.Fonts.sectionTitle)
                 Text("Smart Reminders")
                     .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
@@ -28,7 +28,7 @@ struct SmartNotificationToggleView: View {
                         }
                     }
                 ))
-                .tint(.pink)
+                .tint(DesignTokens.MoonColors.accentBlue)
             }
 
             // Status and description
@@ -36,7 +36,7 @@ struct SmartNotificationToggleView: View {
                 if streakManager.isSmartNotificationEnabled {
                     Text("✅ AI-powered reminders active")
                         .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(.green)
+                        .foregroundColor(DesignTokens.MoonColors.statusSuccess)
 
                     Text("We'll remind you at your optimal focus time based on your usage patterns.")
                         .font(DesignTokens.Fonts.caption)
@@ -63,7 +63,7 @@ struct SmartNotificationToggleView: View {
                 .fill(DesignTokens.CosmosColors.cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                        .stroke(DesignTokens.MoonColors.accentBlue.opacity(0.2), lineWidth: 1)
                 )
         )
         .onAppear {
@@ -119,7 +119,7 @@ struct UsagePatternInsightsView: View {
                 HStack {
                     Text("📊 Your Pattern:")
                         .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(.blue)
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                     Spacer()
                 }
 
