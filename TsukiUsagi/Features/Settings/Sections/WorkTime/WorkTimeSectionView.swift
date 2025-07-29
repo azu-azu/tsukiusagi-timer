@@ -11,32 +11,58 @@ struct WorkTimeSectionView: View {
 
     var body: some View {
         section(title: "", isCompact: true) {
-            HStack {
-                Text("WORK")
+            HStack(spacing: 0) {
+                // 左ブロック
+                Text("Work Duration")
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    .frame(width: timeTitleWidth, alignment: .leading)
+                    .frame(minWidth: 100, alignment: .leading)
+                    .lineLimit(1)
+                    .layoutPriority(1)
 
-                Text(String(format: "%2d min", workMinutes))
-                    .font(DesignTokens.Fonts.numericLabel)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                // 中央ブロック
+                HStack(spacing: 4) {
+                    Text(String(format: "%d", workMinutes))
+                        .font(DesignTokens.Fonts.numericLabel)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                Spacer()
+                    Text("min")
+                        .font(DesignTokens.Fonts.numericLabel)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
 
-                plusMinusButtons(
-                    onMinus: {
+                // 右ブロック
+                HStack(spacing: 12) {
+                    Button {
                         let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
                         if currentIndex > 0 {
                             workMinutes = workMinutesOptions[currentIndex - 1]
                         }
-                    },
-                    onPlus: {
+                    } label: {
+                        Image(systemName: "minus")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    }
+                    .frame(width: 28, height: 28)
+                    .background(DesignTokens.CosmosColors.cardBackground)
+                    .clipShape(Circle())
+
+                    Button {
                         let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
                         if currentIndex < workMinutesOptions.count - 1 {
                             workMinutes = workMinutesOptions[currentIndex + 1]
                         }
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     }
-                )
+                    .frame(width: 28, height: 28)
+                    .background(DesignTokens.CosmosColors.cardBackground)
+                    .clipShape(Circle())
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .debugSection(String(describing: Self.self), position: .topLeading)
