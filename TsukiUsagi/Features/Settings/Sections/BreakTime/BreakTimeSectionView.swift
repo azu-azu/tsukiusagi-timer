@@ -9,22 +9,52 @@ struct BreakTimeSectionView: View {
 
     var body: some View {
         section(title: "", isCompact: true) {
-            HStack {
-                Text("BREAK")
+            HStack(spacing: 0) {
+                // 左ブロック
+                Text("Break Duration")
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    .frame(width: timeTitleWidth, alignment: .leading)
+                    .frame(minWidth: 100, alignment: .leading)
+                    .lineLimit(1)
+                    .layoutPriority(1)
 
-                Text(String(format: "%2d min", breakMinutes))
-                    .font(DesignTokens.Fonts.numericLabel)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                // 中央ブロック
+                HStack(spacing: 4) {
+                    Text(String(format: "%d", breakMinutes))
+                        .font(DesignTokens.Fonts.numericLabel)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                Spacer()
+                    Text("min")
+                        .font(DesignTokens.Fonts.numericLabel)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
 
-                plusMinusButtons(
-                    onMinus: { if breakMinutes > 1 { breakMinutes -= 1 } },
-                    onPlus: { if breakMinutes < 30 { breakMinutes += 1 } }
-                )
+                // 右ブロック
+                HStack(spacing: 12) {
+                    Button {
+                        if breakMinutes > 1 { breakMinutes -= 1 }
+                    } label: {
+                        Image(systemName: "minus")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    }
+                    .frame(width: 28, height: 28)
+                    .background(DesignTokens.CosmosColors.cardBackground)
+                    .clipShape(Circle())
+
+                    Button {
+                        if breakMinutes < 30 { breakMinutes += 1 }
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    }
+                    .frame(width: 28, height: 28)
+                    .background(DesignTokens.CosmosColors.cardBackground)
+                    .clipShape(Circle())
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .debugSection(String(describing: Self.self), position: .topLeading)
