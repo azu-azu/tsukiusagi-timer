@@ -19,7 +19,7 @@ struct StreakView: View {
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(.white)
 
-                WeeklyCalendarSectionView(streakManager: streakManager)
+                WeeklyCalendarSectionView(streakManager: streakManager, weekdays: weekdays)
             }
             .padding()
             .background(Color.black)
