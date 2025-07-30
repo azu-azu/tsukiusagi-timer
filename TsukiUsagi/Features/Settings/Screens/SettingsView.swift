@@ -212,7 +212,7 @@ struct SettingsView: View {
         let label: String
         let destination: Destination
     }
-    
+
     @ViewBuilder
     private func sectionWithAction<Content: View, Destination: View>(
         _ title: String,
