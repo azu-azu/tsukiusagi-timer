@@ -86,10 +86,12 @@ struct SettingsView: View {
                             }
 
                             sectionWithAction(
-                                "SESSION LABEL", 
-                                actionIcon: "pencil",
-                                actionLabel: "Manage Session Names",
-                                actionDestination: SessionNameManagerView().environmentObject(sessionManager),
+                                "SESSION LABEL",
+                                action: SectionAction(
+                                    icon: "pencil",
+                                    label: "Manage Session Names",
+                                    destination: SessionNameManagerView().environmentObject(sessionManager)
+                                ),
                                 bottomPadding: betweenCardSpaceNarrow
                             ) {
                                 sessionLabelContent()
@@ -204,13 +206,17 @@ struct SettingsView: View {
         }
         .padding(.bottom, bottomPadding)
     }
+
+    struct SectionAction<Destination: View> {
+        let icon: String
+        let label: String
+        let destination: Destination
+    }
     
     @ViewBuilder
     private func sectionWithAction<Content: View, Destination: View>(
         _ title: String,
-        actionIcon: String,
-        actionLabel: String,
-        actionDestination: Destination,
+        action: SectionAction<Destination>,
         bottomPadding: CGFloat,
         @ViewBuilder content: () -> Content
     ) -> some View {
@@ -219,15 +225,15 @@ struct SettingsView: View {
                 Text(title)
                     .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                
+
                 Spacer()
-                
-                NavigationLink(destination: actionDestination) {
-                    Image(systemName: actionIcon)
-                        .font(.system(size: 16, weight: .medium))
+
+                NavigationLink(destination: action.destination) {
+                    Image(systemName: action.icon)
+                        .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 }
-                .accessibilityLabel(actionLabel)
+                .accessibilityLabel(action.label)
             }
             content()
         }

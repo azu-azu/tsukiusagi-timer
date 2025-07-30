@@ -97,7 +97,7 @@ struct DurationRowView: View {
             HStack(alignment: .center, spacing: 12) {
                 Button(action: decrementAction) {
                     Image(systemName: "minus")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 }
                 .frame(width: plusMinusButtonSize, height: plusMinusButtonSize)
@@ -106,7 +106,7 @@ struct DurationRowView: View {
 
                 Button(action: incrementAction) {
                     Image(systemName: "plus")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 }
                 .frame(width: plusMinusButtonSize, height: plusMinusButtonSize)
