@@ -81,28 +81,33 @@ struct SettingsView: View {
 
                             weeklyCalendarSection()
 
-                            DurationSectionView()
-                                .padding(.bottom, breakBottomPadding)
+                            section("DURATION", bottomPadding: breakBottomPadding) {
+                                DurationSectionView()
+                            }
 
-                            sessionLabelSection()
-                                .padding(.bottom, betweenCardSpaceNarrow)
+                            section("SESSION LABEL", bottomPadding: betweenCardSpaceNarrow) {
+                                sessionLabelContent()
+                            }
 
-                            ResetStopSectionView()
-                                .padding(.bottom, betweenCardSpaceNarrow)
+                            section("", bottomPadding: betweenCardSpace) {
+                                navCard(
+                                    "Manage Session Names",
+                                    destination: SessionNameManagerView().environmentObject(sessionManager),
+                                    padding: 0
+                                )
+                            }
 
-                            NavigationCardView(
-                                title: "View History",
-                                destination: HistoryView().environmentObject(historyVM),
-                                isCompact: true
-                            )
-                            .padding(.bottom, betweenCardSpaceNarrow)
+                            section("HISTORY", bottomPadding: betweenCardSpace) {
+                                navCard(
+                                    "View History",
+                                    destination: HistoryView().environmentObject(historyVM),
+                                    padding: 0
+                                )
+                            }
 
-                            NavigationCardView(
-                                title: "Manage Session Names",
-                                destination: SessionNameManagerView().environmentObject(sessionManager),
-                                isCompact: true
-                            )
-                            .padding(.bottom, betweenCardSpaceNarrow)
+                            section("SESSION CONTROL", bottomPadding: betweenCardSpace) {
+                                ResetStopSectionView()
+                            }
 
                             #if DEBUG
                             DebugMenuView()
@@ -148,33 +153,24 @@ struct SettingsView: View {
         }
     }
 
-    private func sessionLabelSection() -> some View {
-        VStack(
-            alignment: .leading,
-            spacing: DesignTokens.Spacing.small
-        ) {
-            Text("Session Label")
-                .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-            VStack(alignment: .leading, spacing: 10) {
-                SessionLabelSection(
-                    activity: $activityLabel,
-                    descriptionText: $subtitleLabel,
-                    isActivityFocused: $isActivityFocused,
-                    isDescriptionFocused: $isSubtitleFocused,
-                    labelCornerRadius: labelCornerRadius,
-                    showEmptyError: .constant(currentShowEmptyError),
-                    onDone: nil
-                )
-            }
-            .padding(.all)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
+    private func sessionLabelContent() -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SessionLabelSection(
+                activity: $activityLabel,
+                descriptionText: $subtitleLabel,
+                isActivityFocused: $isActivityFocused,
+                isDescriptionFocused: $isSubtitleFocused,
+                labelCornerRadius: labelCornerRadius,
+                showEmptyError: .constant(currentShowEmptyError),
+                onDone: nil
             )
         }
+        .padding(.all)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(DesignTokens.CosmosColors.cardBackground)
+        )
     }
 
     private func settingsHeaderSection() -> some View {
@@ -190,13 +186,39 @@ struct SettingsView: View {
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(Color.textWhite)
 
-            WeeklyCalendarSectionView(
-                streakManager: streakManager,
-                weekdays: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-            )
+            WeeklyCalendarSectionView(streakManager: streakManager)
         }
         .padding()
         .background(.black)
+    }
+
+    @ViewBuilder
+    private func section<Content: View>(
+        _ title: String,
+        bottomPadding: CGFloat,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            Text(title)
+                .font(DesignTokens.Fonts.sectionTitle)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            content()
+        }
+        .padding(.bottom, bottomPadding)
+    }
+
+    @ViewBuilder
+    private func navCard<Destination: View>(
+        _ title: String,
+        destination: Destination,
+        padding: CGFloat
+    ) -> some View {
+        NavigationCardView(
+            title: title,
+            destination: destination,
+            isCompact: true
+        )
+        .padding(.bottom, padding)
     }
 }
 
@@ -272,3 +294,74 @@ struct KeyboardHeightModifier: ViewModifier {
             .padding(.bottom, keyboardHeight)
     }
 }
+
+#if DEBUG
+// MARK: - Preview Dummy Services
+class PreviewDummyEngine: TimerEngineable {
+    var timeRemaining: Int = 1500
+    var isRunning: Bool = false
+    var onTick: ((Int) -> Void)?
+    var onSessionCompleted: ((TimerSessionInfo) -> Void)?
+    func start(seconds: Int) {}
+    func pause() {}
+    func resume() {}
+    func stop() {}
+    func reset(to seconds: Int) {}
+}
+
+class PreviewDummyNotification: PhaseNotificationServiceable {
+    func sendStartNotification() {}
+    func cancelNotification() {}
+    func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
+    func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
+    func cancelSessionEndNotification() {}
+    func finalizeWorkPhase() {}
+    func finalizeBreakPhase() {}
+}
+
+class PreviewDummyHaptic: HapticServiceable {
+    func heavyImpact() {}
+    func lightImpact() {}
+}
+
+class PreviewDummyHistory: SessionHistoryServiceable {
+    func add(parameters: AddSessionParameters) {}
+}
+
+class PreviewDummyPersistence: TimerPersistenceManageable {
+    var timeRemaining: Int = 1500
+    var isRunning: Bool = false
+    var isWorkSession: Bool = true
+    func saveTimerState() {}
+    func restoreTimerState() {}
+}
+
+class PreviewDummyFormatter: TimeFormatterUtilable {
+    func format(seconds: Int) -> String { "25:00" }
+    func format(date: Date?) -> String { "2024-01-01" }
+}
+
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        let timerVM = TimerViewModel(
+            engine: PreviewDummyEngine(),
+            notificationService: PreviewDummyNotification(),
+            hapticService: PreviewDummyHaptic(),
+            historyService: PreviewDummyHistory(),
+            persistenceManager: PreviewDummyPersistence(),
+            formatter: PreviewDummyFormatter()
+        )
+
+        let historyVM = HistoryViewModel()
+        let sessionManager = SessionManager()
+
+        SettingsView(
+            size: CGSize(width: 390, height: 844),
+            safeAreaInsets: EdgeInsets(top: 47, leading: 0, bottom: 34, trailing: 0)
+        )
+        .environmentObject(timerVM)
+        .environmentObject(historyVM)
+        .environmentObject(sessionManager)
+    }
+}
+#endif

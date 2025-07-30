@@ -3,7 +3,6 @@ import SwiftUI
 struct StreakView: View {
     @StateObject private var streakManager = StreakManager()
 
-    private let weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
     var body: some View {
         VStack(spacing: 16) {
@@ -19,7 +18,7 @@ struct StreakView: View {
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(.white)
 
-                WeeklyCalendarSectionView(streakManager: streakManager, weekdays: weekdays)
+                WeeklyCalendarSectionView(streakManager: streakManager)
             }
             .padding()
             .background(Color.black)
