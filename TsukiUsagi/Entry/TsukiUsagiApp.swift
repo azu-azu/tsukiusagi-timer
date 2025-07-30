@@ -59,6 +59,9 @@ struct TsukiUsagiApp: App {
                 : "Notification authorization denied.")
         }
 
+        // NavigationBar外観設定
+        configureNavigationBarAppearance()
+        
         // カスタムフォントの登録
         registerCustomFonts()
     }
@@ -98,5 +101,27 @@ struct TsukiUsagiApp: App {
         }
 
         print("🔤 カスタムフォント登録完了")
+    }
+    
+    private func configureNavigationBarAppearance() {
+        print("🎨 NavigationBar外観設定開始...")
+        
+        // NavigationBarの外観設定
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        
+        // 背景色とタイトル色をDesignTokensに従って設定
+        appearance.backgroundColor = UIColor(DesignTokens.CosmosColors.background)
+        appearance.titleTextAttributes = [
+            .foregroundColor: DesignTokens.UIColors.textWhite,
+            .font: DesignTokens.UIKitFonts.navigationTitle
+        ]
+        
+        // すべてのNavigationBarに適用
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        UINavigationBar.appearance().compactAppearance = appearance
+        
+        print("✅ NavigationBar外観設定完了")
     }
 }

@@ -326,9 +326,11 @@ extension DesignTokens {
     enum UIColors {
         static var textWhite: UIColor {
             #if canImport(UIKit)
-                return UIColor.white
+            // Assetを読むけど、"固定カラー"として設定したやつだけ使う
+            // （Appearance: Anyに設定した色）
+            return UIColor(named: "moonTextPrimary") ?? UIColor.white
             #else
-                fatalError("UIColor is only available on UIKit platforms.")
+            fatalError("UIColor is only available on UIKit platforms.")
             #endif
         }
     }
