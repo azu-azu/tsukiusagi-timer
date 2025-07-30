@@ -2,7 +2,8 @@ import SwiftUI
 
 struct WeeklyCalendarSectionView: View {
     @ObservedObject var streakManager: StreakManager
-    let weekdays: [String]
+    
+    private let weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
     var body: some View {
         VStack(spacing: 12) {
