@@ -85,16 +85,14 @@ struct SettingsView: View {
                                 DurationSectionView()
                             }
 
-                            section("SESSION LABEL", bottomPadding: betweenCardSpaceNarrow) {
+                            sectionWithAction(
+                                "SESSION LABEL", 
+                                actionIcon: "pencil",
+                                actionLabel: "Manage Session Names",
+                                actionDestination: SessionNameManagerView().environmentObject(sessionManager),
+                                bottomPadding: betweenCardSpaceNarrow
+                            ) {
                                 sessionLabelContent()
-                            }
-
-                            section("", bottomPadding: betweenCardSpace) {
-                                navCard(
-                                    "Manage Session Names",
-                                    destination: SessionNameManagerView().environmentObject(sessionManager),
-                                    padding: 0
-                                )
                             }
 
                             section("HISTORY", bottomPadding: betweenCardSpace) {
@@ -202,6 +200,35 @@ struct SettingsView: View {
             Text(title)
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            content()
+        }
+        .padding(.bottom, bottomPadding)
+    }
+    
+    @ViewBuilder
+    private func sectionWithAction<Content: View, Destination: View>(
+        _ title: String,
+        actionIcon: String,
+        actionLabel: String,
+        actionDestination: Destination,
+        bottomPadding: CGFloat,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            HStack {
+                Text(title)
+                    .font(DesignTokens.Fonts.sectionTitle)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                
+                Spacer()
+                
+                NavigationLink(destination: actionDestination) {
+                    Image(systemName: actionIcon)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                }
+                .accessibilityLabel(actionLabel)
+            }
             content()
         }
         .padding(.bottom, bottomPadding)
