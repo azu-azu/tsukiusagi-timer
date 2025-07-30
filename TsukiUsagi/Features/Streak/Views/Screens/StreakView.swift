@@ -3,7 +3,6 @@ import SwiftUI
 struct StreakView: View {
     @StateObject private var streakManager = StreakManager()
 
-
     var body: some View {
         VStack(spacing: 16) {
             // Level Display

@@ -35,19 +35,19 @@ extension Date {
     func dateForDayOfWeek(_ dayOfWeek: Int) -> Date {
         var calendar = Calendar.current
         calendar.timeZone = TimeZone(identifier: "Asia/Tokyo") ?? .current
-        
+
         let today = calendar.startOfDay(for: self)
         let currentWeekday = calendar.component(.weekday, from: today) - 1
         var offset = dayOfWeek - currentWeekday
         if offset < 0 { offset += 7 }
-        
+
         let result = calendar.date(byAdding: .day, value: offset, to: today) ?? self
-        
+
         // デバッグ用ログ（必要に応じて削除）
         #if DEBUG
         print("[DEBUG] Target Date for index \(dayOfWeek): \(result) | Now: \(Date())")
         #endif
-        
+
         return result
     }
 
