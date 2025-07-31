@@ -23,7 +23,7 @@ struct ContentView: View {
     @Environment(\.sizeCategory) private var sizeCategory
 
     // State
-    @State private var showingSettings = false
+    @State private var showingSideMenu = false
     @State private var showingEditRecord = false
     @State private var showDiamondStars = false
     @State private var cachedIsLandscape: Bool = false
@@ -85,10 +85,12 @@ struct ContentView: View {
         }
     }
 
-    /// Gearボタン共通アクション
-    private func gearButtonAction(showing: inout Bool) {
+    /// ハンバーガーメニューボタン共通アクション
+    private func hamburgerMenuAction() {
         HapticManager.shared.buttonTapFeedback()
-        showing = true
+        withAnimation(.easeInOut(duration: 0.3)) {
+            showingSideMenu.toggle()
+        }
     }
 
     var body: some View {
@@ -104,6 +106,7 @@ struct ContentView: View {
                         BackgroundGradientView().ignoresSafeArea()
                         AwakeEnablerView(hidden: true)
                         StaticStarsView(starCount: staticStarCount)
+                        
 
                         // ✅ 修正: セッション未完了かつアニメーション有効時に星エフェクト表示
                         // 初回起動時(タイマー未開始)でも表示、PAUSE時は非表示
@@ -142,17 +145,38 @@ struct ContentView: View {
                             updateOrientation(size: size)
                         }
 
-                        // footerBarはZStackの一番下
+                        // footerBarはZStackの一番下（ギアボタンと日付を削除）
                         FooterBar(
                             buttonHeight: buttonHeight,
                             buttonWidth: buttonWidth,
-                            dateString: DateFormatters.displayDateNoYear.string(from: Date()),
-                            onGearTap: { gearButtonAction(showing: &showingSettings) },
+                            dateString: "", // 日付表示を削除
+                            onGearTap: nil, // ギアボタンを無効化
                             startPauseButton: AnyView(startPauseButton())
                         )
                         .padding(.horizontal, 16)
                         .padding(.bottom, safeAreaInsets.bottom)
                         .zIndex(AppConstants.footerZIndex)
+                        
+                        // ギアボタン（左下）と日付表示（右下）
+                        VStack {
+                            Spacer()
+                            HStack {
+                                // ギアボタン（左下）
+                                HamburgerMenuButton(action: hamburgerMenuAction)
+                                    .padding(.leading, 16)
+                                    .padding(.bottom, safeAreaInsets.bottom)
+                                
+                                Spacer()
+                                
+                                // 日付表示（右下）
+                                Text(DateFormatters.displayDateNoYear.string(from: Date()))
+                                    .font(DesignTokens.Fonts.footerDate)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                    .padding(.trailing, 16)
+                                    .padding(.bottom, safeAreaInsets.bottom)
+                            }
+                        }
+                        .zIndex(2001) // サイドメニューより高い優先度
 
                         // RecordedTimesViewを縦画面時のみfooterBarの直上に追加
                         if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
@@ -176,16 +200,39 @@ struct ContentView: View {
                             }
                             .allowsHitTesting(false)
                         }
-                    }
-                    .ignoresSafeArea()
-                    .onReceive(timerVM.$flashStars.dropFirst()) { _ in
-                        showDiamondStars = true
-                    }
-                    .sheet(isPresented: $showingSettings) {
-                        SettingsView(size: size, safeAreaInsets: safeAreaInsets)
+                        
+                        // サイドメニュー
+                        SideMenuView(isPresented: $showingSideMenu)
                             .environmentObject(timerVM)
                             .environmentObject(historyVM)
                             .environmentObject(sessionManager)
+                            .zIndex(2000) // 最前面に配置
+                    }
+                    .ignoresSafeArea()
+                    .gesture(
+                        DragGesture()
+                            .onEnded { value in
+                                let horizontalAmount = value.translation.width
+                                let verticalAmount = abs(value.translation.height)
+                                
+                                // 水平方向のスワイプが垂直方向より大きい場合のみ処理
+                                if abs(horizontalAmount) > verticalAmount {
+                                    if horizontalAmount > 50 && !showingSideMenu {
+                                        // 右向きスワイプでメニューを開く
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            showingSideMenu = true
+                                        }
+                                    } else if horizontalAmount < -50 && showingSideMenu {
+                                        // 左向きスワイプでメニューを閉じる
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            showingSideMenu = false
+                                        }
+                                    }
+                                }
+                            }
+                    )
+                    .onReceive(timerVM.$flashStars.dropFirst()) { _ in
+                        showDiamondStars = true
                     }
                     .sheet(isPresented: $showingEditRecord) {
                         TimerEditView()
@@ -200,13 +247,13 @@ struct ContentView: View {
                             }
                         }
                     }
-                    // ✅ 修正: Settings画面制御
-                    .onChange(of: showingSettings) { _, newValue in
+                    // ✅ 修正: サイドメニュー画面制御
+                    .onChange(of: showingSideMenu) { _, newValue in
                         if newValue {
-                            // Settingsを開いたときはアニメーションOFF
+                            // サイドメニューを開いたときはアニメーションOFF
                             isFlowingStarsActive = false
                         } else {
-                            // Settingsを閉じたとき：
+                            // サイドメニューを閉じたとき：
                             // 1. タイマーが実行中の場合
                             // 2. タイマーが未開始の場合（初期状態）
                             // のいずれかでアニメーションON
@@ -216,8 +263,8 @@ struct ContentView: View {
                     }
                     // ✅ 修正: タイマー状態制御（PAUSE時のみアニメーション停止）
                     .onChange(of: timerVM.isRunning) { _, newValue in
-                        // Settings画面が開いていない場合のみ制御
-                        if !showingSettings {
+                        // サイドメニューが開いていない場合のみ制御
+                        if !showingSideMenu {
                             // PAUSEされた場合のみアニメーション停止
                             // 初回起動時（タイマー未開始）は動作を継続
                             if !newValue && timerVM.timeRemaining < (timerVM.workLengthMinutes * 60) {
