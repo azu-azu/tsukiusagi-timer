@@ -5,9 +5,9 @@ struct SideMenuView: View {
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var sessionManager: SessionManager
-    
+
     private let menuWidth: CGFloat = 300
-    
+
     var body: some View {
         GeometryReader { geo in
             let safeAreaInsets = geo.safeAreaInsets
@@ -22,14 +22,23 @@ struct SideMenuView: View {
                         }
                     }
             }
-            
+
             // サイドメニュー本体
             HStack(spacing: 0) {
                 // メニューコンテンツ
                 VStack(alignment: .leading, spacing: 0) {
                     // メニューヘッダー
                     menuHeader(safeAreaInsets: safeAreaInsets)
-                    
+
+                    // Duration & Session 設定セクション
+                    sideMenuDurationSessionView()
+                        .padding(.horizontal, 20)
+                        .padding(.top, 16)
+
+                    Divider()
+                        .background(DesignTokens.MoonColors.surfaceSecondary)
+                        .padding(.horizontal, 20)
+
                     // メニューアイテム
                     VStack(alignment: .leading, spacing: 16) {
                         menuItem(
@@ -37,7 +46,10 @@ struct SideMenuView: View {
                             title: "Settings",
                             destination: AnyView(
                                 SettingsView(
-                                    size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height),
+                                    size: CGSize(
+                                        width: UIScreen.main.bounds.width,
+                                        height: UIScreen.main.bounds.height
+                                    ),
                                     safeAreaInsets: EdgeInsets(
                                         top: safeAreaInsets.top,
                                         leading: safeAreaInsets.leading,
@@ -50,7 +62,7 @@ struct SideMenuView: View {
                                 .environmentObject(sessionManager)
                             )
                         )
-                        
+
                         menuItem(
                             icon: "chart.bar.fill",
                             title: "History",
@@ -59,21 +71,21 @@ struct SideMenuView: View {
                                 .environmentObject(historyVM)
                             )
                         )
-                        
+
                         Divider()
                             .background(DesignTokens.MoonColors.surfaceSecondary)
-                        
+
                         // アプリ情報
                         VStack(alignment: .leading, spacing: 8) {
                             Text("TsukiUsagi Timer")
                                 .font(DesignTokens.Fonts.caption)
                                 .foregroundColor(DesignTokens.MoonColors.textMuted)
-                            
+
                             Text("Version 1.0.0")
                                 .font(DesignTokens.Fonts.caption)
                                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                         }
-                        
+
                         Spacer()
                     }
                     .padding(.horizontal, 20)
@@ -83,33 +95,33 @@ struct SideMenuView: View {
                 .frame(maxHeight: .infinity)
                 .background(DesignTokens.CosmosColors.background)
                 .offset(x: isPresented ? 0 : -menuWidth)
-                
+
                 Spacer()
             }
         }
         .animation(.easeInOut(duration: 0.3), value: isPresented)
         }
     }
-    
+
     @ViewBuilder
     private func menuHeader(safeAreaInsets: EdgeInsets) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("🌙")
                     .font(.system(size: 32))
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("TsukiUsagi")
                         .font(DesignTokens.Fonts.labelBold)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    
+
                     Text("Focus Timer")
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 }
-                
+
                 Spacer()
-                
+
                 Button {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         isPresented = false
@@ -127,7 +139,7 @@ struct SideMenuView: View {
         .padding(.bottom, 16)
         .background(DesignTokens.CosmosColors.cardBackground)
     }
-    
+
     @ViewBuilder
     private func menuItem<Destination: View>(
         icon: String,
@@ -140,13 +152,13 @@ struct SideMenuView: View {
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .frame(width: 24, height: 24)
-                
+
                 Text(title)
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -160,6 +172,154 @@ struct SideMenuView: View {
                 isPresented = false
             }
         })
+    }
+
+    // MARK: - Duration & Session Combined View
+
+    @ViewBuilder
+    private func sideMenuDurationSessionView() -> some View {
+        @AppStorage("workMinutes") var workMinutes: Int = 25
+        @AppStorage("breakMinutes") var breakMinutes: Int = 5
+        @AppStorage("activityLabel") var activityLabel: String = "Work"
+
+        // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
+        let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
+
+        VStack(alignment: .leading, spacing: 12) {
+            // セクションタイトル
+            Text("Timer Settings")
+                .font(DesignTokens.Fonts.labelBold)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+
+            // Work時間調整
+            HStack(alignment: .center) {
+                Text("Work")
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .frame(minWidth: 50, alignment: .leading)
+
+                Spacer()
+
+                // Work時間の+/-ボタンと値表示
+                HStack(spacing: 8) {
+                    Button(action: {
+                        let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
+                        if currentIndex > 0 {
+                            workMinutes = workMinutesOptions[currentIndex - 1]
+                        }
+                    }) {
+                        Image(systemName: "minus")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .frame(width: 24, height: 24)
+                            .background(
+                                Circle()
+                                    .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.3))
+                            )
+                    }
+
+                    Text("\(workMinutes)")
+                        .font(DesignTokens.Fonts.numericLabel)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .frame(width: 24, alignment: .center)
+
+                    Button(action: {
+                        let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
+                        if currentIndex < workMinutesOptions.count - 1 {
+                            workMinutes = workMinutesOptions[currentIndex + 1]
+                        }
+                    }) {
+                        Image(systemName: "plus")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .frame(width: 24, height: 24)
+                            .background(
+                                Circle()
+                                    .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.3))
+                            )
+                    }
+                }
+            }
+
+            // Break時間調整
+            HStack(alignment: .center) {
+                Text("Break")
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .frame(minWidth: 50, alignment: .leading)
+
+                Spacer()
+
+                // Break時間の+/-ボタンと値表示
+                HStack(spacing: 8) {
+                    Button(action: {
+                        if breakMinutes > 1 { breakMinutes -= 1 }
+                    }) {
+                        Image(systemName: "minus")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .frame(width: 24, height: 24)
+                            .background(
+                                Circle()
+                                    .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.3))
+                            )
+                    }
+
+                    Text("\(breakMinutes)")
+                        .font(DesignTokens.Fonts.numericLabel)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .frame(width: 24, alignment: .center)
+
+                    Button(action: {
+                        if breakMinutes < 30 { breakMinutes += 1 }
+                    }) {
+                        Image(systemName: "plus")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .frame(width: 24, height: 24)
+                            .background(
+                                Circle()
+                                    .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.3))
+                            )
+                    }
+                }
+            }
+
+            // Session種類編集リンク
+            NavigationLink(destination: DurationSessionSettingsView()
+                .environmentObject(timerVM)
+                .environmentObject(historyVM)
+                .environmentObject(sessionManager)
+            ) {
+                HStack(alignment: .center) {
+                    Text("Session")
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        .frame(minWidth: 50, alignment: .leading)
+
+                    Spacer()
+
+                    Text(activityLabel)
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+
+                    Image(systemName: "chevron.right")
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                }
+                .padding(.vertical, 4)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
+            .simultaneousGesture(TapGesture().onEnded {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isPresented = false
+                }
+            })
+        }
+        .padding(.vertical, 8)
     }
 }
 
@@ -211,7 +371,7 @@ private class PreviewSideMenuDummyFormatter: TimeFormatterUtilable {
 
 struct SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
-        
+
         let timerVM = TimerViewModel(
             engine: PreviewSideMenuDummyEngine(),
             notificationService: PreviewSideMenuDummyNotification(),
@@ -220,14 +380,14 @@ struct SideMenuView_Previews: PreviewProvider {
             persistenceManager: PreviewSideMenuDummyPersistence(),
             formatter: PreviewSideMenuDummyFormatter()
         )
-        
+
         let historyVM = HistoryViewModel()
         let sessionManager = SessionManager()
-        
+
         NavigationView {
             ZStack {
                 Color.cosmosBackground.ignoresSafeArea()
-                
+
                 SideMenuView(isPresented: .constant(true))
             }
         }
