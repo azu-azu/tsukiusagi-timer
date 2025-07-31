@@ -97,14 +97,6 @@ struct SettingsView: View {
                                 sessionLabelContent()
                             }
 
-                            section("HISTORY", bottomPadding: betweenCardSpace) {
-                                navCard(
-                                    "View History",
-                                    destination: HistoryView().environmentObject(historyVM),
-                                    padding: 0
-                                )
-                            }
-
                             section("SESSION CONTROL", bottomPadding: betweenCardSpace) {
                                 ResetStopSectionView()
                             }
