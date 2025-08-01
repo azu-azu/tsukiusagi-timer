@@ -8,6 +8,7 @@ import Foundation
 /// - デフォルト/カスタムセッションの区別
 /// - 基本的なCRUD操作
 /// - 永続化の管理
+/// - サイドメニュー状態の管理
 class SessionManager: ObservableObject {
     // MARK: - Constants
 
@@ -32,6 +33,9 @@ class SessionManager: ObservableObject {
 
     /// sessionName(lowercased)をキーとするセッションデータベース
     @Published var sessionDatabase: [String: SessionEntry] = [:]
+
+    /// サイドメニューを開くリクエストフラグ
+    @Published var shouldOpenSideMenuOnDismiss: Bool = false
 
     // MARK: - Computed Properties
 
@@ -92,6 +96,18 @@ class SessionManager: ObservableObject {
                 save() // 修正内容を永続化
             }
         }
+    }
+
+    // MARK: - Side Menu Management
+
+    /// サイドメニューを開くリクエストを送る
+    func requestSideMenuOnDismiss() {
+        shouldOpenSideMenuOnDismiss = true
+    }
+
+    /// サイドメニューリクエストをリセット
+    func resetSideMenuRequest() {
+        shouldOpenSideMenuOnDismiss = false
     }
 
     // MARK: - Basic Operations

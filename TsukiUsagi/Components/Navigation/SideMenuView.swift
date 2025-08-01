@@ -31,7 +31,10 @@ struct SideMenuView: View {
                     menuHeader(safeAreaInsets: safeAreaInsets)
 
                     // Duration & Session 設定セクション
-                    sideMenuDurationSessionView()
+                    SideMenuDurationView(isPresented: $isPresented)
+                        .environmentObject(timerVM)
+                        .environmentObject(historyVM)
+                        .environmentObject(sessionManager)
                         .padding(.horizontal, 20)
                         .padding(.top, 16)
 
@@ -41,6 +44,15 @@ struct SideMenuView: View {
 
                     // メニューアイテム
                     VStack(alignment: .leading, spacing: 16) {
+                        menuItem(
+                            icon: "chart.bar.fill",
+                            title: "History",
+                            destination: AnyView(
+                                HistoryView()
+                                .environmentObject(historyVM)
+                            )
+                        )
+
                         menuItem(
                             icon: "gearshape.fill",
                             title: "Settings",
@@ -60,15 +72,6 @@ struct SideMenuView: View {
                                 .environmentObject(timerVM)
                                 .environmentObject(historyVM)
                                 .environmentObject(sessionManager)
-                            )
-                        )
-
-                        menuItem(
-                            icon: "chart.bar.fill",
-                            title: "History",
-                            destination: AnyView(
-                                HistoryView()
-                                .environmentObject(historyVM)
                             )
                         )
 
@@ -174,153 +177,6 @@ struct SideMenuView: View {
         })
     }
 
-    // MARK: - Duration & Session Combined View
-
-    @ViewBuilder
-    private func sideMenuDurationSessionView() -> some View {
-        @AppStorage("workMinutes") var workMinutes: Int = 25
-        @AppStorage("breakMinutes") var breakMinutes: Int = 5
-        @AppStorage("activityLabel") var activityLabel: String = "Work"
-
-        // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
-        let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
-
-        VStack(alignment: .leading, spacing: 12) {
-            // セクションタイトル
-            Text("Timer Settings")
-                .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-
-            // Work時間調整
-            HStack(alignment: .center) {
-                Text("Work")
-                    .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    .frame(minWidth: 50, alignment: .leading)
-
-                Spacer()
-
-                // Work時間の+/-ボタンと値表示
-                HStack(spacing: 8) {
-                    Button(action: {
-                        let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
-                        if currentIndex > 0 {
-                            workMinutes = workMinutesOptions[currentIndex - 1]
-                        }
-                    }) {
-                        Image(systemName: "minus")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            .frame(width: 24, height: 24)
-                            .background(
-                                Circle()
-                                    .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.3))
-                            )
-                    }
-
-                    Text("\(workMinutes)")
-                        .font(DesignTokens.Fonts.numericLabel)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        .frame(width: 24, alignment: .center)
-
-                    Button(action: {
-                        let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
-                        if currentIndex < workMinutesOptions.count - 1 {
-                            workMinutes = workMinutesOptions[currentIndex + 1]
-                        }
-                    }) {
-                        Image(systemName: "plus")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            .frame(width: 24, height: 24)
-                            .background(
-                                Circle()
-                                    .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.3))
-                            )
-                    }
-                }
-            }
-
-            // Break時間調整
-            HStack(alignment: .center) {
-                Text("Break")
-                    .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    .frame(minWidth: 50, alignment: .leading)
-
-                Spacer()
-
-                // Break時間の+/-ボタンと値表示
-                HStack(spacing: 8) {
-                    Button(action: {
-                        if breakMinutes > 1 { breakMinutes -= 1 }
-                    }) {
-                        Image(systemName: "minus")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            .frame(width: 24, height: 24)
-                            .background(
-                                Circle()
-                                    .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.3))
-                            )
-                    }
-
-                    Text("\(breakMinutes)")
-                        .font(DesignTokens.Fonts.numericLabel)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        .frame(width: 24, alignment: .center)
-
-                    Button(action: {
-                        if breakMinutes < 30 { breakMinutes += 1 }
-                    }) {
-                        Image(systemName: "plus")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            .frame(width: 24, height: 24)
-                            .background(
-                                Circle()
-                                    .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.3))
-                            )
-                    }
-                }
-            }
-
-            // Session種類編集リンク
-            NavigationLink(destination: DurationSessionSettingsView()
-                .environmentObject(timerVM)
-                .environmentObject(historyVM)
-                .environmentObject(sessionManager)
-            ) {
-                HStack(alignment: .center) {
-                    Text("Session")
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        .frame(minWidth: 50, alignment: .leading)
-
-                    Spacer()
-
-                    Text(activityLabel)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-
-                    Image(systemName: "chevron.right")
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
-                }
-                .padding(.vertical, 4)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainButtonStyle())
-            .simultaneousGesture(TapGesture().onEnded {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isPresented = false
-                }
-            })
-        }
-        .padding(.vertical, 8)
-    }
 }
 
 #if DEBUG
