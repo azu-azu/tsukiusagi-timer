@@ -106,7 +106,6 @@ struct ContentView: View {
                         BackgroundGradientView().ignoresSafeArea()
                         AwakeEnablerView(hidden: true)
                         StaticStarsView(starCount: staticStarCount)
-                        
 
                         // ✅ 修正: セッション未完了かつアニメーション有効時に星エフェクト表示
                         // 初回起動時(タイマー未開始)でも表示、PAUSE時は非表示
@@ -156,7 +155,7 @@ struct ContentView: View {
                         .padding(.horizontal, 16)
                         .padding(.bottom, safeAreaInsets.bottom)
                         .zIndex(AppConstants.footerZIndex)
-                        
+
                         // ギアボタン（左下）と日付表示（右下）
                         VStack {
                             Spacer()
@@ -165,9 +164,8 @@ struct ContentView: View {
                                 HamburgerMenuButton(action: hamburgerMenuAction)
                                     .padding(.leading, 16)
                                     .padding(.bottom, safeAreaInsets.bottom)
-                                
+
                                 Spacer()
-                                
                                 // 日付表示（右下）
                                 Text(DateFormatters.displayDateNoYear.string(from: Date()))
                                     .font(DesignTokens.Fonts.footerDate)
@@ -200,7 +198,7 @@ struct ContentView: View {
                             }
                             .allowsHitTesting(false)
                         }
-                        
+
                         // サイドメニュー
                         SideMenuView(isPresented: $showingSideMenu)
                             .environmentObject(timerVM)
@@ -214,7 +212,7 @@ struct ContentView: View {
                             .onEnded { value in
                                 let horizontalAmount = value.translation.width
                                 let verticalAmount = abs(value.translation.height)
-                                
+
                                 // 水平方向のスワイプが垂直方向より大きい場合のみ処理
                                 if abs(horizontalAmount) > verticalAmount {
                                     if horizontalAmount > 50 && !showingSideMenu {
