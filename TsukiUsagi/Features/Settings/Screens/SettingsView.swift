@@ -81,21 +81,21 @@ struct SettingsView: View {
 
                             weeklyCalendarSection()
 
-                            section("DURATION", bottomPadding: breakBottomPadding) {
-                                DurationSectionView()
-                            }
+                            // section("DURATION", bottomPadding: breakBottomPadding) {
+                            //     DurationSectionView()
+                            // }
 
-                            sectionWithAction(
-                                "SESSION LABEL",
-                                action: SectionAction(
-                                    icon: "pencil",
-                                    label: "Manage Session Names",
-                                    destination: SessionNameManagerView().environmentObject(sessionManager)
-                                ),
-                                bottomPadding: betweenCardSpaceNarrow
-                            ) {
-                                sessionLabelContent()
-                            }
+                            // sectionWithAction(
+                            //     "SESSION LABEL",
+                            //     action: SectionAction(
+                            //         icon: "pencil",
+                            //         label: "Manage Session Names",
+                            //         destination: SessionNameManagerView().environmentObject(sessionManager)
+                            //     ),
+                            //     bottomPadding: betweenCardSpaceNarrow
+                            // ) {
+                            //     sessionLabelContent()
+                            // }
 
                             section("SESSION CONTROL", bottomPadding: betweenCardSpace) {
                                 ResetStopSectionView()

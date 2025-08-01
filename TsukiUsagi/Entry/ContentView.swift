@@ -286,6 +286,15 @@ struct ContentView: View {
                     .onReceive(timerVM.$isRunning) { _ in
                         // print("ContentView: isRunning changed to \(isRunning)")
                     }
+                    // SessionManagerからのサイドメニュー開きリクエストを監視
+                    .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
+                        if shouldOpen {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                showingSideMenu = true
+                            }
+                            sessionManager.resetSideMenuRequest()
+                        }
+                    }
                     .animation(
                         .easeInOut(duration: 0.3)
                             .delay(0.1),
