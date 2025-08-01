@@ -111,7 +111,7 @@ struct SideMenuView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("🌙")
-                    .font(.system(size: 32))
+                    .font(DesignTokens.Fonts.title)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("TsukiUsagi")
