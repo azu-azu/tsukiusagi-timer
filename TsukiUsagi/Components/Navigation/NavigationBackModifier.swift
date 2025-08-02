@@ -4,7 +4,7 @@ import SwiftUI
 
 struct NavigationBackModifier: ViewModifier {
     let onBack: () -> Void
-    
+
     func body(content: Content) -> some View {
         content
             .toolbar {
