@@ -3,6 +3,7 @@ import SwiftUI
 struct DurationSectionView: View {
     @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
+    @EnvironmentObject private var timerVM: TimerViewModel
 
     // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
     private let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
@@ -20,12 +21,14 @@ struct DurationSectionView: View {
                         let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
                         if currentIndex > 0 {
                             workMinutes = workMinutesOptions[currentIndex - 1]
+                            timerVM.refreshAfterSettingsChange()
                         }
                     },
                     incrementAction: {
                         let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
                         if currentIndex < workMinutesOptions.count - 1 {
                             workMinutes = workMinutesOptions[currentIndex + 1]
+                            timerVM.refreshAfterSettingsChange()
                         }
                     }
                 )
@@ -39,10 +42,16 @@ struct DurationSectionView: View {
                     value: $breakMinutes,
                     options: nil,
                     decrementAction: {
-                        if breakMinutes > 1 { breakMinutes -= 1 }
+                        if breakMinutes > 1 { 
+                            breakMinutes -= 1
+                            timerVM.refreshAfterSettingsChange()
+                        }
                     },
                     incrementAction: {
-                        if breakMinutes < 30 { breakMinutes += 1 }
+                        if breakMinutes < 30 { 
+                            breakMinutes += 1
+                            timerVM.refreshAfterSettingsChange()
+                        }
                     }
                 )
         }
