@@ -39,6 +39,33 @@ struct DurationSessionSettingsView: View {
                                 sessionLabelContent()
                             }
 
+                            // Session Name Manager セクション
+                            section("MANAGE SESSION NAMES", bottomPadding: betweenCardSpace) {
+                                NavigationLink(destination: SessionNameManagerView()
+                                    .environmentObject(sessionManager)
+                                ) {
+                                    HStack {
+                                        Text("Manage session names")
+                                            .font(DesignTokens.Fonts.label)
+                                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .font(DesignTokens.Fonts.caption)
+                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                    }
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(DesignTokens.CosmosColors.cardBackground)
+                                    )
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+
                             Spacer(minLength: 50)
                         }
                         .padding(.horizontal, 16)
@@ -67,14 +94,8 @@ struct DurationSessionSettingsView: View {
             .navigationTitle("Duration & Session")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarRole(.navigationStack)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        saveChanges()
-                    }
-                    .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                }
+            .navigationBackButton {
+                saveChanges()
             }
         }
         .environmentObject(sessionManager)
@@ -143,26 +164,37 @@ struct DurationSessionSettingsView: View {
     }
 
     private func saveChanges() {
-        // UserDefaultsに保存
-        UserDefaults.standard.set(activityLabel, forKey: "activityLabel")
-        UserDefaults.standard.set(subtitleLabel, forKey: "subtitleLabel")
+        // 変更があったかチェック
+        let hasChanges = activityLabel != originalActivityLabel || subtitleLabel != originalSubtitleLabel
+        
+        if hasChanges {
+            // UserDefaultsに保存
+            UserDefaults.standard.set(activityLabel, forKey: "activityLabel")
+            UserDefaults.standard.set(subtitleLabel, forKey: "subtitleLabel")
 
-        // タイマーシステムに反映
-        timerVM.refreshAfterSettingsChange()
+            // タイマーシステムに反映
+            timerVM.refreshAfterSettingsChange()
 
-        // 保存完了メッセージを表示
-        withAnimation(.easeInOut(duration: 0.3)) {
-            showSavedMessage = true
-        }
-
-        // 1秒後にメッセージを非表示にして画面を閉じる
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // 保存完了メッセージを表示
             withAnimation(.easeInOut(duration: 0.3)) {
-                showSavedMessage = false
+                showSavedMessage = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                dismiss()
+
+            // 1秒後にメッセージを非表示にして画面を閉じる
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showSavedMessage = false
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    // サイドメニューを開くリクエストを送る
+                    sessionManager.requestSideMenuOnDismiss()
+                    dismiss()
+                }
             }
+        } else {
+            // 変更がない場合は即座に画面を閉じる
+            sessionManager.requestSideMenuOnDismiss()
+            dismiss()
         }
     }
 

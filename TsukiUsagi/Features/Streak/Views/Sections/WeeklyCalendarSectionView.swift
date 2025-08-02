@@ -6,9 +6,9 @@ struct WeeklyCalendarSectionView: View {
     private let weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             // Day circles
-            HStack(spacing: 0) {
+            HStack(spacing: 4) {
                 ForEach(0..<7, id: \.self) { dayIndex in
                     DayCircleView(
                         dayIndex: dayIndex,
@@ -19,18 +19,10 @@ struct WeeklyCalendarSectionView: View {
                 }
             }
         }
+        // カード型を際立たせたい場合
+        // .background(DesignTokens.CosmosColors.cardBackground)
+
         .padding()
-
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(DesignTokens.CosmosColors.cardBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.pink.opacity(0.2), lineWidth: 1)
-                )
-        )
-
-        // .background(DesignTokens.CosmosColors.cardBackground) // カード風背景
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4) // やわらか影
     }

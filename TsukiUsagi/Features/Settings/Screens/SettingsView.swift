@@ -97,9 +97,9 @@ struct SettingsView: View {
                             //     sessionLabelContent()
                             // }
 
-                            section("SESSION CONTROL", bottomPadding: betweenCardSpace) {
-                                ResetStopSectionView()
-                            }
+                            // section("SESSION CONTROL", bottomPadding: betweenCardSpace) {
+                            //     ResetStopSectionView()
+                            // }
 
                             #if DEBUG
                             DebugMenuView()
@@ -145,25 +145,25 @@ struct SettingsView: View {
         }
     }
 
-    private func sessionLabelContent() -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SessionLabelSection(
-                activity: $activityLabel,
-                descriptionText: $subtitleLabel,
-                isActivityFocused: $isActivityFocused,
-                isDescriptionFocused: $isSubtitleFocused,
-                labelCornerRadius: labelCornerRadius,
-                showEmptyError: .constant(currentShowEmptyError),
-                onDone: nil
-            )
-        }
-        .padding(.all)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(DesignTokens.CosmosColors.cardBackground)
-        )
-    }
+    // private func sessionLabelContent() -> some View {
+    //     VStack(alignment: .leading, spacing: 10) {
+    //         SessionLabelSection(
+    //             activity: $activityLabel,
+    //             descriptionText: $subtitleLabel,
+    //             isActivityFocused: $isActivityFocused,
+    //             isDescriptionFocused: $isSubtitleFocused,
+    //             labelCornerRadius: labelCornerRadius,
+    //             showEmptyError: .constant(currentShowEmptyError),
+    //             onDone: nil
+    //         )
+    //     }
+    //     .padding(.all)
+    //     .frame(maxWidth: .infinity, alignment: .leading)
+    //     .background(
+    //         RoundedRectangle(cornerRadius: 8)
+    //             .fill(DesignTokens.CosmosColors.cardBackground)
+    //     )
+    // }
 
     private func settingsHeaderSection() -> some View {
         SettingsHeaderView(onDismiss: { dismiss() })
@@ -199,38 +199,38 @@ struct SettingsView: View {
         .padding(.bottom, bottomPadding)
     }
 
-    struct SectionAction<Destination: View> {
-        let icon: String
-        let label: String
-        let destination: Destination
-    }
+    // struct SectionAction<Destination: View> {
+    //     let icon: String
+    //     let label: String
+    //     let destination: Destination
+    // }
 
-    @ViewBuilder
-    private func sectionWithAction<Content: View, Destination: View>(
-        _ title: String,
-        action: SectionAction<Destination>,
-        bottomPadding: CGFloat,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-            HStack {
-                Text(title)
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+    // @ViewBuilder
+    // private func sectionWithAction<Content: View, Destination: View>(
+    //     _ title: String,
+    //     action: SectionAction<Destination>,
+    //     bottomPadding: CGFloat,
+    //     @ViewBuilder content: () -> Content
+    // ) -> some View {
+    //     VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+    //         HStack {
+    //             Text(title)
+    //                 .font(DesignTokens.Fonts.sectionTitle)
+    //                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
-                Spacer()
+    //             Spacer()
 
-                NavigationLink(destination: action.destination) {
-                    Image(systemName: action.icon)
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                }
-                .accessibilityLabel(action.label)
-            }
-            content()
-        }
-        .padding(.bottom, bottomPadding)
-    }
+    //             NavigationLink(destination: action.destination) {
+    //                 Image(systemName: action.icon)
+    //                     .font(DesignTokens.Fonts.caption)
+    //                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
+    //             }
+    //             .accessibilityLabel(action.label)
+    //         }
+    //         content()
+    //     }
+    //     .padding(.bottom, bottomPadding)
+    // }
 
     @ViewBuilder
     private func navCard<Destination: View>(

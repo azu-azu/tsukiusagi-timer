@@ -14,51 +14,52 @@ struct SideMenuDurationView: View {
     // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
     private let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // セクションタイトル
-            Text("Timer Settings")
-                .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+    private let blockHorizontalPadding: CGFloat = 6
 
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
             // Work Duration
             SideMenuDurationRowView(
-                title: "Work",
+                title: "Work Duration",
                 value: $workMinutes,
                 options: workMinutesOptions,
                 decrementAction: {
                     let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
                     if currentIndex > 0 {
                         workMinutes = workMinutesOptions[currentIndex - 1]
+                        timerVM.refreshAfterSettingsChange()
                     }
                 },
                 incrementAction: {
                     let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
                     if currentIndex < workMinutesOptions.count - 1 {
                         workMinutes = workMinutesOptions[currentIndex + 1]
+                        timerVM.refreshAfterSettingsChange()
                     }
                 }
             )
 
             // Break Duration
             SideMenuDurationRowView(
-                title: "Break",
+                title: "Break Duration",
                 value: $breakMinutes,
                 options: nil,
                 decrementAction: {
-                    if breakMinutes > 1 { breakMinutes -= 1 }
+                    if breakMinutes > 1 {
+                        breakMinutes -= 1
+                        timerVM.refreshAfterSettingsChange()
+                    }
                 },
                 incrementAction: {
-                    if breakMinutes < 30 { breakMinutes += 1 }
+                    if breakMinutes < 30 {
+                        breakMinutes += 1
+                        timerVM.refreshAfterSettingsChange()
+                    }
                 }
             )
 
-            // Session種類編集リンク
-            NavigationLink(destination: DurationSessionSettingsView()
-                .environmentObject(timerVM)
-                .environmentObject(historyVM)
-                .environmentObject(sessionManager)
-            ) {
+            // Session種類表示
+            VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .center) {
                     Text("Session")
                         .font(DesignTokens.Fonts.label)
@@ -72,22 +73,108 @@ struct SideMenuDurationView: View {
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                         .lineLimit(1)
                         .truncationMode(.tail)
-
-                    Image(systemName: "chevron.right")
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
                 }
                 .padding(.vertical, 4)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainButtonStyle())
-            .simultaneousGesture(TapGesture().onEnded {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isPresented = false
+                .padding(.trailing, blockHorizontalPadding)
+
+                // 鉛筆マークでの編集リンク
+                HStack {
+                    Spacer()
+                    NavigationLink(destination: DurationSessionSettingsView()
+                        .environmentObject(timerVM)
+                        .environmentObject(historyVM)
+                        .environmentObject(sessionManager)
+                    ) {
+                        Image(systemName: "pencil")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                            .frame(width: 20, height: 20)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-            })
+            }
+
+            // Session Control セクション
+            Divider()
+                .background(DesignTokens.MoonColors.surfaceSecondary)
+                .padding(.vertical, 8)
+
+            sessionControlSection()
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
+    }
+
+    // MARK: - Session Control Section
+
+    @ViewBuilder
+    private func sessionControlSection() -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            // Reset Button (既存のResetStopSectionViewと同じ機能)
+            if timerVM.canForceFinish {
+                Button {
+                    timerVM.resetTimer()
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isPresented = false
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.uturn.backward")
+                        Text(timerVM.isWorkSession
+                            ? "Reset Timer (No Save)"
+                            : "Reset Timer (already saved)"
+                        )
+                        .font(DesignTokens.Fonts.label)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .tint(DesignTokens.MoonColors.errorBackground)
+            } else {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.uturn.backward")
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                    Text(timerVM.isWorkSession
+                        ? "Reset Timer (No Save)"
+                        : "Reset Timer (already saved)"
+                    )
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            // 区切り線
+            // Divider()
+
+            // Stop Button (既存のResetStopSectionViewと同じ機能)
+            if timerVM.canForceFinish {
+                Button {
+                    timerVM.forceFinishWorkSession()
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isPresented = false
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "forward.end")
+                        Text("Stop (Save)")
+                            .font(DesignTokens.Fonts.label)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .tint(DesignTokens.MoonColors.accentBlue)
+            } else {
+                HStack(spacing: 8) {
+                    Image(systemName: "forward.end")
+                        .foregroundColor(.gray.opacity(0.6))
+                    Text("Stop (Save)")
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(.gray.opacity(0.6))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(.horizontal, 0)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -103,6 +190,7 @@ struct SideMenuDurationRowView: View {
     private let minWidth: CGFloat = 50
     private let buttonSize: CGFloat = 24
     private let buttonSpacing: CGFloat = 8
+    private let blockHorizontalPadding: CGFloat = 12
 
     var body: some View {
         HStack(alignment: .center) {
@@ -113,7 +201,7 @@ struct SideMenuDurationRowView: View {
 
             Spacer()
 
-            // 時間の+/-ボタンと値表示
+            // 時間の+/-ボタンと値表示（黒背景）
             HStack(spacing: buttonSpacing) {
                 durationButton(systemName: "minus", action: decrementAction)
 
@@ -124,15 +212,14 @@ struct SideMenuDurationRowView: View {
 
                 durationButton(systemName: "plus", action: incrementAction)
             }
+            .padding(.horizontal, blockHorizontalPadding)
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(.black.opacity(0.8))
+            )
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-
-        // 各Rowに色をつける
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(.black.opacity(0.8))
-        )
+        .padding(.vertical, 4)
     }
 
     // MARK: - Helper Methods
