@@ -5,8 +5,6 @@ struct DurationSectionView: View {
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
     @EnvironmentObject private var timerVM: TimerViewModel
 
-    // workMinutesの選択肢: 1, 3, 5, 10, 15, ... 60
-    private let workMinutesOptions: [Int] = [1, 3, 5] + Array(stride(from: 10, through: 60, by: 5))
 
     private let rowsSpacing: CGFloat = 4
 
@@ -16,21 +14,17 @@ struct DurationSectionView: View {
                 DurationRowView(
                     title: "Work",
                     value: $workMinutes,
-                    options: workMinutesOptions,
-                    decrementAction: {
-                        let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
-                        if currentIndex > 0 {
-                            workMinutes = workMinutesOptions[currentIndex - 1]
-                            timerVM.refreshAfterSettingsChange()
-                        }
-                    },
-                    incrementAction: {
-                        let currentIndex = workMinutesOptions.firstIndex(of: workMinutes) ?? 0
-                        if currentIndex < workMinutesOptions.count - 1 {
-                            workMinutes = workMinutesOptions[currentIndex + 1]
-                            timerVM.refreshAfterSettingsChange()
-                        }
-                    }
+                    options: DurationConstants.workMinutesOptions,
+                    decrementAction: DurationActions.makeDecrementWorkAction(
+                        workMinutes: $workMinutes,
+                        options: DurationConstants.workMinutesOptions,
+                        timerVM: timerVM
+                    ),
+                    incrementAction: DurationActions.makeIncrementWorkAction(
+                        workMinutes: $workMinutes,
+                        options: DurationConstants.workMinutesOptions,
+                        timerVM: timerVM
+                    )
                 )
 
                 // 区切り線
@@ -41,18 +35,14 @@ struct DurationSectionView: View {
                     title: "Break",
                     value: $breakMinutes,
                     options: nil,
-                    decrementAction: {
-                        if breakMinutes > 1 { 
-                            breakMinutes -= 1
-                            timerVM.refreshAfterSettingsChange()
-                        }
-                    },
-                    incrementAction: {
-                        if breakMinutes < 30 { 
-                            breakMinutes += 1
-                            timerVM.refreshAfterSettingsChange()
-                        }
-                    }
+                    decrementAction: DurationActions.makeDecrementBreakAction(
+                        breakMinutes: $breakMinutes,
+                        timerVM: timerVM
+                    ),
+                    incrementAction: DurationActions.makeIncrementBreakAction(
+                        breakMinutes: $breakMinutes,
+                        timerVM: timerVM
+                    )
                 )
         }
         .padding(.horizontal, 16)

@@ -48,9 +48,9 @@ struct DurationSessionSettingsView: View {
                                         Text("Manage session names")
                                             .font(DesignTokens.Fonts.label)
                                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                        
+
                                         Spacer()
-                                        
+
                                         Image(systemName: "chevron.right")
                                             .font(DesignTokens.Fonts.caption)
                                             .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -166,7 +166,7 @@ struct DurationSessionSettingsView: View {
     private func saveChanges() {
         // 変更があったかチェック
         let hasChanges = activityLabel != originalActivityLabel || subtitleLabel != originalSubtitleLabel
-        
+
         if hasChanges {
             // UserDefaultsに保存
             UserDefaults.standard.set(activityLabel, forKey: "activityLabel")
