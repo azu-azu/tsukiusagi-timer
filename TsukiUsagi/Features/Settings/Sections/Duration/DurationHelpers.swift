@@ -8,7 +8,7 @@ enum DurationActions {
         workMinutes: Binding<Int>,
         options: [Int],
         timerVM: TimerViewModel
-    ) -> () -> Void {
+    ) -> @MainActor () -> Void {
         return { @MainActor in
             let currentIndex = options.firstIndex(of: workMinutes.wrappedValue) ?? 0
             if currentIndex > 0 {
@@ -23,7 +23,7 @@ enum DurationActions {
         workMinutes: Binding<Int>,
         options: [Int],
         timerVM: TimerViewModel
-    ) -> () -> Void {
+    ) -> @MainActor () -> Void {
         return { @MainActor in
             let currentIndex = options.firstIndex(of: workMinutes.wrappedValue) ?? 0
             if currentIndex < options.count - 1 {
@@ -37,7 +37,7 @@ enum DurationActions {
     static func makeDecrementBreakAction(
         breakMinutes: Binding<Int>,
         timerVM: TimerViewModel
-    ) -> () -> Void {
+    ) -> @MainActor () -> Void {
         return { @MainActor in
             if breakMinutes.wrappedValue > 1 {
                 breakMinutes.wrappedValue -= 1
@@ -50,7 +50,7 @@ enum DurationActions {
     static func makeIncrementBreakAction(
         breakMinutes: Binding<Int>,
         timerVM: TimerViewModel
-    ) -> () -> Void {
+    ) -> @MainActor () -> Void {
         return { @MainActor in
             if breakMinutes.wrappedValue < 30 {
                 breakMinutes.wrappedValue += 1

@@ -18,7 +18,7 @@ struct NavigationBackModifier: ViewModifier {
                             Text("Back")
                                 .font(DesignTokens.Fonts.label)
                         }
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                     }
                 }
             }

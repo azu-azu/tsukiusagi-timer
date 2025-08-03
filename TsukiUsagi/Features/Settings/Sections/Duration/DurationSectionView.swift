@@ -5,7 +5,6 @@ struct DurationSectionView: View {
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
     @EnvironmentObject private var timerVM: TimerViewModel
 
-
     private let rowsSpacing: CGFloat = 4
 
     var body: some View {

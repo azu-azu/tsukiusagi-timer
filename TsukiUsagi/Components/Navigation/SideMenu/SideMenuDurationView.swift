@@ -4,13 +4,13 @@ struct SideMenuDurationView: View {
     @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
+    @AppStorage("subtitleLabel") private var subtitleLabel: String = ""
 
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var sessionManager: SessionManager
 
     @Binding var isPresented: Bool
-
 
     private let blockHorizontalPadding: CGFloat = 6
 
@@ -50,7 +50,7 @@ struct SideMenuDurationView: View {
 
             // Session種類表示
             VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .center) {
+                HStack(alignment: .top) {
                     Text("Session")
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
@@ -58,11 +58,21 @@ struct SideMenuDurationView: View {
 
                     Spacer()
 
-                    Text(activityLabel)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(activityLabel)
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        
+                        if !subtitleLabel.isEmpty {
+                            Text(subtitleLabel)
+                                .font(DesignTokens.Fonts.caption)
+                                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                        }
+                    }
                 }
                 .padding(.vertical, 4)
                 .padding(.trailing, blockHorizontalPadding)
@@ -99,72 +109,76 @@ struct SideMenuDurationView: View {
     @ViewBuilder
     private func sessionControlSection() -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            // Reset Button (既存のResetStopSectionViewと同じ機能)
-            if timerVM.canForceFinish {
-                Button {
-                    timerVM.resetTimer()
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isPresented = false
-                    }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "arrow.uturn.backward")
-                        Text(timerVM.isWorkSession
-                            ? "Reset Timer (No Save)"
-                            : "Reset Timer (already saved)"
-                        )
-                        .font(DesignTokens.Fonts.label)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            resetButton()
+            stopButton()
+        }
+        .padding(.horizontal, 0)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private func resetButton() -> some View {
+        if timerVM.canForceFinish {
+            Button {
+                timerVM.resetTimer()
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isPresented = false
                 }
-                .tint(DesignTokens.MoonColors.errorBackground)
-            } else {
+            } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.uturn.backward")
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
                     Text(timerVM.isWorkSession
                         ? "Reset Timer (No Save)"
                         : "Reset Timer (already saved)"
                     )
                     .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textMuted)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .tint(DesignTokens.MoonColors.errorBackground)
+        } else {
+            HStack(spacing: 8) {
+                Image(systemName: "arrow.uturn.backward")
+                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+                Text(timerVM.isWorkSession
+                    ? "Reset Timer (No Save)"
+                    : "Reset Timer (already saved)"
+                )
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textMuted)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
 
-            // 区切り線
-            // Divider()
-
-            // Stop Button (既存のResetStopSectionViewと同じ機能)
-            if timerVM.canForceFinish {
-                Button {
-                    timerVM.forceFinishWorkSession()
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isPresented = false
-                    }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "forward.end")
-                        Text("Stop (Save)")
-                            .font(DesignTokens.Fonts.label)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+    @ViewBuilder
+    private func stopButton() -> some View {
+        if timerVM.canForceFinish {
+            Button {
+                timerVM.forceFinishWorkSession()
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isPresented = false
                 }
-                .tint(DesignTokens.MoonColors.accentBlue)
-            } else {
+            } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "forward.end")
-                        .foregroundColor(.gray.opacity(0.6))
                     Text("Stop (Save)")
                         .font(DesignTokens.Fonts.label)
-                        .foregroundColor(.gray.opacity(0.6))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .tint(DesignTokens.MoonColors.accentBlue)
+        } else {
+            HStack(spacing: 8) {
+                Image(systemName: "forward.end")
+                    .foregroundColor(.gray.opacity(0.6))
+                Text("Stop (Save)")
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(.gray.opacity(0.6))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 0)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
