@@ -64,7 +64,7 @@ struct SideMenuDurationView: View {
                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
                             .lineLimit(1)
                             .truncationMode(.tail)
-                        
+
                         if !subtitleLabel.isEmpty {
                             Text(subtitleLabel)
                                 .font(DesignTokens.Fonts.caption)
