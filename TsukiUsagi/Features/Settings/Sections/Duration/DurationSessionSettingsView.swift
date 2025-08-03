@@ -132,59 +132,66 @@ struct DurationSessionSettingsView: View {
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
             VStack(alignment: .leading, spacing: 0) {
-                // トグルボタン
-                Button {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isSessionNamesExpanded.toggle()
-                    }
-                } label: {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 6) {
-                                Image(systemName: isSessionNamesExpanded ? "chevron.down" : "chevron.right")
-                                    .font(DesignTokens.Fonts.caption)
-                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
-                                Text("Manage session names")
-                                    .font(DesignTokens.Fonts.label)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            }
-                            if !isSessionNamesExpanded {
-                                sessionNamesPreview()
-                                    .padding(.leading, 18) // chevronアイコンの幅分だけインデント
-                            }
-                        }
-
-                        Spacer()
-                    }
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(DesignTokens.CosmosColors.cardBackground)
-                    )
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainButtonStyle())
-
-                // 展開可能なコンテンツ
-                if isSessionNamesExpanded {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Divider()
-                            .background(DesignTokens.MoonColors.surfaceSecondary)
-
-                        SessionNameManagerView()
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 12)
-                    }
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(DesignTokens.CosmosColors.cardBackground)
-                    )
-                    .transition(.opacity.combined(with: .scale(scale: 1.0, anchor: .top)))
-                }
+                sessionNamesToggleButton()
+                sessionNamesExpandedContent()
             }
         }
         .padding(.bottom, betweenCardSpace)
+    }
+
+    @ViewBuilder
+    private func sessionNamesToggleButton() -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isSessionNamesExpanded.toggle()
+            }
+        } label: {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
+                        Image(systemName: isSessionNamesExpanded ? "chevron.down" : "chevron.right")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        Text("Manage session names")
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    }
+                    if !isSessionNamesExpanded {
+                        sessionNamesPreview()
+                            .padding(.leading, 18)
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    @ViewBuilder
+    private func sessionNamesExpandedContent() -> some View {
+        if isSessionNamesExpanded {
+            VStack(alignment: .leading, spacing: 8) {
+                Divider()
+                    .background(DesignTokens.MoonColors.surfaceSecondary)
+
+                SessionNameManagerView()
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(DesignTokens.CosmosColors.cardBackground)
+            )
+            .transition(.opacity.combined(with: .scale(scale: 1.0, anchor: .top)))
+        }
     }
 
     // MARK: - Session Names Preview
