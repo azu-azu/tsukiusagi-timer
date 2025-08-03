@@ -8,7 +8,7 @@ struct ViewHistorySectionView: View {
 
     var body: some View {
         section(title: "", isCompact: true) {
-            NavigationLink(destination: HistoryView().environmentObject(historyVM)) {
+            NavigationLink(destination: HistoryView()) {
                 HStack {
                     Text("View History")
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
