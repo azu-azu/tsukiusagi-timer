@@ -144,12 +144,10 @@ struct DurationSessionSettingsView: View {
                                 Image(systemName: isSessionNamesExpanded ? "chevron.down" : "chevron.right")
                                     .font(DesignTokens.Fonts.caption)
                                     .foregroundColor(DesignTokens.MoonColors.textMuted)
-                                
                                 Text("Manage session names")
                                     .font(DesignTokens.Fonts.label)
                                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                             }
-                            
                             if !isSessionNamesExpanded {
                                 sessionNamesPreview()
                                     .padding(.leading, 18) // chevronアイコンの幅分だけインデント
@@ -195,7 +193,6 @@ struct DurationSessionSettingsView: View {
     private func sessionNamesPreview() -> some View {
         let sessionNames = sessionManager.allEntries.map { $0.sessionName }
         let previewText = createPreviewText(from: sessionNames)
-        
         if !previewText.isEmpty {
             Text(previewText)
                 .font(DesignTokens.Fonts.caption)
@@ -209,11 +206,9 @@ struct DurationSessionSettingsView: View {
         if sessionNames.isEmpty {
             return "No sessions yet"
         }
-        
         // 最初の3つまでを表示
         let displayNames = Array(sessionNames.prefix(3))
         let previewText = displayNames.joined(separator: ", ")
-        
         // 3つ以上ある場合は "..." を追加
         if sessionNames.count > 3 {
             return previewText + "..."
