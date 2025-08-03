@@ -72,7 +72,6 @@ struct DurationSessionSettingsView: View {
                 saveChanges()
             }
         }
-        .environmentObject(sessionManager)
         .onAppear {
             loadCurrentValues()
         }
@@ -121,7 +120,6 @@ struct DurationSessionSettingsView: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(DesignTokens.CosmosColors.cardBackground)
         )
-        .environmentObject(sessionManager)
     }
 
     // MARK: - Session Names Management Section
@@ -177,7 +175,6 @@ struct DurationSessionSettingsView: View {
                             .background(DesignTokens.MoonColors.surfaceSecondary)
 
                         SessionNameManagerView()
-                            .environmentObject(sessionManager)
                             .padding(.horizontal, 16)
                             .padding(.bottom, 12)
                     }

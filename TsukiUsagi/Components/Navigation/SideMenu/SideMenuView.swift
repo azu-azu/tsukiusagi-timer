@@ -60,9 +60,6 @@ struct SideMenuView: View {
 
                         // Duration & Session 設定セクション
                         SideMenuDurationView(isPresented: $isPresented)
-                            .environmentObject(timerVM)
-                            .environmentObject(historyVM)
-                            .environmentObject(sessionManager)
                             .padding(.leading, leadingOffset + 20)
                             .padding(.trailing, 20)
                             .padding(.top, sectionSpacing)
@@ -81,7 +78,6 @@ struct SideMenuView: View {
                                 itemVerticalPadding: itemVerticalPadding,
                                 destination: AnyView(
                                     HistoryView()
-                                    .environmentObject(historyVM)
                                 )
                             )
 

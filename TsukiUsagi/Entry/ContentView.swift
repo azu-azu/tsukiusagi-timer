@@ -201,9 +201,6 @@ struct ContentView: View {
 
                         // サイドメニュー
                         SideMenuView(isPresented: $showingSideMenu)
-                            .environmentObject(timerVM)
-                            .environmentObject(historyVM)
-                            .environmentObject(sessionManager)
                             .zIndex(2000) // 最前面に配置
                     }
                     .ignoresSafeArea()
@@ -234,9 +231,6 @@ struct ContentView: View {
                     }
                     .sheet(isPresented: $showingEditRecord) {
                         TimerEditView()
-                            .environmentObject(timerVM)
-                            .environmentObject(historyVM)
-                            .environmentObject(sessionManager)
                     }
                     .onChange(of: timerVM.isSessionFinished) { _, newValue in
                         if newValue {
@@ -301,7 +295,6 @@ struct ContentView: View {
                 }
             }
         }
-        .environmentObject(sessionManager)
     }
 
     // MARK: - Start / Pause Button

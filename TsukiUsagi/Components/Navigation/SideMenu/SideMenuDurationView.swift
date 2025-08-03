@@ -80,11 +80,7 @@ struct SideMenuDurationView: View {
                 // 鉛筆マークでの編集リンク
                 HStack {
                     Spacer()
-                    NavigationLink(destination: DurationSessionSettingsView()
-                        .environmentObject(timerVM)
-                        .environmentObject(historyVM)
-                        .environmentObject(sessionManager)
-                    ) {
+                    NavigationLink(destination: DurationSessionSettingsView()) {
                         Image(systemName: "pencil")
                             .font(DesignTokens.Fonts.caption)
                             .foregroundColor(DesignTokens.MoonColors.textMuted)
