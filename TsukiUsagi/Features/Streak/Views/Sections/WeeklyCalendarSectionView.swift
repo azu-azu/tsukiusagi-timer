@@ -6,7 +6,11 @@ struct WeeklyCalendarSectionView: View {
     private let weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 6) {
+            Text("Your Weekly Progress")
+                .font(DesignTokens.Fonts.labelBold)
+                .foregroundColor(Color.textWhite)
+            
             // Day circles
             HStack(spacing: 4) {
                 ForEach(0..<7, id: \.self) { dayIndex in
@@ -19,11 +23,12 @@ struct WeeklyCalendarSectionView: View {
                 }
             }
         }
-        // カード型を際立たせたい場合
-        // .background(DesignTokens.CosmosColors.cardBackground)
 
         .padding()
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4) // やわらか影
+
+        // カード型を際立たせたい場合
+        .background(DesignTokens.CosmosColors.background)
     }
 }

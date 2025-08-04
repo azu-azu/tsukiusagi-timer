@@ -60,14 +60,14 @@ struct SideMenuView: View {
 
                         // Duration & Session 設定セクション
                         SideMenuDurationView(isPresented: $isPresented)
-                            .padding(.leading, leadingOffset + 20)
-                            .padding(.trailing, 20)
+                            .padding(.leading, leadingOffset + 32)
+                            .padding(.trailing, 32)
                             .padding(.top, sectionSpacing)
 
                         Divider()
-                            .background(DesignTokens.MoonColors.surfaceSecondary)
-                            .padding(.leading, leadingOffset + 20)
-                            .padding(.trailing, 20)
+                            .background(DesignTokens.CosmosColors.cardBackground)
+                            .padding(.leading, leadingOffset + 32)
+                            .padding(.trailing, 32)
                             .padding(.vertical, sectionSpacing)
 
                         // メニューアイテム
@@ -82,7 +82,7 @@ struct SideMenuView: View {
                             )
 
                             Divider()
-                                .background(DesignTokens.MoonColors.surfaceSecondary)
+                                .background(DesignTokens.CosmosColors.cardBackground)
                                 .padding(.top, sectionSpacing)
 
                             // アプリ情報
@@ -104,16 +104,20 @@ struct SideMenuView: View {
                                 Spacer()
                             }
                         }
-                        .padding(.leading, leadingOffset + 20)
-                        .padding(.trailing, 20)
+                        .padding(.leading, leadingOffset + 32)
+                        .padding(.trailing, 32)
                         .padding(.bottom, safeAreaInsets.bottom + 20)
                     }
                 }
                 .frame(width: menuWidth)
                 .frame(maxHeight: .infinity)
-                .background(DesignTokens.CosmosColors.background)
+                // .background(Color(red: 0.0, green: 0.1, blue: 0.2).opacity(0.9))
+                .background(Color.black.opacity(0.9))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .shadow(color: Color.black.opacity(0.4), radius: 8, x: -4, y: 0)
+                .shadow(color: Color.black.opacity(0.4), radius: 8, x: 4, y: 0)
                 .transition(.move(edge: .leading).combined(with: .opacity))
-                .offset(x: isPresented ? 0 : -menuWidth)
+                .offset(x: isPresented ? 0 : -menuWidth - 20)
 
                 Spacer()
             }
@@ -145,24 +149,19 @@ struct SideMenuView: View {
                 }
 
                 Spacer()
-
-                Button {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isPresented = false
-                    }
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        .frame(width: 32, height: 32)
-                }
             }
         }
-        .padding(.leading, leadingOffset + 20)
-        .padding(.trailing, 20)
+        .padding(.leading, leadingOffset + 32)
+        .padding(.trailing, 32)
         .padding(.top, topPadding)
         .padding(.bottom, isLandscape ? 12 : 16)
-        .background(DesignTokens.CosmosColors.cardBackground)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.black, Color.black.opacity(0.95)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 
     @ViewBuilder
@@ -203,15 +202,7 @@ struct SideMenuView: View {
     }
 
     private func weeklyCalendarSection() -> some View {
-        VStack(spacing: 6) {
-            Text("Your Weekly Progress")
-                .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(Color.textWhite)
-
-            WeeklyCalendarSectionView(streakManager: streakManager)
-        }
-        .padding()
-        .background(.black)
+        WeeklyCalendarSectionView(streakManager: streakManager)
     }
 }
 
