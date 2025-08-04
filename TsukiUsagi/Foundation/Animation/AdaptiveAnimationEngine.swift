@@ -1,9 +1,9 @@
 import SwiftUI
 import Combine
 
-// MARK: - 🎛 AdaptiveAnimationController
-/// 動的にアニメーションのパフォーマンスを調整するコントローラー
-class AdaptiveAnimationController: ObservableObject {
+// MARK: - 🎛 AdaptiveAnimationEngine
+/// 動的にアニメーションのパフォーマンスを調整するエンジン
+class AdaptiveAnimationEngine: ObservableObject {
 
     // MARK: - 📊 Published Properties
     @Published var starCount: Int = 50
