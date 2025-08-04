@@ -16,7 +16,7 @@ extension View {
 
 /// アダプティブ流れ星View
 struct AdaptiveFlowingStarsView: View {
-    @StateObject private var controller = AdaptiveAnimationController()
+    @StateObject private var controller = AdaptiveAnimationEngine()
     @Environment(\.scenePhase) private var scenePhase
 
     let baseStarCount: Int
@@ -49,7 +49,7 @@ struct AdaptiveFlowingStarsView: View {
 
 /// アダプティブスパークル星View
 struct AdaptiveSparkleStarsView: View {
-    @StateObject private var controller = AdaptiveAnimationController()
+    @StateObject private var controller = AdaptiveAnimationEngine()
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -70,7 +70,7 @@ struct AdaptiveSparkleStarsView: View {
 
 /// アダプティブ月View
 struct AdaptiveMoonView: View {
-    @StateObject private var controller = AdaptiveAnimationController()
+    @StateObject private var controller = AdaptiveAnimationEngine()
     @Environment(\.scenePhase) private var scenePhase
 
     let moonSize: CGFloat

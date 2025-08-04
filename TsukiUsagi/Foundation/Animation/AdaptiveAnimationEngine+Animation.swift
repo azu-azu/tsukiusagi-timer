@@ -2,7 +2,7 @@ import Foundation
 import Combine
 
 // MARK: - 🔍 Performance Monitoring & Animation Control
-extension AdaptiveAnimationController {
+extension AdaptiveAnimationEngine {
 
     // MARK: - Setup Methods
 

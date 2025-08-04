@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - 📊 Performance Debug View (開発用)
 
 struct PerformanceDebugView: View {
-    @StateObject private var controller = AdaptiveAnimationController()
+    @StateObject private var controller = AdaptiveAnimationEngine()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

@@ -3,7 +3,7 @@ import SwiftUI
 import Combine
 
 // MARK: - 🔋 System State Management
-extension AdaptiveAnimationController {
+extension AdaptiveAnimationEngine {
 
     // MARK: - Setup System Observers
 

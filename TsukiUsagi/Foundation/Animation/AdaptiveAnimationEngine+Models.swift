@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - 🎨 Animation Quality Models
-extension AdaptiveAnimationController {
+extension AdaptiveAnimationEngine {
 
     /// アニメーション品質レベル
     enum AnimationQuality: CaseIterable {
