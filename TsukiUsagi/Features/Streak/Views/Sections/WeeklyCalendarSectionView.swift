@@ -24,11 +24,11 @@ struct WeeklyCalendarSectionView: View {
             }
         }
 
-        .padding()
+        .padding(.horizontal, 12)
+        .padding(.vertical, 16)
+        .background(DesignTokens.MoonColors.accentBlueStrong.opacity(0.15))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4) // やわらか影
-
-        // カード型を際立たせたい場合
-        .background(DesignTokens.MoonColors.accentBlueStrong.opacity(0.15))
+        .padding(.horizontal, 16) // 外側マージンで黒背景を見せる
     }
 }
