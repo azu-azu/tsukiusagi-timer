@@ -49,7 +49,7 @@ struct DurationSectionView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(DesignTokens.CosmosColors.cardBackground)
+                .fill(DesignTokens.BlackColors.surface)
         )
     }
 
