@@ -97,7 +97,6 @@ struct SessionRowComponent: View {
             sessionDescriptions
         }
         .padding()
-        .background(sessionBackground)
         .contentShape(Rectangle()) // タッチ領域を明確に定義
         .onTapGesture {
             // セッション行の空の部分をタップしたらキーボードを閉じる
