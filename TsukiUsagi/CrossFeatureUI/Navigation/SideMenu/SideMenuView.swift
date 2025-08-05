@@ -11,6 +11,15 @@ struct SideMenuView: View {
     // Environment for orientation detection
     @Environment(\.horizontalSizeClass) private var horizontalClass
     @Environment(\.verticalSizeClass) private var verticalClass
+    
+    // MARK: - Layout Constants
+    
+    /// サイドメニューの内部パディング（左右）
+    static let menuHorizontalPadding: CGFloat = 32
+    
+    /// メニューを完全に隠すための追加オフセット
+    static let menuHideOffset: CGFloat = 20
+
 
     var body: some View {
         GeometryReader { geo in
@@ -60,14 +69,12 @@ struct SideMenuView: View {
 
                         // Duration & Session 設定セクション
                         SideMenuDurationView(isPresented: $isPresented)
-                            .padding(.leading, leadingOffset + 32)
-                            .padding(.trailing, 32)
+                            .sideMenuPadding(leadingOffset: leadingOffset)
                             .padding(.top, sectionSpacing)
 
                         Divider()
                             .background(DesignTokens.CosmosColors.cardBackground)
-                            .padding(.leading, leadingOffset + 32)
-                            .padding(.trailing, 32)
+                            .sideMenuPadding(leadingOffset: leadingOffset)
                             .padding(.vertical, sectionSpacing)
 
                         // メニューアイテム
@@ -88,12 +95,10 @@ struct SideMenuView: View {
                             // アプリ情報
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("TsukiUsagi Timer")
-                                    .font(DesignTokens.Fonts.caption)
-                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                    .appInfoStyle()
 
                                 Text("Version 1.0.0")
-                                    .font(DesignTokens.Fonts.caption)
-                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                    .appInfoStyle()
                             }
                             .padding(.top, sectionSpacing)
 
@@ -104,8 +109,7 @@ struct SideMenuView: View {
                                 Spacer()
                             }
                         }
-                        .padding(.leading, leadingOffset + 32)
-                        .padding(.trailing, 32)
+                        .sideMenuPadding(leadingOffset: leadingOffset)
                         .padding(.bottom, safeAreaInsets.bottom + 20)
                     }
                 }
@@ -117,7 +121,7 @@ struct SideMenuView: View {
                 .shadow(color: Color.black.opacity(0.4), radius: 8, x: -4, y: 0)
                 .shadow(color: Color.black.opacity(0.4), radius: 8, x: 4, y: 0)
                 .transition(.move(edge: .leading).combined(with: .opacity))
-                .offset(x: isPresented ? 0 : -menuWidth - 20)
+                .offset(x: isPresented ? 0 : -menuWidth - Self.menuHideOffset)
 
                 Spacer()
             }
@@ -140,19 +144,16 @@ struct SideMenuView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("TsukiUsagi")
-                        .font(DesignTokens.Fonts.labelBold)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .titleStyle()
 
                     Text("Focus Timer")
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        .subtitleStyle()
                 }
 
                 Spacer()
             }
         }
-        .padding(.leading, leadingOffset + 32)
-        .padding(.trailing, 32)
+        .sideMenuPadding(leadingOffset: leadingOffset)
         .padding(.top, topPadding)
         .padding(.bottom, isLandscape ? 12 : 16)
         .background(
@@ -203,6 +204,42 @@ struct SideMenuView: View {
 
     private func weeklyCalendarSection() -> some View {
         WeeklyCalendarSectionView(streakManager: streakManager)
+    }
+}
+
+// MARK: - View Extensions
+
+private extension View {
+    /// サイドメニューの標準水平パディングを適用
+    func sideMenuPadding(leadingOffset: CGFloat) -> some View {
+        self
+            .padding(.leading, leadingOffset + SideMenuView.menuHorizontalPadding)
+            .padding(.trailing, SideMenuView.menuHorizontalPadding)
+    }
+}
+
+// MARK: - Text Style Extensions
+
+private extension Text {
+    /// キャプション + ミュートテキストのスタイル（アプリ情報用）
+    func appInfoStyle() -> some View {
+        self
+            .font(DesignTokens.Fonts.caption)
+            .foregroundColor(DesignTokens.MoonColors.textMuted)
+    }
+    
+    /// ラベル太字 + プライマリテキストのスタイル（タイトル用）
+    func titleStyle() -> some View {
+        self
+            .font(DesignTokens.Fonts.labelBold)
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+    }
+    
+    /// キャプション + セカンダリテキストのスタイル（サブタイトル用）
+    func subtitleStyle() -> some View {
+        self
+            .font(DesignTokens.Fonts.caption)
+            .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
 }
 
