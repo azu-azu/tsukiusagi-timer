@@ -218,7 +218,7 @@ struct SideMenuDurationRowView: View {
             // ボタン部分のカード背景
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(DesignTokens.MoonColors.accentGreen.opacity(0.15))
+                    .fill(DesignTokens.MoonColors.textPrimary.opacity(0.1))
                     // .fill(.black.opacity(0.8))
             )
         }
