@@ -201,16 +201,16 @@ struct SideMenuDurationRowView: View {
 
             Spacer()
 
-            // 時間の+/-ボタンと値表示（黒背景）
+            // 時間の+/-ボタンと値表示（統一デザイン）
             HStack(spacing: buttonSpacing) {
-                durationButton(systemName: "minus", action: decrementAction)
+                PlusMinusButton(minus: decrementAction)
 
                 Text("\(value)")
                     .font(DesignTokens.Fonts.numericLabel)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     .frame(width: buttonSize, alignment: .center)
 
-                durationButton(systemName: "plus", action: incrementAction)
+                PlusMinusButton(plus: incrementAction)
             }
             .padding(.horizontal, blockHorizontalPadding)
             .padding(.vertical, 6)
@@ -226,20 +226,7 @@ struct SideMenuDurationRowView: View {
     }
 
     // MARK: - Helper Methods
-
-    @ViewBuilder
-    private func durationButton(systemName: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                .frame(width: buttonSize, height: buttonSize)
-                .background(
-                    Circle()
-                        .fill(DesignTokens.CosmosColors.cardBackground)
-                )
-        }
-    }
+    // durationButton removed - now using PlusMinusButton component
 }
 
 #if DEBUG

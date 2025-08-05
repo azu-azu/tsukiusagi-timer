@@ -60,8 +60,8 @@ struct PlusMinusButton: View {
         self.action = action
         size = DesignTokens.FontSize.caption
         padding = DesignTokens.Padding.small
-        backgroundColor = Color.white.opacity(0.1)
-        foregroundColor = .white
+        backgroundColor = DesignTokens.CosmosColors.cardBackground
+        foregroundColor = DesignTokens.MoonColors.textPrimary
         self.isEnabled = isEnabled
     }
 
@@ -77,8 +77,8 @@ struct PlusMinusButton: View {
         self.action = action
         size = DesignTokens.FontSize.caption
         padding = DesignTokens.Padding.small
-        backgroundColor = Color.white.opacity(0.1)
-        foregroundColor = .white
+        backgroundColor = DesignTokens.CosmosColors.cardBackground
+        foregroundColor = DesignTokens.MoonColors.textPrimary
         self.isEnabled = isEnabled
     }
 
