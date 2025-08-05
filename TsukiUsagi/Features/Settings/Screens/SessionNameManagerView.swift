@@ -10,13 +10,11 @@ struct SessionNameManagerView: View {
 
     var body: some View {
         ScrollView {
-            RoundedCard(backgroundColor: DesignTokens.CosmosColors.cardBackground) {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
-                    NewSessionFormView()
-                    // --- ここから登録済みセッションの明示的な表示 ---
-                    SessionListSectionView()
-                    // --- ここまで ---
-                }
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
+                NewSessionFormView()
+                // --- ここから登録済みセッションの明示的な表示 ---
+                SessionListSectionView()
+                // --- ここまで ---
             }
             .padding()
         }
