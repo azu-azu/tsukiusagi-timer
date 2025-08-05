@@ -96,19 +96,19 @@ struct DurationRowView: View {
                 Button(action: decrementAction) {
                     Image(systemName: "minus")
                         .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .foregroundColor(.white)
                 }
                 .frame(width: plusMinusButtonSize, height: plusMinusButtonSize)
-                .background(DesignTokens.CosmosColors.cardBackground)
+                .background(DesignTokens.MoonColors.accentOrange)
                 .clipShape(Circle())
 
                 Button(action: incrementAction) {
                     Image(systemName: "plus")
                         .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .foregroundColor(.white)
                 }
                 .frame(width: plusMinusButtonSize, height: plusMinusButtonSize)
-                .background(DesignTokens.CosmosColors.cardBackground)
+                .background(DesignTokens.MoonColors.accentGreen)
                 .clipShape(Circle())
             }
         }
