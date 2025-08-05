@@ -203,14 +203,20 @@ struct SideMenuDurationRowView: View {
 
             // 時間の+/-ボタンと値表示（統一デザイン）
             HStack(spacing: buttonSpacing) {
-                PlusMinusButton(minus: decrementAction)
+                PlusMinusButton(
+                    minus: decrementAction
+                )
+                .frame(width: buttonSize, height: buttonSize)
 
                 Text("\(value)")
                     .font(DesignTokens.Fonts.numericLabel)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     .frame(width: buttonSize, alignment: .center)
 
-                PlusMinusButton(plus: incrementAction)
+                PlusMinusButton(
+                    plus: incrementAction
+                )
+                .frame(width: buttonSize, height: buttonSize)
             }
             .padding(.horizontal, blockHorizontalPadding)
             .padding(.vertical, 6)
