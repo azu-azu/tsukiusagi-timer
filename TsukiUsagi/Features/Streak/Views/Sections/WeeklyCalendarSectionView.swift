@@ -28,7 +28,7 @@ struct WeeklyCalendarSectionView: View {
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4) // やわらか影
 
-        // カード型を際立たせたい場合
-        .background(DesignTokens.CosmosColors.background)
+        // カード型を際立たせたい場合  
+        .background(DesignTokens.MoonColors.accentBlueStrong.opacity(0.15))
     }
 }
