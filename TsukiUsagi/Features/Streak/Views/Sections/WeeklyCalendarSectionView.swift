@@ -10,7 +10,7 @@ struct WeeklyCalendarSectionView: View {
             Text("Your Weekly Progress")
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.accentBlueStrong)
-            
+
             // Day circles
             HStack(spacing: 4) {
                 ForEach(0..<7, id: \.self) { dayIndex in
@@ -28,7 +28,7 @@ struct WeeklyCalendarSectionView: View {
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4) // やわらか影
 
-        // カード型を際立たせたい場合  
+        // カード型を際立たせたい場合
         .background(DesignTokens.MoonColors.accentBlueStrong.opacity(0.15))
     }
 }
