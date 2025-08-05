@@ -112,6 +112,12 @@ struct DurationRowView: View {
                 .clipShape(Circle())
             }
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(DesignTokens.MoonColors.accentGreen.opacity(0.1))
+        )
     }
 }
 
