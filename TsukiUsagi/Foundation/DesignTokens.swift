@@ -47,11 +47,11 @@ enum DesignTokens {
 
     /// 宇宙空間をテーマにした背景カラー
     enum CosmosColors {
-        /// 背景色（既存の拡張から）
-        static let background = Color.cosmosBackground
+        /// 背景色（純粋な黒ベース）
+        static let background = Color.black
 
-        /// カード背景色（Light/Dark モード対応）
-        static let cardBackground = Color.cosmosCardBackground
+        /// カード背景色（黒ベースの薄いグレー）
+        static let cardBackground = BlackColors.secondary
     }
 
     /// セマンティック無視の純粋な色（視覚的アクセント用）
@@ -65,7 +65,29 @@ enum DesignTokens {
         static let textWhite = Color.white
     }
 
-    /// 白ベースの用途別カラー（意味づけされたopacity）
+    /// 黒ベース用途別カラー（グレー階層）
+    enum BlackColors {
+        /// プライマリ黒（純粋な黒）
+        static let primary = Color.black
+
+        /// セカンダリ黒（濃いグレー）
+        /// 用途: カード背景、セクション背景
+        static let secondary = Color(red: 0.1, green: 0.1, blue: 0.1)
+
+        /// ターシャリ黒（中間グレー）
+        /// 用途: 入力欄背景、ボタン背景
+        static let tertiary = Color(red: 0.15, green: 0.15, blue: 0.15)
+
+        /// サーフェス黒（薄いグレー）
+        /// 用途: ホバー状態、選択状態
+        static let surface = Color(red: 0.2, green: 0.2, blue: 0.2)
+
+        /// ストローク黒（境界線用）
+        /// 用途: 枠線、区切り線、ボーダー
+        static let stroke = Color(red: 0.25, green: 0.25, blue: 0.25)
+    }
+
+    /// 白ベースの用途別カラー（テキスト用に維持）
     enum WhiteColors {
         /// プライマリ白（完全な白）
         static let primary = Color.white

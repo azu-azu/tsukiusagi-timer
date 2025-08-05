@@ -159,14 +159,14 @@ struct SessionRowComponent: View {
             Text(description)
                 .font(DesignTokens.Fonts.caption)
                 .italic()
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(DesignTokens.WhiteColors.secondary)
                 .padding(.leading, 16)
 
             Spacer()
 
             Image(systemName: "pencil")
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(.white.opacity(0.3))
+                .foregroundColor(DesignTokens.WhiteColors.placeholder)
                 .padding(.trailing, 8)
         }
         .padding(.vertical, 6)
@@ -198,22 +198,22 @@ struct SessionRowComponent: View {
 
     private var editableRowBackground: some View {
         RoundedRectangle(cornerRadius: 6)
-            .stroke(DesignTokens.WhiteColors.stroke, lineWidth: 1)
-            .background(Color.white.opacity(0.02))
+            .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+            .background(DesignTokens.BlackColors.surface)
     }
 
     private var sessionBackground: some View {
         Group {
             if !isDefault {
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(DesignTokens.WhiteColors.surface)
+                    .fill(DesignTokens.BlackColors.surface)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                            .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
                     )
             } else {
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white.opacity(0.02))
+                    .fill(DesignTokens.BlackColors.tertiary)
             }
         }
     }
