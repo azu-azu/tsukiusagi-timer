@@ -58,8 +58,7 @@ struct NewSessionFormView: View {
     }
 
     var body: some View {
-        RoundedCard(backgroundColor: DesignTokens.CosmosColors.cardBackground) {
-            VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top) {
                     if isCustomActivity {
                         HStack(spacing: 8) {
@@ -208,7 +207,6 @@ struct NewSessionFormView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(isAddDisabled)
                     .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
-            }
         }
         .debugForm(String(describing: Self.self), position: .topLeading)
         .keyboardCloseButton(

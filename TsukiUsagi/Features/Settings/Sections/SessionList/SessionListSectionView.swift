@@ -52,13 +52,11 @@ struct SessionListSectionView: View {
 
     var body: some View {
         KeyboardDismissibleContainer {
-            RoundedCard(backgroundColor: DesignTokens.CosmosColors.cardBackground) {
-                VStack(alignment: .leading, spacing: 16) {
-                    defaultSessionsSection
-                    customSessionsSection
-                }
-                .padding(.bottom, 8)
+            VStack(alignment: .leading, spacing: 16) {
+                defaultSessionsSection
+                customSessionsSection
             }
+            .padding(.bottom, 8)
             .debugSection(String(describing: Self.self), position: .topLeading)
         }
         .alert(item: $errorMessage, content: errorAlert)
