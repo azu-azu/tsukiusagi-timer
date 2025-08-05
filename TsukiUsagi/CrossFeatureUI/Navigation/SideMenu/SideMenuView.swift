@@ -11,15 +11,14 @@ struct SideMenuView: View {
     // Environment for orientation detection
     @Environment(\.horizontalSizeClass) private var horizontalClass
     @Environment(\.verticalSizeClass) private var verticalClass
-    
+
     // MARK: - Layout Constants
-    
+
     /// サイドメニューの内部パディング（左右）
     static let menuHorizontalPadding: CGFloat = 32
-    
+
     /// メニューを完全に隠すための追加オフセット
     static let menuHideOffset: CGFloat = 20
-
 
     var body: some View {
         GeometryReader { geo in
@@ -227,14 +226,14 @@ private extension Text {
             .font(DesignTokens.Fonts.caption)
             .foregroundColor(DesignTokens.MoonColors.textMuted)
     }
-    
+
     /// ラベル太字 + プライマリテキストのスタイル（タイトル用）
     func titleStyle() -> some View {
         self
             .font(DesignTokens.Fonts.labelBold)
             .foregroundColor(DesignTokens.MoonColors.textPrimary)
     }
-    
+
     /// キャプション + セカンダリテキストのスタイル（サブタイトル用）
     func subtitleStyle() -> some View {
         self
