@@ -12,15 +12,7 @@ struct StreakView: View {
             WeeklyUsageSectionView(streakManager: streakManager)
 
             // Weekly Calendar
-            VStack(spacing: 16) {
-                Text("Your Weekly Progress")
-                    .font(DesignTokens.Fonts.labelBold)
-                    .foregroundColor(.white)
-
-                WeeklyCalendarSectionView(streakManager: streakManager)
-            }
-            .padding()
-            .background(Color.black)
+            WeeklyCalendarSectionView(streakManager: streakManager)
 
             // Total Streak Display
             TotalStreakSectionView(streakManager: streakManager)

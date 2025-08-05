@@ -43,8 +43,7 @@ struct SessionLabelSection: View {
 struct SettingsView: View {
     var body: some View {
         VStack {
-            DurationSectionView()
-                .debugSection("DurationSectionView", position: .topLeading)
+            // DurationSectionView removed - use DurationSessionSettingsView instead
         }
         .debugScreen("SettingsView")
     }
