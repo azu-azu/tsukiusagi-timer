@@ -9,7 +9,7 @@ struct WeeklyCalendarSectionView: View {
         VStack(spacing: 6) {
             Text("Your Weekly Progress")
                 .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(Color.textWhite)
+                .foregroundColor(DesignTokens.MoonColors.accentBlueStrong)
             
             // Day circles
             HStack(spacing: 4) {

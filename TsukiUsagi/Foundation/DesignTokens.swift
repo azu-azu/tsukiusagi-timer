@@ -43,6 +43,15 @@ enum DesignTokens {
 
         /// 成功状態色（緑の代替）
         static let statusSuccess = Color.green
+        
+        /// プラスボタン用アクセントグリーン
+        static let accentGreen = Color(red: 0.0, green: 0.78, blue: 0.59) // #00C896
+        
+        /// マイナスボタン用アクセントオレンジ
+        static let accentOrange = Color(red: 1.0, green: 0.54, blue: 0.40) // #FF8A65
+        
+        /// プログレス表示用アクセントブルー（強化版）
+        static let accentBlueStrong = Color(red: 0.29, green: 0.62, blue: 1.0) // #4A9EFF
     }
 
     /// 宇宙空間をテーマにした背景カラー
