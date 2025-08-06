@@ -188,7 +188,7 @@ class SessionManager: ObservableObject {
     private func load() {
         // V3形式のデータを読み込み
         if let data = UserDefaults.standard.data(forKey: "allSessionEntriesV3"),
-           let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
+            let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
             sessionDatabase.removeAll()
             for entry in decoded where !entry.sessionName.isEmpty {
                 let key = entry.sessionName
@@ -206,7 +206,7 @@ class SessionManager: ObservableObject {
     /// 旧形式データのマイグレーション
     private func migrateLegacyData() {
         if let data = UserDefaults.standard.data(forKey: "customEntriesV2"),
-           let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
+            let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
             for entry in decoded where !entry.sessionName.isEmpty {
                 let key = entry.sessionName
                     .lowercased()
