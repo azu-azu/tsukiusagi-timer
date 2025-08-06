@@ -126,17 +126,10 @@ struct DurationSessionSettingsView: View {
 
     @ViewBuilder
     private func sessionNamesManagementSection() -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-            Text("MANAGE SESSION NAMES")
-                .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-            VStack(alignment: .leading, spacing: 0) {
-                sessionNamesToggleButton()
-                sessionNamesExpandedContent()
-            }
+        VStack(alignment: .leading, spacing: 0) {
+            sessionNamesToggleButton()
+            sessionNamesExpandedContent()
         }
-        .padding(.bottom, betweenCardSpace)
     }
 
     @ViewBuilder
