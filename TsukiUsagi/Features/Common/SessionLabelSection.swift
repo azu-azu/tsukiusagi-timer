@@ -14,20 +14,8 @@ struct SessionLabelSection: View {
     private let inputHeight: CGFloat = 28
     private let labelHeight: CGFloat = 28
 
-    // 明示的なCustom Input状態管理
-    @State private var isCustomInputMode: Bool = false
-    @State private var isCustomDescriptionMode: Bool = false
-    @State private var toolbarID = UUID() // ツールバー強制更新用
-
-    private var isCustomActivity: Bool {
-        // 明示的なCustom Inputモードまたは空文字の場合
-        return isCustomInputMode || activity.isEmpty
-    }
-
-    private var isCustomDescription: Bool {
-        // 明示的なCustom Descriptionモードまたは選択されたセッションにdescriptionがない場合
-        return isCustomDescriptionMode || getCurrentSessionDescriptions().isEmpty
-    }
+    // ツールバー強制更新用
+    @State private var toolbarID = UUID()
 
     // 現在選択されているセッションに紐づくdescriptionsを取得
     private func getCurrentSessionDescriptions() -> [String] {
@@ -48,236 +36,109 @@ struct SessionLabelSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Top row with Close button
-            HStack {
-                // セッション名入力部分
-                HStack(alignment: .top) {
-                    if isCustomActivity {
-                        HStack(spacing: 8) {
-                            ZStack(alignment: .topLeading) {
-                                if activity.isEmpty {
-                                    Text("Enter session name...")
-                                        .font(DesignTokens.Fonts.label)
-                                        .foregroundColor(.gray)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                }
-
-                                TextField("", text: $activity)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                    .padding(.horizontal, 12)
-                                    .frame(height: labelHeight)
-                                    .focused($isActivityFocused)
-                                    .submitLabel(.done)
-                                    .onSubmit {
-                                        isActivityFocused = false
-                                        onDone?()
-                                    }
-                                    .onChange(of: isActivityFocused) {
-                                        // Haptic feedback removed
-                                    }
-                                    .onChange(of: activity) {
-                                        // セッション名が変更されたらdescriptionもリセット
-                                        descriptionText = ""
-                                        isCustomDescriptionMode = false
-                                    }
-                            }
-                            .frame(height: labelHeight)
-                            .background(
-                                (showEmptyError && activity.isEmpty) ?
-                                    Color.moonErrorBackground.opacity(0.3) :
-                                    DesignTokens.WhiteColors.surface
-                            )
-                            .cornerRadius(labelCornerRadius)
-
+            // Session Selection Menu
+            Menu {
+                // デフォルトセッション
+                Section("Default Sessions") {
+                    ForEach(sessionManager.defaultEntries) { entry in
+                        Button {
+                            activity = entry.sessionName
+                            descriptionText = entry.descriptions.first ?? ""
+                        } label: {
+                            Text(entry.sessionName)
+                                .font(DesignTokens.Fonts.label)
+                        }
+                    }
+                }
+                
+                // カスタムセッション
+                if !sessionManager.customEntries.isEmpty {
+                    Section("Custom Sessions") {
+                        ForEach(sessionManager.customEntries) { entry in
                             Button {
-                                activity = sessionManager.defaultEntries.first?.sessionName ?? "Work"
-                                descriptionText = sessionManager.defaultEntries.first?.descriptions.first ?? ""
-                                isActivityFocused = false
-                                isCustomInputMode = false
-                                isCustomDescriptionMode = false
+                                activity = entry.sessionName
+                                descriptionText = entry.descriptions.first ?? ""
                             } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                Text(entry.sessionName)
                                     .font(DesignTokens.Fonts.label)
                             }
                         }
-                    } else {
-                        Menu {
-                            // デフォルトセッション
-                            ForEach(sessionManager.defaultEntries) { entry in
-                                Button {
-                                    activity = entry.sessionName
-                                    descriptionText = entry.descriptions.first ?? ""
-                                    isCustomInputMode = false
-                                    isCustomDescriptionMode = false
-                                } label: {
-                                    Text(entry.sessionName)
-                                        .font(DesignTokens.Fonts.label)
-                                }
-                            }
-                            Divider()
-                            // カスタムセッション
-                            ForEach(sessionManager.customEntries) { entry in
-                                Button {
-                                    activity = entry.sessionName
-                                    descriptionText = entry.descriptions.first ?? ""
-                                    isCustomInputMode = false
-                                    isCustomDescriptionMode = false
-                                } label: {
-                                    Text(entry.sessionName)
-                                        .font(DesignTokens.Fonts.label)
-                                }
-                            }
-                            Divider()
-                            Button("Custom Input...") {
-                                activity = ""
-                                descriptionText = ""
-                                isCustomInputMode = true
-                                isCustomDescriptionMode = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    isActivityFocused = true
-                                }
-                            }
+                    }
+                }
+            } label: {
+                HStack {
+                    Text(activity.isEmpty ? "Select session..." : activity)
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(activity.isEmpty ? 
+                                       DesignTokens.MoonColors.textMuted : 
+                                       DesignTokens.MoonColors.textPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                }
+                .padding(.horizontal, 12)
+                .frame(height: labelHeight)
+                .background(
+                    (showEmptyError && activity.isEmpty) ?
+                        Color.moonErrorBackground.opacity(0.3) :
+                        DesignTokens.WhiteColors.surface
+                )
+                .cornerRadius(labelCornerRadius)
+            }
+
+            // Description Selection Menu
+            let descriptions = getCurrentSessionDescriptions()
+            if !descriptions.isEmpty {
+                Menu {
+                    ForEach(descriptions, id: \.self) { descriptionOption in
+                        Button {
+                            descriptionText = descriptionOption
                         } label: {
                             HStack {
-                                Text(activity.isEmpty ? "Custom" : activity)
-                                    .font(DesignTokens.Fonts.label)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                Image(systemName: "chevron.down")
-                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
-                            }
-                            .padding(.horizontal, 12)
-                            .frame(height: labelHeight)
-                            .cornerRadius(labelCornerRadius)
-                        }
-                    }
-                }
-            }
-
-            // Description Section
-            if isCustomDescription {
-                ZStack(alignment: .topLeading) {
-                    if descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Text("Description (optional)")
-                            .font(DesignTokens.Fonts.label)
-                            .foregroundColor(.gray)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 12)
-                    }
-
-                    TextEditor(text: $descriptionText)
-                        .frame(height: inputHeight)
-                        .padding(8)
-                        .scrollContentBackground(.hidden)
-                        .background(DesignTokens.WhiteColors.surface)
-                        .cornerRadius(6)
-                        .focused($isDescriptionFocused)
-                        .onChange(of: isDescriptionFocused) {
-                            // Haptic feedback removed
-                        }
-                }
-            } else {
-                // Description selection menu
-                let descriptions = getCurrentSessionDescriptions()
-                if !descriptions.isEmpty {
-                    Menu {
-                        ForEach(descriptions, id: \.self) { descriptionOption in
-                            Button {
-                                descriptionText = descriptionOption
-                                isCustomDescriptionMode = false
-                            } label: {
-                                HStack {
-                                    Text(descriptionOption)
-                                    if descriptionText == descriptionOption {
-                                        Image(systemName: "checkmark")
-                                    }
+                                Text(descriptionOption)
+                                if descriptionText == descriptionOption {
+                                    Image(systemName: "checkmark")
                                 }
                             }
                         }
-                        Divider()
-                        Button("Custom Input...") {
-                            isCustomDescriptionMode = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                isDescriptionFocused = true
-                            }
-                        }
-                        // 「None」ボタンは、description（説明文）を未設定（空文字）に戻すために必要。
-                        // これがないと、一度descriptionを選択・入力した後に「説明文なし」に戻せなくなる。
-                        // 例: 「読書」→「集中」→「None」でdescription=""（未設定）に戻す用途。
-                        Button("None") {
-                            descriptionText = ""
-                            isCustomDescriptionMode = false
-                        }
-                    } label: {
-                        HStack {
-                            Text(descriptionText.isEmpty ? "Select description..." : descriptionText)
-                                .foregroundColor(descriptionText.isEmpty ? .gray : .moonTextPrimary)
-                                .lineLimit(1)
-                            Spacer()
-                            Image(systemName: "chevron.down")
-                                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                        }
-                        .padding(.horizontal, 12)
-                        .frame(height: labelHeight)
-                        .background(DesignTokens.WhiteColors.surface)
-                        .cornerRadius(6)
                     }
-                } else {
-                    // セッションにdescriptionが設定されていない場合はcustom inputのみ
-                    ZStack(alignment: .topLeading) {
-                        if descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Text("Description (optional)")
-                                .foregroundColor(.gray)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 12)
-                        }
-
-                        TextEditor(text: $descriptionText)
-                            .frame(height: inputHeight)
-                            .padding(8)
-                            .scrollContentBackground(.hidden)
-                            .background(DesignTokens.WhiteColors.surface)
-                            .cornerRadius(6)
-                            .focused($isDescriptionFocused)
-                            .onChange(of: isDescriptionFocused) {
-                                // Haptic feedback removed
-                            }
+                    Divider()
+                    Button("None") {
+                        descriptionText = ""
                     }
+                } label: {
+                    HStack {
+                        Text(descriptionText.isEmpty ? "Select description..." : descriptionText)
+                            .foregroundColor(descriptionText.isEmpty ? .gray : .moonTextPrimary)
+                            .lineLimit(1)
+                        Spacer()
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(height: labelHeight)
+                    .background(DesignTokens.WhiteColors.surface)
+                    .cornerRadius(6)
                 }
-            }
-        }
-        .keyboardCloseButton(
-            isVisible: isActivityFocused || isDescriptionFocused,
-            topPadding: 8,
-            action: {
-                KeyboardManager.hideKeyboard {
-                    isActivityFocused = false
-                    isDescriptionFocused = false
-                    onDone?()
+            } else {
+                // セッションにdescriptionが設定されていない場合は空のプレースホルダー
+                HStack {
+                    Text("No descriptions available")
+                        .foregroundColor(.gray)
+                        .font(DesignTokens.Fonts.label)
+                    Spacer()
                 }
-            }
-        )
-        .onChange(of: isActivityFocused) {
-            // Haptic feedback removed
-            // フォーカス時にツールバーを強制更新
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                toolbarID = UUID()
-            }
-        }
-        .onChange(of: isDescriptionFocused) {
-            // Haptic feedback removed
-            // フォーカス時にツールバーを強制更新
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                toolbarID = UUID()
+                .padding(.horizontal, 12)
+                .frame(height: labelHeight)
+                .background(DesignTokens.WhiteColors.surface)
+                .cornerRadius(6)
             }
         }
         .onAppear {
-            // 初期状態で既存セッションが選択されている場合はCustom Inputモードを無効化
-            let allSessionNames = sessionManager.allEntries.map { $0.sessionName }
-            if allSessionNames.contains(activity) {
-                isCustomInputMode = false
-                isCustomDescriptionMode = false
+            // 初期状態でactivityが空の場合はデフォルトセッションを設定
+            if activity.isEmpty {
+                activity = sessionManager.defaultEntries.first?.sessionName ?? "Work"
+                descriptionText = sessionManager.defaultEntries.first?.descriptions.first ?? ""
             }
         }
         .debugSection(String(describing: Self.self), position: .topLeading)
