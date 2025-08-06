@@ -123,42 +123,36 @@ struct NewSessionFormView: View {
     
     @ViewBuilder
     private func unifiedSessionListSection() -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // DEFAULT Sessions
-            VStack(alignment: .leading, spacing: 8) {
-                Text("DEFAULT")
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(sessionManager.defaultEntries) { entry in
-                        sessionListItem(entry.sessionName, isDefault: true)
-                    }
-                }
+        VStack(alignment: .leading, spacing: 4) {
+            // All Default Sessions first
+            ForEach(sessionManager.defaultEntries) { entry in
+                sessionListItem(entry.sessionName, isDefault: true)
             }
             
-            // Light section separator
+            // Divider between default and custom sessions
             Divider()
                 .background(DesignTokens.BlackColors.stroke.opacity(0.3))
+                .padding(.vertical, 8)
             
-            // CUSTOM Sessions
-            VStack(alignment: .leading, spacing: 8) {
-                Text("CUSTOM")
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                
-                if sessionManager.customEntries.isEmpty {
-                    Text("No custom sessions. Tap Create New to add.")
+            // Custom Sessions or Empty State
+            if sessionManager.customEntries.isEmpty {
+                HStack(spacing: 8) {
+                    Text("•")
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        .font(.caption)
+                    
+                    Text("No custom sessions yet. Tap Create New to add.")
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                         .italic()
-                        .padding(.leading, 8)
-                } else {
-                    VStack(alignment: .leading, spacing: 4) {
-                        ForEach(sessionManager.customEntries) { entry in
-                            sessionListItem(entry.sessionName, isDefault: false)
-                        }
-                    }
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 8)
+            } else {
+                // All Custom Sessions
+                ForEach(sessionManager.customEntries) { entry in
+                    sessionListItem(entry.sessionName, isDefault: false)
                 }
             }
         }
@@ -180,8 +174,8 @@ struct NewSessionFormView: View {
             
             Spacer()
             
-            if !isDefault {
-                Text("editable")
+            if isDefault {
+                Text("Default")
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
                     .italic()
