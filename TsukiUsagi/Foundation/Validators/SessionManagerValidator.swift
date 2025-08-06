@@ -149,4 +149,29 @@ class SessionManagerValidator {
             }
         }
     }
+
+    /// Description追加用バリデーション
+    static func validateAddDescription(_ entry: SessionEntry, newText: String) throws {
+        guard entry.descriptions.count < SessionManager.maxDescriptionCount else {
+            throw SessionValidationError.tooManyDescriptions
+        }
+        guard newText.count <= SessionManager.maxDescriptionLength else {
+            throw SessionValidationError.descriptionTooLong
+        }
+    }
+
+    /// Description更新用バリデーション
+    static func validateUpdateDescription(_ entry: SessionEntry, index: Int, newText: String) throws {
+        try validateIndex(index, for: entry.descriptions)
+        guard newText.count <= SessionManager.maxDescriptionLength else {
+            throw SessionValidationError.descriptionTooLong
+        }
+    }
+
+    static func validateAndUnwrap(_ entry: SessionEntry?) throws -> SessionEntry {
+        guard let entry = entry else {
+            throw SessionValidationError.sessionNotFound
+        }
+        return entry
+    }
 }
