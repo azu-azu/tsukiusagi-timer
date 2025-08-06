@@ -58,7 +58,7 @@ class HistoryViewModel: ObservableObject {
         )
 
         history.append(record)
-        store.save(history)
+        saveHistory()
     }
 
     // MARK: - isDeleted判定
@@ -96,7 +96,7 @@ class HistoryViewModel: ObservableObject {
     func getCalendarDailyHistories(for month: Date) -> [Date: DailyHistory] {
         let calendar = Calendar.current
         guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month)),
-              let range = calendar.range(of: .day, in: .month, for: month) else {
+            let range = calendar.range(of: .day, in: .month, for: month) else {
             return [:]
         }
 
@@ -189,8 +189,16 @@ class HistoryViewModel: ObservableObject {
         return formatter.string(from: date)
     }
 
-    func save() {
+    // MARK: - Save Operations
+
+    /// 履歴データの永続化（共通処理）
+    private func saveHistory() {
         store.save(history)
+    }
+
+    /// 外部API用の保存メソッド（後方互換性）
+    func save() {
+        saveHistory()
     }
 
     func updateLast(activity: String,
@@ -204,6 +212,6 @@ class HistoryViewModel: ObservableObject {
         if let end = end {
             history[i].end = end
         }
-        save()
+        saveHistory()
     }
 }
