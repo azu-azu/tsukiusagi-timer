@@ -39,29 +39,26 @@ struct SessionLabelSection: View {
             // Session Selection Menu
             Menu {
                 // デフォルトセッション
-                Section("Default Sessions") {
-                    ForEach(sessionManager.defaultEntries) { entry in
+                ForEach(sessionManager.defaultEntries) { entry in
+                    Button {
+                        activity = entry.sessionName
+                        descriptionText = entry.descriptions.first ?? ""
+                    } label: {
+                        Text(entry.sessionName)
+                            .font(DesignTokens.Fonts.label)
+                    }
+                }
+                
+                // カスタムセッションがある場合は区切り線
+                if !sessionManager.customEntries.isEmpty {
+                    Divider()
+                    ForEach(sessionManager.customEntries) { entry in
                         Button {
                             activity = entry.sessionName
                             descriptionText = entry.descriptions.first ?? ""
                         } label: {
                             Text(entry.sessionName)
                                 .font(DesignTokens.Fonts.label)
-                        }
-                    }
-                }
-                
-                // カスタムセッション
-                if !sessionManager.customEntries.isEmpty {
-                    Section("Custom Sessions") {
-                        ForEach(sessionManager.customEntries) { entry in
-                            Button {
-                                activity = entry.sessionName
-                                descriptionText = entry.descriptions.first ?? ""
-                            } label: {
-                                Text(entry.sessionName)
-                                    .font(DesignTokens.Fonts.label)
-                            }
                         }
                     }
                 }
