@@ -2,261 +2,302 @@ import SwiftUI
 
 struct NewSessionFormView: View {
     @EnvironmentObject var sessionManager: SessionManager
-    @State private var name: String = ""
-    @State private var descriptionTexts: [String] = [""]
+    @State private var selectedSessionForEdit: String = ""
     @State private var errorMessage: String?
     @State private var showErrorAlert = false
-    @FocusState private var isNameFocused: Bool
-    @FocusState private var isDescriptionFocused: Bool
     @State private var errorTitle: String = "Error"
-    @State private var isCustomInputMode: Bool = false
-
-    private let inputHeight: CGFloat = 28
-    private let labelHeight: CGFloat = 28
-    private let labelCornerRadius: CGFloat = 6
-
-    private var isCustomActivity: Bool {
-        return isCustomInputMode
+    @State private var showEditView = false
+    @State private var showCreateView = false
+    
+    private var isEditButtonEnabled: Bool {
+        !selectedSessionForEdit.isEmpty
     }
-
-    var isAddDisabled: Bool {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let descriptions = descriptionTexts.filter {
-            !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        }
-
-        if trimmedName.isEmpty { return true }
-        if descriptions.isEmpty { return true }
-        if trimmedName.count > SessionManager.maxNameLength { return true }
-        if descriptions.contains(where: { $0.count > SessionManager.maxDescriptionLength }) {
-            return true
-        }
-        if descriptions.count > SessionManager.maxDescriptionCount { return true }
-        // セッション数超過（空文字でない場合のみチェック）
-        if !trimmedName.isEmpty &&
-            !sessionManager.defaultSessionNames.contains(trimmedName) &&
-            sessionManager.customEntries.count >= SessionManager.maxSessionCount &&
-            sessionManager.sessionDatabase[trimmedName.lowercased()] == nil {
-            return true
-        }
-        // 重複禁止（空文字でない場合のみチェック）
-        if !trimmedName.isEmpty,
-            let existing = sessionManager.sessionDatabase[trimmedName.lowercased()],
-            !sessionManager.defaultSessionNames.contains(trimmedName) {
-            if !existing.isDefault { return true }
-        }
-        return false
-    }
-
-    var saveButtonTitle: String {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmedName.isEmpty &&
-            sessionManager.allEntries.map({ $0.sessionName }).contains(trimmedName) {
-            return "Update \"\(trimmedName)\""
-        }
-        return "Create Session"
-    }
-
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .top) {
-                    if isCustomActivity {
-                        HStack(spacing: 8) {
-                            ZStack(alignment: .topLeading) {
-                                if name.isEmpty {
-                                    Text("Enter session name...")
-                                        .font(DesignTokens.Fonts.label)
-                                        .foregroundColor(.gray)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                }
-
-                                TextField("", text: $name)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                    .padding(.horizontal, 12)
-                                    .frame(height: labelHeight)
-                                    .focused($isNameFocused)
-                                    .onChange(of: isNameFocused) { _, _ in }
-                            }
-                            .frame(height: labelHeight)
-                            .background(DesignTokens.BlackColors.tertiary)
-                            .cornerRadius(labelCornerRadius)
-                            .frame(maxWidth: .infinity)
-
-                            Button {
-                                name = sessionManager.defaultEntries.first?.sessionName ?? "Work"
-                                isCustomInputMode = false
-                                isNameFocused = false
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(DesignTokens.MoonColors.textMuted)
-                                    .font(DesignTokens.Fonts.label)
-                            }
-                        }
-                    } else {
-                        Menu {
-                            // デフォルトセッション
-                            ForEach(sessionManager.defaultEntries) { entry in
-                                Button {
-                                    name = entry.sessionName
-                                    isCustomInputMode = false
-                                } label: {
-                                    Text(entry.sessionName)
-                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                }
-                            }
-                            Divider()
-                            // カスタムセッション
-                            ForEach(sessionManager.customEntries) { entry in
-                                Button {
-                                    name = entry.sessionName
-                                    isCustomInputMode = false
-                                } label: {
-                                    Text(entry.sessionName)
-                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                }
-                            }
-                            Divider()
-                            Button("Custom Input...") {
-                                name = ""
-                                isCustomInputMode = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    isNameFocused = true
-                                }
-                            }
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            } label: {
-                                HStack {
-                                    Text(name.isEmpty ? "Select Session" : name)
-                                        .foregroundColor(
-                                            name.isEmpty ?
-                                            DesignTokens.MoonColors.textSecondary :
-                                            .moonTextPrimary
-                                        )
-                                    Image(systemName: "chevron.down")
-                                        .foregroundColor(DesignTokens.MoonColors.textMuted)
-                                }
-                                .padding(.horizontal, 12)
-                                .frame(height: labelHeight)
-                                .cornerRadius(labelCornerRadius)
-                            }
-                    }
-
-                    Spacer(minLength: 8)
-                }
-
-                ForEach(descriptionTexts.indices, id: \.self) { idx in
-                    HStack {
-                        ZStack(alignment: .topLeading) {
-                            if descriptionTexts[safe: idx]?
-                                .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true {
-                                Text(idx == 0 ? "Description (optional)" : "Description \(idx + 1)")
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 12)
-                            }
-
-                            TextEditor(text: Binding(
-                                get: { descriptionTexts[safe: idx] ?? "" },
-                                set: { newValue in
-                                    if idx < descriptionTexts.count {
-                                        descriptionTexts[idx] = newValue
-                                    }
-                                }
-                            ))
-                            .frame(height: inputHeight)
-                            .padding(8)
-                            .scrollContentBackground(.hidden)
-                            .background(DesignTokens.BlackColors.tertiary)
-                            .cornerRadius(labelCornerRadius)
-                            .focused($isDescriptionFocused)
-                            .onChange(of: isDescriptionFocused) { _, _ in }
-                        }
-
-                        // 2個目以降にのみマイナスボタンを表示、1個目はスペース確保
-                        if idx > 0 {
-                            Button(
-                                action: { descriptionTexts.remove(at: idx) },
-                                label: {
-                                    Image(systemName: "minus.circle")
-                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                }
-                            )
-                            .buttonStyle(.plain)
-                        } else {
-                            Color.clear.frame(width: 24, height: 24)
-                        }
-                    }
-                }
-
-                Button(action: { descriptionTexts.append("") }, label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "plus.circle")
-                        Text("Add Description")
-                    }
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                })
-                .font(DesignTokens.Fonts.caption)
-                .buttonStyle(.plain)
-                .disabled(
-                    name.isEmpty ||
-                    (descriptionTexts.first?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-                )
-
-                Button(saveButtonTitle, action: { addSession() })
-                    .buttonStyle(.borderedProminent)
-                    .disabled(isAddDisabled)
-                    .accessibilityIdentifier(AccessibilityIDs.SessionManager.addButton)
+        VStack(alignment: .leading, spacing: 24) {
+            // Dropdown Selector Section
+            dropdownSelectorSection()
+            
+            // Action Buttons Section
+            actionButtonsSection()
+            
+            // Single Unified Session List Display
+            unifiedSessionListSection()
         }
-        .debugForm(String(describing: Self.self), position: .topLeading)
-        .keyboardCloseButton(
-            isVisible: isNameFocused || isDescriptionFocused,
-            action: {
-                KeyboardManager.hideKeyboard {
-                    isNameFocused = false
-                    isDescriptionFocused = false
-                }
-            }
-        )
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text(errorTitle),
                 message: Text(errorMessage ?? ""),
                 dismissButton: .default(Text("OK")))
         }
-        .onAppear { isCustomInputMode = false }
-    }
-
-    func addSession() {
-        let trimmedName = name.trimmed
-        let descriptions = descriptionTexts
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-
-        do {
-            if sessionManager.sessionDatabase[trimmedName.lowercased()] != nil {
-                for description in descriptions where !description.isEmpty {
-                    try sessionManager.addDescriptionToSession(
-                        sessionName: trimmedName, newDescription: description)
-                }
-            } else {
-                try sessionManager.addOrUpdateEntry(
-                    originalKey: "", sessionName: trimmedName, descriptions: descriptions)
-            }
-
-            name = ""
-            descriptionTexts = [""]
-            isCustomInputMode = false
-            isNameFocused = true
-        } catch {
-            errorMessage = error.localizedDescription
-            showErrorAlert = true
+        .sheet(isPresented: $showEditView) {
+            EditSessionStubView(sessionName: selectedSessionForEdit)
+        }
+        .sheet(isPresented: $showCreateView) {
+            CreateSessionStubView()
         }
     }
+    
+    // MARK: - Dropdown Selector Section
+    
+    @ViewBuilder
+    private func dropdownSelectorSection() -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Choose existing session to edit")
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            
+            Menu {
+                // All sessions for editing (grouped)
+                Section("DEFAULT") {
+                    ForEach(sessionManager.defaultEntries) { entry in
+                        Button {
+                            selectedSessionForEdit = entry.sessionName
+                        } label: {
+                            HStack {
+                                Text(entry.sessionName)
+                                if selectedSessionForEdit == entry.sessionName {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if !sessionManager.customEntries.isEmpty {
+                    Section("CUSTOM") {
+                        ForEach(sessionManager.customEntries) { entry in
+                            Button {
+                                selectedSessionForEdit = entry.sessionName
+                            } label: {
+                                HStack {
+                                    Text(entry.sessionName)
+                                    if selectedSessionForEdit == entry.sessionName {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } label: {
+                HStack {
+                    Text(selectedSessionForEdit.isEmpty ? "Select a session..." : selectedSessionForEdit)
+                        .foregroundColor(selectedSessionForEdit.isEmpty ? 
+                                       DesignTokens.MoonColors.textMuted : 
+                                       DesignTokens.MoonColors.textPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        .font(.caption)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(DesignTokens.CosmosColors.cardBackground)
+                        .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+                )
+            }
+        }
+    }
+    
+    // MARK: - Action Buttons Section
+    
+    @ViewBuilder
+    private func actionButtonsSection() -> some View {
+        HStack(spacing: 12) {
+            Button("Edit Selected") {
+                showEditView = true
+            }
+            .buttonStyle(.bordered)
+            .disabled(!isEditButtonEnabled)
+            
+            Button("Create New") {
+                showCreateView = true
+            }
+            .buttonStyle(.borderedProminent)
+        }
+    }
+    
+    // MARK: - Unified Session List Display
+    
+    @ViewBuilder
+    private func unifiedSessionListSection() -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // DEFAULT Sessions
+            VStack(alignment: .leading, spacing: 8) {
+                Text("DEFAULT")
+                    .font(DesignTokens.Fonts.sectionTitle)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(sessionManager.defaultEntries) { entry in
+                        sessionListItem(entry.sessionName, isDefault: true)
+                    }
+                }
+            }
+            
+            // Light section separator
+            Divider()
+                .background(DesignTokens.BlackColors.stroke.opacity(0.3))
+            
+            // CUSTOM Sessions
+            VStack(alignment: .leading, spacing: 8) {
+                Text("CUSTOM")
+                    .font(DesignTokens.Fonts.sectionTitle)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                
+                if sessionManager.customEntries.isEmpty {
+                    Text("No custom sessions. Tap Create New to add.")
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        .italic()
+                        .padding(.leading, 8)
+                } else {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(sessionManager.customEntries) { entry in
+                            sessionListItem(entry.sessionName, isDefault: false)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 8)
+    }
+    
+    // MARK: - Session List Item
+    
+    @ViewBuilder
+    private func sessionListItem(_ sessionName: String, isDefault: Bool) -> some View {
+        HStack(spacing: 8) {
+            Text("•")
+                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .font(.caption)
+            
+            Text(sessionName)
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+            
+            Spacer()
+            
+            if !isDefault {
+                Text("editable")
+                    .font(DesignTokens.Fonts.caption)
+                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+                    .italic()
+            }
+        }
+        .padding(.horizontal, 8)
+    }
+}
 
-    func hideKeyboard() {
-        KeyboardManager.hideKeyboard {
-            isNameFocused = false
-            isDescriptionFocused = false
+// MARK: - Stub Views
+
+struct EditSessionStubView: View {
+    let sessionName: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var editedName: String = ""
+    @State private var editedDescription: String = ""
+    
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Editing: \(sessionName)")
+                    .font(DesignTokens.Fonts.title)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Session Name")
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    
+                    TextField("Enter session name", text: $editedName)
+                        .textFieldStyle(.roundedBorder)
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Description")
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    
+                    TextField("Enter description (optional)", text: $editedDescription)
+                        .textFieldStyle(.roundedBorder)
+                }
+                
+                Spacer()
+                
+                Button("Save Changes") {
+                    // TODO: Implement save functionality
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            .navigationTitle("Edit Session")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .onAppear {
+            editedName = sessionName
+        }
+    }
+}
+
+struct CreateSessionStubView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var newSessionName: String = ""
+    @State private var newDescription: String = ""
+    
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Create New Session")
+                    .font(DesignTokens.Fonts.title)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Session Name")
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    
+                    TextField("Enter session name", text: $newSessionName)
+                        .textFieldStyle(.roundedBorder)
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Description")
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    
+                    TextField("Enter description (optional)", text: $newDescription)
+                        .textFieldStyle(.roundedBorder)
+                }
+                
+                Spacer()
+                
+                Button("Create Session") {
+                    // TODO: Implement create functionality
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(newSessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            .padding()
+            .navigationTitle("New Session")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }
@@ -264,7 +305,10 @@ struct NewSessionFormView: View {
 #if DEBUG
 struct NewSessionFormView_Previews: PreviewProvider {
     static var previews: some View {
-        NewSessionFormView().environmentObject(SessionManager())
+        NewSessionFormView()
+            .environmentObject(SessionManager())
+            .padding()
+            .background(DesignTokens.CosmosColors.background)
     }
 }
 #endif

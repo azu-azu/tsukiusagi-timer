@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import CoreText
+@testable import TsukiUsagi
 
 // MARK: - Font Test Helper Views
 
