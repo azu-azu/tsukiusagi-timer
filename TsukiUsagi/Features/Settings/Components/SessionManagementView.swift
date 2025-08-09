@@ -111,47 +111,7 @@ struct SessionManagementView: View {
         Button {
             selectedSession = session
             activeSheet = .edit(session)
-        } label: {
-            HStack(spacing: DesignTokens.Spacing.large) {
-                // Session Icon
-                Image(systemName: session.iconName)
-                    .foregroundColor(DesignTokens.MoonColors.textMuted)
-                    .font(DesignTokens.Fonts.symbolMedium)
-                    .frame(width: 20)
-
-                // Session Info
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
-                    Text(session.sessionName)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-
-                    Text(
-                        String.localizedStringWithFormat(
-                            NSLocalizedString(
-                                "descriptions_count",
-                                tableName: nil,
-                                bundle: .main,
-                                value: "%d descriptions",
-                                comment: "Pluralized descriptions count"
-                            ),
-                            session.descriptions.count
-                        )
-                    )
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
-                }
-
-                Spacer()
-
-                // Edit indicator
-                Image(systemName: "pencil")
-                    .foregroundColor(DesignTokens.MoonColors.textMuted)
-                    .font(DesignTokens.Fonts.symbolSmall)
-            }
-            .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
-            .padding(.vertical, DesignTokens.Padding.medium)
-            .contentShape(Rectangle())
-        }
+        } label: { defaultRowLabel(session: session) }
         .buttonStyle(PlainButtonStyle())
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
@@ -223,39 +183,7 @@ struct SessionManagementView: View {
         Button {
             selectedSession = session
             activeSheet = .edit(session)
-        } label: {
-            HStack(spacing: DesignTokens.Spacing.large) {
-                // Session Icon
-                Image(systemName: session.iconName)
-                    .foregroundColor(DesignTokens.MoonColors.textMuted)
-                    .font(DesignTokens.Fonts.symbolMedium)
-                    .frame(width: 20)
-
-                // Session Info
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
-                    Text(session.sessionName)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-
-                    if let description = session.descriptions.first, !description.isEmpty {
-                        Text(description)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textMuted)
-                            .lineLimit(1)
-                    }
-                }
-
-                Spacer()
-
-                // Edit indicator
-                Image(systemName: "chevron.right")
-                    .foregroundColor(DesignTokens.MoonColors.textMuted)
-                    .font(DesignTokens.Fonts.symbolSmall)
-            }
-            .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
-            .padding(.vertical, DesignTokens.Padding.medium)
-            .contentShape(Rectangle())
-        }
+        } label: { customRowLabel(session: session) }
         .buttonStyle(PlainButtonStyle())
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
@@ -280,6 +208,80 @@ struct SessionManagementView: View {
             Divider()
                 .padding(.leading, DesignTokens.Padding.large + 20 + DesignTokens.Spacing.large)
         }
+    }
+
+    // MARK: - Row Labels (extracted to reduce function length)
+
+    @ViewBuilder
+    private func defaultRowLabel(session: SessionEntry) -> some View {
+        HStack(spacing: DesignTokens.Spacing.large) {
+            Image(systemName: session.iconName)
+                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .font(DesignTokens.Fonts.symbolMedium)
+                .frame(width: 20)
+
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
+                Text(session.sessionName)
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+
+                Text(
+                    String.localizedStringWithFormat(
+                        NSLocalizedString(
+                            "descriptions_count",
+                            tableName: nil,
+                            bundle: .main,
+                            value: "%d descriptions",
+                            comment: "Pluralized descriptions count"
+                        ),
+                        session.descriptions.count
+                    )
+                )
+                .font(DesignTokens.Fonts.caption)
+                .foregroundColor(DesignTokens.MoonColors.textMuted)
+            }
+
+            Spacer()
+
+            Image(systemName: "pencil")
+                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .font(DesignTokens.Fonts.symbolSmall)
+        }
+        .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
+        .padding(.vertical, DesignTokens.Padding.medium)
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private func customRowLabel(session: SessionEntry) -> some View {
+        HStack(spacing: DesignTokens.Spacing.large) {
+            Image(systemName: session.iconName)
+                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .font(DesignTokens.Fonts.symbolMedium)
+                .frame(width: 20)
+
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
+                Text(session.sessionName)
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+
+                if let description = session.descriptions.first, !description.isEmpty {
+                    Text(description)
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .font(DesignTokens.Fonts.symbolSmall)
+        }
+        .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
+        .padding(.vertical, DesignTokens.Padding.medium)
+        .contentShape(Rectangle())
     }
 
     @ViewBuilder
