@@ -131,7 +131,7 @@ struct EmbeddedSessionManagementView: View {
                 .padding(.leading, DesignTokens.Padding.large + 20 + DesignTokens.Spacing.large)
         }
     }
-    
+
     // MARK: - Custom Sessions Section
 
     @ViewBuilder
@@ -198,9 +198,9 @@ struct EmbeddedSessionManagementView: View {
                             .lineLimit(1)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 // Edit indicator
                 Image(systemName: "chevron.right")
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
