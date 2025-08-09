@@ -268,6 +268,24 @@ enum DesignTokens {
             Font.custom("Nunito-Bold", size: FontSize.headline)
         }
 
+        /// SF Symbols 用の小サイズフォント（12pt程度）
+        static var symbolSmall: Font {
+            // swiftlint:disable:next discouraged-font-usage
+            Font.system(size: FontSize.caption, weight: .regular)
+        }
+
+        /// SF Symbols 用の中サイズフォント（16pt程度）
+        static var symbolMedium: Font {
+            // swiftlint:disable:next discouraged-font-usage
+            Font.system(size: FontSize.subheadline, weight: .medium)
+        }
+
+        /// SF Symbols 用の大サイズフォント（22pt程度）
+        static var symbolLarge: Font {
+            // swiftlint:disable:next discouraged-font-usage
+            Font.system(size: FontSize.title2, weight: .regular)
+        }
+
         /// タイマー表示用フォント（🚨 重要：絶対に変更禁止 🚨）
         /// 必ずシステムフォント .rounded を使用すること
         /// 理由：視認性・読みやすさ・数字表示最適化のため
