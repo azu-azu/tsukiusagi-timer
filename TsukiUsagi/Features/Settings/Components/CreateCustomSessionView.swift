@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct NewSessionFormView: View {
+struct CreateCustomSessionView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var sessionManager: SessionManager
 
@@ -14,13 +14,19 @@ struct NewSessionFormView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
-                    header()
+                VStack(alignment: .leading, spacing: 24) {
+                    // Header
+                    createSessionHeader()
+
+                    // Session Name Section
                     sessionNameSection()
+
+                    // Descriptions Section
                     descriptionsSection()
+
                     Spacer(minLength: 50)
                 }
-                .padding(DesignTokens.Padding.large)
+                .padding()
             }
             .navigationTitle(NSLocalizedString("new_custom_session_title", comment: ""))
             .navigationBarTitleDisplayMode(.inline)
@@ -30,6 +36,7 @@ struct NewSessionFormView: View {
                         dismiss()
                     }
                 }
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(NSLocalizedString("create", comment: "")) {
                         createSession()
@@ -38,21 +45,21 @@ struct NewSessionFormView: View {
                 }
             }
         }
-        .alert(NSLocalizedString("error_title", comment: "Error"), isPresented: $showError) {
-            Button(NSLocalizedString("ok", comment: "OK")) { }
+        .alert("Error", isPresented: $showError) {
+            Button("OK") { }
         } message: {
             Text(errorMessage)
         }
     }
 
-    // MARK: - Header
+    // MARK: - Create Session Header
 
     @ViewBuilder
-    private func header() -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
+    private func createSessionHeader() -> some View {
+        VStack(alignment: .leading, spacing: 12) {
             Image(systemName: "folder.badge.plus")
                 .foregroundColor(DesignTokens.MoonColors.accentBlue)
-                .font(DesignTokens.Fonts.symbolLarge)
+                .font(.system(size: 32))
 
             Text(NSLocalizedString("create_custom_session_title", comment: ""))
                 .font(DesignTokens.Fonts.title)
@@ -64,11 +71,11 @@ struct NewSessionFormView: View {
         }
     }
 
-    // MARK: - Session Name
+    // MARK: - Session Name Section
 
     @ViewBuilder
     private func sessionNameSection() -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(NSLocalizedString("session_name_required_label", comment: ""))
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
@@ -82,23 +89,24 @@ struct NewSessionFormView: View {
         }
     }
 
-    // MARK: - Descriptions
+    // MARK: - Descriptions Section
 
     @ViewBuilder
     private func descriptionsSection() -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(NSLocalizedString("descriptions_optional_label", comment: ""))
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
+
                 Spacer()
+
                 Button {
                     showAddDescriptionField = true
                     newDescription = ""
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
-                        .font(DesignTokens.Fonts.symbolMedium)
                 }
             }
 
@@ -109,7 +117,7 @@ struct NewSessionFormView: View {
             if descriptions.isEmpty {
                 emptyDescriptionsView()
             } else {
-                LazyVStack(spacing: DesignTokens.Spacing.medium) {
+                LazyVStack(spacing: 8) {
                     ForEach(Array(descriptions.enumerated()), id: \.offset) { index, description in
                         descriptionRow(description: description, index: index)
                     }
@@ -124,10 +132,10 @@ struct NewSessionFormView: View {
 
     @ViewBuilder
     private func emptyDescriptionsView() -> some View {
-        VStack(spacing: DesignTokens.Spacing.medium) {
+        VStack(spacing: 8) {
             Image(systemName: "text.bubble")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolMedium)
+                .font(.system(size: 20))
 
             Text(NSLocalizedString("no_descriptions_title", comment: ""))
                 .font(DesignTokens.Fonts.caption)
@@ -138,16 +146,16 @@ struct NewSessionFormView: View {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, DesignTokens.Padding.large)
+        .padding(.vertical, 20)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+            RoundedRectangle(cornerRadius: 8)
                 .fill(DesignTokens.MoonColors.textMuted.opacity(0.05))
         )
     }
 
     @ViewBuilder
     private func descriptionRow(description: String, index: Int) -> some View {
-        HStack(spacing: DesignTokens.Spacing.medium) {
+        HStack(spacing: 8) {
             TextField(NSLocalizedString("description_placeholder", comment: ""), text: Binding(
                 get: { descriptions[safe: index] ?? "" },
                 set: { newValue in
@@ -162,29 +170,26 @@ struct NewSessionFormView: View {
                 descriptions.remove(at: index)
             } label: {
                 Image(systemName: "minus.circle.fill")
-                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
-                    .font(DesignTokens.Fonts.symbolMedium)
+                    .foregroundColor(.red)
             }
         }
     }
 
     @ViewBuilder
     private func addDescriptionField() -> some View {
-        HStack(spacing: DesignTokens.Spacing.medium) {
+        HStack(spacing: 8) {
             TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
                 .textFieldStyle(.roundedBorder)
 
             Button {
-                let trimmed = newDescription.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmed.isEmpty {
-                    descriptions.append(trimmed)
+                if !newDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    descriptions.append(newDescription.trimmingCharacters(in: .whitespacesAndNewlines))
                     newDescription = ""
                 }
                 showAddDescriptionField = false
             } label: {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(DesignTokens.MoonColors.accentGreen)
-                    .font(DesignTokens.Fonts.symbolMedium)
+                    .foregroundColor(.green)
             }
 
             Button {
@@ -192,21 +197,22 @@ struct NewSessionFormView: View {
                 newDescription = ""
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
-                    .font(DesignTokens.Fonts.symbolMedium)
+                    .foregroundColor(.red)
             }
         }
     }
 
-    // MARK: - Create
+    // MARK: - Helper Methods
 
     private func createSession() {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
+
         guard !trimmedName.isEmpty else {
-            errorMessage = NSLocalizedString("error_empty_session_name", comment: "Session name cannot be empty")
+            errorMessage = "Session name cannot be empty"
             showError = true
             return
         }
+
         do {
             try sessionManager.addOrUpdateEntry(
                 originalKey: "",
@@ -221,13 +227,12 @@ struct NewSessionFormView: View {
     }
 }
 
+
 #if DEBUG
-struct NewSessionFormView_Previews: PreviewProvider {
+struct CreateCustomSessionView_Previews: PreviewProvider {
     static var previews: some View {
-        NewSessionFormView()
+        CreateCustomSessionView()
             .environmentObject(SessionManager())
-            .padding()
-            .background(DesignTokens.CosmosColors.background)
     }
 }
 #endif

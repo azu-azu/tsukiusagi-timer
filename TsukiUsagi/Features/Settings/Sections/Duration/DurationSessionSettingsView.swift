@@ -175,7 +175,7 @@ struct DurationSessionSettingsView: View {
                 Divider()
                     .background(DesignTokens.MoonColors.surfaceSecondary)
 
-                SessionNameManagerView()
+                EmbeddedSessionManagementView()
                     .padding(.horizontal, 16)
                     .padding(.bottom, 12)
             }
