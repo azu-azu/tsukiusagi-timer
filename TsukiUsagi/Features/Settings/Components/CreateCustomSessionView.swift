@@ -227,7 +227,6 @@ struct CreateCustomSessionView: View {
     }
 }
 
-
 #if DEBUG
 struct CreateCustomSessionView_Previews: PreviewProvider {
     static var previews: some View {
