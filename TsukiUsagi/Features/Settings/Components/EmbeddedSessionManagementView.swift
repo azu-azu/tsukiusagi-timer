@@ -20,15 +20,15 @@ struct EmbeddedSessionManagementView: View {
 
     @State private var activeSheet: ActiveSheet?
     @State private var showDeleteConfirm: Bool = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraLarge) {
             // Default Sessions Section (Description editing only)
             defaultSessionsSection()
-            
+
             // Custom Sessions Section (Full CRUD)
             customSessionsSection()
-            
+
             // Add Custom Session Button
             addCustomSessionButton()
         }
@@ -55,14 +55,14 @@ struct EmbeddedSessionManagementView: View {
     }
     
     // MARK: - Default Sessions Section
-    
+
     @ViewBuilder
     private func defaultSessionsSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             Text(NSLocalizedString("default_sessions_title", comment: ""))
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
-            
+
             VStack(spacing: 0) {
                 ForEach(Array(sessionManager.defaultEntries.enumerated()), id: \.element.id) { index, session in
                     defaultSessionRow(session, isLast: index == sessionManager.defaultEntries.count - 1)
@@ -133,7 +133,7 @@ struct EmbeddedSessionManagementView: View {
     }
     
     // MARK: - Custom Sessions Section
-    
+
     @ViewBuilder
     private func customSessionsSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
@@ -141,9 +141,9 @@ struct EmbeddedSessionManagementView: View {
                 Text(NSLocalizedString("custom_sessions_title", comment: ""))
                     .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                
+
                 Spacer()
-                
+
                 Text("\(sessionManager.customEntries.count)")
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -154,7 +154,7 @@ struct EmbeddedSessionManagementView: View {
                             .fill(DesignTokens.MoonColors.textMuted.opacity(0.1))
                     )
             }
-            
+
             VStack(spacing: 0) {
                 if sessionManager.customEntries.isEmpty {
                     emptyCustomSessionsView()
@@ -171,7 +171,7 @@ struct EmbeddedSessionManagementView: View {
             )
         }
     }
-    
+
     @ViewBuilder
     private func customSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
         Button {
@@ -190,7 +190,7 @@ struct EmbeddedSessionManagementView: View {
                     Text(session.sessionName)
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    
+
                     if let description = session.descriptions.first, !description.isEmpty {
                         Text(description)
                             .font(DesignTokens.Fonts.caption)
@@ -198,9 +198,9 @@ struct EmbeddedSessionManagementView: View {
                             .lineLimit(1)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 // Edit indicator
                 Image(systemName: "chevron.right")
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -248,24 +248,24 @@ struct EmbeddedSessionManagementView: View {
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(Text("\(session.sessionName)" + (session.descriptions.first.flatMap { ": \($0)" } ?? "")))
         .accessibilityHint(Text("Tap to edit. Long-press for more actions."))
-        
+
         if !isLast {
             Divider()
                 .padding(.leading, DesignTokens.Padding.large + 20 + DesignTokens.Spacing.large)
         }
     }
-    
+
     @ViewBuilder
     private func emptyCustomSessionsView() -> some View {
         VStack(spacing: DesignTokens.Spacing.medium) {
             Image(systemName: "folder.badge.plus")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolLarge)
-            
+
             Text(NSLocalizedString("empty_custom_sessions_title", comment: ""))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
-            
+
             Text(NSLocalizedString("empty_custom_sessions_subtitle", comment: ""))
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -274,9 +274,9 @@ struct EmbeddedSessionManagementView: View {
         .padding(.vertical, DesignTokens.Padding.large)
         .frame(maxWidth: .infinity)
     }
-    
+
     // MARK: - Add Custom Session Button
-    
+
     @ViewBuilder
     private func addCustomSessionButton() -> some View {
         Button {
