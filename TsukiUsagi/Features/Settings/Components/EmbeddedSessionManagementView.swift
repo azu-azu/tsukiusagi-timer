@@ -53,7 +53,7 @@ struct EmbeddedSessionManagementView: View {
             }
         }
     }
-    
+
     // MARK: - Default Sessions Section
 
     @ViewBuilder
@@ -75,7 +75,7 @@ struct EmbeddedSessionManagementView: View {
             )
         }
     }
-    
+
     @ViewBuilder
     private func defaultSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
         Button {
@@ -88,20 +88,20 @@ struct EmbeddedSessionManagementView: View {
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
                     .font(DesignTokens.Fonts.symbolMedium)
                     .frame(width: 20)
-                
+
                 // Session Info
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
                     Text(session.sessionName)
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    
+
                     Text(String.localizedStringWithFormat(NSLocalizedString("descriptions_count", tableName: nil, bundle: .main, value: "%d descriptions", comment: "Pluralized descriptions count"), session.descriptions.count))
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                 }
-                
+
                 Spacer()
-                
+
                 // Edit indicator
                 Image(systemName: "pencil")
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -125,7 +125,7 @@ struct EmbeddedSessionManagementView: View {
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(Text("\(session.sessionName), \(session.descriptions.count) descriptions"))
         .accessibilityHint(Text("Tap to edit descriptions"))
-        
+
         if !isLast {
             Divider()
                 .padding(.leading, DesignTokens.Padding.large + 20 + DesignTokens.Spacing.large)
@@ -184,7 +184,7 @@ struct EmbeddedSessionManagementView: View {
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
                     .font(DesignTokens.Fonts.symbolMedium)
                     .frame(width: 20)
-                
+
                 // Session Info
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
                     Text(session.sessionName)
@@ -198,9 +198,9 @@ struct EmbeddedSessionManagementView: View {
                             .lineLimit(1)
                     }
                 }
-
+                
                 Spacer()
-
+                
                 // Edit indicator
                 Image(systemName: "chevron.right")
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
