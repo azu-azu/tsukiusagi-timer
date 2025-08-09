@@ -116,7 +116,18 @@ struct SessionManagementView: View {
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                    Text(String.localizedStringWithFormat(NSLocalizedString("descriptions_count", tableName: nil, bundle: .main, value: "%d descriptions", comment: "Pluralized descriptions count"), session.descriptions.count))
+                    Text(
+                        String.localizedStringWithFormat(
+                            NSLocalizedString(
+                                "descriptions_count",
+                                tableName: nil,
+                                bundle: .main,
+                                value: "%d descriptions",
+                                comment: "Pluralized descriptions count"
+                            ),
+                            session.descriptions.count
+                        )
+                    )
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                 }

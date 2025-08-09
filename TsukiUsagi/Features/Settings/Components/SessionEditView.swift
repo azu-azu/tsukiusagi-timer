@@ -35,7 +35,11 @@ struct SessionEditView: View {
                 }
                 .padding()
             }
-            .navigationTitle(isDefaultSession ? NSLocalizedString("edit_descriptions_title", comment: "") : NSLocalizedString("edit_session_title", comment: ""))
+            .navigationTitle(
+                isDefaultSession
+                    ? NSLocalizedString("edit_descriptions_title", comment: "")
+                    : NSLocalizedString("edit_session_title", comment: "")
+            )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -70,7 +74,11 @@ struct SessionEditView: View {
     @ViewBuilder
     private func sessionInfoHeader() -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(isDefaultSession ? NSLocalizedString("default_session_label", comment: "") : NSLocalizedString("custom_session_label", comment: ""))
+            Text(
+                isDefaultSession
+                    ? NSLocalizedString("default_session_label", comment: "")
+                    : NSLocalizedString("custom_session_label", comment: "")
+            )
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
