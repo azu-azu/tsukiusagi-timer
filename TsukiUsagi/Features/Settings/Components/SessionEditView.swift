@@ -298,7 +298,6 @@ struct SessionEditView: View {
     }
 }
 
-
 #if DEBUG
 struct SessionEditView_Previews: PreviewProvider {
     static var previews: some View {
