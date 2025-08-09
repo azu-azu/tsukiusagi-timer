@@ -48,7 +48,7 @@ struct SessionLabelSection: View {
                             .font(DesignTokens.Fonts.label)
                     }
                 }
-                
+
                 // カスタムセッションがある場合は区切り線
                 if !sessionManager.customEntries.isEmpty {
                     Divider()
@@ -66,9 +66,11 @@ struct SessionLabelSection: View {
                 HStack {
                     Text(activity.isEmpty ? "Select session..." : activity)
                         .font(DesignTokens.Fonts.label)
-                        .foregroundColor(activity.isEmpty ? 
-                                       DesignTokens.MoonColors.textMuted : 
-                                       DesignTokens.MoonColors.textPrimary)
+                        .foregroundColor(
+                            activity.isEmpty
+                            ? DesignTokens.MoonColors.textMuted
+                            : DesignTokens.MoonColors.textPrimary
+                        )
                     Spacer()
                     Image(systemName: "chevron.down")
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
