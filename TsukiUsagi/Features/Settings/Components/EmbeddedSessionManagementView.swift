@@ -304,6 +304,12 @@ struct EmbeddedSessionManagementView: View {
     }
 }
 
+// MARK: - EmbeddedSessionManagementView subviews
+
+extension EmbeddedSessionManagementView {
+    // Additional helpers can be added here to keep main type small
+}
+
 #if DEBUG
 struct EmbeddedSessionManagementView_Previews: PreviewProvider {
     static var previews: some View {

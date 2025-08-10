@@ -306,6 +306,12 @@ struct SessionEditView: View {
     }
 }
 
+// MARK: - SessionEditView helpers
+
+extension SessionEditView {
+    // Keep extensions for additional helpers if needed to keep body short
+}
+
 #if DEBUG
 struct SessionEditView_Previews: PreviewProvider {
     static var previews: some View {
