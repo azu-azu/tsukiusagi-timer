@@ -318,6 +318,12 @@ struct SessionManagementView: View {
     }
 }
 
+// MARK: - SessionManagementView subviews
+
+extension SessionManagementView {
+    // Moved helper subviews here to reduce main type body length
+}
+
 // MARK: - SessionEntry UI Extension
 
 extension SessionEntry {
