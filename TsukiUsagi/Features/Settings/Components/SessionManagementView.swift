@@ -75,10 +75,15 @@ struct SessionManagementView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // MARK: - Default Sessions Section
+    // Helpers moved to extension below to satisfy type_body_length
+}
 
+// MARK: - SessionManagementView subviews
+
+extension SessionManagementView {
+    // Default Sessions Section
     @ViewBuilder
-    private func defaultSessionsSection() -> some View {
+    fileprivate func defaultSessionsSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             defaultSessionsHeader()
             defaultSessionsList()
@@ -86,14 +91,14 @@ struct SessionManagementView: View {
     }
 
     @ViewBuilder
-    private func defaultSessionsHeader() -> some View {
+    fileprivate func defaultSessionsHeader() -> some View {
         Text(NSLocalizedString("default_sessions_title", comment: ""))
             .font(DesignTokens.Fonts.sectionTitle)
             .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
 
     @ViewBuilder
-    private func defaultSessionsList() -> some View {
+    fileprivate func defaultSessionsList() -> some View {
         VStack(spacing: 0) {
             ForEach(Array(sessionManager.defaultEntries.enumerated()), id: \.element.id) { index, session in
                 defaultSessionRow(session, isLast: index == sessionManager.defaultEntries.count - 1)
@@ -107,7 +112,7 @@ struct SessionManagementView: View {
     }
 
     @ViewBuilder
-    private func defaultSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
+    fileprivate func defaultSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
         Button {
             selectedSession = session
             activeSheet = .edit(session)
@@ -129,10 +134,9 @@ struct SessionManagementView: View {
         }
     }
 
-    // MARK: - Custom Sessions Section
-
+    // Custom Sessions Section
     @ViewBuilder
-    private func customSessionsSection() -> some View {
+    fileprivate func customSessionsSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             customSessionsHeader()
             customSessionsList()
@@ -140,7 +144,7 @@ struct SessionManagementView: View {
     }
 
     @ViewBuilder
-    private func customSessionsHeader() -> some View {
+    fileprivate func customSessionsHeader() -> some View {
         HStack {
             Text(NSLocalizedString("custom_sessions_title", comment: ""))
                 .font(DesignTokens.Fonts.sectionTitle)
@@ -161,7 +165,7 @@ struct SessionManagementView: View {
     }
 
     @ViewBuilder
-    private func customSessionsList() -> some View {
+    fileprivate func customSessionsList() -> some View {
         VStack(spacing: 0) {
             if sessionManager.customEntries.isEmpty {
                 emptyCustomSessionsView()
@@ -179,7 +183,7 @@ struct SessionManagementView: View {
     }
 
     @ViewBuilder
-    private func customSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
+    fileprivate func customSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
         Button {
             selectedSession = session
             activeSheet = .edit(session)
@@ -210,82 +214,8 @@ struct SessionManagementView: View {
         }
     }
 
-    // MARK: - Row Labels (extracted to reduce function length)
-
     @ViewBuilder
-    private func defaultRowLabel(session: SessionEntry) -> some View {
-        HStack(spacing: DesignTokens.Spacing.large) {
-            Image(systemName: session.iconName)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolMedium)
-                .frame(width: 20)
-
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
-                Text(session.sessionName)
-                    .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-
-                Text(
-                    String.localizedStringWithFormat(
-                        NSLocalizedString(
-                            "descriptions_count",
-                            tableName: nil,
-                            bundle: .main,
-                            value: "%d descriptions",
-                            comment: "Pluralized descriptions count"
-                        ),
-                        session.descriptions.count
-                    )
-                )
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-            }
-
-            Spacer()
-
-            Image(systemName: "pencil")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolSmall)
-        }
-        .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
-        .padding(.vertical, DesignTokens.Padding.medium)
-        .contentShape(Rectangle())
-    }
-
-    @ViewBuilder
-    private func customRowLabel(session: SessionEntry) -> some View {
-        HStack(spacing: DesignTokens.Spacing.large) {
-            Image(systemName: session.iconName)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolMedium)
-                .frame(width: 20)
-
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraSmall) {
-                Text(session.sessionName)
-                    .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-
-                if let description = session.descriptions.first, !description.isEmpty {
-                    Text(description)
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
-                        .lineLimit(1)
-                }
-            }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolSmall)
-        }
-        .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
-        .padding(.vertical, DesignTokens.Padding.medium)
-        .contentShape(Rectangle())
-    }
-
-    @ViewBuilder
-    private func emptyCustomSessionsView() -> some View {
+    fileprivate func emptyCustomSessionsView() -> some View {
         VStack(spacing: 8) {
             Image(systemName: "folder.badge.plus")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -304,10 +234,8 @@ struct SessionManagementView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: - Add Custom Session Button
-
     @ViewBuilder
-    private func addCustomSessionButton() -> some View {
+    fileprivate func addCustomSessionButton() -> some View {
         Button {
             activeSheet = .create
         } label: {
@@ -316,12 +244,6 @@ struct SessionManagementView: View {
         }
         .buttonStyle(.borderedProminent)
     }
-}
-
-// MARK: - SessionManagementView subviews
-
-extension SessionManagementView {
-    // Moved helper subviews here to reduce main type body length
 }
 
 // MARK: - SessionEntry UI Extension
