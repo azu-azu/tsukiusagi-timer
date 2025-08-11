@@ -215,7 +215,7 @@ extension SessionEditView {
                 editedDescriptions.remove(at: index)
             } label: {
                 Image(systemName: "minus.circle.fill")
-                    .foregroundColor(.red)
+                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
             }
         }
     }
@@ -234,7 +234,7 @@ extension SessionEditView {
                 showAddDescriptionField = false
             } label: {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundColor(DesignTokens.MoonColors.accentGreen)
             }
 
             Button {
@@ -242,7 +242,7 @@ extension SessionEditView {
                 newDescription = ""
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.red)
+                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
             }
         }
     }
@@ -255,7 +255,7 @@ extension SessionEditView {
                 showDeleteAlert = true
             }
             .buttonStyle(.bordered)
-            .foregroundColor(.red)
+            .foregroundColor(DesignTokens.MoonColors.accentOrange)
             .frame(maxWidth: .infinity)
         }
     }

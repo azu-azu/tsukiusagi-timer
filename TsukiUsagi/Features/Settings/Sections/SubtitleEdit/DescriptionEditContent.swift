@@ -97,7 +97,7 @@ struct DescriptionEditContent: View {
 
                 Image(systemName: "lock.fill")
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(DesignTokens.MoonColors.textMuted)
                     .accessibilityLabel("Fixed category")
             }
             .padding()
@@ -152,7 +152,7 @@ struct DescriptionEditContent: View {
                             action: { self.removeDescription(at: index) },
                             label: {
                                 Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
                             }
                         )
                     }

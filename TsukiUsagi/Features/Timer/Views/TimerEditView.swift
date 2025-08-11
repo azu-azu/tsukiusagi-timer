@@ -94,7 +94,7 @@ struct TimerEditView: View {
                                     if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                         Text("Memo (optional)")
                                             .font(DesignTokens.Fonts.label)
-                                            .foregroundColor(.gray)
+                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 12)
                                     }

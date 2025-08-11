@@ -32,7 +32,7 @@ struct RecordedTimesView: View {
                 Button(action: onEdit) {
                     Image(systemName: "pencil")
                         .font(DesignTokens.Fonts.title)
-                        .foregroundColor(.yellow)
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
                 .accessibilityLabel("Edit session record")
                 .accessibilityHint("Tap to edit start time, end time, and session details")

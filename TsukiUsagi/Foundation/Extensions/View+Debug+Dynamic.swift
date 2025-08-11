@@ -27,7 +27,7 @@ struct DynamicDebugScreenModifier: ViewModifier {
                     if isVisible {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
@@ -65,7 +65,7 @@ struct DynamicDebugSectionModifier: ViewModifier {
                     if isVisible {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
@@ -103,7 +103,7 @@ struct DynamicDebugComponentModifier: ViewModifier {
                     if isVisible {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
@@ -141,7 +141,7 @@ struct DynamicDebugFormModifier: ViewModifier {
                     if isVisible {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(

@@ -59,10 +59,10 @@ struct ResetStopSectionView: View {
                 } else {
                     HStack(spacing: 8) {
                         Image(systemName: "forward.end")
-                            .foregroundColor(.gray.opacity(0.6))
+                            .foregroundColor(DesignTokens.MoonColors.textMuted)
                         Text("Stop (Save)")
                             .font(DesignTokens.Fonts.label)
-                            .foregroundColor(.gray.opacity(0.6))
+                            .foregroundColor(DesignTokens.MoonColors.textMuted)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }

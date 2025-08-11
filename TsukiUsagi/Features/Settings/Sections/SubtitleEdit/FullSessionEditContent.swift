@@ -138,7 +138,7 @@ struct FullSessionEditContent: View {
                             action: { self.removeDescription(at: index) },
                             label: {
                                 Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
                             }
                         )
                     }

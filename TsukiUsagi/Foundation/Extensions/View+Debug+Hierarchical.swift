@@ -22,7 +22,7 @@ struct DebugScreenModifier: ViewModifier {
                     if showModuleNames {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
@@ -56,7 +56,7 @@ struct DebugSectionModifier: ViewModifier {
                     if showModuleNames {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
@@ -90,7 +90,7 @@ struct DebugComponentModifier: ViewModifier {
                     if showModuleNames {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
@@ -124,7 +124,7 @@ struct DebugFormModifier: ViewModifier {
                     if showModuleNames {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
