@@ -24,7 +24,7 @@ extension View {
         design: Font.Design = .default
     ) -> some View {
         font(DesignTokens.Fonts.title)
-            .foregroundColor(.white)
+            .foregroundColor(DesignTokens.PureColors.textWhite)
     }
 }
 
@@ -40,7 +40,7 @@ private struct AvenirNextWhiteModifier: ViewModifier {
             .font(
                 .custom(fontName, size: size)
             )
-            .foregroundColor(.white)
+            .foregroundColor(DesignTokens.PureColors.textWhite)
     }
 }
 

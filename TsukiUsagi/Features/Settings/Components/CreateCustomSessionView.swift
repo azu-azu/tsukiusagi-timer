@@ -170,7 +170,7 @@ struct CreateCustomSessionView: View {
                 descriptions.remove(at: index)
             } label: {
                 Image(systemName: "minus.circle.fill")
-                    .foregroundColor(.red)
+                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
             }
         }
     }
@@ -189,7 +189,7 @@ struct CreateCustomSessionView: View {
                 showAddDescriptionField = false
             } label: {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundColor(DesignTokens.MoonColors.accentGreen)
             }
 
             Button {
@@ -197,7 +197,7 @@ struct CreateCustomSessionView: View {
                 newDescription = ""
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.red)
+                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
             }
         }
     }

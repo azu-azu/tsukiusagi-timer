@@ -314,7 +314,7 @@ struct ContentView: View {
         .background(Color.white.opacity(0.2),
                     in: RoundedRectangle(cornerRadius: 20))
         .titleWhiteAvenir(weight: .bold)
-        .foregroundColor(.white)
+        .foregroundColor(DesignTokens.PureColors.textWhite)
     }
 
     // MARK: - Helper Methods

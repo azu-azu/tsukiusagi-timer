@@ -32,7 +32,7 @@ struct DebugModuleNameModifier: ViewModifier {
                     if isVisible {
                         Text(moduleName)
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(DesignTokens.PureColors.textWhite)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(

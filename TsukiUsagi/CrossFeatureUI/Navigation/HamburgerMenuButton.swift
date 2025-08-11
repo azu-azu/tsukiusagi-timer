@@ -9,7 +9,7 @@ struct HamburgerMenuButton: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 16, height: 16)
-                .foregroundColor(.white)
+                .foregroundColor(DesignTokens.PureColors.textWhite)
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }

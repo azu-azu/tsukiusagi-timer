@@ -83,7 +83,7 @@ struct DailyTimelineView: View {
             Spacer(minLength: 8)
 
             Text("\(displayName) \(durationMinutes(rec)) min")
-                .foregroundColor(isDeleted ? .gray : DesignTokens.MoonColors.textPrimary)
+                .foregroundColor(isDeleted ? DesignTokens.MoonColors.textMuted : DesignTokens.MoonColors.textPrimary)
                 .opacity(isDeleted ? 0.5 : 1.0)
 
             if isDeleted {

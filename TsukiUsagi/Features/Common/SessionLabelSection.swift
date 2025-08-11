@@ -108,7 +108,7 @@ struct SessionLabelSection: View {
                 } label: {
                     HStack {
                         Text(descriptionText.isEmpty ? "Select description..." : descriptionText)
-                            .foregroundColor(descriptionText.isEmpty ? .gray : .moonTextPrimary)
+                            .foregroundColor(descriptionText.isEmpty ? DesignTokens.MoonColors.textMuted : DesignTokens.MoonColors.textPrimary)
                             .lineLimit(1)
                         Spacer()
                         Image(systemName: "chevron.down")
@@ -123,7 +123,7 @@ struct SessionLabelSection: View {
                 // セッションにdescriptionが設定されていない場合は空のプレースホルダー
                 HStack {
                     Text("No descriptions available")
-                        .foregroundColor(.gray)
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
                         .font(DesignTokens.Fonts.label)
                     Spacer()
                 }

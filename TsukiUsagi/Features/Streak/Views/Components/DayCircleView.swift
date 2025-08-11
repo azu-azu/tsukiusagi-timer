@@ -20,7 +20,7 @@ struct DayCircleView: View {
             .overlay(
                 Text(weekdayText)
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(isUsed ? .white : DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(isUsed ? DesignTokens.PureColors.textWhite : DesignTokens.MoonColors.textSecondary)
             )
             .overlay(alignment: .bottom) {
                 if isToday && !isUsed && !isFutureDay {
