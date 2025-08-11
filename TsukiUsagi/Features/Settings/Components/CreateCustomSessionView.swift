@@ -59,7 +59,7 @@ struct CreateCustomSessionView: View {
         VStack(alignment: .leading, spacing: 12) {
             Image(systemName: "folder.badge.plus")
                 .foregroundColor(DesignTokens.MoonColors.accentBlue)
-                .font(.system(size: 32))
+                .font(DesignTokens.Fonts.symbolLarge)
 
             Text(NSLocalizedString("create_custom_session_title", comment: ""))
                 .font(DesignTokens.Fonts.title)
@@ -135,7 +135,7 @@ struct CreateCustomSessionView: View {
         VStack(spacing: 8) {
             Image(systemName: "text.bubble")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(.system(size: 20))
+                .font(DesignTokens.Fonts.symbolLarge)
 
             Text(NSLocalizedString("no_descriptions_title", comment: ""))
                 .font(DesignTokens.Fonts.caption)

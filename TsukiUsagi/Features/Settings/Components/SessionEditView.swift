@@ -90,7 +90,7 @@ extension SessionEditView {
             HStack(spacing: 8) {
                 Image(systemName: session.iconName)
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
-                    .font(.system(size: 20))
+                    .font(DesignTokens.Fonts.symbolLarge)
 
                 Text(session.sessionName)
                     .font(DesignTokens.Fonts.title)
@@ -184,7 +184,7 @@ extension SessionEditView {
         VStack(spacing: 8) {
             Image(systemName: "text.bubble")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(.system(size: 20))
+                .font(DesignTokens.Fonts.symbolLarge)
 
             Text(NSLocalizedString("no_descriptions_title", comment: ""))
                 .font(DesignTokens.Fonts.caption)
