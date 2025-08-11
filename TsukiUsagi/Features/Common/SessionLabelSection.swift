@@ -108,7 +108,11 @@ struct SessionLabelSection: View {
                 } label: {
                     HStack {
                         Text(descriptionText.isEmpty ? "Select description..." : descriptionText)
-                            .foregroundColor(descriptionText.isEmpty ? DesignTokens.MoonColors.textMuted : DesignTokens.MoonColors.textPrimary)
+                            .foregroundColor(
+                                descriptionText.isEmpty
+                                ? DesignTokens.MoonColors.textMuted
+                                : DesignTokens.MoonColors.textPrimary
+                            )
                             .lineLimit(1)
                         Spacer()
                         Image(systemName: "chevron.down")
