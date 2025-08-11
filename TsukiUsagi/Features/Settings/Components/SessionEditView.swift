@@ -69,10 +69,15 @@ struct SessionEditView: View {
         }
     }
 
-    // MARK: - Session Info Header
+    // Helpers moved to extension
+}
 
+// MARK: - SessionEditView helpers
+
+extension SessionEditView {
+    // MARK: - Session Info Header
     @ViewBuilder
-    private func sessionInfoHeader() -> some View {
+    fileprivate func sessionInfoHeader() -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(
                 isDefaultSession
@@ -108,9 +113,8 @@ struct SessionEditView: View {
     }
 
     // MARK: - Session Name Section
-
     @ViewBuilder
-    private func sessionNameSection() -> some View {
+    fileprivate func sessionNameSection() -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(NSLocalizedString("session_name_label", comment: ""))
                 .font(DesignTokens.Fonts.label)
@@ -140,9 +144,8 @@ struct SessionEditView: View {
     }
 
     // MARK: - Descriptions Section
-
     @ViewBuilder
-    private func descriptionsSection() -> some View {
+    fileprivate func descriptionsSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(NSLocalizedString("descriptions_label", comment: ""))
@@ -177,7 +180,7 @@ struct SessionEditView: View {
     }
 
     @ViewBuilder
-    private func emptyDescriptionsView() -> some View {
+    fileprivate func emptyDescriptionsView() -> some View {
         VStack(spacing: 8) {
             Image(systemName: "text.bubble")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -196,7 +199,7 @@ struct SessionEditView: View {
     }
 
     @ViewBuilder
-    private func descriptionRow(description: String, index: Int) -> some View {
+    fileprivate func descriptionRow(description: String, index: Int) -> some View {
         HStack(spacing: 8) {
             TextField(NSLocalizedString("description_placeholder", comment: ""), text: Binding(
                 get: { editedDescriptions[safe: index] ?? "" },
@@ -218,7 +221,7 @@ struct SessionEditView: View {
     }
 
     @ViewBuilder
-    private func addDescriptionField() -> some View {
+    fileprivate func addDescriptionField() -> some View {
         HStack(spacing: 8) {
             TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
                 .textFieldStyle(.roundedBorder)
@@ -245,9 +248,8 @@ struct SessionEditView: View {
     }
 
     // MARK: - Action Buttons
-
     @ViewBuilder
-    private func actionButtons() -> some View {
+    fileprivate func actionButtons() -> some View {
         VStack(spacing: 12) {
             Button("Delete Session") {
                 showDeleteAlert = true
@@ -259,8 +261,7 @@ struct SessionEditView: View {
     }
 
     // MARK: - Helper Properties
-
-    private var hasChanges: Bool {
+    fileprivate var hasChanges: Bool {
         if isDefaultSession {
             return editedDescriptions != session.descriptions
         } else {
@@ -269,22 +270,19 @@ struct SessionEditView: View {
     }
 
     // MARK: - Helper Methods
-
-    private func loadSessionData() {
+    fileprivate func loadSessionData() {
         editedName = session.sessionName
         editedDescriptions = session.descriptions
     }
 
-    private func saveChanges() {
+    fileprivate func saveChanges() {
         do {
             if isDefaultSession {
-                // Default sessions: only update descriptions
                 try sessionManager.updateSessionDescriptions(
                     sessionName: session.sessionName,
                     newDescriptions: editedDescriptions
                 )
             } else {
-                // Custom sessions: update name and descriptions
                 try sessionManager.addOrUpdateEntry(
                     originalKey: session.sessionName.lowercased(),
                     sessionName: editedName,
@@ -293,23 +291,16 @@ struct SessionEditView: View {
             }
             dismiss()
         } catch {
-            // Handle error
             print("Error saving session: \(error)")
         }
     }
 
-    private func deleteSession() {
+    fileprivate func deleteSession() {
         if !isDefaultSession {
             sessionManager.deleteEntry(id: session.id)
         }
         dismiss()
     }
-}
-
-// MARK: - SessionEditView helpers
-
-extension SessionEditView {
-    // Keep extensions for additional helpers if needed to keep body short
 }
 
 #if DEBUG
