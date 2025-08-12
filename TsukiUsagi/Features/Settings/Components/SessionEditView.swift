@@ -11,6 +11,14 @@ struct SessionEditView: View {
     @State private var showAddDescriptionField = false
     @State private var newDescription = ""
 
+    @FocusState private var focusedField: FocusedField?
+
+    private enum FocusedField: Hashable {
+        case editedName
+        case newDescription
+        case description(Int)
+    }
+
     private var isDefaultSession: Bool {
         session.isDefault
     }
@@ -55,6 +63,13 @@ struct SessionEditView: View {
                     .disabled(!isSaveEnabled)
                 }
             }
+            .adaptiveKeyboardCloseButton(
+                isVisible: focusedField != nil,
+                position: .topTrailing,
+                action: {
+                    KeyboardHelper.hideKeyboard { focusedField = nil }
+                }
+            )
         }
         .onAppear {
             loadSessionData()
@@ -139,6 +154,7 @@ extension SessionEditView {
             } else {
                 TextField(NSLocalizedString("enter_session_name_placeholder", comment: ""), text: $editedName)
                     .textFieldStyle(.roundedBorder)
+                    .focused($focusedField, equals: .editedName)
             }
         }
     }
@@ -210,6 +226,7 @@ extension SessionEditView {
                 }
             ))
             .textFieldStyle(.roundedBorder)
+            .focused($focusedField, equals: .description(index))
 
             Button {
                 editedDescriptions.remove(at: index)
@@ -225,6 +242,7 @@ extension SessionEditView {
         HStack(spacing: 8) {
             TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
                 .textFieldStyle(.roundedBorder)
+                .focused($focusedField, equals: .newDescription)
 
             Button {
                 if !newDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
