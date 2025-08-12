@@ -11,6 +11,14 @@ struct NewSessionFormView: View {
     @State private var errorMessage: String = ""
     @State private var showError = false
 
+    @FocusState private var focusedField: FocusedField?
+
+    private enum FocusedField: Hashable {
+        case sessionName
+        case newDescription
+        case description(Int)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -37,6 +45,13 @@ struct NewSessionFormView: View {
                     .disabled(sessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+            .adaptiveKeyboardCloseButton(
+                isVisible: focusedField != nil,
+                position: .topTrailing,
+                action: {
+                    KeyboardHelper.hideKeyboard { focusedField = nil }
+                }
+            )
         }
         .alert(NSLocalizedString("error_title", comment: "Error"), isPresented: $showError) {
             Button(NSLocalizedString("ok", comment: "OK")) { }
@@ -75,6 +90,7 @@ struct NewSessionFormView: View {
 
             TextField(NSLocalizedString("session_name_placeholder", comment: ""), text: $sessionName)
                 .textFieldStyle(.roundedBorder)
+                .focused($focusedField, equals: .sessionName)
 
             Text(NSLocalizedString("session_name_hint", comment: ""))
                 .font(.caption2)
@@ -157,6 +173,7 @@ struct NewSessionFormView: View {
                 }
             ))
             .textFieldStyle(.roundedBorder)
+            .focused($focusedField, equals: .description(index))
 
             Button {
                 descriptions.remove(at: index)
@@ -173,6 +190,7 @@ struct NewSessionFormView: View {
         HStack(spacing: DesignTokens.Spacing.medium) {
             TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
                 .textFieldStyle(.roundedBorder)
+                .focused($focusedField, equals: .newDescription)
 
             Button {
                 let trimmed = newDescription.trimmingCharacters(in: .whitespacesAndNewlines)
