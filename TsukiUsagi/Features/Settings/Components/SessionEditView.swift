@@ -52,7 +52,7 @@ struct SessionEditView: View {
                     Button(NSLocalizedString("save", comment: "")) {
                         saveChanges()
                     }
-                    .disabled(!hasChanges)
+                    .disabled(!isSaveEnabled)
                 }
             }
         }
@@ -267,6 +267,13 @@ extension SessionEditView {
         } else {
             return editedName != session.sessionName || editedDescriptions != session.descriptions
         }
+    }
+
+    /// Save is enabled only if there are changes AND, for custom sessions, the edited name is non-empty after trimming
+    fileprivate var isSaveEnabled: Bool {
+        guard hasChanges else { return false }
+        if isDefaultSession { return true }
+        return !editedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     // MARK: - Helper Methods
