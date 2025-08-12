@@ -56,7 +56,7 @@ struct SessionManagementView: View {
             case .edit(let session):
                 SessionEditView(session: session)
             case .create:
-                CreateCustomSessionView()
+                NewSessionFormView()
             }
         }
         .alert("Delete Session", isPresented: $showDeleteConfirm) {
