@@ -17,7 +17,9 @@ final class SpyNotificationService: PhaseNotificationServiceable {
 
     func sendStartNotification() { calls.append(.start) }
     func cancelNotification() { calls.append(.cancelAll) }
-    func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) { calls.append(.scheduleEnd(seconds, phase)) }
+    func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
+        calls.append(.scheduleEnd(seconds, phase))
+    }
     func sendPhaseChangeNotification(for phase: PomodoroPhase) { calls.append(.phaseChange(phase)) }
     func cancelSessionEndNotification() { calls.append(.cancelEnd) }
     func finalizeWorkPhase() { calls.append(.finalizeWork) }
@@ -33,7 +35,7 @@ final class SpyHistoryService: SessionHistoryServiceable {
 
 @MainActor
 final class NotificationAndHistorySpiesTests: XCTestCase {
-    func testBackgroundForegroundSchedulingCalls() {
+    func testBackgroundForegroundSchedulingCalls() throws {
         // Given
         let mock = MockDependencyContainer()
         let spyNotification = SpyNotificationService()
@@ -54,16 +56,16 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         // Then
         // Expect schedule followed by cancel
         XCTAssertGreaterThanOrEqual(spyNotification.calls.count, 2)
-        // Find first schedule and first cancel occurrence order
-        let firstScheduleIndex = spyNotification.calls.firstIndex(where: {
-            if case .scheduleEnd = $0 { return true } else { return false }
-        })
-        let firstCancelIndex = spyNotification.calls.firstIndex(where: { $0 == .cancelEnd })
-        XCTAssertNotNil(firstScheduleIndex)
-        XCTAssertNotNil(firstCancelIndex)
-        if let s = firstScheduleIndex, let c = firstCancelIndex {
-            XCTAssertLessThan(s, c, "schedule must happen before cancel")
-        }
+        // Find first schedule and first cancel occurrence order (with XCTUnwrap)
+        let firstScheduleIndex = try XCTUnwrap(
+            spyNotification.calls.firstIndex { if case .scheduleEnd = $0 { return true } else { return false } },
+            "scheduleEnd が一度も呼ばれていない"
+        )
+        let firstCancelIndex = try XCTUnwrap(
+            spyNotification.calls.firstIndex { $0 == .cancelEnd },
+            "cancelEnd が一度も呼ばれていない"
+        )
+        XCTAssertLessThan(firstScheduleIndex, firstCancelIndex)
 
         // Validate schedule parameters
         if case let .scheduleEnd(seconds, phase)? = spyNotification.calls.first(where: {
@@ -74,6 +76,19 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         } else {
             XCTFail("No scheduleEnd call recorded")
         }
+
+        // Negative assertion: finalizeBreak should not be called in background flow
+        XCTAssertFalse(
+            spyNotification.calls.contains { if case .finalizeBreak = $0 { return true } else { return false } },
+            "背景遷移の流れで finalizeBreak は呼ばれないはず"
+        )
+
+        // Call count assertion: scheduleEnd should be exactly once in this flow
+        XCTAssertEqual(
+            spyNotification.calls.filter { if case .scheduleEnd = $0 { return true } else { return false } }.count,
+            1,
+            "scheduleEnd は1回だけのはず"
+        )
     }
 
     func testForceFinishSendsCorrectHistoryParameters() {
