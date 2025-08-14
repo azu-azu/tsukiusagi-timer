@@ -1,4 +1,6 @@
 import SwiftUI
+import UIKit
+@testable import TsukiUsagi
 
 struct FontDebugTestView: View {
     var body: some View {

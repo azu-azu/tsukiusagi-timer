@@ -367,19 +367,15 @@ private class DummyFormatter: TimeFormatterUtilable {
     func format(date: Date?) -> String { "date" }
 }
 
-#Preview {
-    let history = HistoryViewModel()
-    let timer = TimerViewModel(
-        engine: DummyEngine(),
-        notificationService: DummyNotification(),
-        hapticService: DummyHaptic(),
-        historyService: DummyHistory(),
-        persistenceManager: DummyPersistence(),
-        formatter: DummyFormatter()
-    )
-    let sessionManager = SessionManager()
-    ContentView()
-        .environmentObject(history)
-        .environmentObject(timer)
-        .environmentObject(sessionManager)
+#if DEBUG
+@MainActor
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        let mock = MockDependencyContainer()
+        return ContentView()
+            .environmentObject(mock.historyVM)
+            .environmentObject(mock.timerVM)
+            .environmentObject(mock.sessionManager)
+    }
 }
+#endif

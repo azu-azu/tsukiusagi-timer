@@ -68,9 +68,11 @@ struct TsukiUsagiApp: App {
 
             if success {
                 print("✅ フォント登録成功: \(fontFile)")
+            } else if let e = error?.takeRetainedValue() as Error? {
+                // 既に登録済みなどの場合はスキップ扱い（必要に応じてエラーコード分岐可）
+                print("ℹ️ skip or failed: \(fontFile) — \(e.localizedDescription)")
             } else {
-                let errorDescription = error?.takeRetainedValue().localizedDescription ?? "不明なエラー"
-                print("❌ フォント登録失敗: \(fontFile) - \(errorDescription)")
+                print("ℹ️ skip or failed: \(fontFile)")
             }
         }
 
