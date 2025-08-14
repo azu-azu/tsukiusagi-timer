@@ -22,6 +22,7 @@ final class TimerViewModel: ObservableObject {
     private let historyService: SessionHistoryServiceable
     private let persistenceManager: TimerPersistenceManageable
     private let formatter: TimeFormatterUtilable
+    private let dateProvider: DateProviding
 
     // Streak tracking - @StateObjectではなく通常のプロパティに変更
     private let streakManager: StreakManager
@@ -70,7 +71,8 @@ final class TimerViewModel: ObservableObject {
         historyService: SessionHistoryServiceable,
         persistenceManager: TimerPersistenceManageable,
         formatter: TimeFormatterUtilable,
-        streakManager: StreakManager = StreakManager() // デフォルト値を提供
+        streakManager: StreakManager = StreakManager(), // デフォルト値を提供
+        dateProvider: DateProviding = SystemDateProvider()
     ) {
         // 3. Engine設定
         self.engine = engine
@@ -80,6 +82,7 @@ final class TimerViewModel: ObservableObject {
         self.historyService = historyService
         self.persistenceManager = persistenceManager
         self.streakManager = streakManager
+        self.dateProvider = dateProvider
 
         // 4. Engineのコールバック設定（notificationService初期化後）
         self.engine.onTick = { [weak self] seconds in
@@ -136,7 +139,7 @@ final class TimerViewModel: ObservableObject {
         // timeRemainingが0の場合は設定値で初期化
         let actualSeconds = seconds > 0 ? seconds : workMinutes * 60
 
-        startTime = Date()
+        startTime = dateProvider.now()
         isWorkSession = true
         isRunning = true
         timeRemaining = actualSeconds
@@ -191,7 +194,7 @@ final class TimerViewModel: ObservableObject {
 
     /// 強制終了（Stopボタン用）
     func forceFinishWorkSession() {
-        endTime = Date()
+        endTime = dateProvider.now()
         // ★ startTime が残っているうちに履歴保存
         if let start = startTime, let end = endTime {
             let parameters = AddSessionParameters(
@@ -315,7 +318,7 @@ final class TimerViewModel: ObservableObject {
 
     /// バックグラウンドへ
     func appDidEnterBackground() {
-        lastBackgroundDate = Date()
+        lastBackgroundDate = dateProvider.now()
         if isRunning {
             notificationService.scheduleSessionEndNotification(
                 after: timeRemaining,
@@ -330,7 +333,7 @@ final class TimerViewModel: ObservableObject {
     func appWillEnterForeground() {
         guard let last = lastBackgroundDate else { return }
 
-        let elapsed = Int(Date().timeIntervalSince(last))
+        let elapsed = Int(dateProvider.now().timeIntervalSince(last))
         notificationService.cancelSessionEndNotification()
         let originalRemaining = timeRemaining
         timeRemaining = max(originalRemaining - elapsed, 0)
