@@ -1,4 +1,6 @@
 import SwiftUI
+import UIKit
+@testable import TsukiUsagi
 
 struct DirectDescriptionEditTest: View {
     @State private var testDescriptions: [String] = ["First item", "Second item"]

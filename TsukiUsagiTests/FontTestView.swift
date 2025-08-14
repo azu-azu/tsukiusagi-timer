@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import CoreText
+@testable import TsukiUsagi
 
 struct FontTestView: View {
     @State private var allFontFamilies: [String] = []
