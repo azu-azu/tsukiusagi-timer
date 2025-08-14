@@ -8,15 +8,17 @@ final class MockTimerEngine: TimerEngineable {
     var onTick: ((Int) -> Void)?
     var onSessionCompleted: ((TimerSessionInfo) -> Void)?
     func start(seconds: Int) {
+        isRunning = true
+        timeRemaining = seconds
         // 即時に数回のtickを発行
         onTick?(seconds - 1)
         onTick?(seconds - 2)
         onTick?(seconds - 3)
     }
-    func pause() {}
-    func resume() {}
-    func stop() {}
-    func reset(to seconds: Int) { onTick?(seconds) }
+    func pause() { isRunning = false }
+    func resume() { isRunning = true }
+    func stop() { isRunning = false }
+    func reset(to seconds: Int) { timeRemaining = seconds; onTick?(seconds) }
 }
 
 @MainActor

@@ -327,45 +327,7 @@ struct ContentView: View {
     }
 }
 
-// --- Preview用ダミークラス（ファイルスコープに移動） ---
-private class DummyEngine: TimerEngineable {
-    var timeRemaining: Int = 0
-    var isRunning: Bool = false
-    var onTick: ((Int) -> Void)?
-    var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-    func start(seconds: Int) {}
-    func pause() {}
-    func resume() {}
-    func stop() {}
-    func reset(to seconds: Int) {}
-}
-private class DummyNotification: PhaseNotificationServiceable {
-    func sendStartNotification() {}
-    func cancelNotification() {}
-    func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
-    func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
-    func cancelSessionEndNotification() {}
-    func finalizeWorkPhase() {}
-    func finalizeBreakPhase() {}
-}
-private class DummyHaptic: HapticServiceable {
-    func heavyImpact() {}
-    func lightImpact() {}
-}
-private class DummyHistory: SessionHistoryServiceable {
-    func add(parameters: AddSessionParameters) {}
-}
-private class DummyPersistence: TimerPersistenceManageable {
-    var timeRemaining: Int = 0
-    var isRunning: Bool = false
-    var isWorkSession: Bool = true
-    func saveTimerState() {}
-    func restoreTimerState() {}
-}
-private class DummyFormatter: TimeFormatterUtilable {
-    func format(seconds: Int) -> String { "00:00" }
-    func format(date: Date?) -> String { "date" }
-}
+// Dummy* は MockDependencyContainer への統一方針により削除
 
 #if DEBUG
 @MainActor
