@@ -1,0 +1,50 @@
+#if DEBUG
+import Foundation
+
+@MainActor
+final class MockTimerEngine: TimerEngineable {
+    var timeRemaining: Int = 0
+    var isRunning: Bool = false
+    var onTick: ((Int) -> Void)?
+    var onSessionCompleted: ((TimerSessionInfo) -> Void)?
+    func start(seconds: Int) {
+        // 即時に数回のtickを発行
+        onTick?(seconds - 1)
+        onTick?(seconds - 2)
+        onTick?(seconds - 3)
+    }
+    func pause() {}
+    func resume() {}
+    func stop() {}
+    func reset(to seconds: Int) { onTick?(seconds) }
+}
+
+@MainActor
+final class MockDependencyContainer {
+    // Services (必要に応じて他もモック化)
+    let timerEngine: TimerEngineable = MockTimerEngine()
+    let hapticService = HapticService()
+    let formatter = TimeFormatterUtil()
+    let notificationService: PhaseNotificationServiceable
+    let historyService: SessionHistoryServiceable
+    let persistenceManager = TimerPersistenceManager()
+
+    // ViewModels
+    let historyVM = HistoryViewModel()
+    let timerVM: TimerViewModel
+    let sessionManager = SessionManager()
+
+    init() {
+        self.notificationService = PhaseNotificationService(hapticService: hapticService)
+        self.historyService = SessionHistoryService(formatter: formatter)
+        self.timerVM = TimerViewModel(
+            engine: timerEngine,
+            notificationService: notificationService,
+            hapticService: hapticService,
+            historyService: historyService,
+            persistenceManager: persistenceManager,
+            formatter: formatter
+        )
+    }
+}
+#endif

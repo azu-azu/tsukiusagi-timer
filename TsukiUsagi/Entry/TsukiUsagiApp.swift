@@ -5,52 +5,26 @@ import CoreText
 struct TsukiUsagiApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
-    // StateObjects: declaration only
+    // DI Container
+    private let container: DependencyContainer
+
+    // StateObjects (Container提供のインスタンスを注入)
     @StateObject private var historyVM: HistoryViewModel
     @StateObject private var timerVM: TimerViewModel
     @StateObject private var sessionManager: SessionManager
-
-    // Service singletons
-    private let timerEngine: TimerEngineable
-    private let hapticService: HapticService
-    private let notificationService: PhaseNotificationServiceable
-    private let formatter: TimeFormatterUtil
-    private let historyService: SessionHistoryServiceable
-    private let persistenceManager: TimerPersistenceManager
 
     init() {
         // ハプティックフィードバックの事前初期化
         _ = HapticManager.shared
 
-        // Construct services first
-        let timerEngine: TimerEngineable = TimerEngine()
-        print("✅ Using TimerEngine for all environments")
+        // DIコンテナ生成（ローカル変数で参照を固定）
+        let c = DependencyContainer()
+        self.container = c
 
-        let hapticService = HapticService()
-        let formatter = TimeFormatterUtil()
-        let notificationService = PhaseNotificationService(hapticService: hapticService)
-        let historyService = SessionHistoryService(formatter: formatter)
-        let persistenceManager = TimerPersistenceManager()
-
-        // Assign to lets
-        self.timerEngine = timerEngine
-        self.hapticService = hapticService
-        self.notificationService = notificationService
-        self.historyService = historyService
-        self.persistenceManager = persistenceManager
-        self.formatter = formatter
-
-        // StateObjects
-        _historyVM = StateObject(wrappedValue: HistoryViewModel())
-        _timerVM = StateObject(wrappedValue: TimerViewModel(
-            engine: timerEngine,
-            notificationService: notificationService,
-            hapticService: hapticService,
-            historyService: historyService,
-            persistenceManager: persistenceManager,
-            formatter: formatter
-        ))
-        _sessionManager = StateObject(wrappedValue: SessionManager())
+        // StateObjects — Container から注入
+        _historyVM = StateObject(wrappedValue: c.historyVM)
+        _timerVM = StateObject(wrappedValue: c.timerVM)
+        _sessionManager = StateObject(wrappedValue: c.sessionManager)
 
         // Feature Flags の初期化
         FeatureFlags.setDefaultValues()
