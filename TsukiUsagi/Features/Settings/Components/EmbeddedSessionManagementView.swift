@@ -36,8 +36,10 @@ struct EmbeddedSessionManagementView: View {
             switch sheet {
             case .edit(let session):
                 SessionEditView(session: session)
+                    .presentationBackground(DesignTokens.CosmosColors.background)
             case .create:
                 NewSessionFormView()
+                    .presentationBackground(DesignTokens.CosmosColors.background)
             }
         }
         .alert("Delete Session", isPresented: $showDeleteConfirm) {
