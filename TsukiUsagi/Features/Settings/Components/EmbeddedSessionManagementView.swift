@@ -52,6 +52,7 @@ struct EmbeddedSessionManagementView: View {
                 Text("Are you sure you want to delete '\(session.sessionName)'?")
             }
         }
+        .background(DesignTokens.CosmosColors.background)
     }
 
     // MARK: - Default Sessions Section

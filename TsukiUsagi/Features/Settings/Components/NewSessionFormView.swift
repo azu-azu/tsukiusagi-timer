@@ -58,6 +58,8 @@ struct NewSessionFormView: View {
         } message: {
             Text(errorMessage)
         }
+        .background(DesignTokens.CosmosColors.background)
+        .ignoresSafeArea()
     }
 
     // MARK: - Header

@@ -82,6 +82,8 @@ struct SessionEditView: View {
         } message: {
             Text(String(format: NSLocalizedString("delete_session_message", comment: ""), session.sessionName))
         }
+        .background(DesignTokens.CosmosColors.background)
+        .ignoresSafeArea()
     }
 
     // Helpers moved to extension
