@@ -1,5 +1,7 @@
 import SwiftUI
 
+@available(*, deprecated, message: "Use NewSessionFormView")
+
 struct CreateCustomSessionView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var sessionManager: SessionManager
