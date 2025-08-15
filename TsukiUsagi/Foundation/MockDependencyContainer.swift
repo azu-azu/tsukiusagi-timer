@@ -30,13 +30,15 @@ final class MockDependencyContainer {
     let notificationService: PhaseNotificationServiceable
     let historyService: SessionHistoryServiceable
     let persistenceManager = TimerPersistenceManager()
+    let dateProvider: DateProviding
 
     // ViewModels
     let historyVM = HistoryViewModel()
     let timerVM: TimerViewModel
     let sessionManager = SessionManager()
 
-    init() {
+    init(dateProvider: DateProviding = SystemDateProvider()) {
+        self.dateProvider = dateProvider
         self.notificationService = PhaseNotificationService(hapticService: hapticService)
         self.historyService = SessionHistoryService(formatter: formatter)
         self.timerVM = TimerViewModel(
@@ -45,8 +47,13 @@ final class MockDependencyContainer {
             hapticService: hapticService,
             historyService: historyService,
             persistenceManager: persistenceManager,
-            formatter: formatter
+            formatter: formatter,
+            dateProvider: dateProvider
         )
     }
 }
+
+#if DEBUG
+struct FixedDateProvider: DateProviding { let fixed: Date; func now() -> Date { fixed } }
+#endif
 #endif

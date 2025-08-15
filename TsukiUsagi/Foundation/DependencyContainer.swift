@@ -14,6 +14,7 @@ final class DependencyContainer {
     let historyVM: HistoryViewModel
     let timerVM: TimerViewModel
     let sessionManager: SessionManager
+    let dateProvider: DateProviding
 
     init() {
         // --- Services ---
@@ -23,6 +24,7 @@ final class DependencyContainer {
         self.notificationService = PhaseNotificationService(hapticService: hapticService)
         self.historyService = SessionHistoryService(formatter: formatter)
         self.persistenceManager = TimerPersistenceManager()
+        self.dateProvider = SystemDateProvider()
 
         // --- ViewModels ---
         self.historyVM = HistoryViewModel()
@@ -32,7 +34,9 @@ final class DependencyContainer {
             hapticService: hapticService,
             historyService: historyService,
             persistenceManager: persistenceManager,
-            formatter: formatter
+            formatter: formatter,
+            streakManager: StreakManager(),
+            dateProvider: dateProvider
         )
         self.sessionManager = SessionManager()
     }
