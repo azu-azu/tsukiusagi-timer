@@ -9,13 +9,11 @@ struct ContentView: View {
 
     // Environment for Orientation and Accessibility
     @Environment(\.horizontalSizeClass) private var horizontalClass
-    @Environment(\.verticalSizeClass) private var verticalClass
-    @Environment(\.sizeCategory) private var sizeCategory
+    // verticalClass/sizeCategory は当面未使用のため削除
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // State
     @State private var showingSideMenu = false
-    @State private var isMenuOpen = false
     @State private var showingEditRecord = false
     @State private var showDiamondStars = false
     @FocusState private var isQuietMoonFocused: Bool
@@ -27,8 +25,7 @@ struct ContentView: View {
     private let buttonWidth: CGFloat = 120
     private let buttonHeight: CGFloat = AppConstants.footerBarHeight
 
-    // 比率定数
-    private let timerBottomRatio: CGFloat = 1.1 // 画面高に対する TimerPanel の比率
+    // 比率定数（未使用を削除）
     private let moonPortraitYOffsetRatio: CGFloat = 0.15 // portrait（縦画面）時のmoonは少し上げる
     private let moonLandscapeYOffsetRatio: CGFloat = 0.1 // landscape（横画面）時のmoonは少し上げる
 
@@ -57,7 +54,7 @@ struct ContentView: View {
     /// 星アニメ可否の単一の真理
     private var shouldAnimateStars: Bool {
         if reduceMotion { return false }
-        if isMenuOpen { return false }
+        if showingSideMenu { return false }
         let isInitial = timerVM.timeRemaining == timerVM.workLengthMinutes * 60
         return timerVM.isRunning || isInitial
     }
@@ -149,7 +146,7 @@ struct ContentView: View {
                                     .padding(.bottom, safeAreaInsets.bottom)
                             }
                         }
-                        .zIndex(2001) // サイドメニューより高い優先度
+                        .zIndex(2001) // サイドメニューより下にしたいならOK（上にしたいならSideMenuをより大きく）
 
                         // RecordedTimesViewを縦画面時のみfooterBarの直上に追加
                         if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
@@ -176,7 +173,7 @@ struct ContentView: View {
 
                         // サイドメニュー
                         SideMenuView(isPresented: $showingSideMenu)
-                            .zIndex(2000) // 最前面に配置
+                            .zIndex(2002) // 本当に最前面にする
                     }
                     .ignoresSafeArea()
                     .gesture(
@@ -218,10 +215,7 @@ struct ContentView: View {
                             }
                         }
                     }
-                    // サイドメニューの開閉状態を単純に反映
-                    .onChange(of: showingSideMenu) { _, newValue in
-                        isMenuOpen = newValue
-                    }
+                    // showingSideMenu の変更のみで十分（shouldAnimateStars が再評価される）
                     // 低電力モードの変更を監視
                     .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
                         isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
