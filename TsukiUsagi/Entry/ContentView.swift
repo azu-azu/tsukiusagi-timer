@@ -1,16 +1,6 @@
 import SwiftUI
 import Foundation
 
-// MARK: - PreferenceKey for Landscape Detection
-
-struct LandscapePreferenceKey: PreferenceKey {
-    static let defaultValue: Bool = false
-
-    static func reduce(value: inout Bool, nextValue: () -> Bool) {
-        value = nextValue()
-    }
-}
-
 struct ContentView: View {
     // Environment
     @EnvironmentObject private var historyVM: HistoryViewModel
@@ -21,14 +11,15 @@ struct ContentView: View {
     @Environment(\.horizontalSizeClass) private var horizontalClass
     @Environment(\.verticalSizeClass) private var verticalClass
     @Environment(\.sizeCategory) private var sizeCategory
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // State
     @State private var showingSideMenu = false
+    @State private var isMenuOpen = false
     @State private var showingEditRecord = false
     @State private var showDiamondStars = false
-    @State private var cachedIsLandscape: Bool = false
     @FocusState private var isQuietMoonFocused: Bool
-    @State private var isFlowingStarsActive: Bool = true  // ✅ 復活: アニメーション制御用
+    @State private var isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
 
     private let moonTitle = "Centered"
 
@@ -63,26 +54,12 @@ struct ContentView: View {
         }
     }
 
-    /// Dynamic Type対応のフォントサイズ調整
-    private var adjustedFontSize: CGFloat {
-        switch sizeCategory {
-        case .accessibilityExtraExtraExtraLarge:
-            return DesignTokens.FontSize.accessibilityExtraLarge
-        case .accessibilityExtraExtraLarge:
-            return DesignTokens.FontSize.accessibilityLarge
-        case .accessibilityExtraLarge:
-            return DesignTokens.FontSize.accessibilityMedium
-        default:
-            return DesignTokens.FontSize.defaultSize
-        }
-    }
-
-    /// 向き変更の最適化
-    private func updateOrientation(size: CGSize) {
-        let newIsLandscape = safeIsLandscape(size: size)
-        if cachedIsLandscape != newIsLandscape {
-            cachedIsLandscape = newIsLandscape
-        }
+    /// 星アニメ可否の単一の真理
+    private var shouldAnimateStars: Bool {
+        if reduceMotion { return false }
+        if isMenuOpen { return false }
+        let isInitial = timerVM.timeRemaining == timerVM.workLengthMinutes * 60
+        return timerVM.isRunning || isInitial
     }
 
     /// ハンバーガーメニューボタン共通アクション
@@ -107,18 +84,18 @@ struct ContentView: View {
                         AwakeEnablerView(hidden: true)
                         StaticStarsView(starCount: staticStarCount)
 
-                        // ✅ 修正: セッション未完了かつアニメーション有効時に星エフェクト表示
-                        // 初回起動時(タイマー未開始)でも表示、PAUSE時は非表示
-                        if !timerVM.isSessionFinished && isFlowingStarsActive {
+                        // セッション未完了かつアニメーション可時に星エフェクト表示
+                        if !timerVM.isSessionFinished && shouldAnimateStars {
+                            let flowingCount = isLowPowerMode ? 24 : flowingStarCount
                             FlowingStarsView(
-                                starCount: flowingStarCount,
+                                starCount: flowingCount,
                                 angle: .degrees(90), // 下向き
                                 durationRange: 24 ... 40,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
                             FlowingStarsView(
-                                starCount: flowingStarCount,
+                                starCount: flowingCount,
                                 angle: .degrees(-90), // 上向き
                                 durationRange: 24 ... 40,
                                 sizeRange: 2 ... 4,
@@ -138,11 +115,9 @@ struct ContentView: View {
                             moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
                             isQuietMoonFocused: $isQuietMoonFocused,
                             showingEditRecord: $showingEditRecord,
-                            isMoonAnimationActive: isFlowingStarsActive  // ✅ 修正: 星と月のアニメーション連動
+                            isMoonAnimationActive: shouldAnimateStars
                         )
-                        .onPreferenceChange(LandscapePreferenceKey.self) { _ in
-                            updateOrientation(size: size)
-                        }
+                        
 
                         // footerBarはZStackの一番下（ギアボタンと日付を削除）
                         FooterBar(
@@ -209,15 +184,19 @@ struct ContentView: View {
                             .onEnded { value in
                                 let horizontalAmount = value.translation.width
                                 let verticalAmount = abs(value.translation.height)
+                                let openThreshold = max(50, geo.size.width * 0.10)
+                                let closeThreshold = -openThreshold
 
                                 // 水平方向のスワイプが垂直方向より大きい場合のみ処理
                                 if abs(horizontalAmount) > verticalAmount {
-                                    if horizontalAmount > 50 && !showingSideMenu {
-                                        // 右向きスワイプでメニューを開く
-                                        withAnimation(.easeInOut(duration: 0.3)) {
-                                            showingSideMenu = true
+                                    if horizontalAmount > openThreshold && !showingSideMenu {
+                                        // 左端20pt内からの右向きスワイプでメニューを開く
+                                        if value.startLocation.x <= 20 {
+                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                showingSideMenu = true
+                                            }
                                         }
-                                    } else if horizontalAmount < -50 && showingSideMenu {
+                                    } else if horizontalAmount < closeThreshold && showingSideMenu {
                                         // 左向きスワイプでメニューを閉じる
                                         withAnimation(.easeInOut(duration: 0.3)) {
                                             showingSideMenu = false
@@ -239,44 +218,13 @@ struct ContentView: View {
                             }
                         }
                     }
-                    // ✅ 修正: サイドメニュー画面制御
+                    // サイドメニューの開閉状態を単純に反映
                     .onChange(of: showingSideMenu) { _, newValue in
-                        if newValue {
-                            // サイドメニューを開いたときはアニメーションOFF
-                            isFlowingStarsActive = false
-                        } else {
-                            // サイドメニューを閉じたとき：
-                            // 1. タイマーが実行中の場合
-                            // 2. タイマーが未開始の場合（初期状態）
-                            // のいずれかでアニメーションON
-                            let isTimerNotStarted = timerVM.timeRemaining == (timerVM.workLengthMinutes * 60)
-                            isFlowingStarsActive = timerVM.isRunning || isTimerNotStarted
-                        }
+                        isMenuOpen = newValue
                     }
-                    // ✅ 修正: タイマー状態制御（PAUSE時のみアニメーション停止）
-                    .onChange(of: timerVM.isRunning) { _, newValue in
-                        // サイドメニューが開いていない場合のみ制御
-                        if !showingSideMenu {
-                            // PAUSEされた場合のみアニメーション停止
-                            // 初回起動時（タイマー未開始）は動作を継続
-                            if !newValue && timerVM.timeRemaining < (timerVM.workLengthMinutes * 60) {
-                                // タイマーが進行していてPAUSEされた場合
-                                isFlowingStarsActive = false
-                            } else if newValue {
-                                // タイマー開始時
-                                isFlowingStarsActive = true
-                            }
-                        }
-                    }
-                    // デバッグ用の状態変化追跡
-                    .onReceive(timerVM.$isSessionFinished) { _ in
-                        // print("ContentView: isSessionFinished changed to \(isFinished)")
-                    }
-                    .onReceive(timerVM.$isWorkSession) { _ in
-                        // print("ContentView: isWorkSession changed to \(isWork)")
-                    }
-                    .onReceive(timerVM.$isRunning) { _ in
-                        // print("ContentView: isRunning changed to \(isRunning)")
+                    // 低電力モードの変更を監視
+                    .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
+                        isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
                     }
                     // SessionManagerからのサイドメニュー開きリクエストを監視
                     .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
@@ -318,13 +266,6 @@ struct ContentView: View {
     }
 
     // MARK: - Helper Methods
-
-    private func roundedSize(_ size: CGSize) -> CGSize {
-        return CGSize(
-            width: round(size.width),
-            height: round(size.height)
-        )
-    }
 }
 
 // Dummy* は MockDependencyContainer への統一方針により削除
