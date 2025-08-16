@@ -26,7 +26,7 @@ struct WeeklyCalendarSectionView: View {
 
         .padding(.horizontal, 12)
         .padding(.vertical, 16)
-        .background(DesignTokens.MoonColors.accentBlueStrong.opacity(0.15))
+        .background(DesignTokens.CosmosColors.cardBackground)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4) // やわらか影
         .padding(.horizontal, 16) // 外側マージンで黒背景を見せる
