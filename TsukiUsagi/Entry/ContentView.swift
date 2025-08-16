@@ -237,6 +237,7 @@ struct ContentView: View {
                     }
                     .sheet(isPresented: $showingEditRecord) {
                         TimerEditView()
+                            .presentationBackground(DesignTokens.CosmosColors.background)
                     }
                     .onChange(of: timerVM.isSessionFinished) { _, newValue in
                         if newValue {
