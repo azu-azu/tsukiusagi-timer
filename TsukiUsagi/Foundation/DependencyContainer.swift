@@ -22,12 +22,17 @@ final class DependencyContainer {
         self.hapticService = HapticService()
         self.formatter = TimeFormatterUtil()
         self.notificationService = PhaseNotificationService(hapticService: hapticService)
-        self.historyService = SessionHistoryService(formatter: formatter)
+        // ViewModels を先に初期化できないため、ダミーで初期化して後で差し替えるように見えるが
+        // この順序だと循環するため、まず先に HistoryViewModel を作ってから Service を作る
+        // → 下のViewModels初期化順序を入れ替える
         self.persistenceManager = TimerPersistenceManager()
         self.dateProvider = SystemDateProvider()
 
         // --- ViewModels ---
         self.historyVM = HistoryViewModel()
+        // --- Services that depend on ViewModels ---
+        self.historyService = SessionHistoryService(formatter: formatter, historyVM: historyVM)
+
         self.timerVM = TimerViewModel(
             engine: timerEngine,
             notificationService: notificationService,

@@ -19,6 +19,8 @@ struct ContentView: View {
     @FocusState private var isQuietMoonFocused: Bool
     @State private var isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
     @State private var today = Date()
+    @State private var showSavedToast = false
+    @State private var savedToastWorkItem: DispatchWorkItem?
 
     private let moonTitle = "Centered"
 
@@ -177,6 +179,31 @@ struct ContentView: View {
                         // サイドメニュー
                         SideMenuView(isPresented: $showingSideMenu)
                             .zIndex(2002) // 本当に最前面にする
+
+                        // 保存トースト（Quiet Moon 画面に戻った直後の軽量HUD）
+                        if showSavedToast {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(DesignTokens.Fonts.symbolMedium)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                Text("Saved")
+                                    .font(DesignTokens.Fonts.label)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(DesignTokens.CosmosColors.cardBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(DesignTokens.WhiteColors.stroke)
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .zIndex(3000)
+                            .allowsHitTesting(false)
+                        }
                     }
                     .ignoresSafeArea()
                     .gesture(
@@ -229,6 +256,17 @@ struct ContentView: View {
                     }
                     // 画面常駐時に0時を跨いだら日付を更新
                     .onAppear { scheduleMidnightTick() }
+                    // 編集保存完了でHUDを表示
+                    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
+                        // 既存の消去予約をキャンセルして、表示時間をリセット
+                        savedToastWorkItem?.cancel()
+                        withAnimation(.easeInOut(duration: 0.2)) { showSavedToast = true }
+                        let work = DispatchWorkItem {
+                            withAnimation(.easeInOut(duration: 0.3)) { showSavedToast = false }
+                        }
+                        savedToastWorkItem = work
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+                    }
                     // SessionManagerからのサイドメニュー開きリクエストを監視
                     .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
                         if shouldOpen {

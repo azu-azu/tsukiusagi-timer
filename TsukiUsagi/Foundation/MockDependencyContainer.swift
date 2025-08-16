@@ -40,7 +40,7 @@ final class MockDependencyContainer {
     init(dateProvider: DateProviding = SystemDateProvider()) {
         self.dateProvider = dateProvider
         self.notificationService = PhaseNotificationService(hapticService: hapticService)
-        self.historyService = SessionHistoryService(formatter: formatter)
+        self.historyService = SessionHistoryService(formatter: formatter, historyVM: historyVM)
         self.timerVM = TimerViewModel(
             engine: timerEngine,
             notificationService: notificationService,

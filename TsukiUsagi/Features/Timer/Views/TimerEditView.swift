@@ -54,7 +54,8 @@ struct TimerEditView: View {
                         editedActivity: editedActivity,
                         editedSubtitle: editedSubtitle,
                         editedMemo: editedMemo,
-                        editedEnd: editedEnd
+                        editedEnd: editedEnd,
+                        isSaveDisabledExtra: isNoChanges
                     )
                     .background(Color.cosmosBackground)
                     .zIndex(1)
@@ -217,5 +218,22 @@ struct TimerEditView: View {
                     .fill(DesignTokens.CosmosColors.cardBackground)
             )
         }
+    }
+}
+
+// MARK: - Change detection
+private extension TimerEditView {
+    var isNoChanges: Bool {
+        let originalActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
+        let originalSubtitle = timerVM.currentSubtitleLabel
+        let originalEnd = timerVM.endTime ?? Date()
+        let activitySame = editedActivity.trimmingCharacters(in: .whitespacesAndNewlines) == originalActivity
+        let subtitleSame = editedSubtitle.trimmingCharacters(in: .whitespacesAndNewlines) == originalSubtitle
+        // 分解能は分単位で比較（秒の僅差での誤判定を避ける）
+        let cal = Calendar.current
+        let comps1 = cal.dateComponents([.hour, .minute], from: editedEnd)
+        let comps2 = cal.dateComponents([.hour, .minute], from: originalEnd)
+        let endSame = comps1.hour == comps2.hour && comps1.minute == comps2.minute
+        return activitySame && subtitleSame && endSame && editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
