@@ -38,7 +38,8 @@ struct TimerEditHeaderView: View {
                         end: editedEnd
                     )
                     timerVM.setEndTime(editedEnd)
-                    dismiss()
+                    // 保存完了通知を投げて、呼び出し側で閉じる＋HUD表示などを行う
+                    NotificationCenter.default.post(name: Notification.Name("TimerEditSaved"), object: nil)
                 },
                 isSaveDisabled: shouldDisableSave()
             )
