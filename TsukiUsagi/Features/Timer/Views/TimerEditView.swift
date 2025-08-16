@@ -12,6 +12,7 @@ struct TimerEditView: View {
     @State private var editedEnd = Date()
     @State private var minEnd = Date()
     @State private var isKeyboardVisible: Bool = false
+    @State private var keyboardBottomInset: CGFloat = 0
 
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
@@ -116,7 +117,9 @@ struct TimerEditView: View {
                             Spacer(minLength: 40)
                             }
                             .padding()
+                            .padding(.bottom, keyboardBottomInset)
                         }
+                        .scrollContentBackground(.hidden)
                         .scrollIndicators(.hidden) // スクロールインジケーター非表示
                         .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
                         .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
@@ -129,35 +132,53 @@ struct TimerEditView: View {
                             }
                         }
                         // キーボード表示時にもメモへスクロール
-                        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+                        .onReceive(
+                            NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+                        ) { _ in
                             if isMemoFocused {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    proxy.scrollTo(SectionID.memo, anchor: .bottom)
+                                // 次フレームで実行し、レイアウト確定後にスクロール
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        proxy.scrollTo(SectionID.memo, anchor: .bottom)
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 30))
-                .padding(.top, topPadding)
+                // 角丸クリップを外し、シートの下地色が見えないようにする
                 .presentationDetents([.large])
             }
             .navigationBarHidden(true) // NavigationBarを非表示
             .ignoresSafeArea(.keyboard, edges: .bottom) // キーボードで下を隠さない
+            // シートの背景そのものを黒系テーマに統一
+            .presentationBackground(DesignTokens.CosmosColors.background)
+            .background(Color.cosmosBackground) // 万一の透過対策
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
             .modifier(DismissKeyboardOnTap(
                 isActivityFocused: $isActivityFocused,
                 isSubtitleFocused: $isSubtitleFocused,
                 isMemoFocused: $isMemoFocused,
                 isKeyboardVisible: $isKeyboardVisible
             ))
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notif in
+                withAnimation(.easeInOut(duration: 0.25)) {
                     isKeyboardVisible = true
+                }
+                if let info = (notif as Notification).userInfo,
+                    let frame = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                    let screenMaxY = UIScreen.main.bounds.maxY
+                    let overlap = max(0, screenMaxY - frame.minY)
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        keyboardBottomInset = overlap
+                    }
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation(.easeInOut(duration: 0.25)) {
                     isKeyboardVisible = false
+                    keyboardBottomInset = 0
                 }
             }
             .toolbar {
@@ -269,7 +290,8 @@ private extension TimerEditView {
         let comps1 = cal.dateComponents([.hour, .minute], from: editedEnd)
         let comps2 = cal.dateComponents([.hour, .minute], from: originalEnd)
         let endSame = comps1.hour == comps2.hour && comps1.minute == comps2.minute
-        let memoSame = editedMemo.trimmingCharacters(in: .whitespacesAndNewlines) == originalMemo.trimmingCharacters(in: .whitespacesAndNewlines)
+        let memoSame = editedMemo.trimmingCharacters(in: .whitespacesAndNewlines)
+            == originalMemo.trimmingCharacters(in: .whitespacesAndNewlines)
         return activitySame && subtitleSame && endSame && memoSame
     }
 }

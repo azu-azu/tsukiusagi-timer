@@ -14,8 +14,8 @@ struct ContentView: View {
 
     // State
     @State private var showingSideMenu = false
-    @State private var showingEditRecord = false
     @State private var showDiamondStars = false
+    @State private var showingEditRecord = false
     @FocusState private var isQuietMoonFocused: Bool
     @State private var isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
     @State private var today = Date()
@@ -119,7 +119,7 @@ struct ContentView: View {
                             showingEditRecord: $showingEditRecord,
                             isMoonAnimationActive: shouldAnimateStars
                         )
-                        
+
 
                         // footerBarはZStackの一番下（ギアボタンと日付を削除）
                         FooterBar(
@@ -153,7 +153,7 @@ struct ContentView: View {
                         }
                         .zIndex(2001) // サイドメニューより下にしたいならOK（上にしたいならSideMenuをより大きく）
 
-                        // RecordedTimesViewを縦画面時のみfooterBarの直上に追加
+                        // RecordedTimesViewを縦画面時のみfooterBarの直上に追加（位置は従来のまま）
                         if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
                             RecordedTimesView(
                                 formattedStartTime: timerVM.formattedStartTime,
@@ -235,9 +235,14 @@ struct ContentView: View {
                     .onReceive(timerVM.$flashStars.dropFirst()) { _ in
                         showDiamondStars = true
                     }
+                    // シート提示は MainPanel へ移譲
                     .sheet(isPresented: $showingEditRecord) {
-                        TimerEditView()
-                            .presentationBackground(DesignTokens.CosmosColors.background)
+                        // 外側（器）と内側（中身）の両方で黒を明示
+                        ZStack {
+                            DesignTokens.CosmosColors.background.ignoresSafeArea()
+                            TimerEditView()
+                                .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+                        }
                     }
                     .onChange(of: timerVM.isSessionFinished) { _, newValue in
                         if newValue {
@@ -252,7 +257,9 @@ struct ContentView: View {
                         isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
                     }
                     // フォアグラウンド復帰で日付を更新
-                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                    .onReceive(
+                        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+                    ) { _ in
                         today = Date()
                     }
                     // 画面常駐時に0時を跨いだら日付を更新

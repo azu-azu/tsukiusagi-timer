@@ -99,7 +99,7 @@ struct MainPanel: View {
                     ))
                 } else {
                     // let _ = print("🌙 MainPanel - Portrait QuietMoon")
-                    // 縦画面：従来通り
+                    // 縦画面：QuietMoonのみ（RecordedTimesはContentView側で重ねる）
                     VStack {
                         QuietMoonView(
                             size: size,
@@ -185,5 +185,6 @@ struct MainPanel: View {
                 }
             }
         }
+        // シート提示は上位（ContentView）から
     }
 }
