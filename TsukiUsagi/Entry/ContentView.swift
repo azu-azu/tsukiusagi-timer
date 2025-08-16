@@ -125,7 +125,7 @@ struct ContentView: View {
                             buttonWidth: buttonWidth,
                             dateString: "", // 日付表示を削除
                             onGearTap: nil, // ギアボタンを無効化
-                            startPauseButton: AnyView(startPauseButton())
+                            startPauseButton: startPauseButton()
                         )
                         .padding(.horizontal, 16)
                         .padding(.bottom, safeAreaInsets.bottom)
@@ -227,6 +227,8 @@ struct ContentView: View {
                     .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
                         today = Date()
                     }
+                    // 画面常駐時に0時を跨いだら日付を更新
+                    .onAppear { scheduleMidnightTick() }
                     // SessionManagerからのサイドメニュー開きリクエストを監視
                     .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
                         if shouldOpen {
@@ -267,6 +269,23 @@ struct ContentView: View {
     }
 
     // MARK: - Helper Methods
+}
+
+// MARK: - Midnight tick
+private extension ContentView {
+    func scheduleMidnightTick() {
+        let cal = Calendar.current
+        let next = cal.nextDate(
+            after: Date(),
+            matching: DateComponents(hour: 0, minute: 0, second: 1),
+            matchingPolicy: .nextTime
+        ) ?? Date().addingTimeInterval(60)
+        let interval = max(0, next.timeIntervalSinceNow)
+        DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
+            today = Date()
+            scheduleMidnightTick()
+        }
+    }
 }
 
 // Dummy* は MockDependencyContainer への統一方針により削除

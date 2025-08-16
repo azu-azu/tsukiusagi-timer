@@ -1,12 +1,12 @@
 import SwiftUI
 import Foundation
 
-struct FooterBar: View {
+struct FooterBar<StartBtn: View>: View {
     let buttonHeight: CGFloat
     let buttonWidth: CGFloat
     let dateString: String
     let onGearTap: (() -> Void)?
-    let startPauseButton: AnyView
+    let startPauseButton: StartBtn
 
     var body: some View {
         ZStack(alignment: .bottom) {
