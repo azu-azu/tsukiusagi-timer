@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var showDiamondStars = false
     @FocusState private var isQuietMoonFocused: Bool
     @State private var isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+    @State private var today = Date()
 
     private let moonTitle = "Centered"
 
@@ -83,18 +84,20 @@ struct ContentView: View {
 
                         // セッション未完了かつアニメーション可時に星エフェクト表示
                         if !timerVM.isSessionFinished && shouldAnimateStars {
-                            let flowingCount = isLowPowerMode ? 24 : flowingStarCount
+                            let baseCount = isLowPowerMode ? 24 : flowingStarCount
+                            let flowingCount = isLandscape ? Int(Double(baseCount) * 0.7) : baseCount
+                            let dur: ClosedRange<Double> = isLandscape ? 28 ... 44 : 24 ... 40
                             FlowingStarsView(
                                 starCount: flowingCount,
                                 angle: .degrees(90), // 下向き
-                                durationRange: 24 ... 40,
+                                durationRange: dur,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
                             FlowingStarsView(
                                 starCount: flowingCount,
                                 angle: .degrees(-90), // 上向き
-                                durationRange: 24 ... 40,
+                                durationRange: dur,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
@@ -139,7 +142,7 @@ struct ContentView: View {
 
                                 Spacer()
                                 // 日付表示（右下）
-                                Text(DateFormatters.displayDateNoYear.string(from: Date()))
+                                Text(DateFormatters.displayDateNoYear.string(from: today))
                                     .font(DesignTokens.Fonts.footerDate)
                                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                     .padding(.trailing, 16)
@@ -219,6 +222,10 @@ struct ContentView: View {
                     // 低電力モードの変更を監視
                     .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
                         isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+                    }
+                    // フォアグラウンド復帰で日付を更新
+                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                        today = Date()
                     }
                     // SessionManagerからのサイドメニュー開きリクエストを監視
                     .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
