@@ -152,12 +152,21 @@ struct TimerEditView: View {
                 }
             }
             .task {
-                // 編集画面を開いた時、現在のセッションの値をセット
-                editedEnd = timerVM.endTime ?? Date()
-                minEnd = timerVM.startTime ?? Date()
-                editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
-                editedSubtitle = timerVM.currentSubtitleLabel
-                editedMemo = ""
+                // 編集対象は「最後に記録された履歴」なので、History から初期値を読み込む
+                if let last = historyVM.history.last {
+                    editedEnd = last.end
+                    minEnd = last.start
+                    editedActivity = last.activity
+                    editedSubtitle = last.subtitle ?? ""
+                    editedMemo = last.memo ?? ""
+                } else {
+                    // フォールバック（念のため）
+                    editedEnd = timerVM.endTime ?? Date()
+                    minEnd = timerVM.startTime ?? Date()
+                    editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
+                    editedSubtitle = timerVM.currentSubtitleLabel
+                    editedMemo = ""
+                }
             }
             // 保存系のアクションはヘッダー内のボタンで行われる想定
             // 保存成功時のフィードバックと閉じ処理を注入
@@ -224,9 +233,13 @@ struct TimerEditView: View {
 // MARK: - Change detection
 private extension TimerEditView {
     var isNoChanges: Bool {
-        let originalActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
-        let originalSubtitle = timerVM.currentSubtitleLabel
-        let originalEnd = timerVM.endTime ?? Date()
+        // 比較元も履歴の最後のレコードを参照（なければVMの値でフォールバック）
+        let originalActivity = historyVM.history.last?.activity
+            ?? (timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel)
+        let originalSubtitle = historyVM.history.last?.subtitle
+            ?? timerVM.currentSubtitleLabel
+        let originalMemo = historyVM.history.last?.memo ?? ""
+        let originalEnd = historyVM.history.last?.end ?? (timerVM.endTime ?? Date())
         let activitySame = editedActivity.trimmingCharacters(in: .whitespacesAndNewlines) == originalActivity
         let subtitleSame = editedSubtitle.trimmingCharacters(in: .whitespacesAndNewlines) == originalSubtitle
         // 分解能は分単位で比較（秒の僅差での誤判定を避ける）
@@ -234,6 +247,7 @@ private extension TimerEditView {
         let comps1 = cal.dateComponents([.hour, .minute], from: editedEnd)
         let comps2 = cal.dateComponents([.hour, .minute], from: originalEnd)
         let endSame = comps1.hour == comps2.hour && comps1.minute == comps2.minute
-        return activitySame && subtitleSame && endSame && editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let memoSame = editedMemo.trimmingCharacters(in: .whitespacesAndNewlines) == originalMemo.trimmingCharacters(in: .whitespacesAndNewlines)
+        return activitySame && subtitleSame && endSame && memoSame
     }
 }
