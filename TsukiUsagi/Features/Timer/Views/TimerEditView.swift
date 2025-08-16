@@ -158,6 +158,16 @@ struct TimerEditView: View {
                 editedSubtitle = timerVM.currentSubtitleLabel
                 editedMemo = ""
             }
+            // 保存系のアクションはヘッダー内のボタンで行われる想定
+            // 保存成功時のフィードバックと閉じ処理を注入
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
+                HapticManager.shared.buttonTapFeedback()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                dismiss()
+                // アクセシビリティ通知（保存完了）
+                UIAccessibility.post(notification: .announcement, argument: "Saved")
+                // 軽量トースト（HUD）は別途共通実装があればそちらを使用
+            }
         }
     }
 
