@@ -10,7 +10,8 @@ struct StartPulseAnimationModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .foregroundColor(flashYellow ? DesignTokens.MoonColors.accentBlueStrong : DesignTokens.PureColors.textWhite)
+            // 仕様: スタート時の色変化は白のまま（青は規定外）
+            .foregroundColor(DesignTokens.PureColors.textWhite)
             .scaleEffect(flashScale ? 1.5 : 1.0, anchor: .center)
             .onReceive(publisher) { _ in
                 print("StartPulseAnimationModifier: received pulse signal")
