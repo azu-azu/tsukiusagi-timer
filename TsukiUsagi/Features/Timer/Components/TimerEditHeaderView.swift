@@ -69,7 +69,7 @@ struct TimerEditHeaderView_Previews: PreviewProvider {
             persistenceManager: DummyPersistenceManager(),
             formatter: DummyFormatter()
         ))
-        .background(Color.cosmosBackground)
+        .background(DesignTokens.CosmosColors.background)
     }
 }
 
