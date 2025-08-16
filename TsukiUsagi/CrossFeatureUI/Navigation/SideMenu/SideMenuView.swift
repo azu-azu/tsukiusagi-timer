@@ -307,7 +307,7 @@ struct SideMenuView_Previews: PreviewProvider {
 
         NavigationView {
             ZStack {
-                Color.cosmosBackground.ignoresSafeArea()
+                DesignTokens.CosmosColors.background.ignoresSafeArea()
 
                 SideMenuView(isPresented: .constant(true))
             }

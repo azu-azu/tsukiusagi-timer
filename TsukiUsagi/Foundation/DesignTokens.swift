@@ -53,9 +53,9 @@ enum DesignTokens {
 
     /// 宇宙空間をテーマにした背景カラー
     enum CosmosColors {
-        /// 背景色（アプリ共通の宇宙背景トーン）
-        /// 既存の `Color.cosmosBackground` と統一
-        static let background = Color.cosmosBackground
+        /// 背景色（純粋な黒ベース）
+        /// シート含めアプリ全体の基準色
+        static let background = Color.black
 
         /// カード背景色（黒ベースの薄いグレー）
         static let cardBackground = BlackColors.secondary
