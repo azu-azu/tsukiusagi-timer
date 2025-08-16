@@ -48,7 +48,7 @@ struct TimerEditView: View {
         NavigationStack {
             ZStack {
                 // 背景（画面全体、clipされない）
-                Color.cosmosBackground.ignoresSafeArea()
+                DesignTokens.CosmosColors.background.ignoresSafeArea()
 
                 // SettingsViewと同じ構造に統一
                 VStack(spacing: 0) {
@@ -60,7 +60,7 @@ struct TimerEditView: View {
                         editedEnd: editedEnd,
                         isSaveDisabledExtra: isNoChanges
                     )
-                    .background(Color.cosmosBackground)
+                    .background(DesignTokens.CosmosColors.background)
                     .zIndex(1)
 
                     // スクロール可能なコンテンツ
@@ -153,7 +153,7 @@ struct TimerEditView: View {
             .ignoresSafeArea(.keyboard, edges: .bottom) // キーボードで下を隠さない
             // シートの背景そのものを黒系テーマに統一
             .presentationBackground(DesignTokens.CosmosColors.background)
-            .background(Color.cosmosBackground) // 万一の透過対策
+            .background(DesignTokens.CosmosColors.background) // 万一の透過対策
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
             .modifier(DismissKeyboardOnTap(
