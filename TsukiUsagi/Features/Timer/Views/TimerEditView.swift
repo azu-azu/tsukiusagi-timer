@@ -15,6 +15,8 @@ struct TimerEditView: View {
 
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
+    // スクロール位置制御用の識別子
+    private enum SectionID { case memo }
     @FocusState private var isActivityFocused: Bool
 
     // SettingsViewと同じ定数
@@ -61,8 +63,9 @@ struct TimerEditView: View {
                     .zIndex(1)
 
                     // スクロール可能なコンテンツ
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 40) {
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 40) {
                             // Session Label
                             section(title: "Session Label") {
                                 SessionLabelSection(
@@ -108,20 +111,39 @@ struct TimerEditView: View {
                                         .focused($isMemoFocused)
                                 }
                             }
+                            .id(SectionID.memo)
 
                             Spacer(minLength: 40)
+                            }
+                            .padding()
                         }
-                        .padding()
+                        .scrollIndicators(.hidden) // スクロールインジケーター非表示
+                        .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
+                        .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
+                        // メモにフォーカスしたら自動スクロール
+                        .onChange(of: isMemoFocused) { _, newValue in
+                            if newValue {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    proxy.scrollTo(SectionID.memo, anchor: .bottom)
+                                }
+                            }
+                        }
+                        // キーボード表示時にもメモへスクロール
+                        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+                            if isMemoFocused {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    proxy.scrollTo(SectionID.memo, anchor: .bottom)
+                                }
+                            }
+                        }
                     }
-                    .scrollIndicators(.hidden) // スクロールインジケーター非表示
-                    .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
-                    .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 30))
                 .padding(.top, topPadding)
                 .presentationDetents([.large])
             }
             .navigationBarHidden(true) // NavigationBarを非表示
+            .ignoresSafeArea(.keyboard, edges: .bottom) // キーボードで下を隠さない
             .modifier(DismissKeyboardOnTap(
                 isActivityFocused: $isActivityFocused,
                 isSubtitleFocused: $isSubtitleFocused,
