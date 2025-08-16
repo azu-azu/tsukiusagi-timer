@@ -1,19 +1,21 @@
 import Foundation
 
 protocol SessionHistoryServiceable: AnyObject {
-    func add(parameters: AddSessionParameters)
+    @MainActor func add(parameters: AddSessionParameters)
 }
 
 final class SessionHistoryService: SessionHistoryServiceable {
     private let formatter: TimeFormatterUtilable
-    // HistoryViewModel等もここで保持
+    private weak var historyVM: HistoryViewModel?
 
-    init(formatter: TimeFormatterUtilable) {
+    init(formatter: TimeFormatterUtilable, historyVM: HistoryViewModel) {
         self.formatter = formatter
+        self.historyVM = historyVM
     }
 
+    @MainActor
     func add(parameters: AddSessionParameters) {
-        // 履歴保存ロジック
-        // formatterを使って表示用テキスト生成も可能
+        // HistoryViewModel に委譲して単一ソース・オブ・トゥルースを保つ
+        historyVM?.add(parameters: parameters)
     }
 }
