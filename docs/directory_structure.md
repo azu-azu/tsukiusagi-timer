@@ -59,20 +59,23 @@ TsukiUsagi/
 │   │   │       ├── DailyTimelineView.swift
 │   │   │       └── HistoryView.swift
 │   │   ├── Settings/
-│   │   │   ├── Components/
-│   │   │   │   ├── CreateCustomSessionView.swift
-│   │   │   │   ├── EmbeddedSessionManagementView.swift
-│   │   │   │   ├── NewSessionFormView.swift
-│   │   │   │   ├── SessionDescriptionsView.swift
-│   │   │   │   ├── SessionEditView.swift
-│   │   │   │   ├── SessionManagementView.swift
-│   │   │   │   ├── SessionNameCustomInputView.swift
-│   │   │   │   ├── SessionNameSelectionView.swift
-│   │   │   │   ├── SessionRowDisplayView.swift
-│   │   │   │   ├── SessionRowEditingView.swift
-│   │   │   │   ├── SessionRowView.swift
+│   │   │   ├── Components/                       # 再利用 UI
+│   │   │   │   ├── Sessions/
+│   │   │   │   │   ├── Descriptions/
+│   │   │   │   │   │   └── SessionDescriptionsView.swift
+│   │   │   │   │   ├── Forms/
+│   │   │   │   │   │   ├── SessionNameCustomInputView.swift
+│   │   │   │   │   │   └── SessionNameSelectionView.swift
+│   │   │   │   │   ├── Rows/
+│   │   │   │   │   │   ├── SessionRowDisplayView.swift
+│   │   │   │   │   │   ├── SessionRowEditingView.swift
+│   │   │   │   │   │   └── SessionRowView.swift
+│   │   │   │   │   └── EmbeddedSessionManagementView.swift
 │   │   │   │   └── SettingsHeaderView.swift
-│   │   │   ├── Screens/                      # 現在未使用（空）
+│   │   │   ├── Screens/                          # 画面（Screen）
+│   │   │   │   ├── NewSessionFormView.swift      # 新規作成シート
+│   │   │   │   ├── SessionEditView.swift         # 編集画面
+│   │   │   │   └── SessionManagementView.swift   # 一覧・管理画面
 │   │   │   ├── Sections/
 │   │   │   │   ├── Duration/
 │   │   │   │   │   ├── DurationHelpers.swift
