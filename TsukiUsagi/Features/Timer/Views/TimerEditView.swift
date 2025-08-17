@@ -113,6 +113,14 @@ struct TimerEditView: View {
                                 }
                             }
                             .id(SectionID.memo)
+                            .simultaneousGesture(TapGesture().onEnded {
+                                isMemoFocused = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        proxy.scrollTo(SectionID.memo, anchor: .bottom)
+                                    }
+                                }
+                            })
 
                             Spacer(minLength: 40)
                             }
@@ -141,6 +149,13 @@ struct TimerEditView: View {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         proxy.scrollTo(SectionID.memo, anchor: .bottom)
                                     }
+                                }
+                            }
+                        }
+                        .onChange(of: keyboardBottomInset) { _, _ in
+                            if isMemoFocused {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    proxy.scrollTo(SectionID.memo, anchor: .bottom)
                                 }
                             }
                         }
