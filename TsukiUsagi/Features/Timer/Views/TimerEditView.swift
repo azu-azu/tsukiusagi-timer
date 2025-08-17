@@ -126,12 +126,17 @@ struct TimerEditView: View {
                             Spacer(minLength: 40)
                             }
                             .padding()
-                            .padding(.bottom, keyboardBottomInset)
+                            // ScrollViewの中での下余白は最小限に留める（主にsafeAreaInsetで担保）
                         }
                         .scrollContentBackground(.hidden)
                         .scrollIndicators(.hidden) // スクロールインジケーター非表示
                         .scrollDismissesKeyboard(.never) // 競合回避のため一旦無効化
                         .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
+                        .safeAreaInset(edge: .bottom) {
+                            // セーフエリア外まで背景を広げているため、
+                            // 下端の余白は safeAreaInset で作るのが安定
+                            Color.clear.frame(height: isKeyboardVisible ? keyboardBottomInset : 0)
+                        }
                         // 発火タイミングは bottom inset 更新に寄せる
                         .onChange(of: keyboardBottomInset) { _, _ in
                             guard isMemoFocused else { return }
@@ -156,7 +161,7 @@ struct TimerEditView: View {
                 .presentationDetents([.large])
             }
             .navigationBarHidden(true) // NavigationBarを非表示
-            .ignoresSafeArea(.keyboard, edges: .bottom) // キーボードで下を隠さない
+            // システムのセーフエリア調整を使う（競合を避けるためキーボード無視は外す）
             // シートの背景そのものを黒系テーマに統一
             .presentationBackground(DesignTokens.CosmosColors.background)
             .background(DesignTokens.CosmosColors.background) // 万一の透過対策
