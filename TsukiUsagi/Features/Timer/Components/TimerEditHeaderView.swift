@@ -11,6 +11,7 @@ struct TimerEditHeaderView: View {
     let editedSubtitle: String
     let editedMemo: String
     let editedEnd: Date
+    let isSaveDisabledExtra: Bool
 
     private var isCustomActivity: Bool {
         let predefinedActivities = ["Work", "Study", "Read"]
@@ -38,9 +39,10 @@ struct TimerEditHeaderView: View {
                         end: editedEnd
                     )
                     timerVM.setEndTime(editedEnd)
-                    dismiss()
+                    // 保存完了通知を投げて、呼び出し側で閉じる＋HUD表示などを行う
+                    NotificationCenter.default.post(name: Notification.Name("TimerEditSaved"), object: nil)
                 },
-                isSaveDisabled: shouldDisableSave()
+                isSaveDisabled: shouldDisableSave() || isSaveDisabledExtra
             )
         )
         .debugComponent("TimerEditHeaderView", position: .topLeading)
@@ -55,7 +57,8 @@ struct TimerEditHeaderView_Previews: PreviewProvider {
             editedActivity: "Work",
             editedSubtitle: "Test subtitle",
             editedMemo: "Test memo",
-            editedEnd: Date()
+            editedEnd: Date(),
+            isSaveDisabledExtra: false
         )
         .environmentObject(DummyHistoryViewModel())
         .environmentObject(TimerViewModel(
@@ -66,7 +69,7 @@ struct TimerEditHeaderView_Previews: PreviewProvider {
             persistenceManager: DummyPersistenceManager(),
             formatter: DummyFormatter()
         ))
-        .background(Color.cosmosBackground)
+        .background(DesignTokens.CosmosColors.background)
     }
 }
 

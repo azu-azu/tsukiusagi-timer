@@ -1,16 +1,6 @@
 import SwiftUI
 import Foundation
 
-// MARK: - PreferenceKey for Landscape Detection
-
-struct LandscapePreferenceKey: PreferenceKey {
-    static let defaultValue: Bool = false
-
-    static func reduce(value: inout Bool, nextValue: () -> Bool) {
-        value = nextValue()
-    }
-}
-
 struct ContentView: View {
     // Environment
     @EnvironmentObject private var historyVM: HistoryViewModel
@@ -19,16 +9,18 @@ struct ContentView: View {
 
     // Environment for Orientation and Accessibility
     @Environment(\.horizontalSizeClass) private var horizontalClass
-    @Environment(\.verticalSizeClass) private var verticalClass
-    @Environment(\.sizeCategory) private var sizeCategory
+    // verticalClass/sizeCategory は当面未使用のため削除
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // State
     @State private var showingSideMenu = false
-    @State private var showingEditRecord = false
     @State private var showDiamondStars = false
-    @State private var cachedIsLandscape: Bool = false
+    @State private var showingEditRecord = false
     @FocusState private var isQuietMoonFocused: Bool
-    @State private var isFlowingStarsActive: Bool = true  // ✅ 復活: アニメーション制御用
+    @State private var isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+    @State private var today = Date()
+    @State private var showSavedToast = false
+    @State private var savedToastWorkItem: DispatchWorkItem?
 
     private let moonTitle = "Centered"
 
@@ -36,8 +28,7 @@ struct ContentView: View {
     private let buttonWidth: CGFloat = 120
     private let buttonHeight: CGFloat = AppConstants.footerBarHeight
 
-    // 比率定数
-    private let timerBottomRatio: CGFloat = 1.1 // 画面高に対する TimerPanel の比率
+    // 比率定数（未使用を削除）
     private let moonPortraitYOffsetRatio: CGFloat = 0.15 // portrait（縦画面）時のmoonは少し上げる
     private let moonLandscapeYOffsetRatio: CGFloat = 0.1 // landscape（横画面）時のmoonは少し上げる
 
@@ -63,26 +54,12 @@ struct ContentView: View {
         }
     }
 
-    /// Dynamic Type対応のフォントサイズ調整
-    private var adjustedFontSize: CGFloat {
-        switch sizeCategory {
-        case .accessibilityExtraExtraExtraLarge:
-            return DesignTokens.FontSize.accessibilityExtraLarge
-        case .accessibilityExtraExtraLarge:
-            return DesignTokens.FontSize.accessibilityLarge
-        case .accessibilityExtraLarge:
-            return DesignTokens.FontSize.accessibilityMedium
-        default:
-            return DesignTokens.FontSize.defaultSize
-        }
-    }
-
-    /// 向き変更の最適化
-    private func updateOrientation(size: CGSize) {
-        let newIsLandscape = safeIsLandscape(size: size)
-        if cachedIsLandscape != newIsLandscape {
-            cachedIsLandscape = newIsLandscape
-        }
+    /// 星アニメ可否の単一の真理
+    private var shouldAnimateStars: Bool {
+        if reduceMotion { return false }
+        if showingSideMenu { return false }
+        let isInitial = timerVM.timeRemaining == timerVM.workLengthMinutes * 60
+        return timerVM.isRunning || isInitial
     }
 
     /// ハンバーガーメニューボタン共通アクション
@@ -107,20 +84,22 @@ struct ContentView: View {
                         AwakeEnablerView(hidden: true)
                         StaticStarsView(starCount: staticStarCount)
 
-                        // ✅ 修正: セッション未完了かつアニメーション有効時に星エフェクト表示
-                        // 初回起動時(タイマー未開始)でも表示、PAUSE時は非表示
-                        if !timerVM.isSessionFinished && isFlowingStarsActive {
+                        // セッション未完了かつアニメーション可時に星エフェクト表示
+                        if !timerVM.isSessionFinished && shouldAnimateStars {
+                            let baseCount = isLowPowerMode ? 24 : flowingStarCount
+                            let flowingCount = isLandscape ? Int(Double(baseCount) * 0.7) : baseCount
+                            let dur: ClosedRange<Double> = isLandscape ? 28 ... 44 : 24 ... 40
                             FlowingStarsView(
-                                starCount: flowingStarCount,
+                                starCount: flowingCount,
                                 angle: .degrees(90), // 下向き
-                                durationRange: 24 ... 40,
+                                durationRange: dur,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
                             FlowingStarsView(
-                                starCount: flowingStarCount,
+                                starCount: flowingCount,
                                 angle: .degrees(-90), // 上向き
-                                durationRange: 24 ... 40,
+                                durationRange: dur,
                                 sizeRange: 2 ... 4,
                                 spawnArea: nil
                             )
@@ -138,11 +117,8 @@ struct ContentView: View {
                             moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
                             isQuietMoonFocused: $isQuietMoonFocused,
                             showingEditRecord: $showingEditRecord,
-                            isMoonAnimationActive: isFlowingStarsActive  // ✅ 修正: 星と月のアニメーション連動
+                            isMoonAnimationActive: shouldAnimateStars
                         )
-                        .onPreferenceChange(LandscapePreferenceKey.self) { _ in
-                            updateOrientation(size: size)
-                        }
 
                         // footerBarはZStackの一番下（ギアボタンと日付を削除）
                         FooterBar(
@@ -150,7 +126,7 @@ struct ContentView: View {
                             buttonWidth: buttonWidth,
                             dateString: "", // 日付表示を削除
                             onGearTap: nil, // ギアボタンを無効化
-                            startPauseButton: AnyView(startPauseButton())
+                            startPauseButton: startPauseButton()
                         )
                         .padding(.horizontal, 16)
                         .padding(.bottom, safeAreaInsets.bottom)
@@ -167,16 +143,16 @@ struct ContentView: View {
 
                                 Spacer()
                                 // 日付表示（右下）
-                                Text(DateFormatters.displayDateNoYear.string(from: Date()))
+                                Text(DateFormatters.displayDateNoYear.string(from: today))
                                     .font(DesignTokens.Fonts.footerDate)
                                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                     .padding(.trailing, 16)
                                     .padding(.bottom, safeAreaInsets.bottom)
                             }
                         }
-                        .zIndex(2001) // サイドメニューより高い優先度
+                        .zIndex(2001) // サイドメニューより下にしたいならOK（上にしたいならSideMenuをより大きく）
 
-                        // RecordedTimesViewを縦画面時のみfooterBarの直上に追加
+                        // RecordedTimesViewを縦画面時のみfooterBarの直上に追加（位置は従来のまま）
                         if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
                             RecordedTimesView(
                                 formattedStartTime: timerVM.formattedStartTime,
@@ -201,7 +177,32 @@ struct ContentView: View {
 
                         // サイドメニュー
                         SideMenuView(isPresented: $showingSideMenu)
-                            .zIndex(2000) // 最前面に配置
+                            .zIndex(2002) // 本当に最前面にする
+
+                        // 保存トースト（Quiet Moon 画面に戻った直後の軽量HUD）
+                        if showSavedToast {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(DesignTokens.Fonts.symbolMedium)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                Text("Saved")
+                                    .font(DesignTokens.Fonts.label)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(DesignTokens.CosmosColors.cardBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(DesignTokens.WhiteColors.stroke)
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .zIndex(3000)
+                            .allowsHitTesting(false)
+                        }
                     }
                     .ignoresSafeArea()
                     .gesture(
@@ -209,15 +210,19 @@ struct ContentView: View {
                             .onEnded { value in
                                 let horizontalAmount = value.translation.width
                                 let verticalAmount = abs(value.translation.height)
+                                let openThreshold = max(50, geo.size.width * 0.10)
+                                let closeThreshold = -openThreshold
 
                                 // 水平方向のスワイプが垂直方向より大きい場合のみ処理
                                 if abs(horizontalAmount) > verticalAmount {
-                                    if horizontalAmount > 50 && !showingSideMenu {
-                                        // 右向きスワイプでメニューを開く
-                                        withAnimation(.easeInOut(duration: 0.3)) {
-                                            showingSideMenu = true
+                                    if horizontalAmount > openThreshold && !showingSideMenu {
+                                        // 左端20pt内からの右向きスワイプでメニューを開く
+                                        if value.startLocation.x <= 20 {
+                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                showingSideMenu = true
+                                            }
                                         }
-                                    } else if horizontalAmount < -50 && showingSideMenu {
+                                    } else if horizontalAmount < closeThreshold && showingSideMenu {
                                         // 左向きスワイプでメニューを閉じる
                                         withAnimation(.easeInOut(duration: 0.3)) {
                                             showingSideMenu = false
@@ -229,9 +234,16 @@ struct ContentView: View {
                     .onReceive(timerVM.$flashStars.dropFirst()) { _ in
                         showDiamondStars = true
                     }
+                    // シート提示は MainPanel へ移譲
                     .sheet(isPresented: $showingEditRecord) {
-                        TimerEditView()
+                        // 外側（器）と内側（中身）の両方で黒を明示
+                        ZStack {
+                            DesignTokens.CosmosColors.background.ignoresSafeArea()
+                            TimerEditView()
+                                .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+                        }
                     }
+                    .presentationBackground(DesignTokens.CosmosColors.background)
                     .onChange(of: timerVM.isSessionFinished) { _, newValue in
                         if newValue {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -239,44 +251,29 @@ struct ContentView: View {
                             }
                         }
                     }
-                    // ✅ 修正: サイドメニュー画面制御
-                    .onChange(of: showingSideMenu) { _, newValue in
-                        if newValue {
-                            // サイドメニューを開いたときはアニメーションOFF
-                            isFlowingStarsActive = false
-                        } else {
-                            // サイドメニューを閉じたとき：
-                            // 1. タイマーが実行中の場合
-                            // 2. タイマーが未開始の場合（初期状態）
-                            // のいずれかでアニメーションON
-                            let isTimerNotStarted = timerVM.timeRemaining == (timerVM.workLengthMinutes * 60)
-                            isFlowingStarsActive = timerVM.isRunning || isTimerNotStarted
+                    // showingSideMenu の変更のみで十分（shouldAnimateStars が再評価される）
+                    // 低電力モードの変更を監視
+                    .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
+                        isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+                    }
+                    // フォアグラウンド復帰で日付を更新
+                    .onReceive(
+                        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+                    ) { _ in
+                        today = Date()
+                    }
+                    // 画面常駐時に0時を跨いだら日付を更新
+                    .onAppear { scheduleMidnightTick() }
+                    // 編集保存完了でHUDを表示
+                    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
+                        // 既存の消去予約をキャンセルして、表示時間をリセット
+                        savedToastWorkItem?.cancel()
+                        withAnimation(.easeInOut(duration: 0.2)) { showSavedToast = true }
+                        let work = DispatchWorkItem {
+                            withAnimation(.easeInOut(duration: 0.3)) { showSavedToast = false }
                         }
-                    }
-                    // ✅ 修正: タイマー状態制御（PAUSE時のみアニメーション停止）
-                    .onChange(of: timerVM.isRunning) { _, newValue in
-                        // サイドメニューが開いていない場合のみ制御
-                        if !showingSideMenu {
-                            // PAUSEされた場合のみアニメーション停止
-                            // 初回起動時（タイマー未開始）は動作を継続
-                            if !newValue && timerVM.timeRemaining < (timerVM.workLengthMinutes * 60) {
-                                // タイマーが進行していてPAUSEされた場合
-                                isFlowingStarsActive = false
-                            } else if newValue {
-                                // タイマー開始時
-                                isFlowingStarsActive = true
-                            }
-                        }
-                    }
-                    // デバッグ用の状態変化追跡
-                    .onReceive(timerVM.$isSessionFinished) { _ in
-                        // print("ContentView: isSessionFinished changed to \(isFinished)")
-                    }
-                    .onReceive(timerVM.$isWorkSession) { _ in
-                        // print("ContentView: isWorkSession changed to \(isWork)")
-                    }
-                    .onReceive(timerVM.$isRunning) { _ in
-                        // print("ContentView: isRunning changed to \(isRunning)")
+                        savedToastWorkItem = work
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
                     }
                     // SessionManagerからのサイドメニュー開きリクエストを監視
                     .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
@@ -318,12 +315,22 @@ struct ContentView: View {
     }
 
     // MARK: - Helper Methods
+}
 
-    private func roundedSize(_ size: CGSize) -> CGSize {
-        return CGSize(
-            width: round(size.width),
-            height: round(size.height)
-        )
+// MARK: - Midnight tick
+private extension ContentView {
+    func scheduleMidnightTick() {
+        let cal = Calendar.current
+        let next = cal.nextDate(
+            after: Date(),
+            matching: DateComponents(hour: 0, minute: 0, second: 1),
+            matchingPolicy: .nextTime
+        ) ?? Date().addingTimeInterval(60)
+        let interval = max(0, next.timeIntervalSinceNow)
+        DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
+            today = Date()
+            scheduleMidnightTick()
+        }
     }
 }
 

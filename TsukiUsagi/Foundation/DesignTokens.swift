@@ -54,6 +54,7 @@ enum DesignTokens {
     /// 宇宙空間をテーマにした背景カラー
     enum CosmosColors {
         /// 背景色（純粋な黒ベース）
+        /// シート含めアプリ全体の基準色
         static let background = Color.black
 
         /// カード背景色（黒ベースの薄いグレー）
@@ -69,6 +70,10 @@ enum DesignTokens {
         /// | 🎯 アニメーションやエフェクト内の強調白                         | セマンティック無視の**視覚的アクセント**として使う           |
         /// | 🎯 エラー時の「×」やチェックマークなど、**文字以外**のグラフィックで白が必要なとき | 記号的意味が強くて、意味ではなく「色」としての白が必要な場合        |
         static let textWhite = Color.white
+
+        /// 強調用イエロー（STARTパルス時の一時色）
+        /// 視覚的アクセントとしてのみ使用（セマンティック無視）
+        static let accentYellow = Color.yellow
     }
 
     /// 黒ベース用途別カラー（グレー階層）

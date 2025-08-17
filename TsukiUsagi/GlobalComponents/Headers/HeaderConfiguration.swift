@@ -106,7 +106,7 @@ extension HeaderConfiguration {
                 role: .cancel
             ),
             rightButton: HeaderButton(
-                title: "Save",
+                title: "Update",
                 action: onSave,
                 role: .primary,
                 isDisabled: isSaveDisabled

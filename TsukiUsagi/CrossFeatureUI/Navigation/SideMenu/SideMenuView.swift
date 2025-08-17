@@ -15,7 +15,8 @@ struct SideMenuView: View {
     // MARK: - Layout Constants
 
     /// サイドメニューの内部パディング（左右）
-    static let menuHorizontalPadding: CGFloat = 32
+    /// Weekly progress カードの外側マージン(16)に合わせる
+    static let menuHorizontalPadding: CGFloat = 16
 
     /// メニューを完全に隠すための追加オフセット
     static let menuHideOffset: CGFloat = 20
@@ -212,7 +213,8 @@ private extension View {
     /// サイドメニューの標準水平パディングを適用
     func sideMenuPadding(leadingOffset: CGFloat) -> some View {
         self
-            .padding(.leading, leadingOffset + SideMenuView.menuHorizontalPadding)
+            // メニュー幅に leadingOffset を含めているため、パディングは固定値のみ適用
+            .padding(.leading, SideMenuView.menuHorizontalPadding)
             .padding(.trailing, SideMenuView.menuHorizontalPadding)
     }
 }
@@ -305,7 +307,7 @@ struct SideMenuView_Previews: PreviewProvider {
 
         NavigationView {
             ZStack {
-                Color.cosmosBackground.ignoresSafeArea()
+                DesignTokens.CosmosColors.background.ignoresSafeArea()
 
                 SideMenuView(isPresented: .constant(true))
             }
