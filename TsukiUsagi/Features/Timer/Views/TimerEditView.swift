@@ -31,6 +31,20 @@ struct TimerEditView: View {
         return !predefinedActivities.contains { $0.lowercased() == editedActivity.lowercased() }
     }
 
+    // Memoエディタの最大高さ（常に有限かつmin以上にクランプ）
+    private var memoEditorMaxHeight: CGFloat {
+        let screenHeight = UIScreen.main.bounds.height
+        let candidate = (screenHeight.isFinite && screenHeight > 0) ? screenHeight * 0.4 : 300
+        return max(120, candidate)
+    }
+
+    // safeAreaInset用のボトム余白（負・非有限を排除）
+    private var bottomInsetForSafeArea: CGFloat {
+        let inset = isKeyboardVisible ? keyboardBottomInset : 0
+        if inset.isFinite && inset >= 0 { return inset }
+        return 0
+    }
+
     // バリデーション関数の共通化
     private func isActivityEmpty() -> Bool {
         return editedActivity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -111,7 +125,7 @@ struct TimerEditView: View {
                                         .onTapGesture { isMemoFocused = true }
 
                                     TextEditor(text: $editedMemo)
-                                        .frame(minHeight: 120, maxHeight: UIScreen.main.bounds.height * 0.4)
+                                        .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
                                         .padding(8)
                                         .scrollContentBackground(.hidden)
                                         .background(Color.clear) // 背景は上のレイヤーに委譲
@@ -136,7 +150,7 @@ struct TimerEditView: View {
                         .safeAreaInset(edge: .bottom) {
                             // セーフエリア外まで背景を広げているため、
                             // 下端の余白は safeAreaInset で作るのが安定
-                            Color.clear.frame(height: isKeyboardVisible ? keyboardBottomInset : 0)
+                            Color.clear.frame(height: bottomInsetForSafeArea)
                         }
                         // 発火タイミングは bottom inset 更新に寄せる（多重発火を抑制）
                         .onChange(of: keyboardBottomInset) { _, _ in
@@ -222,12 +236,18 @@ struct TimerEditView: View {
             // 保存系のアクションはヘッダー内のボタンで行われる想定
             // 保存成功時のフィードバックと閉じ処理を注入
             .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
+                // 保存後のレイアウト変化中にスクロールが走らないようフラグを一時的に立てる
+                isAutoScrolling = true
                 HapticManager.shared.buttonTapFeedback()
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                dismiss()
-                // アクセシビリティ通知（保存完了）
-                UIAccessibility.post(notification: .announcement, argument: "Saved")
-                // 軽量トースト（HUD）は別途共通実装があればそちらを使用
+                // 微遅延で閉じる（0.1s）し、フラグはさらに後で解除
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                    dismiss()
+                    UIAccessibility.post(notification: .announcement, argument: "Saved")
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.40) {
+                    isAutoScrolling = false
+                }
             }
         }
     }
