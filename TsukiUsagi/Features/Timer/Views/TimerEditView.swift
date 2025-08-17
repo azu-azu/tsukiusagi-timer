@@ -16,8 +16,8 @@ struct TimerEditView: View {
 
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
-    // スクロール位置制御用の識別子
-    private enum SectionID { case memo }
+    // スクロール位置制御用の識別子（小さなアンカー用）
+    private enum SectionID: Hashable { case memoAnchor }
     @FocusState private var isActivityFocused: Bool
 
     // SettingsViewと同じ定数
@@ -104,63 +104,49 @@ struct TimerEditView: View {
                                             .padding(.vertical, 12)
                                     }
 
+                                    // 背景レイヤにタップ検知を置いてフォーカスを確実に付与
+                                    DesignTokens.WhiteColors.surface
+                                        .contentShape(Rectangle())
+                                        .onTapGesture { isMemoFocused = true }
+
                                     TextEditor(text: $editedMemo)
                                         .frame(minHeight: 120, maxHeight: UIScreen.main.bounds.height * 0.4)
                                         .padding(8)
                                         .scrollContentBackground(.hidden)
-                                        .background(DesignTokens.WhiteColors.surface)
+                                        .background(Color.clear) // 背景は上のレイヤーに委譲
                                         .focused($isMemoFocused)
                                 }
+
+                                // TextEditor直下に小さなアンカーを置く
+                                Color.clear
+                                    .frame(height: 1)
+                                    .id(SectionID.memoAnchor)
                             }
-                            .id(SectionID.memo)
-                            .simultaneousGesture(TapGesture().onEnded {
-                                isMemoFocused = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        proxy.scrollTo(SectionID.memo, anchor: .bottom)
-                                    }
-                                }
-                            })
 
                             Spacer(minLength: 40)
-                            // キーボード表示時は下側にダミー領域を足して
-                            // コンテンツ総高さを増やし、確実にスクロール可能にする
-                            if isKeyboardVisible {
-                                Color.clear.frame(height: keyboardBottomInset + 120)
-                            }
                             }
                             .padding()
                             .padding(.bottom, keyboardBottomInset)
                         }
                         .scrollContentBackground(.hidden)
                         .scrollIndicators(.hidden) // スクロールインジケーター非表示
-                        .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
+                        .scrollDismissesKeyboard(.never) // 競合回避のため一旦無効化
                         .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
-                        // メモにフォーカスしたら自動スクロール
-                        .onChange(of: isMemoFocused) { _, newValue in
-                            if newValue {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    proxy.scrollTo(SectionID.memo, anchor: .bottom)
-                                }
-                            }
-                        }
-                        // キーボード表示時にもメモへスクロール
-                        .onReceive(
-                            NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
-                        ) { _ in
-                            if isMemoFocused {
-                                // 次フレームで実行し、レイアウト確定後にスクロール
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        proxy.scrollTo(SectionID.memo, anchor: .bottom)
-                                    }
-                                }
-                            }
-                        }
+                        // 発火タイミングは bottom inset 更新に寄せる
                         .onChange(of: keyboardBottomInset) { _, _ in
-                            if isMemoFocused {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    proxy.scrollTo(SectionID.memo, anchor: .bottom)
+                            guard isMemoFocused else { return }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    proxy.scrollTo(SectionID.memoAnchor, anchor: .bottom)
+                                }
+                            }
+                        }
+                        // フォーカス時の補助（同じアンカーへ統一）
+                        .onChange(of: isMemoFocused) { _, newValue in
+                            guard newValue else { return }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    proxy.scrollTo(SectionID.memoAnchor, anchor: .bottom)
                                 }
                             }
                         }
