@@ -120,7 +120,6 @@ struct ContentView: View {
                             isMoonAnimationActive: shouldAnimateStars
                         )
 
-
                         // footerBarはZStackの一番下（ギアボタンと日付を削除）
                         FooterBar(
                             buttonHeight: buttonHeight,
