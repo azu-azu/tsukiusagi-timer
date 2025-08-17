@@ -50,6 +50,7 @@ struct EmbeddedSessionManagementView: View {
                 .presentationBackground(DesignTokens.CosmosColors.background)
             }
         }
+        .presentationBackground(DesignTokens.CosmosColors.background)
         .alert("Delete Session", isPresented: $showDeleteConfirm) {
             Button("Delete", role: .destructive) {
                 if let session = selectedSession, !session.isDefault {
