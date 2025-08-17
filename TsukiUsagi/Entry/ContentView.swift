@@ -244,6 +244,7 @@ struct ContentView: View {
                                 .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
                         }
                     }
+                    .presentationBackground(DesignTokens.CosmosColors.background)
                     .onChange(of: timerVM.isSessionFinished) { _, newValue in
                         if newValue {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

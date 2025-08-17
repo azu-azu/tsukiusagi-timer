@@ -53,6 +53,7 @@ struct TimerPanel: View {
                     .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
             }
         })
+        .presentationBackground(DesignTokens.CosmosColors.background)
 
         // ★ Moon メッセージと同じ duration で同期
         .animation(
