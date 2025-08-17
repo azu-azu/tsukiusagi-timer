@@ -123,6 +123,11 @@ struct TimerEditView: View {
                             })
 
                             Spacer(minLength: 40)
+                            // キーボード表示時は下側にダミー領域を足して
+                            // コンテンツ総高さを増やし、確実にスクロール可能にする
+                            if isKeyboardVisible {
+                                Color.clear.frame(height: keyboardBottomInset + 120)
+                            }
                             }
                             .padding()
                             .padding(.bottom, keyboardBottomInset)
