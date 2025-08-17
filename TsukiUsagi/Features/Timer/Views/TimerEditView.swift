@@ -13,6 +13,7 @@ struct TimerEditView: View {
     @State private var minEnd = Date()
     @State private var isKeyboardVisible: Bool = false
     @State private var keyboardBottomInset: CGFloat = 0
+    @State private var isAutoScrolling: Bool = false
 
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
@@ -137,21 +138,17 @@ struct TimerEditView: View {
                             // 下端の余白は safeAreaInset で作るのが安定
                             Color.clear.frame(height: isKeyboardVisible ? keyboardBottomInset : 0)
                         }
-                        // 発火タイミングは bottom inset 更新に寄せる
+                        // 発火タイミングは bottom inset 更新に寄せる（多重発火を抑制）
                         .onChange(of: keyboardBottomInset) { _, _ in
-                            guard isMemoFocused else { return }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
-                                withAnimation(.easeInOut(duration: 0.25)) {
+                            guard isKeyboardVisible, isMemoFocused, !isAutoScrolling else { return }
+                            isAutoScrolling = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                                withAnimation(.easeOut(duration: 0.22)) {
                                     proxy.scrollTo(SectionID.memoAnchor, anchor: .bottom)
                                 }
-                            }
-                        }
-                        // フォーカス時の補助（同じアンカーへ統一）
-                        .onChange(of: isMemoFocused) { _, newValue in
-                            guard newValue else { return }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
-                                withAnimation(.easeInOut(duration: 0.25)) {
-                                    proxy.scrollTo(SectionID.memoAnchor, anchor: .bottom)
+                                // スロットル
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+                                    isAutoScrolling = false
                                 }
                             }
                         }
