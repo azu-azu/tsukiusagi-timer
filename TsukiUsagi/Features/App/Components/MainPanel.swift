@@ -55,8 +55,8 @@ struct MainPanel: View {
                             isAnimationActive: isMoonAnimationActive
                         )
                         .frame(
-                            width: (contentSize.width - landscapeMargin) * 0.5,
-                            height: setHeight
+                            width: max(contentSize.width - landscapeMargin, 0) * 0.5,
+                            height: max(setHeight, 0)
                         )
                         .background(Color.clear)
                         .zIndex(10)
@@ -81,7 +81,10 @@ struct MainPanel: View {
                             .sessionEndTransition(timerVM)
                             Spacer()
                         }
-                        .frame(width: (contentSize.width - landscapeMargin) * 0.5, height: setHeight)
+                        .frame(
+                            width: max(contentSize.width - landscapeMargin, 0) * 0.5,
+                            height: max(setHeight, 0)
+                        )
                         .background(Color.clear)
                         .zIndex(10)
                         .layoutPriority(0)
@@ -91,7 +94,7 @@ struct MainPanel: View {
                             "duration"
                         )
                     }
-                    .frame(width: contentSize.width, height: setHeight)
+                    .frame(width: max(contentSize.width, 0), height: max(setHeight, 0))
                     .position(x: contentSize.width / 2, y: setCenterY)
                     .transition(.asymmetric(
                         insertion: .move(edge: .leading).combined(with: .opacity),
@@ -125,7 +128,7 @@ struct MainPanel: View {
                 // 進行中はMoon+Timerセット
                 if isLandscape {
                     // --- Landscape の Moon + Timer 横並び ---
-                    let hStackWidth = contentSize.width * 0.8
+                    let hStackWidth = max(contentSize.width, 0) * 0.8
                     HStack(spacing: landscapeMargin) {
                         // MoonView
                         MoonView(
@@ -136,8 +139,8 @@ struct MainPanel: View {
                         )
                         .allowsHitTesting(false)
                         .frame(
-                            width: (hStackWidth - landscapeMargin) * 0.5,
-                            height: moonSize
+                            width: max(hStackWidth - landscapeMargin, 0) * 0.5,
+                            height: max(moonSize, 0)
                         )
                         .layoutPriority(1)
 
@@ -154,12 +157,12 @@ struct MainPanel: View {
                             Spacer()
                         }
                         .frame(
-                            width: (hStackWidth - landscapeMargin) * 0.5,
-                            height: moonSize
+                            width: max(hStackWidth - landscapeMargin, 0) * 0.5,
+                            height: max(moonSize, 0)
                         )
                         .layoutPriority(0)
                     }
-                    .frame(width: hStackWidth, height: moonSize)
+                    .frame(width: max(hStackWidth, 0), height: max(moonSize, 0))
                     .position(x: contentSize.width / 2, y: setCenterY)
                 } else {
                     // 縦画面：従来通り
