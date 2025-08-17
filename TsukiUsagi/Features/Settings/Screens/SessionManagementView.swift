@@ -54,11 +54,22 @@ struct SessionManagementView: View {
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .edit(let session):
-                SessionEditView(session: session)
+                ZStack {
+                    DesignTokens.CosmosColors.background.ignoresSafeArea()
+                    SessionEditView(session: session)
+                        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+                }
+                .presentationBackground(DesignTokens.CosmosColors.background)
             case .create:
-                NewSessionFormView()
+                ZStack {
+                    DesignTokens.CosmosColors.background.ignoresSafeArea()
+                    NewSessionFormView()
+                        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+                }
+                .presentationBackground(DesignTokens.CosmosColors.background)
             }
         }
+        .presentationBackground(DesignTokens.CosmosColors.background)
         .alert("Delete Session", isPresented: $showDeleteConfirm) {
             Button("Delete", role: .destructive) {
                 if let session = selectedSession, !session.isDefault {

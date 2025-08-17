@@ -25,15 +25,13 @@ extension Color {
         self.init(red: red, green: green, blue: blue)
     }
 
-    /// 夜空の背景（ZStack全体に使用）
-    static let cosmosBackground = Color(hex: "#060c22").opacity(0.95)
+    // Removed: use DesignTokens.CosmosColors.background and .cardBackground instead
+    // static let cosmosBackground = Color(hex: "#060c22").opacity(0.95)
+    // static let cosmosCardBackground = Color(hex: "#4b95ba").opacity(0.15)
 
-    /// コスモスカード背景（セクションやボタン）
-    static let cosmosCardBackground = Color(hex: "#4b95ba").opacity(0.15)
-
-    /// 月の光を思わせる青（アクセント、リンクカラー）
+    // 月の光を思わせる青（アクセント、リンクカラー）
     static let moonAccentBlue = Color(red: 97 / 255, green: 163 / 255, blue: 242 / 255)
 
-    /// エラー表示用の赤色（バリデーションエラーなど）
+    // エラー表示用の赤色（バリデーションエラーなど）
     static let moonErrorBackground = Color.red.opacity(0.8)
 }

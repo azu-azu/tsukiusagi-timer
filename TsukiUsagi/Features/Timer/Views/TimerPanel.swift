@@ -45,7 +45,15 @@ struct TimerPanel: View {
         .sheet(isPresented: $isEditing, onDismiss: {
             // 再描画用にIDを更新
             lastEditID = UUID()
-        }, content: { editSheetView() })
+        }, content: {
+            // 外側（器）と内側（中身）の両方で黒を明示
+            ZStack {
+                DesignTokens.CosmosColors.background.ignoresSafeArea()
+                editSheetView()
+                    .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+            }
+        })
+        .presentationBackground(DesignTokens.CosmosColors.background)
 
         // ★ Moon メッセージと同じ duration で同期
         .animation(

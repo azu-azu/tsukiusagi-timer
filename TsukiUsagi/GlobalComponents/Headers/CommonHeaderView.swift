@@ -122,7 +122,7 @@ struct CommonHeaderView_Previews: PreviewProvider {
 
             Spacer()
         }
-        .background(Color.cosmosBackground)
+        .background(DesignTokens.CosmosColors.background)
     }
 }
 #endif

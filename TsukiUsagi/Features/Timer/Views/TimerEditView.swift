@@ -12,9 +12,13 @@ struct TimerEditView: View {
     @State private var editedEnd = Date()
     @State private var minEnd = Date()
     @State private var isKeyboardVisible: Bool = false
+    @State private var keyboardBottomInset: CGFloat = 0
+    @State private var isAutoScrolling: Bool = false
 
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
+    // スクロール位置制御用の識別子（小さなアンカー用）
+    private enum SectionID: Hashable { case memoAnchor }
     @FocusState private var isActivityFocused: Bool
 
     // SettingsViewと同じ定数
@@ -25,6 +29,20 @@ struct TimerEditView: View {
     private var isCustomActivity: Bool {
         let predefinedActivities = ["Work", "Study", "Read"]
         return !predefinedActivities.contains { $0.lowercased() == editedActivity.lowercased() }
+    }
+
+    // Memoエディタの最大高さ（常に有限かつmin以上にクランプ）
+    private var memoEditorMaxHeight: CGFloat {
+        let screenHeight = UIScreen.main.bounds.height
+        let candidate = (screenHeight.isFinite && screenHeight > 0) ? screenHeight * 0.4 : 300
+        return max(120, candidate)
+    }
+
+    // safeAreaInset用のボトム余白（負・非有限を排除）
+    private var bottomInsetForSafeArea: CGFloat {
+        let inset = isKeyboardVisible ? keyboardBottomInset : 0
+        if inset.isFinite && inset >= 0 { return inset }
+        return 0
     }
 
     // バリデーション関数の共通化
@@ -45,7 +63,7 @@ struct TimerEditView: View {
         NavigationStack {
             ZStack {
                 // 背景（画面全体、clipされない）
-                Color.cosmosBackground.ignoresSafeArea()
+                DesignTokens.CosmosColors.background.ignoresSafeArea()
 
                 // SettingsViewと同じ構造に統一
                 VStack(spacing: 0) {
@@ -54,14 +72,16 @@ struct TimerEditView: View {
                         editedActivity: editedActivity,
                         editedSubtitle: editedSubtitle,
                         editedMemo: editedMemo,
-                        editedEnd: editedEnd
+                        editedEnd: editedEnd,
+                        isSaveDisabledExtra: isNoChanges
                     )
-                    .background(Color.cosmosBackground)
+                    .background(DesignTokens.CosmosColors.background)
                     .zIndex(1)
 
                     // スクロール可能なコンテンツ
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 40) {
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 40) {
                             // Session Label
                             section(title: "Session Label") {
                                 SessionLabelSection(
@@ -99,42 +119,88 @@ struct TimerEditView: View {
                                             .padding(.vertical, 12)
                                     }
 
+                                    // 背景レイヤにタップ検知を置いてフォーカスを確実に付与
+                                    DesignTokens.WhiteColors.surface
+                                        .contentShape(Rectangle())
+                                        .onTapGesture { isMemoFocused = true }
+
                                     TextEditor(text: $editedMemo)
-                                        .frame(minHeight: 120, maxHeight: UIScreen.main.bounds.height * 0.4)
+                                        .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
                                         .padding(8)
                                         .scrollContentBackground(.hidden)
-                                        .background(DesignTokens.WhiteColors.surface)
+                                        .background(Color.clear) // 背景は上のレイヤーに委譲
                                         .focused($isMemoFocused)
                                 }
+
+                                // TextEditor直下に小さなアンカーを置く
+                                Color.clear
+                                    .frame(height: 1)
+                                    .id(SectionID.memoAnchor)
                             }
 
                             Spacer(minLength: 40)
+                            }
+                            .padding()
+                            // ScrollViewの中での下余白は最小限に留める（主にsafeAreaInsetで担保）
                         }
-                        .padding()
+                        .scrollContentBackground(.hidden)
+                        .scrollIndicators(.hidden) // スクロールインジケーター非表示
+                        .scrollDismissesKeyboard(.never) // 競合回避のため一旦無効化
+                        .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
+                        .safeAreaInset(edge: .bottom) {
+                            // セーフエリア外まで背景を広げているため、
+                            // 下端の余白は safeAreaInset で作るのが安定
+                            Color.clear.frame(height: bottomInsetForSafeArea)
+                        }
+                        // 発火タイミングは bottom inset 更新に寄せる（多重発火を抑制）
+                        .onChange(of: keyboardBottomInset) { _, _ in
+                            guard isKeyboardVisible, isMemoFocused, !isAutoScrolling else { return }
+                            isAutoScrolling = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                                withAnimation(.easeOut(duration: 0.22)) {
+                                    proxy.scrollTo(SectionID.memoAnchor, anchor: .bottom)
+                                }
+                                // スロットル
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+                                    isAutoScrolling = false
+                                }
+                            }
+                        }
                     }
-                    .scrollIndicators(.hidden) // スクロールインジケーター非表示
-                    .scrollDismissesKeyboard(.interactively) // キーボード制御を改善
-                    .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 30))
-                .padding(.top, topPadding)
+                // 角丸クリップを外し、シートの下地色が見えないようにする
                 .presentationDetents([.large])
             }
             .navigationBarHidden(true) // NavigationBarを非表示
+            // システムのセーフエリア調整を使う（競合を避けるためキーボード無視は外す）
+            // シートの背景そのものを黒系テーマに統一
+            .presentationBackground(DesignTokens.CosmosColors.background)
+            .background(DesignTokens.CosmosColors.background) // 万一の透過対策
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
             .modifier(DismissKeyboardOnTap(
                 isActivityFocused: $isActivityFocused,
                 isSubtitleFocused: $isSubtitleFocused,
                 isMemoFocused: $isMemoFocused,
                 isKeyboardVisible: $isKeyboardVisible
             ))
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notif in
+                withAnimation(.easeInOut(duration: 0.25)) {
                     isKeyboardVisible = true
+                }
+                if let info = (notif as Notification).userInfo,
+                    let frame = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                    let screenMaxY = UIScreen.main.bounds.maxY
+                    let overlap = max(0, screenMaxY - frame.minY)
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        keyboardBottomInset = overlap
+                    }
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation(.easeInOut(duration: 0.25)) {
                     isKeyboardVisible = false
+                    keyboardBottomInset = 0
                 }
             }
             .toolbar {
@@ -151,12 +217,37 @@ struct TimerEditView: View {
                 }
             }
             .task {
-                // 編集画面を開いた時、現在のセッションの値をセット
-                editedEnd = timerVM.endTime ?? Date()
-                minEnd = timerVM.startTime ?? Date()
-                editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
-                editedSubtitle = timerVM.currentSubtitleLabel
-                editedMemo = ""
+                // 編集対象は「最後に記録された履歴」なので、History から初期値を読み込む
+                if let last = historyVM.history.last {
+                    editedEnd = last.end
+                    minEnd = last.start
+                    editedActivity = last.activity
+                    editedSubtitle = last.subtitle ?? ""
+                    editedMemo = last.memo ?? ""
+                } else {
+                    // フォールバック（念のため）
+                    editedEnd = timerVM.endTime ?? Date()
+                    minEnd = timerVM.startTime ?? Date()
+                    editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
+                    editedSubtitle = timerVM.currentSubtitleLabel
+                    editedMemo = ""
+                }
+            }
+            // 保存系のアクションはヘッダー内のボタンで行われる想定
+            // 保存成功時のフィードバックと閉じ処理を注入
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
+                // 保存後のレイアウト変化中にスクロールが走らないようフラグを一時的に立てる
+                isAutoScrolling = true
+                HapticManager.shared.buttonTapFeedback()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                // 微遅延で閉じる（0.1s）し、フラグはさらに後で解除
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                    dismiss()
+                    UIAccessibility.post(notification: .announcement, argument: "Saved")
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.40) {
+                    isAutoScrolling = false
+                }
             }
         }
     }
@@ -207,5 +298,28 @@ struct TimerEditView: View {
                     .fill(DesignTokens.CosmosColors.cardBackground)
             )
         }
+    }
+}
+
+// MARK: - Change detection
+private extension TimerEditView {
+    var isNoChanges: Bool {
+        // 比較元も履歴の最後のレコードを参照（なければVMの値でフォールバック）
+        let originalActivity = historyVM.history.last?.activity
+            ?? (timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel)
+        let originalSubtitle = historyVM.history.last?.subtitle
+            ?? timerVM.currentSubtitleLabel
+        let originalMemo = historyVM.history.last?.memo ?? ""
+        let originalEnd = historyVM.history.last?.end ?? (timerVM.endTime ?? Date())
+        let activitySame = editedActivity.trimmingCharacters(in: .whitespacesAndNewlines) == originalActivity
+        let subtitleSame = editedSubtitle.trimmingCharacters(in: .whitespacesAndNewlines) == originalSubtitle
+        // 分解能は分単位で比較（秒の僅差での誤判定を避ける）
+        let cal = Calendar.current
+        let comps1 = cal.dateComponents([.hour, .minute], from: editedEnd)
+        let comps2 = cal.dateComponents([.hour, .minute], from: originalEnd)
+        let endSame = comps1.hour == comps2.hour && comps1.minute == comps2.minute
+        let memoSame = editedMemo.trimmingCharacters(in: .whitespacesAndNewlines)
+            == originalMemo.trimmingCharacters(in: .whitespacesAndNewlines)
+        return activitySame && subtitleSame && endSame && memoSame
     }
 }

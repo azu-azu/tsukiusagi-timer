@@ -52,11 +52,14 @@ final class TimerEngine: TimerEngineable {
         actualWorkedSeconds = 0
         lastResumedTime = Date()
 
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // UI操作中（ドラッグ等）でも止まらないよう、.common モードで回す
+        let t = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.tick()
             }
         }
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
     }
 
     private func tick() {
@@ -87,11 +90,13 @@ final class TimerEngine: TimerEngineable {
         }
         isRunning = true
         lastResumedTime = Date()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        let t = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.tick()
             }
         }
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
     }
 
     func stop() {

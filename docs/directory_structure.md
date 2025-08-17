@@ -47,7 +47,7 @@ TsukiUsagi/
 │   │   │   └── Components/
 │   │   │       └── FooterBar.swift
 │   │   ├── Common/
-│   │   │   └── SessionLabelSection.swift
+│   │   │   └── (共通系は CrossFeatureUI へ昇格・集約)
 │   │   ├── History/
 │   │   │   ├── Helpers/
 │   │   │   ├── Models/
@@ -66,11 +66,12 @@ TsukiUsagi/
 │   │   │   │   │   ├── Forms/
 │   │   │   │   │   │   ├── SessionNameCustomInputView.swift
 │   │   │   │   │   │   └── SessionNameSelectionView.swift
+│   │   │   │   │   ├── Management/
+│   │   │   │   │   │   └── EmbeddedSessionManagementView.swift   # Screen に埋め込む再利用 UI（移動）
 │   │   │   │   │   ├── Rows/
 │   │   │   │   │   │   ├── SessionRowDisplayView.swift
 │   │   │   │   │   │   ├── SessionRowEditingView.swift
 │   │   │   │   │   │   └── SessionRowView.swift
-│   │   │   │   │   └── EmbeddedSessionManagementView.swift
 │   │   │   │   └── SettingsHeaderView.swift
 │   │   │   ├── Screens/                          # 画面（Screen）
 │   │   │   │   ├── NewSessionFormView.swift      # 新規作成シート
