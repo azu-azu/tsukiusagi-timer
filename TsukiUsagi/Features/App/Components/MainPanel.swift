@@ -24,17 +24,43 @@ struct MainPanel: View {
 
             let contentSize = geo2.size
             // GeometryReaderのsafeAreaに統一
-            let safeTop = (geo2.safeAreaInsets.top.isFinite && !geo2.safeAreaInsets.top.isNaN) ? geo2.safeAreaInsets.top : 0
-            let safeBottom = (geo2.safeAreaInsets.bottom.isFinite && !geo2.safeAreaInsets.bottom.isNaN) ? geo2.safeAreaInsets.bottom : 0
+            let safeTop = (
+                geo2.safeAreaInsets.top.isFinite
+                && !geo2.safeAreaInsets.top.isNaN
+            )
+                ? geo2.safeAreaInsets.top
+                : 0
+            let safeBottom = (
+                geo2.safeAreaInsets.bottom.isFinite
+                && !geo2.safeAreaInsets.bottom.isNaN
+            )
+                ? geo2.safeAreaInsets.bottom
+                : 0
 
-            // 入力の安定化
-            let contentW = max(0, (contentSize.width.isFinite && !contentSize.width.isNaN) ? contentSize.width : 0)
-            let contentH = max(0, (contentSize.height.isFinite && !contentSize.height.isNaN) ? contentSize.height : 0)
-            let ratioPortraitRaw = (moonPortraitYOffsetRatio.isFinite && !moonPortraitYOffsetRatio.isNaN) ? moonPortraitYOffsetRatio : 0
-            let ratioLandscapeRaw = (moonLandscapeYOffsetRatio.isFinite && !moonLandscapeYOffsetRatio.isNaN) ? moonLandscapeYOffsetRatio : 0
+            // 入力の安定化（ローカル関数を使わず式で記述）
+            let contentW = (
+                contentSize.width.isFinite && !contentSize.width.isNaN
+            ) ? max(0, contentSize.width) : 0
+            let contentH = (
+                contentSize.height.isFinite && !contentSize.height.isNaN
+            ) ? max(0, contentSize.height) : 0
+            let ratioPortraitRaw = (
+                moonPortraitYOffsetRatio.isFinite
+                && !moonPortraitYOffsetRatio.isNaN
+            )
+                ? moonPortraitYOffsetRatio
+                : 0
+
+            let ratioLandscapeRaw = (
+                moonLandscapeYOffsetRatio.isFinite
+                && !moonLandscapeYOffsetRatio.isNaN
+            )
+                ? moonLandscapeYOffsetRatio
+                : 0
             let ratioPortrait = max(-1, min(ratioPortraitRaw, 1))
             let ratioLandscape = max(-1, min(ratioLandscapeRaw, 1))
             let margin = max(0, (landscapeMargin.isFinite && !landscapeMargin.isNaN) ? landscapeMargin : 0)
+            let safeMargin = min(margin, contentW * 0.8)
 
             // 動的サイズ計算（副作用なし）
             let baseMoonSize = max(0, min(contentW, contentH) * 0.5)
@@ -43,6 +69,20 @@ struct MainPanel: View {
             let timerSpacing = max(0, min(moonSize * 0.5, 120))
 
             let setHeight = max(0, moonSize + timerSpacing + timerHeight)
+            // 子に渡す正規化済み値
+            let childW = max(1, contentW)
+            let childH = max(1, contentH)
+            let childSize = CGSize(width: childW, height: childH)
+            let childInsets = EdgeInsets(
+                top: (geo2.safeAreaInsets.top.isFinite && !geo2.safeAreaInsets.top.isNaN) ? max(0, geo2.safeAreaInsets.top) : 0,
+                leading: (geo2.safeAreaInsets.leading.isFinite && !geo2.safeAreaInsets.leading.isNaN) ? max(0, geo2.safeAreaInsets.leading) : 0,
+                bottom: (geo2.safeAreaInsets.bottom.isFinite && !geo2.safeAreaInsets.bottom.isNaN) ? max(0, geo2.safeAreaInsets.bottom) : 0,
+                trailing: (geo2.safeAreaInsets.trailing.isFinite && !geo2.safeAreaInsets.trailing.isNaN) ? max(0, geo2.safeAreaInsets.trailing) : 0
+            )
+            // 画面中央Y（safe area考慮）をオフセットに変換
+            let centerY = (contentH - safeTop - safeBottom) / 2 + safeTop
+            let setCenterYRaw: CGFloat = isLandscape ? centerY - contentH * ratioLandscape : centerY - contentH * ratioPortrait
+            let setCenterYOffset = -(max(-contentH, min(setCenterYRaw - contentH / 2, contentH)))
 
             if timerVM.isSessionFinished {
                 // let _ = print("🌙 MainPanel - Showing QuietMoon section")
@@ -50,16 +90,16 @@ struct MainPanel: View {
                 if isLandscape {
                     // let _ = print("🌙 MainPanel - Landscape QuietMoon")
                     // 横画面：左右分割（最高品質版）
-                    HStack(spacing: landscapeMargin) {
+                    HStack(spacing: safeMargin) {
                         // 左側：QuietMoonView
                         QuietMoonView(
-                            size: size,
-                            safeAreaInsets: geo2.safeAreaInsets,
+                            size: childSize,
+                            safeAreaInsets: childInsets,
                             isAnimationActive: isMoonAnimationActive
                         )
                         .frame(
-                            width: max(contentW - margin, 0) * 0.5,
-                            height: setHeight
+                            width: max(1, max(contentW - safeMargin, 0) * 0.5),
+                            height: max(1, setHeight)
                         )
                         .background(Color.clear)
                         .zIndex(10)
@@ -85,8 +125,8 @@ struct MainPanel: View {
                             Spacer()
                         }
                         .frame(
-                            width: max(contentW - margin, 0) * 0.5,
-                            height: setHeight
+                            width: max(1, max(contentW - safeMargin, 0) * 0.5),
+                            height: max(1, setHeight)
                         )
                         .background(Color.clear)
                         .zIndex(10)
@@ -97,8 +137,8 @@ struct MainPanel: View {
                             "duration"
                         )
                     }
-                    .frame(width: contentW, height: setHeight, alignment: .center)
-                    .offset(y: -(contentH * ratioLandscape))
+                    .frame(width: max(1, contentW), height: max(1, setHeight), alignment: .center)
+                    .offset(y: setCenterYOffset)
                     .transition(.asymmetric(
                         insertion: .move(edge: .leading).combined(with: .opacity),
                         removal: .move(edge: .trailing).combined(with: .opacity)
@@ -108,8 +148,8 @@ struct MainPanel: View {
                     // 縦画面：QuietMoonのみ（RecordedTimesはContentView側で重ねる）
                     VStack {
                         QuietMoonView(
-                            size: size,
-                            safeAreaInsets: geo2.safeAreaInsets,
+                            size: childSize,
+                            safeAreaInsets: childInsets,
                             isAnimationActive: isMoonAnimationActive
                         )
                         .accessibilityLabel("Quiet Moon Message")
@@ -119,8 +159,8 @@ struct MainPanel: View {
                         .accessibilityAddTraits(AccessibilityTraits.isHeader)
                         .focused(isQuietMoonFocused)
                     }
-                    .frame(width: contentW, height: setHeight, alignment: .center)
-                    .offset(y: -(contentH * ratioPortrait))
+                    .frame(width: max(1, contentW), height: max(1, setHeight), alignment: .center)
+                    .offset(y: setCenterYOffset)
                     .transition(.asymmetric(
                         insertion: .move(edge: .top).combined(with: .opacity),
                         removal: .move(edge: .bottom).combined(with: .opacity)
@@ -132,12 +172,12 @@ struct MainPanel: View {
                 if isLandscape {
                     // --- Landscape の Moon + Timer 横並び ---
                     let hStackWidth = max(contentW, 0) * 0.8
-                    HStack(spacing: landscapeMargin) {
+                    HStack(spacing: safeMargin) {
                         // MoonView
                         MoonView(
                             moonSize: moonSize,
                             glitterText: moonTitle,
-                            size: size,
+                            size: childSize,
                             isAnimationActive: isMoonAnimationActive
                         )
                         .allowsHitTesting(false)
@@ -165,15 +205,15 @@ struct MainPanel: View {
                         )
                         .layoutPriority(0)
                     }
-                    .frame(width: max(hStackWidth, 0), height: moonSize, alignment: .center)
-                    .offset(y: -(contentH * ratioLandscape))
+                    .frame(width: max(1, max(hStackWidth, 0)), height: max(1, moonSize), alignment: .center)
+                    .offset(y: setCenterYOffset)
                 } else {
                     // 縦画面：従来通り
                     VStack(spacing: timerSpacing) {
                         MoonView(
                             moonSize: moonSize,
                             glitterText: moonTitle,
-                            size: size,
+                            size: childSize,
                             isAnimationActive: isMoonAnimationActive
                         )
                         .allowsHitTesting(false)
@@ -186,8 +226,8 @@ struct MainPanel: View {
                                 maxHeight: timerHeight
                             )
                     }
-                    .frame(width: contentW, height: setHeight, alignment: .center)
-                    .offset(y: -(contentH * ratioPortrait))
+                    .frame(width: max(1, contentW), height: max(1, setHeight), alignment: .center)
+                    .offset(y: setCenterYOffset)
                 }
             }
         }
