@@ -13,24 +13,19 @@ struct CalendarHistoryView: View {
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
 
     var body: some View {
-        VStack(spacing: 0) {
-            // カレンダーカード（月ナビゲーション + 曜日ヘッダー + グリッド）
-            VStack(spacing: 0) {
-                // 月ナビゲーションヘッダー
-                monthNavigationHeader()
+        VStack(spacing: 8) {
+            // 月ナビゲーションヘッダー（最小限のパディングでエッジ寄せ）
+            monthNavigationHeader()
+                .padding(.horizontal, 8)
+                .padding(.top, 8)
 
-                // 曜日ヘッダー
-                weekdayHeader()
+            // 曜日ヘッダー
+            weekdayHeader()
+                .padding(.horizontal, 8)
 
-                // カレンダーグリッド
-                calendarGridView()
-            }
-            .padding()
-            .background(DesignTokens.CosmosColors.cardBackground)
-            .cornerRadius(16)
-            .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
-            .padding(.horizontal)
-            .padding(.top)
+            // カレンダーグリッド（エッジ to エッジ）
+            calendarGridView()
+                .padding(.horizontal, 8)
 
             // 選択日の詳細表示
             if let selectedDate = selectedDate {
@@ -39,11 +34,11 @@ struct CalendarHistoryView: View {
                     dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
                 )
                 .transition(.move(edge: .bottom).combined(with: .opacity))
-                .padding(.top, 16)
+                .padding(.top, 12)
             }
 
             // 下部余白を確保
-            Spacer(minLength: 100)
+            Spacer(minLength: 48)
         }
         .contentShape(Rectangle())
         .highPriorityGesture(monthSwipeGesture())
@@ -92,7 +87,7 @@ struct CalendarHistoryView: View {
 
     @ViewBuilder
     private func weekdayHeader() -> some View {
-        HStack {
+        HStack(spacing: 0) {
             ForEach(CalendarUtilities.weekdays(), id: \.self) { weekday in
                 Text(weekday)
                     .font(DesignTokens.Fonts.caption)
@@ -100,7 +95,6 @@ struct CalendarHistoryView: View {
                     .frame(maxWidth: .infinity)
             }
         }
-        .padding(.horizontal)
         .frame(height: DesignTokens.Calendar.weekdayHeight)
     }
 
@@ -108,7 +102,7 @@ struct CalendarHistoryView: View {
 
     @ViewBuilder
     private func calendarGridView() -> some View {
-        LazyVGrid(columns: columns, spacing: DesignTokens.Calendar.cellSpacing) {
+        LazyVGrid(columns: columns, spacing: 6) {
             ForEach(generateCalendarDates(), id: \.self) { date in
                 CalendarDayCell(
                     date: date,
@@ -121,7 +115,6 @@ struct CalendarHistoryView: View {
                 }
             }
         }
-        .padding(.horizontal)
     }
 
     // MARK: - Helper Methods

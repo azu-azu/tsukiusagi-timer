@@ -10,67 +10,50 @@ struct CalendarDayCell: View {
     private let calendar = Calendar.current
 
     var body: some View {
-        VStack(spacing: 2) {
-            // 日付（大きく表示）
+        ZStack {
+            // Filled circle background for active/completed days
+            circleBackground
+
+            // Day number
             Text("\(calendar.component(.day, from: date))")
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(textColor)
-
-            // 活動インジケーター
-            activityIndicator()
         }
         .frame(width: 44, height: 44)
-        .background(backgroundColor)
-        .clipShape(Circle())
         .scaleEffect(isSelected ? 1.1 : 1.0)
         .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 
+    // 背景サークル
     @ViewBuilder
-    private func activityIndicator() -> some View {
-        if let history = dailyHistory, history.hasRecords {
-            if isToday {
-                // 今日の場合は点滅アニメーション
-                TimelineView(.animation(minimumInterval: 0.1)) { timeline in
-                    let timeInterval = timeline.date.timeIntervalSinceReferenceDate
-                    let pulseOpacity = 0.6 + 0.4 * sin(timeInterval * 1.5)
-
-                    Circle()
-                        .fill(history.activityIntensity.color)
-                        .frame(width: history.activityIntensity.indicatorSize)
-                        .opacity(pulseOpacity)
-                }
-            } else {
-                // 通常の表示
-                Circle()
-                    .fill(history.activityIntensity.color)
-                    .frame(width: history.activityIntensity.indicatorSize)
-            }
+    private var circleBackground: some View {
+        let hasRecord = dailyHistory?.hasRecords == true
+        if isSelected {
+            Circle().fill(DesignTokens.MoonColors.accentBlue)
+        } else if isToday {
+            Circle()
+                .stroke(DesignTokens.MoonColors.accentBlue, lineWidth: 2)
+                .background(Circle().fill(hasRecord ? historyColor.opacity(0.2) : Color.clear))
+        } else if hasRecord {
+            Circle().fill(historyColor.opacity(0.85))
         } else {
-            // 記録なしの場合は何も表示しない
-            Spacer().frame(height: 6)
+            Circle().fill(Color.clear)
         }
     }
 
     // MARK: - Computed Properties
 
     private var textColor: Color {
-        if isSelected {
-            return .white
-        } else if isToday {
-            return DesignTokens.MoonColors.accentBlue
-        } else {
-            return DesignTokens.MoonColors.textPrimary
-        }
+        if isSelected { return DesignTokens.PureColors.textWhite }
+        if isToday { return DesignTokens.MoonColors.accentBlue }
+        return DesignTokens.MoonColors.textPrimary
     }
 
-    private var backgroundColor: Color {
-        if isSelected {
-            return DesignTokens.MoonColors.accentBlue
-        } else if isToday {
-            return DesignTokens.MoonColors.accentBlue.opacity(0.1)
-        } else {
-            return Color.clear
+    private var historyColor: Color {
+        // Use intensity color if available; otherwise muted accent for visibility
+        if let history = dailyHistory, history.hasRecords {
+            return history.activityIntensity.color
         }
+        return DesignTokens.MoonColors.textMuted
     }
 }
