@@ -9,34 +9,24 @@ struct CalendarHistoryView: View {
     @State private var selectedDate: Date?
     @State private var dailyHistories: [Date: DailyHistory] = [:]
 
-    // Smooth paging model for months
-    @State private var months: [Date] = []
-    @State private var currentIndex: Int = 0
-
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             // 月ナビゲーションヘッダー（最小限のパディングでエッジ寄せ）
             monthNavigationHeader()
                 .padding(.horizontal, 8)
-                .padding(.top, 8)
+                .padding(.top, 6)
 
             // 曜日ヘッダー
             weekdayHeader()
                 .padding(.horizontal, 8)
+                .padding(.bottom, 2)
 
-            // カレンダーグリッド（ページングでスムーズに月移動）
-            TabView(selection: $currentIndex) {
-                ForEach(months.indices, id: \.self) { idx in
-                    calendarGridView(for: months[idx])
-                        .padding(.horizontal, 8)
-                        .tag(idx)
-                }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.snappy(duration: 0.28, extraBounce: 0), value: currentIndex)
+            // カレンダーグリッド（エッジ to エッジ）
+            calendarGridView(for: selectedMonth)
+                .padding(.horizontal, 8)
 
             // 選択日の詳細表示
             if let selectedDate = selectedDate {
@@ -52,19 +42,10 @@ struct CalendarHistoryView: View {
             Spacer(minLength: 48)
         }
         .contentShape(Rectangle())
+        .highPriorityGesture(monthSwipeGesture())
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-        .onAppear {
-            ensureMonthsInitialized()
-            selectedMonth = months[safe: currentIndex] ?? selectedMonth
-            loadMonthData()
-        }
+        .onAppear { loadMonthData() }
         .onChange(of: selectedMonth) { loadMonthData() }
-        .onChange(of: currentIndex) { _, newIndex in
-            if let month = months[safe: newIndex] {
-                selectedMonth = month
-                selectedDate = nil
-            }
-        }
     }
 
     // MARK: - Month Navigation Header
@@ -73,7 +54,7 @@ struct CalendarHistoryView: View {
     private func monthNavigationHeader() -> some View {
         HStack {
             Button {
-                pageChange(by: -1)
+                changeMonth(by: -1)
             } label: {
                 Image(systemName: "chevron.left")
                     .font(DesignTokens.Fonts.label)
@@ -91,7 +72,7 @@ struct CalendarHistoryView: View {
             Spacer()
 
             Button {
-                pageChange(by: 1)
+                changeMonth(by: 1)
             } label: {
                 Image(systemName: "chevron.right")
                     .font(DesignTokens.Fonts.label)
@@ -123,13 +104,11 @@ struct CalendarHistoryView: View {
 
     @ViewBuilder
     private func calendarGridView(for month: Date) -> some View {
-        // Get histories for this page's month to avoid pop-in during swipe
-        let map = historyVM.getCalendarDailyHistories(for: month)
-        return LazyVGrid(columns: columns, spacing: 6) {
+        LazyVGrid(columns: columns, spacing: 6) {
             ForEach(generateCalendarDates(for: month), id: \.self) { date in
                 CalendarDayCell(
                     date: date,
-                    dailyHistory: map[calendar.startOfDay(for: date)],
+                    dailyHistory: dailyHistories[calendar.startOfDay(for: date)],
                     isSelected: isSelected(date),
                     isToday: CalendarUtilities.isToday(date)
                 )
@@ -157,21 +136,27 @@ struct CalendarHistoryView: View {
         return CalendarUtilities.generateMonthDates(for: month)
     }
 
-    private func pageChange(by delta: Int) {
-        let newIndex = max(0, min((months.count - 1), currentIndex + delta))
-        guard newIndex != currentIndex else { return }
-        currentIndex = newIndex
+    private func changeMonth(by offset: Int) {
+        guard let newMonth = calendar.date(byAdding: .month, value: offset, to: selectedMonth) else { return }
+        withAnimation(.easeOut(duration: 0.22)) {
+            selectedMonth = newMonth
+            selectedDate = nil
+        }
     }
 
-    // MARK: - Months window setup
-    private func ensureMonthsInitialized() {
-        guard months.isEmpty else { return }
-        let center = calendar.date(from: calendar.dateComponents([.year, .month], from: Date())) ?? Date()
-        let window = (-12...12).compactMap { offset in
-            calendar.date(byAdding: .month, value: offset, to: center)
-        }
-        months = window
-        currentIndex = window.firstIndex(of: center) ?? (window.count / 2)
+    // MARK: - Gestures
+    private func monthSwipeGesture() -> some Gesture {
+        DragGesture(minimumDistance: 20, coordinateSpace: .local)
+            .onEnded { value in
+                let horizontal = value.translation.width
+                let vertical = abs(value.translation.height)
+                guard abs(horizontal) > vertical else { return }
+                if horizontal < -30 {
+                    changeMonth(by: 1)
+                } else if horizontal > 30 {
+                    changeMonth(by: -1)
+                }
+            }
     }
 
     private func monthTitle() -> String {
