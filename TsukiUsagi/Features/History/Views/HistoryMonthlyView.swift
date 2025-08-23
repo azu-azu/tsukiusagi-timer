@@ -94,7 +94,7 @@ private struct WeeklyTotalsList: View {
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-            ForEach(buckets, id: \.self.index) { bucket in
+            ForEach(buckets) { bucket in
                 HStack(spacing: 8) {
                     Text(bucket.label)
                         .font(DesignTokens.Fonts.caption)
@@ -127,13 +127,13 @@ private struct WeeklyTotalsList: View {
         }
     }
 
-    private func weeklyBuckets() -> [(index: Int, label: String, totalMinutes: Int)] {
+    private func weeklyBuckets() -> [WeeklyBucket] {
         // Split the month into weeks (starting Sunday per current Calendar settings)
         let days = historyVM.getCalendarDailyHistories(for: month)
         // sort keys
         let sortedKeys = days.keys.sorted()
         guard let first = sortedKeys.first else { return [] }
-        var buckets: [(Int, String, Int)] = []
+        var buckets: [WeeklyBucket] = []
 
         var weekIndex = 0
         var currentWeekTotal = 0
@@ -144,7 +144,7 @@ private struct WeeklyTotalsList: View {
             let compPrev = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: currentWeekStart)
             if comp.weekOfYear != compPrev.weekOfYear || comp.yearForWeekOfYear != compPrev.yearForWeekOfYear {
                 // flush previous
-                buckets.append((weekIndex, weekLabel(currentWeekStart), currentWeekTotal))
+                buckets.append(WeeklyBucket(index: weekIndex, label: weekLabel(currentWeekStart), totalMinutes: currentWeekTotal))
                 weekIndex += 1
                 currentWeekStart = key
                 currentWeekTotal = 0
@@ -152,7 +152,7 @@ private struct WeeklyTotalsList: View {
             currentWeekTotal += days[key]?.totalMinutes ?? 0
         }
         // flush last
-        buckets.append((weekIndex, weekLabel(currentWeekStart), currentWeekTotal))
+        buckets.append(WeeklyBucket(index: weekIndex, label: weekLabel(currentWeekStart), totalMinutes: currentWeekTotal))
         return buckets
     }
 
@@ -164,4 +164,12 @@ private struct WeeklyTotalsList: View {
     }
 
     // Removed maxTotal() to avoid repeated recomputation per row
+}
+
+// MARK: - Weekly Bucket Model
+private struct WeeklyBucket: Identifiable {
+    let index: Int
+    let label: String
+    let totalMinutes: Int
+    var id: Int { index }
 }
