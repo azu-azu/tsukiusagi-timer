@@ -13,45 +13,43 @@ struct CalendarHistoryView: View {
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
 
     var body: some View {
-        ScrollView {
+        VStack(spacing: 0) {
+            // カレンダーカード（月ナビゲーション + 曜日ヘッダー + グリッド）
             VStack(spacing: 0) {
-                // カレンダーカード（月ナビゲーション + 曜日ヘッダー + グリッド）
-                VStack(spacing: 0) {
-                    // 月ナビゲーションヘッダー
-                    monthNavigationHeader()
+                // 月ナビゲーションヘッダー
+                monthNavigationHeader()
 
-                    // 曜日ヘッダー
-                    weekdayHeader()
+                // 曜日ヘッダー
+                weekdayHeader()
 
-                    // カレンダーグリッド
-                    calendarGridView()
-                }
-                .padding()
-                .background(DesignTokens.CosmosColors.cardBackground)
-                .cornerRadius(16)
-                .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
-                .padding(.horizontal)
-                .padding(.top)
-
-                // 選択日の詳細表示
-                if let selectedDate = selectedDate {
-                    DailyDetailView(
-                        date: selectedDate,
-                        dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
-                    )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .padding(.top, 16)
-                }
-
-                // 下部余白を確保
-                Spacer(minLength: 100)
+                // カレンダーグリッド
+                calendarGridView()
             }
+            .padding()
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+            .padding(.horizontal)
+            .padding(.top)
+
+            // 選択日の詳細表示
+            if let selectedDate = selectedDate {
+                DailyDetailView(
+                    date: selectedDate,
+                    dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .padding(.top, 16)
+            }
+
+            // 下部余白を確保
+            Spacer(minLength: 100)
         }
-        .scrollIndicators(.hidden)
+        .contentShape(Rectangle())
+        .highPriorityGesture(monthSwipeGesture())
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
         .onAppear { loadMonthData() }
         .onChange(of: selectedMonth) { loadMonthData() }
-        .gesture(monthSwipeGesture())
     }
 
     // MARK: - Month Navigation Header
