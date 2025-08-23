@@ -107,16 +107,18 @@ private struct WeeklyTotalsList: View {
 
                     // bar
                     GeometryReader { geo in
-                        let maxWidth = max(1, geo.size.width)
+                        let maxWidth = max(0, geo.size.width)
                         let ratio = min(1, max(0, Double(bucket.totalMinutes) / Double(maxVal)))
                         let barWidth = CGFloat(ratio) * maxWidth
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(DesignTokens.WhiteColors.stroke)
                                 .opacity(0.2)
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(DesignTokens.MoonColors.accentBlue)
-                                .frame(width: max(1, barWidth), height: 8)
+                            if bucket.totalMinutes > 0 && barWidth > 0 {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(DesignTokens.MoonColors.accentBlue)
+                                    .frame(width: barWidth, height: 8)
+                            }
                         }
                     }
                     .frame(height: 12)
