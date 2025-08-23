@@ -3,31 +3,37 @@ import SwiftUI
 struct HistoryMonthlyView: View {
     @EnvironmentObject var historyVM: HistoryViewModel
 
-    @State private var monthAnchor: Date = Date()
+    // Stable paging model to avoid jank: fixed months array + index
+    @State private var months: [Date] = []
+    @State private var currentIndex: Int = 0
 
     private let calendar = Calendar.current
 
     var body: some View {
-        VStack(spacing: 16) {
-            // Page-style month pager
-            TabView(selection: $monthAnchor) {
-                ForEach(pagedMonths(anchor: monthAnchor), id: \.self) { month in
-                    MonthlyPage(month: month)
-                        .tag(month)
+        VStack(spacing: 8) {
+            // Page-style month pager (stable pages by index)
+            TabView(selection: $currentIndex) {
+                ForEach(months.indices, id: \.self) { idx in
+                    MonthlyPage(month: months[idx])
+                        .tag(idx)
                         .padding(.horizontal)
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .frame(maxHeight: .infinity)
         }
+        .onAppear { ensureMonthsInitialized() }
     }
 
-    // Generate a small window of months around the anchor for paging
-    private func pagedMonths(anchor: Date) -> [Date] {
-        let months = (-6...6).compactMap { offset in
-            calendar.date(byAdding: .month, value: offset, to: startOfMonth(anchor))
+    // Initialize a stable window of months around today
+    private func ensureMonthsInitialized() {
+        guard months.isEmpty else { return }
+        let center = startOfMonth(Date())
+        let window = (-12...12).compactMap { offset in
+            calendar.date(byAdding: .month, value: offset, to: center)
         }
-        return months
+        months = window
+        currentIndex = window.firstIndex(of: center) ?? (window.count / 2)
     }
 
     private func startOfMonth(_ date: Date) -> Date {
@@ -68,7 +74,8 @@ struct HistoryMonthlyView: View {
             WeeklyTotalsList(month: month)
                 .roundedCard()
         }
-        .padding(.top)
+        // Keep top padding minimal to avoid excessive whitespace under tabs
+        .padding(.top, 4)
     }
 }
 
@@ -79,12 +86,15 @@ private struct WeeklyTotalsList: View {
     private let calendar = Calendar.current
 
     var body: some View {
+        let buckets = weeklyBuckets()
+        let maxVal = max(buckets.map { $0.totalMinutes }.max() ?? 1, 1)
+
         VStack(alignment: .leading, spacing: 8) {
             Text("Weekly Summary")
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-            ForEach(weeklyBuckets(), id: \.self.index) { bucket in
+            ForEach(buckets, id: \.self.index) { bucket in
                 HStack(spacing: 8) {
                     Text(bucket.label)
                         .font(DesignTokens.Fonts.caption)
@@ -94,7 +104,7 @@ private struct WeeklyTotalsList: View {
                     // bar
                     GeometryReader { geo in
                         let maxWidth = max(1, geo.size.width)
-                        let ratio = min(1, max(0, Double(bucket.totalMinutes) / Double(maxTotal())))
+                        let ratio = min(1, max(0, Double(bucket.totalMinutes) / Double(maxVal)))
                         let barWidth = CGFloat(ratio) * maxWidth
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 4)
@@ -153,7 +163,5 @@ private struct WeeklyTotalsList: View {
         return "\(start.formatted(fmt)) - \(end.formatted(fmt))"
     }
 
-    private func maxTotal() -> Int {
-        weeklyBuckets().map { $0.totalMinutes }.max() ?? 1
-    }
+    // Removed maxTotal() to avoid repeated recomputation per row
 }
