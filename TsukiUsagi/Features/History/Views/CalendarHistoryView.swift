@@ -9,6 +9,10 @@ struct CalendarHistoryView: View {
     @State private var selectedDate: Date?
     @State private var dailyHistories: [Date: DailyHistory] = [:]
 
+    // Smooth paging model for months
+    @State private var months: [Date] = []
+    @State private var currentIndex: Int = 0
+
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
 
@@ -23,9 +27,16 @@ struct CalendarHistoryView: View {
             weekdayHeader()
                 .padding(.horizontal, 8)
 
-            // カレンダーグリッド（エッジ to エッジ）
-            calendarGridView()
-                .padding(.horizontal, 8)
+            // カレンダーグリッド（ページングでスムーズに月移動）
+            TabView(selection: $currentIndex) {
+                ForEach(months.indices, id: \.self) { idx in
+                    calendarGridView(for: months[idx])
+                        .padding(.horizontal, 8)
+                        .tag(idx)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .animation(.snappy(duration: 0.28, extraBounce: 0), value: currentIndex)
 
             // 選択日の詳細表示
             if let selectedDate = selectedDate {
@@ -41,10 +52,19 @@ struct CalendarHistoryView: View {
             Spacer(minLength: 48)
         }
         .contentShape(Rectangle())
-        .highPriorityGesture(monthSwipeGesture())
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-        .onAppear { loadMonthData() }
+        .onAppear {
+            ensureMonthsInitialized()
+            selectedMonth = months[safe: currentIndex] ?? selectedMonth
+            loadMonthData()
+        }
         .onChange(of: selectedMonth) { loadMonthData() }
+        .onChange(of: currentIndex) { _, newIndex in
+            if let month = months[safe: newIndex] {
+                selectedMonth = month
+                selectedDate = nil
+            }
+        }
     }
 
     // MARK: - Month Navigation Header
@@ -53,7 +73,7 @@ struct CalendarHistoryView: View {
     private func monthNavigationHeader() -> some View {
         HStack {
             Button {
-                changeMonth(by: -1)
+                pageChange(by: -1)
             } label: {
                 Image(systemName: "chevron.left")
                     .font(DesignTokens.Fonts.label)
@@ -66,11 +86,12 @@ struct CalendarHistoryView: View {
             Text(monthTitle())
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .contentTransition(.opacity)
 
             Spacer()
 
             Button {
-                changeMonth(by: 1)
+                pageChange(by: 1)
             } label: {
                 Image(systemName: "chevron.right")
                     .font(DesignTokens.Fonts.label)
@@ -101,18 +122,18 @@ struct CalendarHistoryView: View {
     // MARK: - Calendar Grid
 
     @ViewBuilder
-    private func calendarGridView() -> some View {
-        LazyVGrid(columns: columns, spacing: 6) {
-            ForEach(generateCalendarDates(), id: \.self) { date in
+    private func calendarGridView(for month: Date) -> some View {
+        // Get histories for this page's month to avoid pop-in during swipe
+        let map = historyVM.getCalendarDailyHistories(for: month)
+        return LazyVGrid(columns: columns, spacing: 6) {
+            ForEach(generateCalendarDates(for: month), id: \.self) { date in
                 CalendarDayCell(
                     date: date,
-                    dailyHistory: dailyHistories[calendar.startOfDay(for: date)],
+                    dailyHistory: map[calendar.startOfDay(for: date)],
                     isSelected: isSelected(date),
                     isToday: CalendarUtilities.isToday(date)
                 )
-                .onTapGesture {
-                    selectDate(date)
-                }
+                .onTapGesture { selectDate(date) }
             }
         }
     }
@@ -131,36 +152,26 @@ struct CalendarHistoryView: View {
         }
     }
 
-    private func generateCalendarDates() -> [Date] {
+    private func generateCalendarDates(for month: Date) -> [Date] {
         // 当月のみの日付を生成（他月は表示しない）
-        return CalendarUtilities.generateMonthDates(for: selectedMonth)
+        return CalendarUtilities.generateMonthDates(for: month)
     }
 
-    private func changeMonth(by offset: Int) {
-        guard let newMonth = calendar.date(
-            byAdding: .month,
-            value: offset,
-            to: selectedMonth
-        ) else {
-            return
+    private func pageChange(by delta: Int) {
+        let newIndex = max(0, min((months.count - 1), currentIndex + delta))
+        guard newIndex != currentIndex else { return }
+        currentIndex = newIndex
+    }
+
+    // MARK: - Months window setup
+    private func ensureMonthsInitialized() {
+        guard months.isEmpty else { return }
+        let center = calendar.date(from: calendar.dateComponents([.year, .month], from: Date())) ?? Date()
+        let window = (-12...12).compactMap { offset in
+            calendar.date(byAdding: .month, value: offset, to: center)
         }
-        selectedMonth = newMonth
-        selectedDate = nil // 選択をクリア
-    }
-
-    // MARK: - Gestures
-    private func monthSwipeGesture() -> some Gesture {
-        DragGesture(minimumDistance: 20, coordinateSpace: .local)
-            .onEnded { value in
-                let horizontal = value.translation.width
-                let vertical = abs(value.translation.height)
-                guard abs(horizontal) > vertical else { return }
-                if horizontal < -30 {
-                    changeMonth(by: 1) // swipe left -> next month
-                } else if horizontal > 30 {
-                    changeMonth(by: -1) // swipe right -> previous month
-                }
-            }
+        months = window
+        currentIndex = window.firstIndex(of: center) ?? (window.count / 2)
     }
 
     private func monthTitle() -> String {
