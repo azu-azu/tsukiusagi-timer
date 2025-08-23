@@ -134,51 +134,60 @@ private struct WeeklyTotalsList: View {
     }
 
     private func weeklyBuckets() -> [WeeklyBucket] {
-        // Split the month into weeks (starting Sunday per current Calendar settings)
+        // Compute month boundaries
+        let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: month))!
+        let daysRange = calendar.range(of: .day, in: .month, for: month)!
+        let monthEnd = calendar.date(byAdding: .day, value: daysRange.count - 1, to: monthStart)!
+
+        // Precomputed daily map for this month
         let days = historyVM.getCalendarDailyHistories(for: month)
-        // sort keys
         let sortedKeys = days.keys.sorted()
         guard let first = sortedKeys.first else { return [] }
-        var buckets: [WeeklyBucket] = []
 
+        var buckets: [WeeklyBucket] = []
         var weekIndex = 0
         var currentWeekTotal = 0
         var currentWeekStart = first
+        var currentWeekEnd = first
 
         for key in sortedKeys {
             let comp = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: key)
             let compPrev = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: currentWeekStart)
-            if comp.weekOfYear != compPrev.weekOfYear || comp.yearForWeekOfYear != compPrev.yearForWeekOfYear {
-                // flush previous
+            let isSameWeek = (comp.weekOfYear == compPrev.weekOfYear) && (comp.yearForWeekOfYear == compPrev.yearForWeekOfYear)
+            if !isSameWeek {
+                // flush previous with month-clipped label
+                let clippedStart = max(currentWeekStart, monthStart)
+                let clippedEnd = min(currentWeekEnd, monthEnd)
                 buckets.append(
                     WeeklyBucket(
                         index: weekIndex,
-                        label: weekLabel(currentWeekStart),
+                        label: weekLabelClipped(start: clippedStart, end: clippedEnd),
                         totalMinutes: currentWeekTotal
                     )
                 )
                 weekIndex += 1
                 currentWeekStart = key
+                currentWeekEnd = key
                 currentWeekTotal = 0
+            } else {
+                currentWeekEnd = key
             }
             currentWeekTotal += days[key]?.totalMinutes ?? 0
         }
         // flush last
+        let clippedStart = max(currentWeekStart, monthStart)
+        let clippedEnd = min(currentWeekEnd, monthEnd)
         buckets.append(
             WeeklyBucket(
                 index: weekIndex,
-                label: weekLabel(currentWeekStart),
+                label: weekLabelClipped(start: clippedStart, end: clippedEnd),
                 totalMinutes: currentWeekTotal
             )
         )
         return buckets
     }
 
-    private func weekLabel(_ date: Date) -> String {
-        let start = calendar.date(
-            from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
-        ) ?? date
-        let end = calendar.date(byAdding: .day, value: 6, to: start) ?? start
+    private func weekLabelClipped(start: Date, end: Date) -> String {
         let fmt: Date.FormatStyle = .dateTime.month(.abbreviated).day()
         return "\(start.formatted(fmt)) - \(end.formatted(fmt))"
     }
