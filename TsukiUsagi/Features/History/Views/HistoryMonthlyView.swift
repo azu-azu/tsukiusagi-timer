@@ -188,8 +188,10 @@ private struct WeeklyTotalsList: View {
     }
 
     private func weekLabelClipped(start: Date, end: Date) -> String {
-        let fmt: Date.FormatStyle = .dateTime.month(.abbreviated).day()
-        return "\(start.formatted(fmt)) - \(end.formatted(fmt))"
+        let startDay = calendar.component(.day, from: start)
+        let endDay = calendar.component(.day, from: end)
+        if startDay == endDay { return "\(startDay)" }
+        return "\(startDay) – \(endDay)"
     }
 
     // Removed maxTotal() to avoid repeated recomputation per row
