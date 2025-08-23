@@ -207,8 +207,20 @@ struct FlowingStarsView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let size = geo.size
-            let safeAreaInsets = geo.safeAreaInsets
+            let rawSize = geo.size
+            let rawInsets = geo.safeAreaInsets
+
+            // 入力を正規化（非負・有限・最小1pt）
+            let width = (rawSize.width.isFinite && !rawSize.width.isNaN) ? max(1, rawSize.width) : 1
+            let height = (rawSize.height.isFinite && !rawSize.height.isNaN) ? max(1, rawSize.height) : 1
+            let size = CGSize(width: width, height: height)
+            let safeAreaInsets = EdgeInsets(
+                top: (rawInsets.top.isFinite && !rawInsets.top.isNaN) ? max(0, rawInsets.top) : 0,
+                leading: (rawInsets.leading.isFinite && !rawInsets.leading.isNaN) ? max(0, rawInsets.leading) : 0,
+                bottom: (rawInsets.bottom.isFinite && !rawInsets.bottom.isNaN) ? max(0, rawInsets.bottom) : 0,
+                trailing: (rawInsets.trailing.isFinite && !rawInsets.trailing.isNaN) ? max(0, rawInsets.trailing) : 0
+            )
+
             ZStack {
                 ForEach(generator.stars) { star in
                     FlowingStarView(
