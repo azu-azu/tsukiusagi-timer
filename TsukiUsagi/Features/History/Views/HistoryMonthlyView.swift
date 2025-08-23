@@ -144,7 +144,13 @@ private struct WeeklyTotalsList: View {
             let compPrev = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: currentWeekStart)
             if comp.weekOfYear != compPrev.weekOfYear || comp.yearForWeekOfYear != compPrev.yearForWeekOfYear {
                 // flush previous
-                buckets.append(WeeklyBucket(index: weekIndex, label: weekLabel(currentWeekStart), totalMinutes: currentWeekTotal))
+                buckets.append(
+                    WeeklyBucket(
+                        index: weekIndex,
+                        label: weekLabel(currentWeekStart),
+                        totalMinutes: currentWeekTotal
+                    )
+                )
                 weekIndex += 1
                 currentWeekStart = key
                 currentWeekTotal = 0
@@ -152,12 +158,20 @@ private struct WeeklyTotalsList: View {
             currentWeekTotal += days[key]?.totalMinutes ?? 0
         }
         // flush last
-        buckets.append(WeeklyBucket(index: weekIndex, label: weekLabel(currentWeekStart), totalMinutes: currentWeekTotal))
+        buckets.append(
+            WeeklyBucket(
+                index: weekIndex,
+                label: weekLabel(currentWeekStart),
+                totalMinutes: currentWeekTotal
+            )
+        )
         return buckets
     }
 
     private func weekLabel(_ date: Date) -> String {
-        let start = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)) ?? date
+        let start = calendar.date(
+            from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        ) ?? date
         let end = calendar.date(byAdding: .day, value: 6, to: start) ?? start
         let fmt: Date.FormatStyle = .dateTime.month(.abbreviated).day()
         return "\(start.formatted(fmt)) - \(end.formatted(fmt))"

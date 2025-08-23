@@ -74,14 +74,37 @@ struct MainPanel: View {
             let childH = max(1, contentH)
             let childSize = CGSize(width: childW, height: childH)
             let childInsets = EdgeInsets(
-                top: (geo2.safeAreaInsets.top.isFinite && !geo2.safeAreaInsets.top.isNaN) ? max(0, geo2.safeAreaInsets.top) : 0,
-                leading: (geo2.safeAreaInsets.leading.isFinite && !geo2.safeAreaInsets.leading.isNaN) ? max(0, geo2.safeAreaInsets.leading) : 0,
-                bottom: (geo2.safeAreaInsets.bottom.isFinite && !geo2.safeAreaInsets.bottom.isNaN) ? max(0, geo2.safeAreaInsets.bottom) : 0,
-                trailing: (geo2.safeAreaInsets.trailing.isFinite && !geo2.safeAreaInsets.trailing.isNaN) ? max(0, geo2.safeAreaInsets.trailing) : 0
+                top: (
+                    geo2.safeAreaInsets.top.isFinite &&
+                    !geo2.safeAreaInsets.top.isNaN
+                )
+                    ? max(0, geo2.safeAreaInsets.top)
+                    : 0,
+                leading: (
+                    geo2.safeAreaInsets.leading.isFinite &&
+                    !geo2.safeAreaInsets.leading.isNaN
+                )
+                    ? max(0, geo2.safeAreaInsets.leading)
+                    : 0,
+                bottom: (
+                    geo2.safeAreaInsets.bottom.isFinite &&
+                    !geo2.safeAreaInsets.bottom.isNaN
+                )
+                    ? max(0, geo2.safeAreaInsets.bottom)
+                    : 0,
+                trailing: (
+                    geo2.safeAreaInsets.trailing.isFinite &&
+                    !geo2.safeAreaInsets.trailing.isNaN
+                )
+                    ? max(0, geo2.safeAreaInsets.trailing)
+                    : 0
             )
             // 画面中央Y（safe area考慮）をオフセットに変換
             let centerY = (contentH - safeTop - safeBottom) / 2 + safeTop
-            let setCenterYRaw: CGFloat = isLandscape ? centerY - contentH * ratioLandscape : centerY - contentH * ratioPortrait
+            let setCenterYRaw: CGFloat =
+                isLandscape
+                ? centerY - contentH * ratioLandscape
+                : centerY - contentH * ratioPortrait
             let setCenterYOffset = -(max(-contentH, min(setCenterYRaw - contentH / 2, contentH)))
 
             if timerVM.isSessionFinished {
