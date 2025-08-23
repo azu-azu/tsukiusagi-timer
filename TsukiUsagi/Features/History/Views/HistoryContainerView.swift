@@ -10,7 +10,7 @@ struct HistoryContainerView: View {
     @State private var selectedTab: Tab = .daily
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 6) {
             // Segmented control
             Picker("History Mode", selection: $selectedTab) {
                 Text("Daily").tag(Tab.daily)
