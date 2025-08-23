@@ -8,7 +8,7 @@ struct HistoryView: View {
 
     var body: some View {
         NavigationStack {
-            CalendarHistoryView()
+            HistoryContainerView()
                 .navigationTitle("History")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarRole(.navigationStack)

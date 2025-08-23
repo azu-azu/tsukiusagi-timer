@@ -49,12 +49,9 @@ struct CalendarHistoryView: View {
         }
         .scrollIndicators(.hidden)
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-        .onAppear {
-            loadMonthData()
-        }
-        .onChange(of: selectedMonth) {
-            loadMonthData()
-        }
+        .onAppear { loadMonthData() }
+        .onChange(of: selectedMonth) { loadMonthData() }
+        .gesture(monthSwipeGesture())
     }
 
     // MARK: - Month Navigation Header
@@ -158,6 +155,21 @@ struct CalendarHistoryView: View {
         }
         selectedMonth = newMonth
         selectedDate = nil // 選択をクリア
+    }
+
+    // MARK: - Gestures
+    private func monthSwipeGesture() -> some Gesture {
+        DragGesture(minimumDistance: 20, coordinateSpace: .local)
+            .onEnded { value in
+                let horizontal = value.translation.width
+                let vertical = abs(value.translation.height)
+                guard abs(horizontal) > vertical else { return }
+                if horizontal < -30 {
+                    changeMonth(by: 1) // swipe left -> next month
+                } else if horizontal > 30 {
+                    changeMonth(by: -1) // swipe right -> previous month
+                }
+            }
     }
 
     private func monthTitle() -> String {

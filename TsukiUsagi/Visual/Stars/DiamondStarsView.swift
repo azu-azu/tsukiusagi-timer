@@ -55,7 +55,12 @@ struct SparkleDiamond: View {
         }
         .scaleEffect(scale)
         .opacity(opacity) // 追加: フェード用
-        .position(position)
+        .position(
+            CGPoint(
+                x: position.x.isFinite ? position.x : 0,
+                y: position.y.isFinite ? position.y : 0
+            )
+        )
         .compositingGroup() // レイヤーを1枚化
         .onAppear {
             withAnimation(.easeOut(duration: lifetime * 0.3)) { scale = 1 }
