@@ -10,13 +10,13 @@ struct HistoryMonthlyView: View {
     private let calendar = Calendar.current
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             // Page-style month pager (stable pages by index)
             TabView(selection: $currentIndex) {
                 ForEach(months.indices, id: \.self) { idx in
                     MonthlyPage(month: months[idx])
                         .tag(idx)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 8)
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
@@ -44,7 +44,7 @@ struct HistoryMonthlyView: View {
     @ViewBuilder
     private func MonthlyPage(month: Date) -> some View {
         let summary = historyVM.getCalendarMonthSummary(for: month)
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             // Header
             HStack {
                 Text(month.formatted(.dateTime.year().month(.wide)))
@@ -74,8 +74,8 @@ struct HistoryMonthlyView: View {
             WeeklyTotalsList(month: month)
                 .roundedCard()
         }
-        // Keep top padding minimal to avoid excessive whitespace under tabs
-        .padding(.top, 4)
+        // Minimal gap below tabs
+        .padding(.top, 0)
     }
 }
 
