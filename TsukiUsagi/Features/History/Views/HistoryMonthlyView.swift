@@ -14,13 +14,17 @@ struct HistoryMonthlyView: View {
             // Page-style month pager (stable pages by index)
             TabView(selection: $currentIndex) {
                 ForEach(months.indices, id: \.self) { idx in
-                    MonthlyPage(month: months[idx])
-                        .tag(idx)
-                        .padding(.horizontal, 8)
+                    VStack(alignment: .leading, spacing: 0) {
+                        MonthlyPage(month: months[idx])
+                            .padding(.horizontal, 8)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .tag(idx)
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .frame(maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .onAppear { ensureMonthsInitialized() }
     }
