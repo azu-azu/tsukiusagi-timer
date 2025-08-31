@@ -83,6 +83,9 @@ struct PreviewData {
             var timeRemaining: Int = 0
             var isRunning: Bool = false
             var isWorkSession: Bool = true
+            var runStateRaw: String? = nil
+            var endAtEpoch: Double? = nil
+            var remainingAtPause: Int? = nil
             func saveTimerState() {}
             func restoreTimerState() {}
         }

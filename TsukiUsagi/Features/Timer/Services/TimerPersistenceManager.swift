@@ -2,9 +2,16 @@ import Foundation
 import SwiftUI
 
 protocol TimerPersistenceManageable: AnyObject {
-    var timeRemaining: Int { get set }
-    var isRunning: Bool { get set }
+    // Core persisted values
+    var timeRemaining: Int { get set }           // snapshot seconds; used for paused/idle
+    var isRunning: Bool { get set }              // legacy flag; derived from runState
     var isWorkSession: Bool { get set }
+
+    // New robust state
+    var runStateRaw: String? { get set }         // "idle" | "running" | "paused"
+    var endAtEpoch: Double? { get set }          // seconds since 1970 when running
+    var remainingAtPause: Int? { get set }       // seconds at pause
+
     func saveTimerState()
     func restoreTimerState()
 }
@@ -25,14 +32,36 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
         static let isRunning = "isRunning"
         static let backgroundTimestamp = "backgroundTimestamp"
         static let isWorkSession = "isWorkSession"
-        static let endAtTimestamp = "endAtTimestamp"
+        static let endAtTimestamp = "endAtTimestamp" // legacy
+        static let runState = "timerRunState"
+        static let endAtEpoch = "timerEndAtEpoch"
+        static let remainingAtPause = "timerRemainingAtPause"
     }
 
     @AppStorage(TimerPersistKeys.remainingSeconds) private var storedRemainingSeconds: Int = 0
     @AppStorage(TimerPersistKeys.isRunning) private var storedIsRunning: Bool = false
     @AppStorage(TimerPersistKeys.backgroundTimestamp) private var storedBackgroundTimestamp: Double = 0
     @AppStorage(TimerPersistKeys.isWorkSession) private var storedIsWorkSession: Bool = true
+    // Legacy absolute timestamp (kept for backward compatibility)
     @AppStorage(TimerPersistKeys.endAtTimestamp) private var storedEndAtTimestamp: Double = 0
+    // New fields
+    @AppStorage(TimerPersistKeys.runState) private var storedRunState: String = ""
+    @AppStorage(TimerPersistKeys.endAtEpoch) private var storedEndAtEpoch: Double = 0
+    @AppStorage(TimerPersistKeys.remainingAtPause) private var storedRemainingAtPause: Int = 0
+
+    // MARK: - Protocol bridging properties
+    var runStateRaw: String? {
+        get { storedRunState.isEmpty ? nil : storedRunState }
+        set { storedRunState = newValue ?? "" }
+    }
+    var endAtEpoch: Double? {
+        get { storedEndAtEpoch > 0 ? storedEndAtEpoch : nil }
+        set { storedEndAtEpoch = newValue ?? 0 }
+    }
+    var remainingAtPause: Int? {
+        get { storedRemainingAtPause > 0 ? storedRemainingAtPause : nil }
+        set { storedRemainingAtPause = newValue ?? 0 }
+    }
 
     init() {
         self.timeRemaining = 0
@@ -48,25 +77,35 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
         storedIsRunning = isRunning
         storedIsWorkSession = isWorkSession
         storedBackgroundTimestamp = Date().timeIntervalSince1970
-        // Persist absolute end time for robust restoration across app restarts
-        if isRunning && timeRemaining > 0 {
-            storedEndAtTimestamp = Date().timeIntervalSince1970 + Double(timeRemaining)
-        } else {
-            storedEndAtTimestamp = 0
-        }
+        // Note: runState/endAtEpoch/remainingAtPause are written by caller via protocol properties
     }
 
     func restoreTimerState() {
         isWorkSession = storedIsWorkSession
-        // If we have an absolute end timestamp and the timer was running,
-        // recompute the remaining seconds based on current time.
+        // Primary: use new fields if present
+        if !storedRunState.isEmpty {
+            // Derive isRunning from runState
+            isRunning = storedRunState == "running"
+            if storedRunState == "running", storedEndAtEpoch > 0 {
+                let nowTs = Date().timeIntervalSince1970
+                let remain = Int(ceil(max(0, storedEndAtEpoch - nowTs)))
+                timeRemaining = remain
+            } else if storedRunState == "paused" {
+                timeRemaining = max(0, storedRemainingAtPause)
+                isRunning = false
+            } else {
+                timeRemaining = max(0, storedRemainingSeconds)
+                isRunning = false
+            }
+            return
+        }
+        // Fallback: legacy behavior (pre-runState)
         if storedIsRunning && storedEndAtTimestamp > 0 {
             let nowTs = Date().timeIntervalSince1970
             let remain = Int(ceil(max(0, storedEndAtTimestamp - nowTs)))
             timeRemaining = remain
             isRunning = remain > 0
         } else {
-            // Fallback to the stored remaining seconds (paused or stopped state)
             timeRemaining = max(0, storedRemainingSeconds)
             isRunning = false
         }
