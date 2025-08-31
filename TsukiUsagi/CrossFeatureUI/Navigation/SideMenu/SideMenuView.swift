@@ -282,6 +282,9 @@ private class PreviewSideMenuDummyPersistence: TimerPersistenceManageable {
     var timeRemaining: Int = 1500
     var isRunning: Bool = false
     var isWorkSession: Bool = true
+    var runStateRaw: String? = nil
+    var endAtEpoch: Double? = nil
+    var remainingAtPause: Int? = nil
     func saveTimerState() {}
     func restoreTimerState() {}
 }

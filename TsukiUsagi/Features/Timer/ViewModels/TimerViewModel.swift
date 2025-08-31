@@ -12,6 +12,12 @@ import UIKit
 // 1. 各Serviceable/Engineableのimport
 import Foundation
 
+enum TimerRunState: String {
+    case idle
+    case running
+    case paused
+}
+
 /// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
 @MainActor
 final class TimerViewModel: ObservableObject {
@@ -30,10 +36,12 @@ final class TimerViewModel: ObservableObject {
     // 3. @PublishedなどUIバインディング用プロパティ
     @Published var timeRemaining: Int = 25 * 60 // 初期値を25分に設定
     @Published var isRunning: Bool = false
+    @Published private(set) var runState: TimerRunState = .idle
     @Published var isWorkSession: Bool = true
     @Published var isSessionFinished = false
     @Published private(set) var startTime: Date?
     @Published private(set) var endTime: Date?
+    private var endAt: Date?
     @Published var flashStars = false
     @Published private(set) var lastBackgroundDate: Date?
     @Published var shouldSuppressAnimation = false
@@ -139,10 +147,13 @@ final class TimerViewModel: ObservableObject {
         // timeRemainingが0の場合は設定値で初期化
         let actualSeconds = seconds > 0 ? seconds : workMinutes * 60
 
-        startTime = dateProvider.now()
+        let now = dateProvider.now()
+        startTime = now
         isWorkSession = true
         isRunning = true
         timeRemaining = actualSeconds
+        endAt = now.addingTimeInterval(TimeInterval(actualSeconds))
+        runState = .running
 
         // アニメーション抑制フラグをリセット
         shouldSuppressAnimation = false
@@ -156,35 +167,46 @@ final class TimerViewModel: ObservableObject {
 
             // アニメーションを発火
             self.triggerStartAnimations()
-            // Persist absolute endAt via persistence manager for restart recovery
+            // Persist state
             self.saveTimerState()
         }
     }
 
     func pauseTimer() {
+        guard runState == .running else { return }
+        // Recompute remaining from endAt for accuracy
+        let now = dateProvider.now()
+        if let endAt { timeRemaining = max(0, Int(ceil(endAt.timeIntervalSince(now)))) }
+        endAt = nil
         engine.pause()
-        isRunning = engine.isRunning
-        // Persist paused state so we do not auto-start on return
+        isRunning = false
+        runState = .paused
         saveTimerState()
     }
 
     func resumeTimer() {
-        engine.resume()
-        isRunning = engine.isRunning
-        // Persist new endAt after resume
+        guard runState == .paused, timeRemaining > 0 else { return }
+        let now = dateProvider.now()
+        endAt = now.addingTimeInterval(TimeInterval(timeRemaining))
+        runState = .running
+        isRunning = true
+        engine.start(seconds: timeRemaining)
         saveTimerState()
     }
 
     func stopTimer() {
         engine.stop()
-        isRunning = engine.isRunning
-        // Clear persisted running state
+        isRunning = false
+        runState = .idle
+        endAt = nil
         saveTimerState()
     }
 
     func resetTimer(to seconds: Int) {
         engine.reset(to: seconds)
         isRunning = engine.isRunning
+        runState = .idle
+        endAt = nil
         saveTimerState()
     }
 
@@ -263,8 +285,20 @@ final class TimerViewModel: ObservableObject {
     @MainActor
     func saveTimerState() {
         persistenceManager.timeRemaining = timeRemaining
-        persistenceManager.isRunning = isRunning
+        persistenceManager.isRunning = (runState == .running)
         persistenceManager.isWorkSession = isWorkSession
+        persistenceManager.runStateRaw = runState.rawValue
+        switch runState {
+        case .running:
+            if let endAt { persistenceManager.endAtEpoch = endAt.timeIntervalSince1970 }
+            persistenceManager.remainingAtPause = nil
+        case .paused:
+            persistenceManager.endAtEpoch = nil
+            persistenceManager.remainingAtPause = timeRemaining
+        case .idle:
+            persistenceManager.endAtEpoch = nil
+            persistenceManager.remainingAtPause = nil
+        }
         persistenceManager.saveTimerState()
     }
 
@@ -272,18 +306,50 @@ final class TimerViewModel: ObservableObject {
     @MainActor
     func restoreTimerState() {
         persistenceManager.restoreTimerState()
-        timeRemaining = persistenceManager.timeRemaining
-        isRunning = persistenceManager.isRunning
         isWorkSession = persistenceManager.isWorkSession
+        let restored = TimerRunState(rawValue: persistenceManager.runStateRaw ?? "") ?? .idle
+        runState = restored
+        switch restored {
+        case .running:
+            if let ts = persistenceManager.endAtEpoch {
+                let now = dateProvider.now()
+                let end = Date(timeIntervalSince1970: ts)
+                let remain = max(0, Int(ceil(end.timeIntervalSince(now))))
+                if remain > 0 {
+                    endAt = end
+                    timeRemaining = remain
+                    isRunning = true
+                } else {
+                    endAt = nil
+                    timeRemaining = 0
+                    isRunning = false
+                    runState = .idle
+                }
+            } else {
+                // Safety: missing endAt
+                endAt = nil
+                timeRemaining = 0
+                isRunning = false
+                runState = .idle
+            }
+        case .paused:
+            timeRemaining = max(0, persistenceManager.remainingAtPause ?? 0)
+            isRunning = false
+            endAt = nil
+        case .idle:
+            timeRemaining = workMinutes * 60
+            isRunning = false
+            endAt = nil
+        }
     }
 
     /// 永続化から復元後、必要なら残り秒数でエンジンを再開（起動直後や再アクティブ時用）
     @MainActor
     func startFromRestoredIfNeeded() {
-        guard isRunning, timeRemaining > 0 else { return }
+        guard runState == .running, timeRemaining > 0 else { return }
         shouldSuppressAnimation = true
         engine.start(seconds: timeRemaining)
-        isRunning = engine.isRunning
+        isRunning = true
     }
 
     // MARK: - Private Methods
@@ -349,15 +415,15 @@ final class TimerViewModel: ObservableObject {
     /// フォアグラウンド復帰
     @MainActor
     func appWillEnterForeground() {
-        // 優先：endAtベースの永続化から復元し、再開可否を判断
+        // endAtベースで復元し、状態に応じてのみ再開
         restoreTimerState()
         notificationService.cancelSessionEndNotification()
-        if timeRemaining > 0 {
+        switch runState {
+        case .running:
             shouldSuppressAnimation = true
             shouldSuppressSessionFinishedAnimation = true
-            // 実行中だった場合のみ再開（ポーズしていた場合は再開しない）
             startFromRestoredIfNeeded()
-        } else {
+        case .paused, .idle:
             isRunning = false
         }
         lastBackgroundDate = nil
