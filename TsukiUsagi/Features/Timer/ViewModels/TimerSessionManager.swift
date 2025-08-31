@@ -13,6 +13,8 @@ final class TimerSessionManager: ObservableObject {
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
 
     private let historyVM: HistoryViewModel
+    private var breakEndAt: Date?
+    private var breakTimer: Timer?
 
     init(historyVM: HistoryViewModel) {
         self.historyVM = historyVM
@@ -40,20 +42,28 @@ final class TimerSessionManager: ObservableObject {
         isSessionFinished = true
         isWorkSession = false // ← ブレイクモードへ
 
-        // 休憩タイマーを"見えないまま"走らせる
-        var secondsLeft = breakMinutes * 60 // 表示は更新しない
-        print("📝 secondsLeft  =", secondsLeft)
-        Timer.scheduledTimer(
-            withTimeInterval: 1.0,
-            repeats: true
-        ) { [weak self] t in
-            guard let self else { return }
-            secondsLeft -= 1
-            if secondsLeft <= 0 {
-                t.invalidate()
+        // 休憩終了の絶対時刻を確定
+        breakEndAt = Date().addingTimeInterval(TimeInterval(breakMinutes * 60))
+
+        // 既存の休憩通知をキャンセル→1本だけ再予約（多重予約防止）
+        NotificationManager.shared.cancelSessionEndNotification()
+        NotificationManager.shared.scheduleSessionEndNotification(
+            after: breakMinutes * 60,
+            phase: .breakTime
+        )
+
+        // 隠し休憩タイマー（.common、毎tick差分再計算）
+        breakTimer?.invalidate()
+        breakTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self, let end = self.breakEndAt else { return }
+            let remain = Int(ceil(end.timeIntervalSinceNow))
+            if remain <= 0 {
+                self.breakTimer?.invalidate()
+                self.breakTimer = nil
                 Task { @MainActor in self.finalizeBreak(sendNotification: sendNotification) }
             }
         }
+        if let t = breakTimer { RunLoop.main.add(t, forMode: .common); t.tolerance = 0.1 }
     }
 
     /// 休憩終了後に呼ぶまとめ関数
@@ -62,6 +72,10 @@ final class TimerSessionManager: ObservableObject {
             NotificationManager.shared.sendPhaseChangeNotification(for: .focus)
         }
         // 状態は何も変更しない
+        breakTimer?.invalidate(); breakTimer = nil
+        breakEndAt = nil
+        // 休憩関連の終了通知はここでキャンセル（保険）
+        NotificationManager.shared.cancelSessionEndNotification()
     }
 
     /// 履歴にセッションを追加
@@ -83,6 +97,13 @@ final class TimerSessionManager: ObservableObject {
         // 履歴保存は呼び出し側で行う
         isSessionFinished = true
         isWorkSession = false
+        breakTimer?.invalidate(); breakTimer = nil
+        breakEndAt = nil
+        NotificationManager.shared.cancelSessionEndNotification()
+    }
+
+    deinit {
+        breakTimer?.invalidate(); breakTimer = nil
     }
 
     // 公開getter
