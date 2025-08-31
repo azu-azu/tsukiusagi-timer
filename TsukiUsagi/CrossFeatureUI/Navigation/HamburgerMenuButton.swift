@@ -23,7 +23,7 @@ struct HamburgerMenuButton_Previews: PreviewProvider {
         HamburgerMenuButton {
             print("Menu tapped")
         }
-        .background(Color.black)
+        .background(DesignTokens.BlackColors.primary)
         .previewLayout(.sizeThatFits)
         .padding()
     }
