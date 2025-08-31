@@ -13,36 +13,38 @@ struct CalendarHistoryView: View {
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
 
     var body: some View {
-        VStack(spacing: 4) {
-            // 月ナビゲーションヘッダー（最小限のパディングでエッジ寄せ）
-            monthNavigationHeader()
-                .padding(.horizontal, 8)
-                .padding(.top, 6)
+        ScrollView {
+            VStack(spacing: 4) {
+                // 月ナビゲーションヘッダー（最小限のパディングでエッジ寄せ）
+                monthNavigationHeader()
+                    .padding(.horizontal, 8)
+                    .padding(.top, 6)
 
-            // 曜日ヘッダー
-            weekdayHeader()
-                .padding(.horizontal, 8)
-                .padding(.bottom, 2)
+                // 曜日ヘッダー
+                weekdayHeader()
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 2)
 
-            // カレンダーグリッド（エッジ to エッジ）
-            calendarGridView(for: selectedMonth)
-                .padding(.horizontal, 8)
+                // カレンダーグリッド（エッジ to エッジ）
+                calendarGridView(for: selectedMonth)
+                    .padding(.horizontal, 8)
+                    .simultaneousGesture(monthSwipeGesture())
 
-            // 選択日の詳細表示
-            if let selectedDate = selectedDate {
-                DailyDetailView(
-                    date: selectedDate,
-                    dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
-                )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .padding(.top, 12)
+                // 選択日の詳細表示
+                if let selectedDate = selectedDate {
+                    DailyDetailView(
+                        date: selectedDate,
+                        dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.top, 12)
+                }
+
+                // 下部余白を確保
+                Spacer(minLength: 48)
             }
-
-            // 下部余白を確保
-            Spacer(minLength: 48)
         }
-        .contentShape(Rectangle())
-        .highPriorityGesture(monthSwipeGesture())
+        .scrollIndicators(.hidden)
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
         .onAppear { loadMonthData() }
         .onChange(of: selectedMonth) { loadMonthData() }

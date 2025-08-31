@@ -31,11 +31,11 @@ struct SideMenuView: View {
             let baseMenuWidth: CGFloat = isLandscape ?
                 min(size.width * 0.5, 480) :
                 min(size.width * 0.8, 300)
-            let leadingOffset: CGFloat = isLandscape ?
-                safeAreaInsets.leading + 40 :
-                max(safeAreaInsets.leading, 16) // 縦向きでも最低16pxの余白を確保
-            // 左端まで表示するためにleadingOffsetの分だけメニュー幅を広げる
-            let menuWidth: CGFloat = baseMenuWidth + leadingOffset
+            let minLeading: CGFloat = isLandscape ? 40 : 16
+            let leadingOffset: CGFloat = max(safeAreaInsets.leading, minLeading)
+            // 安全な表示幅（左のセーフエリア分はパディングで確保する）
+            let menuWidth: CGFloat = baseMenuWidth
+            let effectiveMenuWidth: CGFloat = menuWidth + leadingOffset + SideMenuView.menuHorizontalPadding
             let topPadding: CGFloat = isLandscape ? safeAreaInsets.top + 20 : safeAreaInsets.top + 60
             let sectionSpacing: CGFloat = isLandscape ? 24 : 16
             let itemVerticalPadding: CGFloat = isLandscape ? 16 : 12
@@ -114,6 +114,7 @@ struct SideMenuView: View {
                     }
                 }
                 .frame(width: menuWidth)
+                .padding(.leading, leadingOffset + SideMenuView.menuHorizontalPadding)
                 .frame(maxHeight: .infinity)
                 // .background(Color(red: 0.0, green: 0.1, blue: 0.2).opacity(0.9))
                 .background(DesignTokens.CosmosColors.background.opacity(0.9))
@@ -121,7 +122,7 @@ struct SideMenuView: View {
                 .shadow(color: DesignTokens.BlackColors.primary.opacity(0.4), radius: 8, x: -4, y: 0)
                 .shadow(color: DesignTokens.BlackColors.primary.opacity(0.4), radius: 8, x: 4, y: 0)
                 .transition(.move(edge: .leading).combined(with: .opacity))
-                .offset(x: isPresented ? 0 : -menuWidth - Self.menuHideOffset)
+                .offset(x: isPresented ? 0 : -effectiveMenuWidth - Self.menuHideOffset)
 
                 Spacer()
             }
