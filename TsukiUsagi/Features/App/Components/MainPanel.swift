@@ -44,8 +44,15 @@ struct MainPanel: View {
             let contentH = (
                 contentSize.height.isFinite && !contentSize.height.isNaN
             ) ? max(0, contentSize.height) : 0
-            let ratioPortrait = max(-1, min(moonPortraitYOffsetRatio, 1))
-            let ratioLandscape = max(-1, min(moonLandscapeYOffsetRatio, 1))
+            // 縦オフセット比（以前のロジックに復元）
+            let ratioPortraitRaw = (
+                moonPortraitYOffsetRatio.isFinite && !moonPortraitYOffsetRatio.isNaN
+            ) ? moonPortraitYOffsetRatio : 0
+            let ratioLandscapeRaw = (
+                moonLandscapeYOffsetRatio.isFinite && !moonLandscapeYOffsetRatio.isNaN
+            ) ? moonLandscapeYOffsetRatio : 0
+            let ratioPortrait = max(-1, min(ratioPortraitRaw, 1))
+            let ratioLandscape = max(-1, min(ratioLandscapeRaw, 1))
             let margin = max(0, (landscapeMargin.isFinite && !landscapeMargin.isNaN) ? landscapeMargin : 0)
 
             // 動的サイズ計算（副作用なし）
@@ -85,8 +92,12 @@ struct MainPanel: View {
                     ? max(0, geo2.safeAreaInsets.trailing)
                     : 0
             )
-            // セーフエリア内の有効高さ（未使用）
-            let _ = max(1, contentH - safeTop - safeBottom)
+            // 画面中央Y（safe area考慮）をオフセットに変換（以前のロジックに復元）
+            let centerY = (contentH - safeTop - safeBottom) / 2 + safeTop
+            let setCenterYRaw: CGFloat = isLandscape
+                ? centerY - contentH * ratioLandscape
+                : centerY - contentH * ratioPortrait
+            let setCenterYOffset = -(max(-contentH, min(setCenterYRaw - contentH / 2, contentH)))
 
             // 横向き時の安全な左パディング（ノッチやホームインジケータ回避）
             let safeLeft = (
@@ -158,7 +169,7 @@ struct MainPanel: View {
                     }
                     .frame(width: usableW, height: max(1, setHeight), alignment: .center)
                     .padding(.leading, isLandscape ? safeLeft : 0)
-                    .frame(maxHeight: .infinity, alignment: .center)
+                    .offset(y: setCenterYOffset)
                     .transition(.asymmetric(
                         insertion: .move(edge: .leading).combined(with: .opacity),
                         removal: .move(edge: .trailing).combined(with: .opacity)
@@ -229,7 +240,7 @@ struct MainPanel: View {
                     }
                     .frame(width: max(1, effectiveW), height: max(1, moonSize), alignment: .center)
                     .padding(.leading, isLandscape ? safeLeft : 0)
-                    .frame(maxHeight: .infinity, alignment: .center)
+                    .offset(y: setCenterYOffset)
                 } else {
                     // 縦画面：従来通り
                     VStack(spacing: timerSpacing) {
