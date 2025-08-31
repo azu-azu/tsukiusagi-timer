@@ -46,8 +46,8 @@ final class TimerEngine: TimerEngineable {
     var onSessionCompleted: ((TimerSessionInfo) -> Void)?
 
     func start(seconds: Int) {
-        stop()
         guard seconds > 0 else { return }
+        stop()
         isRunning = true
         sessionStartTime = Date()
         actualWorkedSeconds = 0
@@ -61,7 +61,7 @@ final class TimerEngine: TimerEngineable {
 
     private func tick() {
         guard isRunning, let endAt else { return }
-        let remain = max(0, Int(endAt.timeIntervalSinceNow.rounded()))
+        let remain = max(0, Int(ceil(endAt.timeIntervalSinceNow)))
         if remain != timeRemaining {
             timeRemaining = remain
             onTick?(timeRemaining)
@@ -98,9 +98,12 @@ final class TimerEngine: TimerEngineable {
     }
 
     func stop() {
+        guard isRunning else { return }
         isRunning = false
         timer?.invalidate()
         timer = nil
+        endAt = nil
+        pausedRemaining = nil
         if let resumedAt = lastResumedTime {
             actualWorkedSeconds += Int(Date().timeIntervalSince(resumedAt))
             lastResumedTime = nil
@@ -120,10 +123,6 @@ final class TimerEngine: TimerEngineable {
     private func handleSessionCompleted() {
         stop()
         let endTime = Date()
-        if let resumedAt = lastResumedTime {
-            actualWorkedSeconds += Int(endTime.timeIntervalSince(resumedAt))
-            lastResumedTime = nil
-        }
         guard let startTime = sessionStartTime else {
             return
         }
@@ -144,6 +143,7 @@ final class TimerEngine: TimerEngineable {
                 self?.tick()
             }
         }
+        t.tolerance = 0.1
         RunLoop.main.add(t, forMode: .common)
         timer = t
     }
