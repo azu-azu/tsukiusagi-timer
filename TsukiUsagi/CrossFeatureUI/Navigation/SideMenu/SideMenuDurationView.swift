@@ -221,11 +221,10 @@ struct SideMenuDurationRowView: View {
             .padding(.horizontal, blockHorizontalPadding)
             .padding(.vertical, 6)
 
-            // ボタン部分のカード背景
+            // ボタン部分のカード背景（デザイントークン）
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(DesignTokens.MoonColors.textPrimary.opacity(0.1))
-                    // .fill(.black.opacity(0.8))
+                    .fill(DesignTokens.CosmosColors.cardBackgroundAlt)
             )
         }
         .padding(.vertical, 4)
