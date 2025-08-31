@@ -61,6 +61,10 @@ enum DesignTokens {
 
         /// カード背景色（黒ベースの薄いグレー）
         static let cardBackground = BlackColors.secondary
+
+        /// カード背景（代替・サブtle用）
+        /// 例: サイドメニューのDuration +/- ブロック背景
+        static let cardBackgroundAlt = WhiteColors.primary.opacity(0.10)
     }
 
     /// セマンティック無視の純粋な色（視覚的アクセント用）
