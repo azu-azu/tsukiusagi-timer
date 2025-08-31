@@ -43,7 +43,7 @@ struct SideMenuView: View {
         ZStack {
             // 背景オーバーレイ（半透明で暗くする）
             if isPresented {
-                DesignTokens.BlackColors.primary.opacity(0.3)
+                DesignTokens.CosmosColors.background.opacity(0.3)
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.3)) {
@@ -116,7 +116,7 @@ struct SideMenuView: View {
                 .frame(width: menuWidth)
                 .frame(maxHeight: .infinity)
                 // .background(Color(red: 0.0, green: 0.1, blue: 0.2).opacity(0.9))
-                .background(DesignTokens.BlackColors.primary.opacity(0.9))
+                .background(DesignTokens.CosmosColors.background.opacity(0.9))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(color: DesignTokens.BlackColors.primary.opacity(0.4), radius: 8, x: -4, y: 0)
                 .shadow(color: DesignTokens.BlackColors.primary.opacity(0.4), radius: 8, x: 4, y: 0)
@@ -158,7 +158,7 @@ struct SideMenuView: View {
         .padding(.bottom, isLandscape ? 12 : 16)
         .background(
             LinearGradient(
-                gradient: Gradient(colors: [DesignTokens.BlackColors.primary, DesignTokens.BlackColors.primary.opacity(0.95)]),
+                gradient: Gradient(colors: [DesignTokens.CosmosColors.background, DesignTokens.CosmosColors.background.opacity(0.95)]),
                 startPoint: .top,
                 endPoint: .bottom
             )

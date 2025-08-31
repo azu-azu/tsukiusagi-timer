@@ -36,7 +36,7 @@ struct FooterBar<StartBtn: View>: View {
                 .offset(y: 6)
         }
         .frame(height: buttonHeight)
-        .background(DesignTokens.BlackColors.primary.opacity(0.0001))
+        .background(DesignTokens.CosmosColors.background.opacity(0.0001))
         .zIndex(AppConstants.overlayZIndex)
     }
 }
