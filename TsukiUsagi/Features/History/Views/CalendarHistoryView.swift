@@ -104,8 +104,24 @@ struct CalendarHistoryView: View {
 
     @ViewBuilder
     private func calendarGridView(for month: Date) -> some View {
+        let startOfMonth = CalendarUtilities.startOfMonth(for: month)
+        // Align first day of month to correct weekday column
+        let firstWeekday = calendar.firstWeekday // 1=Sunday (typically)
+        let weekdayOfFirst = calendar.component(.weekday, from: startOfMonth) // 1...7
+        let leadingSpacers = (weekdayOfFirst - firstWeekday + 7) % 7
+
+        let dates = generateCalendarDates(for: month)
+        let totalCells = leadingSpacers + dates.count
+        let trailingSpacers = (7 - (totalCells % 7)) % 7
+
         LazyVGrid(columns: columns, spacing: 6) {
-            ForEach(generateCalendarDates(for: month), id: \.self) { date in
+            // leading empty cells
+            ForEach(0..<leadingSpacers, id: \.self) { _ in
+                Color.clear.frame(width: 44, height: 44)
+            }
+
+            // month dates
+            ForEach(dates, id: \.self) { date in
                 CalendarDayCell(
                     date: date,
                     dailyHistory: dailyHistories[calendar.startOfDay(for: date)],
@@ -113,6 +129,11 @@ struct CalendarHistoryView: View {
                     isToday: CalendarUtilities.isToday(date)
                 )
                 .onTapGesture { selectDate(date) }
+            }
+
+            // trailing empty cells to complete the last row
+            ForEach(0..<trailingSpacers, id: \.self) { _ in
+                Color.clear.frame(width: 44, height: 44)
             }
         }
     }
