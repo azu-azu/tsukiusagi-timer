@@ -44,9 +44,8 @@ struct MainPanel: View {
             let contentH = (
                 contentSize.height.isFinite && !contentSize.height.isNaN
             ) ? max(0, contentSize.height) : 0
-            // 縦オフセット比は使用しない（常に縦中央）
-            let ratioPortrait: CGFloat = 0
-            let ratioLandscape: CGFloat = 0
+            let ratioPortrait = max(-1, min(moonPortraitYOffsetRatio, 1))
+            let ratioLandscape = max(-1, min(moonLandscapeYOffsetRatio, 1))
             let margin = max(0, (landscapeMargin.isFinite && !landscapeMargin.isNaN) ? landscapeMargin : 0)
 
             // 動的サイズ計算（副作用なし）
@@ -86,8 +85,8 @@ struct MainPanel: View {
                     ? max(0, geo2.safeAreaInsets.trailing)
                     : 0
             )
-            // セーフエリア内の有効高さ
-            let availableH = max(1, contentH - safeTop - safeBottom)
+            // セーフエリア内の有効高さ（未使用）
+            _ = max(1, contentH - safeTop - safeBottom)
 
             // 横向き時の安全な左パディング（ノッチやホームインジケータ回避）
             let safeLeft = (
