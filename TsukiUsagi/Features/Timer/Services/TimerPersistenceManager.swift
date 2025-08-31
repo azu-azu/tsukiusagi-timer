@@ -25,12 +25,14 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
         static let isRunning = "isRunning"
         static let backgroundTimestamp = "backgroundTimestamp"
         static let isWorkSession = "isWorkSession"
+        static let endAtTimestamp = "endAtTimestamp"
     }
 
     @AppStorage(TimerPersistKeys.remainingSeconds) private var storedRemainingSeconds: Int = 0
     @AppStorage(TimerPersistKeys.isRunning) private var storedIsRunning: Bool = false
     @AppStorage(TimerPersistKeys.backgroundTimestamp) private var storedBackgroundTimestamp: Double = 0
     @AppStorage(TimerPersistKeys.isWorkSession) private var storedIsWorkSession: Bool = true
+    @AppStorage(TimerPersistKeys.endAtTimestamp) private var storedEndAtTimestamp: Double = 0
 
     init() {
         self.timeRemaining = 0
@@ -46,12 +48,28 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
         storedIsRunning = isRunning
         storedIsWorkSession = isWorkSession
         storedBackgroundTimestamp = Date().timeIntervalSince1970
+        // Persist absolute end time for robust restoration across app restarts
+        if isRunning && timeRemaining > 0 {
+            storedEndAtTimestamp = Date().timeIntervalSince1970 + Double(timeRemaining)
+        } else {
+            storedEndAtTimestamp = 0
+        }
     }
 
     func restoreTimerState() {
-        timeRemaining = storedRemainingSeconds
-        isRunning = storedIsRunning
         isWorkSession = storedIsWorkSession
+        // If we have an absolute end timestamp and the timer was running,
+        // recompute the remaining seconds based on current time.
+        if storedIsRunning && storedEndAtTimestamp > 0 {
+            let nowTs = Date().timeIntervalSince1970
+            let remain = Int(ceil(max(0, storedEndAtTimestamp - nowTs)))
+            timeRemaining = remain
+            isRunning = remain > 0
+        } else {
+            // Fallback to the stored remaining seconds (paused or stopped state)
+            timeRemaining = max(0, storedRemainingSeconds)
+            isRunning = false
+        }
     }
 
     // MARK: - Background Handling

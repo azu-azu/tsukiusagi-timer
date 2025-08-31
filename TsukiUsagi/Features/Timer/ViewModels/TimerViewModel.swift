@@ -156,27 +156,36 @@ final class TimerViewModel: ObservableObject {
 
             // アニメーションを発火
             self.triggerStartAnimations()
+            // Persist absolute endAt via persistence manager for restart recovery
+            self.saveTimerState()
         }
     }
 
     func pauseTimer() {
         engine.pause()
         isRunning = engine.isRunning
+        // Persist paused state so we do not auto-start on return
+        saveTimerState()
     }
 
     func resumeTimer() {
         engine.resume()
         isRunning = engine.isRunning
+        // Persist new endAt after resume
+        saveTimerState()
     }
 
     func stopTimer() {
         engine.stop()
         isRunning = engine.isRunning
+        // Clear persisted running state
+        saveTimerState()
     }
 
     func resetTimer(to seconds: Int) {
         engine.reset(to: seconds)
         isRunning = engine.isRunning
+        saveTimerState()
     }
 
     /// タイマーリセット
@@ -268,6 +277,15 @@ final class TimerViewModel: ObservableObject {
         isWorkSession = persistenceManager.isWorkSession
     }
 
+    /// 永続化から復元後、必要なら残り秒数でエンジンを再開（起動直後や再アクティブ時用）
+    @MainActor
+    func startFromRestoredIfNeeded() {
+        guard isRunning, timeRemaining > 0 else { return }
+        shouldSuppressAnimation = true
+        engine.start(seconds: timeRemaining)
+        isRunning = engine.isRunning
+    }
+
     // MARK: - Private Methods
 
     /// セッション完了時の処理（Engineコールバックから呼ばれる）
@@ -331,22 +349,16 @@ final class TimerViewModel: ObservableObject {
     /// フォアグラウンド復帰
     @MainActor
     func appWillEnterForeground() {
-        guard let last = lastBackgroundDate else { return }
-
-        let elapsed = Int(dateProvider.now().timeIntervalSince(last))
+        // 優先：endAtベースの永続化から復元し、再開可否を判断
+        restoreTimerState()
         notificationService.cancelSessionEndNotification()
-        let originalRemaining = timeRemaining
-        timeRemaining = max(originalRemaining - elapsed, 0)
-
-        if timeRemaining <= 0 {
-            // 0になった時刻を計算
-            let sessionEndDate = last.addingTimeInterval(TimeInterval(originalRemaining))
-            endTime = sessionEndDate
-            // セッション完了処理はEngineのコールバックで行われる
-        } else {
+        if timeRemaining > 0 {
             shouldSuppressAnimation = true
             shouldSuppressSessionFinishedAnimation = true
-            resumeTimer()
+            // 実行中だった場合のみ再開（ポーズしていた場合は再開しない）
+            startFromRestoredIfNeeded()
+        } else {
+            isRunning = false
         }
         lastBackgroundDate = nil
     }

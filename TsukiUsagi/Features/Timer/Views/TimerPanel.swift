@@ -72,8 +72,9 @@ struct TimerPanel: View {
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .background:
-                timerVM.appDidEnterBackground()
+                // Save running state and absolute endAt before pausing engine
                 timerVM.saveTimerState()
+                timerVM.appDidEnterBackground()
             case .active:
                 Task { timerVM.appWillEnterForeground() }
             default:
@@ -82,6 +83,11 @@ struct TimerPanel: View {
         }
 
         .onAppear {
+            // 再起動/再表示時に永続化状態から復元
+            Task { @MainActor in
+                timerVM.restoreTimerState()
+                timerVM.startFromRestoredIfNeeded()
+            }
             // 通知の重複防止: 先に必ずremove
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd"])
             if timerVM.isRunning && timerVM.timeRemaining > 0 {
