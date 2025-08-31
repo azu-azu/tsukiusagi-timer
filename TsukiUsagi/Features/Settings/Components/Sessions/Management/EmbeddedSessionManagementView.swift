@@ -79,9 +79,7 @@ struct EmbeddedSessionManagementView: View {
             Button {
                 selectedSession = session
                 activeSheet = .edit(session)
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
+            } label: { Label("Edit", systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
         }
         .accessibilityElement(children: .combine)
@@ -124,9 +122,7 @@ struct EmbeddedSessionManagementView: View {
             Button {
                 selectedSession = session
                 activeSheet = .edit(session)
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
+            } label: { Label("Edit", systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
             if !session.isDefault {
                 Button(role: .destructive) {
@@ -181,9 +177,7 @@ struct EmbeddedSessionManagementView: View {
 
             Spacer()
 
-            Image(systemName: "pencil")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolSmall)
+            PencilIcon(style: .muted, size: .small)
         }
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .padding(.vertical, DesignTokens.Padding.medium)

@@ -133,9 +133,7 @@ extension SessionManagementView {
             Button {
                 selectedSession = session
                 activeSheet = .edit(session)
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
+            } label: { Label("Edit", systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
         }
 
@@ -204,9 +202,7 @@ extension SessionManagementView {
             Button {
                 selectedSession = session
                 activeSheet = .edit(session)
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
+            } label: { Label("Edit", systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
 
             if !session.isDefault {
@@ -288,9 +284,7 @@ extension SessionManagementView {
 
             Spacer()
 
-            Image(systemName: "pencil")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolSmall)
+            PencilIcon(style: .muted, size: .small)
         }
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .padding(.vertical, DesignTokens.Padding.medium)
