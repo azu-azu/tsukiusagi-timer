@@ -338,12 +338,12 @@ final class TimerViewModel: ObservableObject {
     func appDidEnterBackground() {
         lastBackgroundDate = dateProvider.now()
         if isRunning {
+            // Keep running state; schedule a single end notification
             notificationService.scheduleSessionEndNotification(
                 after: timeRemaining,
                 phase: isWorkSession ? .focus : .breakTime
             )
         }
-        stopTimer()
     }
 
     /// フォアグラウンド復帰
