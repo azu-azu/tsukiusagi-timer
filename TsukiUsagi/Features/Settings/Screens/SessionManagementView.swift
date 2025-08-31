@@ -284,7 +284,7 @@ extension SessionManagementView {
 
             Spacer()
 
-            PencilIcon(style: .muted, size: .small)
+            PencilIcon(size: .small)
         }
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .padding(.vertical, DesignTokens.Padding.medium)

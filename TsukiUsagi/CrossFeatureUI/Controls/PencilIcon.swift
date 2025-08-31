@@ -1,11 +1,5 @@
 import SwiftUI
 
-enum PencilIconStyle {
-    case accent
-    case muted
-    case primary
-}
-
 enum PencilIconSize {
     case small
     case medium
@@ -14,18 +8,16 @@ enum PencilIconSize {
 }
 
 struct PencilIcon: View {
-    let style: PencilIconStyle
     let size: PencilIconSize
 
-    init(style: PencilIconStyle = .accent, size: PencilIconSize = .medium) {
-        self.style = style
+    init(size: PencilIconSize = .medium) {
         self.size = size
     }
 
     var body: some View {
         Image(systemName: "pencil")
             .font(font)
-            .foregroundColor(color)
+            .foregroundColor(DesignTokens.MoonColors.accentBlue)
     }
 
     private var font: Font {
@@ -37,29 +29,20 @@ struct PencilIcon: View {
         }
     }
 
-    private var color: Color {
-        switch style {
-        case .accent: return DesignTokens.MoonColors.accentBlue
-        case .muted: return DesignTokens.MoonColors.textMuted
-        case .primary: return DesignTokens.MoonColors.textPrimary
-        }
-    }
 }
 
 struct PencilButton: View {
     let action: () -> Void
-    let style: PencilIconStyle
     let size: PencilIconSize
 
-    init(style: PencilIconStyle = .accent, size: PencilIconSize = .title, action: @escaping () -> Void) {
+    init(size: PencilIconSize = .title, action: @escaping () -> Void) {
         self.action = action
-        self.style = style
         self.size = size
     }
 
     var body: some View {
         Button(action: action) {
-            PencilIcon(style: style, size: size)
+            PencilIcon(size: size)
         }
         .accessibilityLabel("Edit")
     }

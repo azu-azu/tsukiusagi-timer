@@ -29,7 +29,7 @@ struct RecordedTimesView: View {
             // ✏️
             HStack {
                 Spacer()
-                PencilButton(style: .accent, size: .title, action: onEdit)
+                PencilButton(size: .title, action: onEdit)
                     .accessibilityLabel("Edit session record")
                     .accessibilityHint("Tap to edit start time, end time, and session details")
             }
