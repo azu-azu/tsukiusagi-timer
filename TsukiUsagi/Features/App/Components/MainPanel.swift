@@ -192,6 +192,7 @@ struct MainPanel: View {
                     }
                     .frame(width: max(1, contentW), height: max(1, setHeight), alignment: .center)
                     .frame(maxHeight: .infinity, alignment: .center)
+                    .offset(y: -(contentH * ratioPortrait))
                     .transition(.asymmetric(
                         insertion: .move(edge: .top).combined(with: .opacity),
                         removal: .move(edge: .bottom).combined(with: .opacity)
@@ -262,6 +263,7 @@ struct MainPanel: View {
                     }
                     .frame(width: max(1, contentW), height: max(1, setHeight), alignment: .center)
                     .frame(maxHeight: .infinity, alignment: .center)
+                    .offset(y: -(contentH * ratioPortrait))
                 }
             }
         }
