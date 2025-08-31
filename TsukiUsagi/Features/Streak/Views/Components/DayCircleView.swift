@@ -15,7 +15,7 @@ struct DayCircleView: View {
 
     var body: some View {
         Circle()
-            .fill(isToday ? DesignTokens.CosmosColors.cardBackground : circleColor)
+            .fill(isToday ? DesignTokens.BlackColors.primary : circleColor)
             .frame(width: 32, height: 32)
             .overlay(
                 Text(weekdayText)
