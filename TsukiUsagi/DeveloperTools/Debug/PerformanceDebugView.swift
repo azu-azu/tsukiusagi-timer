@@ -51,7 +51,7 @@ struct AdaptiveAnimationDemoView: View {
     // MARK: - Private Views
 
     private var backgroundLayer: some View {
-        Color.black.ignoresSafeArea()
+        DesignTokens.BlackColors.primary.ignoresSafeArea()
     }
 
     private var animationLayers: some View {
