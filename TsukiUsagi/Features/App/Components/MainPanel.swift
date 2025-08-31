@@ -86,7 +86,7 @@ struct MainPanel: View {
                     : 0
             )
             // セーフエリア内の有効高さ（未使用）
-            _ = max(1, contentH - safeTop - safeBottom)
+            let _ = max(1, contentH - safeTop - safeBottom)
 
             // 横向き時の安全な左パディング（ノッチやホームインジケータ回避）
             let safeLeft = (
