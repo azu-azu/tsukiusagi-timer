@@ -29,13 +29,9 @@ struct RecordedTimesView: View {
             // ✏️
             HStack {
                 Spacer()
-                Button(action: onEdit) {
-                    Image(systemName: "pencil")
-                        .font(DesignTokens.Fonts.title)
-                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
-                }
-                .accessibilityLabel("Edit session record")
-                .accessibilityHint("Tap to edit start time, end time, and session details")
+                PencilButton(style: .accent, size: .title, action: onEdit)
+                    .accessibilityLabel("Edit session record")
+                    .accessibilityHint("Tap to edit start time, end time, and session details")
             }
             .frame(maxWidth: 110)
         }
