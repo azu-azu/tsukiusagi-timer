@@ -81,7 +81,7 @@ struct SideMenuDurationView: View {
                 HStack {
                     Spacer()
                     NavigationLink(destination: DurationSessionSettingsView()) {
-                        PencilIcon(size: .small)
+                        PencilIcon(size: .medium)
                             .frame(width: 20, height: 20)
                     }
                     .buttonStyle(PlainButtonStyle())
