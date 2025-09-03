@@ -140,6 +140,11 @@ final class TimerViewModel: ObservableObject {
 
     // 6. タイマー制御はengine経由
     func startTimer(seconds: Int) {
+        // If paused, treat start as resume to preserve remaining time
+        if runState == .paused, timeRemaining > 0 {
+            resumeTimer()
+            return
+        }
         // セッション完了状態をクリア（重要：これを最初に行う）
         if isSessionFinished {
             isSessionFinished = false
