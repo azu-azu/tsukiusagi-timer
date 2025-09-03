@@ -112,17 +112,19 @@ final class TimerViewModel: ObservableObject {
         }
         #endif
 
-        // 初期値を設定（@AppStorageの値を使用）
-        self.timeRemaining = workMinutes * 60
-
-        // 5. EngineのonTickでViewModelのtimeRemainingを更新
-        // 既に上で設定済み
-
-        // 6. EngineのonSessionCompletedでセッション完了処理
-        // 既に上で設定済み
-
-        // 設定を即座に反映
-        self.refreshAfterSettingsChange()
+        // 最優先で復元し、その結果に応じて初期化/再開を判断
+        self.restoreTimerState()
+        switch self.runState {
+        case .running:
+            self.shouldSuppressAnimation = true
+            self.startFromRestoredIfNeeded()
+        case .paused:
+            // 保持した残り秒数のまま静止。初期化しない
+            break
+        case .idle:
+            // idle のときだけ初期値を適用
+            self.refreshAfterSettingsChange()
+        }
     }
 
     // MARK: - Public API
