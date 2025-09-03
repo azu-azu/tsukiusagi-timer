@@ -101,7 +101,10 @@ final class TimerViewModel: ObservableObject {
             self.timeRemaining = seconds
         }
         self.engine.onSessionCompleted = { [weak self] sessionInfo in
-            self?.handleSessionCompleted(sessionInfo)
+            guard let self else { return }
+            // Ignore delayed completion when not actively running (e.g., after pause/restore)
+            guard self.runState == .running else { return }
+            self.handleSessionCompleted(sessionInfo)
         }
 
         // Simulator用：UserDefaultsの初期値を強制設定
@@ -125,8 +128,8 @@ final class TimerViewModel: ObservableObject {
             // 保持した残り秒数のまま静止。初期化しない
             break
         case .idle:
-            // idle のときだけ初期値を適用
-            self.refreshAfterSettingsChange()
+            // ここでは初期化しない（本当にゼロの判定は restore 側で実施）
+            break
         }
         self.isRestoring = false
     }
@@ -193,6 +196,10 @@ final class TimerViewModel: ObservableObject {
         engine.pause()
         isRunning = false
         runState = .paused
+        // Persist explicit paused snapshot immediately (stronger than generic save)
+        persistenceManager.remainingAtPause = timeRemaining
+        persistenceManager.runStateRaw = TimerRunState.paused.rawValue
+        persistenceManager.endAtEpoch = nil
         saveTimerState()
     }
 
@@ -364,7 +371,12 @@ final class TimerViewModel: ObservableObject {
             isRunning = false
             endAt = nil
         case .idle:
-            timeRemaining = workMinutes * 60
+            // Only apply defaults when truly zero (no remaining or anchors anywhere)
+            let persistedPause = persistenceManager.remainingAtPause ?? 0
+            let persistedEndAt = persistenceManager.endAtEpoch ?? 0
+            if timeRemaining == 0 && persistedPause == 0 && persistedEndAt == 0 {
+                timeRemaining = workMinutes * 60
+            }
             isRunning = false
             endAt = nil
         }
@@ -385,6 +397,8 @@ final class TimerViewModel: ObservableObject {
 
     /// セッション完了時の処理（Engineコールバックから呼ばれる）
     private func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
+        // Safety: drop stale completion if we're no longer running
+        guard runState == .running else { return }
         isRunning = false
         timeRemaining = 0
 
@@ -440,22 +454,39 @@ final class TimerViewModel: ObservableObject {
                 after: timeRemaining,
                 phase: isWorkSession ? .focus : .breakTime
             )
+        } else if runState == .paused {
+            // Ensure paused remaining is persisted for robust restoration
+            persistenceManager.remainingAtPause = timeRemaining
+            persistenceManager.runStateRaw = TimerRunState.paused.rawValue
+            persistenceManager.endAtEpoch = nil
+            saveTimerState()
         }
     }
 
     /// フォアグラウンド復帰
     @MainActor
     func appWillEnterForeground() {
+        // Preserve pre-restore state to guard against mis-inferred idle
+        let prevState = runState
+        let prevRemaining = timeRemaining
         // endAtベースで復元し、状態に応じてのみ再開（復元ロック中は保存禁止）
         isRestoring = true
         restoreTimerState()
         notificationService.cancelSessionEndNotification()
-        switch runState {
-        case .running:
+        switch (prevState, runState) {
+        case (.running, .running):
             shouldSuppressAnimation = true
             shouldSuppressSessionFinishedAnimation = true
             startFromRestoredIfNeeded()
-        case .paused, .idle:
+        case (.paused, .idle):
+            // Roll back accidental downgrade idle -> keep paused state and remaining seconds
+            runState = .paused
+            isRunning = false
+            let persisted = persistenceManager.remainingAtPause ?? 0
+            timeRemaining = max(prevRemaining, persisted)
+        case (.paused, .paused):
+            isRunning = false
+        default:
             isRunning = false
         }
         lastBackgroundDate = nil
