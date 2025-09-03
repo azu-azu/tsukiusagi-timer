@@ -129,9 +129,8 @@ final class TimerViewModel: ObservableObject {
 
     /// 設定変更を即反映（STOP中だけ）
     func refreshAfterSettingsChange() {
-        guard !isRunning else {
-            return
-        }
+        // Idle のときだけ初期時間を更新（paused は維持して上書きしない）
+        guard runState == .idle else { return }
 
         let minutes = isWorkSession ? workMinutes : breakMinutes
         let newTimeRemaining = minutes * 60
@@ -220,6 +219,7 @@ final class TimerViewModel: ObservableObject {
         isRunning = false
         isSessionFinished = false  // 先にfalseにする
         isWorkSession = true      // その後でtrueにする
+        // Resetは明示操作のみ初期化。pause復帰と混ざらない
         timeRemaining = workMinutes * 60
         startTime = nil
         endTime = nil
