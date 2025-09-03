@@ -34,7 +34,7 @@ final class TimerViewModel: ObservableObject {
     private let streakManager: StreakManager
 
     // 3. @PublishedなどUIバインディング用プロパティ
-    @Published var timeRemaining: Int = 25 * 60 // 初期値を25分に設定
+    @Published var timeRemaining: Int = 0
     @Published var isRunning: Bool = false
     @Published private(set) var runState: TimerRunState = .idle
     @Published var isWorkSession: Bool = true
@@ -42,6 +42,8 @@ final class TimerViewModel: ObservableObject {
     @Published private(set) var startTime: Date?
     @Published private(set) var endTime: Date?
     private var endAt: Date?
+    // 復元中ロック（この間は保存/初期化を抑止）
+    private var isRestoring = false
     @Published var flashStars = false
     @Published private(set) var lastBackgroundDate: Date?
     @Published var shouldSuppressAnimation = false
@@ -113,6 +115,7 @@ final class TimerViewModel: ObservableObject {
         #endif
 
         // 最優先で復元し、その結果に応じて初期化/再開を判断
+        self.isRestoring = true
         self.restoreTimerState()
         switch self.runState {
         case .running:
@@ -125,14 +128,15 @@ final class TimerViewModel: ObservableObject {
             // idle のときだけ初期値を適用
             self.refreshAfterSettingsChange()
         }
+        self.isRestoring = false
     }
 
     // MARK: - Public API
 
     /// 設定変更を即反映（STOP中だけ）
     func refreshAfterSettingsChange() {
-        // Idle のときだけ初期時間を更新（paused は維持して上書きしない）
-        guard runState == .idle else { return }
+        // Idle かつ復元完了後のみ初期時間を更新（paused は維持）
+        guard runState == .idle, !isRestoring else { return }
 
         let minutes = isWorkSession ? workMinutes : breakMinutes
         let newTimeRemaining = minutes * 60
@@ -293,6 +297,8 @@ final class TimerViewModel: ObservableObject {
     /// タイマー状態を永続化
     @MainActor
     func saveTimerState() {
+        // 復元中は保存しない：一瞬の初期化値で上書きする事故を防止
+        if isRestoring { return }
         persistenceManager.timeRemaining = timeRemaining
         persistenceManager.isRunning = (runState == .running)
         persistenceManager.isWorkSession = isWorkSession
@@ -316,9 +322,21 @@ final class TimerViewModel: ObservableObject {
     func restoreTimerState() {
         persistenceManager.restoreTimerState()
         isWorkSession = persistenceManager.isWorkSession
-        let restored = TimerRunState(rawValue: persistenceManager.runStateRaw ?? "") ?? .idle
-        runState = restored
-        switch restored {
+        // まず宣言ベースの runState を参照
+        var restored = TimerRunState(rawValue: persistenceManager.runStateRaw ?? "")
+        // フォールバック推定：runState欠損時でも痕跡から推定
+        if restored == nil {
+            if let ts = persistenceManager.endAtEpoch, ts > 0 {
+                restored = .running
+            } else if let rp = persistenceManager.remainingAtPause, rp > 0 {
+                restored = .paused
+            } else {
+                restored = .idle
+            }
+        }
+        let state = restored ?? .idle
+        runState = state
+        switch state {
         case .running:
             if let ts = persistenceManager.endAtEpoch {
                 let now = dateProvider.now()
@@ -428,7 +446,8 @@ final class TimerViewModel: ObservableObject {
     /// フォアグラウンド復帰
     @MainActor
     func appWillEnterForeground() {
-        // endAtベースで復元し、状態に応じてのみ再開
+        // endAtベースで復元し、状態に応じてのみ再開（復元ロック中は保存禁止）
+        isRestoring = true
         restoreTimerState()
         notificationService.cancelSessionEndNotification()
         switch runState {
@@ -440,6 +459,7 @@ final class TimerViewModel: ObservableObject {
             isRunning = false
         }
         lastBackgroundDate = nil
+        isRestoring = false
     }
 }
 
