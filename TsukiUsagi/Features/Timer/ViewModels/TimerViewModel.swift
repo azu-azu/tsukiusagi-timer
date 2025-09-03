@@ -94,7 +94,9 @@ final class TimerViewModel: ObservableObject {
 
         // 4. Engineのコールバック設定（notificationService初期化後）
         self.engine.onTick = { [weak self] seconds in
-            self?.timeRemaining = seconds
+            guard let self else { return }
+            guard self.runState == .running else { return }
+            self.timeRemaining = seconds
         }
         self.engine.onSessionCompleted = { [weak self] sessionInfo in
             self?.handleSessionCompleted(sessionInfo)
@@ -384,8 +386,10 @@ final class TimerViewModel: ObservableObject {
             streakManager.recordTimerUsage()
         }
 
-        // 永続化
-        persistenceManager.saveTimerState()
+        // State finalize: drop endAt, set idle, persist via ViewModel API
+        runState = .idle
+        endAt = nil
+        saveTimerState()
     }
 
     /// diamondアニメーションとstartPulseアニメーションを発火
