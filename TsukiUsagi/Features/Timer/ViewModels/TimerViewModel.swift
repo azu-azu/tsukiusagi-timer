@@ -350,6 +350,8 @@ final class TimerViewModel: ObservableObject {
     func startFromRestoredIfNeeded() {
         guard runState == .running, timeRemaining > 0 else { return }
         shouldSuppressAnimation = true
+        // Reset engine first to avoid any residual state before starting
+        engine.reset(to: timeRemaining)
         engine.start(seconds: timeRemaining)
         isRunning = true
     }
