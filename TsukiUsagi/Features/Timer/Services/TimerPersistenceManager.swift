@@ -114,38 +114,9 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
     // MARK: - Background Handling
 
     /// バックグラウンドへ
-    func appDidEnterBackground() {
-        wasRunningBeforeBackground = isRunning
-        lastBackgroundDate = Date()
-        savedRemainingSeconds = timeRemaining
-        if isRunning {
-            NotificationManager.shared.scheduleSessionEndNotification(
-                after: timeRemaining,
-                phase: isWorkSession ? .focus : .breakTime
-            )
-        }
-    }
+    func appDidEnterBackground() { /* Responsibility moved to ViewModel */ }
 
     /// フォアグラウンド復帰
     @MainActor
-    func appWillEnterForeground() {
-        guard let last = lastBackgroundDate,
-            wasRunningBeforeBackground else { return }
-
-        let elapsed = Int(Date().timeIntervalSince(last))
-        NotificationManager.shared.cancelSessionEndNotification()
-        let originalRemaining = savedRemainingSeconds ?? timeRemaining
-        timeRemaining = max(originalRemaining - elapsed, 0)
-
-        if timeRemaining <= 0 {
-            // 0になった時刻を計算
-            _ = last.addingTimeInterval(TimeInterval(originalRemaining))
-            // セッション完了処理は呼び出し側で行う
-        } else {
-            // 再開処理は呼び出し側で行う
-        }
-        lastBackgroundDate = nil
-        wasRunningBeforeBackground = false
-        savedRemainingSeconds = nil
-    }
+    func appWillEnterForeground() { /* Responsibility moved to ViewModel */ }
 }
