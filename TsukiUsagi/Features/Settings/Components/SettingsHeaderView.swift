@@ -70,6 +70,8 @@ private class DummyNotificationService: PhaseNotificationServiceable {
     func sendStartNotification() {}
     func cancelNotification() {}
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
+    func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+    func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
     func cancelSessionEndNotification() {}
     func finalizeWorkPhase() {}

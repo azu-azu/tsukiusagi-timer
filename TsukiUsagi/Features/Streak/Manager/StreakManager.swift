@@ -120,7 +120,9 @@ class StreakManager: ObservableObject {
         // Save changes
         saveIfChanged()
 
+        #if DEBUG
         print("📅 Streak Manager: Marked today as used. Total streak: \\(streakData.totalContinuousStreak)")
+        #endif
     }
 
     /// Calculate current and total streaks

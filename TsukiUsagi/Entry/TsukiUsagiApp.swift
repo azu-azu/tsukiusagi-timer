@@ -28,9 +28,19 @@ struct TsukiUsagiApp: App {
 
         // Feature Flags の初期化
         FeatureFlags.setDefaultValues()
-        NotificationManager.shared.requestAuthorization { ok in
-            print(ok ? "Notification authorization granted."
-                : "Notification authorization denied.")
+
+        // 通知許可のリクエスト（初回起動時のみ）
+        Task {
+            let granted = await NotificationPermissionManager.shared.requestPermissionIfNeeded()
+            if granted {
+                #if DEBUG
+                print("🔔 通知許可が承認されました - バックグラウンド時の終了通知が有効です")
+                #endif
+            } else {
+                #if DEBUG
+                print("🔔 通知許可が拒否されました - バックグラウンド時の終了通知は無効です")
+                #endif
+            }
         }
 
         // NavigationBar外観設定
@@ -50,7 +60,9 @@ struct TsukiUsagiApp: App {
     }
 
     private func registerCustomFonts() {
+        #if DEBUG
         print("🔤 カスタムフォント登録開始...")
+        #endif
 
         let fontFiles = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
 
@@ -59,7 +71,9 @@ struct TsukiUsagiApp: App {
                 forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""),
                 withExtension: "ttf"
             ) else {
+                #if DEBUG
                 print("❌ フォントファイルが見つかりません: \(fontFile)")
+                #endif
                 continue
             }
 
@@ -67,20 +81,30 @@ struct TsukiUsagiApp: App {
             let success = CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error)
 
             if success {
+                #if DEBUG
                 print("✅ フォント登録成功: \(fontFile)")
+                #endif
             } else if let e = error?.takeRetainedValue() as Error? {
                 // 既に登録済みなどの場合はスキップ扱い（必要に応じてエラーコード分岐可）
+                #if DEBUG
                 print("ℹ️ skip or failed: \(fontFile) — \(e.localizedDescription)")
+                #endif
             } else {
+                #if DEBUG
                 print("ℹ️ skip or failed: \(fontFile)")
+                #endif
             }
         }
 
+        #if DEBUG
         print("🔤 カスタムフォント登録完了")
+        #endif
     }
 
     private func configureNavigationBarAppearance() {
+        #if DEBUG
         print("🎨 NavigationBar外観設定開始...")
+        #endif
 
         // NavigationBarの外観設定
         let appearance = UINavigationBarAppearance()
@@ -98,6 +122,8 @@ struct TsukiUsagiApp: App {
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
 
+        #if DEBUG
         print("✅ NavigationBar外観設定完了")
+        #endif
     }
 }

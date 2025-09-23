@@ -15,10 +15,12 @@ struct MainPanel: View {
     let isMoonAnimationActive: Bool
 
     var body: some View {
-        // let _ = print(
-        //   "🌙 MainPanel - isSessionFinished:\n"
-        //   + "  \(timerVM.isSessionFinished),\n"
-        //   + "  isWorkSession: \(timerVM.isWorkSession)")
+        #if DEBUG
+        let _ = print(
+          "🌙 MainPanel - isSessionFinished:\n"
+          + "  \(timerVM.isSessionFinished),\n"
+          + "  isWorkSession: \(timerVM.isWorkSession)")
+        #endif
 
         GeometryReader { geo2 in
 
@@ -97,7 +99,10 @@ struct MainPanel: View {
             let setCenterYRaw: CGFloat = isLandscape
                 ? centerY - contentH * ratioLandscape
                 : centerY - contentH * ratioPortrait
-            let setCenterYOffset = -(max(-contentH, min(setCenterYRaw - contentH / 2, contentH)))
+            // 横向きでのQuiet Moon表示時は、より中央寄りの位置に調整
+            let setCenterYOffset = timerVM.isSessionFinished && isLandscape
+                ? -(max(-contentH, min(setCenterYRaw - contentH / 2 + contentH * 0.1, contentH)))
+                : -(max(-contentH, min(setCenterYRaw - contentH / 2, contentH)))
 
             // 横向き時の安全な左パディング（ノッチやホームインジケータ回避）
             let safeLeft = (
@@ -110,10 +115,12 @@ struct MainPanel: View {
             let effectiveW = isLandscape ? usableW : contentW
             let safeMargin2 = min(margin, effectiveW * 0.8)
             // 双方を少し中央へ寄せるための微小オフセット（機種に依らず控えめに）
-            let centerPull = isLandscape ? min(24, effectiveW * 0.02) : 0
+            let centerPull = isLandscape ? min(40, effectiveW * 0.05) : 0
 
             if timerVM.isSessionFinished {
-                // let _ = print("🌙 MainPanel - Showing QuietMoon section")
+                #if DEBUG
+                let _ = print("🌙 MainPanel - Showing QuietMoon section")
+                #endif
                 // 終了時はQuietMoonViewのみ
                 if isLandscape {
                     // let _ = print("🌙 MainPanel - Landscape QuietMoon")
@@ -175,7 +182,9 @@ struct MainPanel: View {
                         removal: .move(edge: .trailing).combined(with: .opacity)
                     ))
                 } else {
-                    // let _ = print("🌙 MainPanel - Portrait QuietMoon")
+                    #if DEBUG
+                    let _ = print("🌙 MainPanel - Portrait QuietMoon")
+                    #endif
                     // 縦画面：QuietMoonのみ（RecordedTimesはContentView側で重ねる）
                     VStack {
                         QuietMoonView(
@@ -199,7 +208,9 @@ struct MainPanel: View {
                     ))
                 }
             } else {
-                // let _ = print("🌙 MainPanel - Showing Timer section")
+                #if DEBUG
+                let _ = print("🌙 MainPanel - Showing Timer section")
+                #endif
                 // 進行中はMoon+Timerセット
                 if isLandscape {
                     // --- Landscape の Moon + Timer 横並び ---
