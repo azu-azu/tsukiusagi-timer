@@ -120,7 +120,9 @@ struct BundleDebugSectionView: View {
     }
 
     private func registerFontsManually() {
+        #if DEBUG
         print("📝 手動フォント登録開始...")
+        #endif
 
         let fontFiles = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
 
@@ -129,24 +131,34 @@ struct BundleDebugSectionView: View {
                 forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""),
                 withExtension: "ttf"
             ) else {
+                #if DEBUG
                 print("❌ フォントファイルが見つかりません: \(fontFile)")
+                #endif
                 continue
             }
 
+            #if DEBUG
             print("📂 フォントURL: \(fontURL)")
+            #endif
 
             var error: Unmanaged<CFError>?
             let success = CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error)
 
             if success {
+                #if DEBUG
                 print("✅ フォント登録成功: \(fontFile)")
+                #endif
             } else {
                 let errorDescription = error?.takeRetainedValue().localizedDescription ?? "不明なエラー"
+                #if DEBUG
                 print("❌ フォント登録失敗: \(fontFile) - \(errorDescription)")
+                #endif
             }
         }
 
+        #if DEBUG
         print("🔄 フォント再読み込み...")
+        #endif
     }
 }
 

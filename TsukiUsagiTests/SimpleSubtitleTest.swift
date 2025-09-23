@@ -24,7 +24,9 @@ struct DirectDescriptionEditTest: View {
                 descriptions: testDescriptions,
                 editingIndex: nil,
                 onDescriptionsChange: { newDescriptions in
+                    #if DEBUG
                     print("🟦🟦🟦 Direct test received change: \(newDescriptions)")
+                    #endif
                     testDescriptions = newDescriptions
                 },
                 isAnyFieldFocused: $isAnyFieldFocused,
@@ -62,6 +64,7 @@ struct DirectDescriptionEditTest: View {
             }
         }
         .onAppear {
+            #if DEBUG
             print("📝 📦 Available Fonts:")
             for family in UIFont.familyNames.sorted() {
                 print("📂 Family: \(family)")
@@ -69,6 +72,7 @@ struct DirectDescriptionEditTest: View {
                     print("  🔤 Font: \(name)")
                 }
             }
+            #endif
         }
     }
 }

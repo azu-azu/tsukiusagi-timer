@@ -8,9 +8,14 @@ struct CalendarHistoryView: View {
     @State private var selectedMonth = Date()
     @State private var selectedDate: Date?
     @State private var dailyHistories: [Date: DailyHistory] = [:]
+    @State private var lastSwipeDirection: SwipeDirection?
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
+    
+    private enum SwipeDirection {
+        case left, right
+    }
 
     var body: some View {
         ScrollView {
@@ -118,8 +123,9 @@ struct CalendarHistoryView: View {
 
         LazyVGrid(columns: columns, spacing: 6) {
             // leading empty cells
-            ForEach(0..<leadingSpacers, id: \.self) { _ in
+            ForEach(0..<leadingSpacers, id: \.self) { index in
                 Color.clear.frame(width: 44, height: 44)
+                    .id("leading-\(index)")
             }
 
             // month dates
@@ -131,11 +137,13 @@ struct CalendarHistoryView: View {
                     isToday: CalendarUtilities.isToday(date)
                 )
                 .onTapGesture { selectDate(date) }
+                .id("date-\(date.timeIntervalSince1970)")
             }
 
             // trailing empty cells to complete the last row
-            ForEach(0..<trailingSpacers, id: \.self) { _ in
+            ForEach(0..<trailingSpacers, id: \.self) { index in
                 Color.clear.frame(width: 44, height: 44)
+                    .id("trailing-\(index)")
             }
         }
     }
@@ -161,7 +169,8 @@ struct CalendarHistoryView: View {
 
     private func changeMonth(by offset: Int) {
         guard let newMonth = calendar.date(byAdding: .month, value: offset, to: selectedMonth) else { return }
-        withAnimation(.easeOut(duration: 0.22)) {
+        // より速いアニメーションでレスポンシブな操作感を提供
+        withAnimation(.easeOut(duration: 0.15)) {
             selectedMonth = newMonth
             selectedDate = nil
         }
@@ -169,16 +178,34 @@ struct CalendarHistoryView: View {
 
     // MARK: - Gestures
     private func monthSwipeGesture() -> some Gesture {
-        DragGesture(minimumDistance: 20, coordinateSpace: .local)
-            .onEnded { value in
+        DragGesture(minimumDistance: 15, coordinateSpace: .local)
+            .onChanged { value in
                 let horizontal = value.translation.width
                 let vertical = abs(value.translation.height)
+                
+                // 水平スワイプが垂直より大きい場合のみ処理
                 guard abs(horizontal) > vertical else { return }
-                if horizontal < -30 {
-                    changeMonth(by: 1)
-                } else if horizontal > 30 {
-                    changeMonth(by: -1)
+                
+                // backのスワイプを無効化したので、より敏感に反応できる
+                let currentDirection: SwipeDirection? = horizontal > 25 ? .left : (horizontal < -25 ? .right : nil)
+                
+                // 同じ方向のスワイプは一度だけ実行
+                if let direction = currentDirection, lastSwipeDirection != direction {
+                    lastSwipeDirection = direction
+                    
+                    switch direction {
+                    case .left:
+                        // 左スワイプ（前の月）: backとの競合がなくなったので敏感に反応
+                        changeMonth(by: -1)
+                    case .right:
+                        // 右スワイプ（次の月）: 同様に敏感に反応
+                        changeMonth(by: 1)
+                    }
                 }
+            }
+            .onEnded { _ in
+                // スワイプ完了時に方向をリセット
+                lastSwipeDirection = nil
             }
     }
 
