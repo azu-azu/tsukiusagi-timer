@@ -308,21 +308,21 @@ final class TimerViewModel: ObservableObject {
     func saveTimerState() {
         #if DEBUG
         #endif
-        
+
         // 復元中は保存しない：一瞬の初期化値で上書きする事故を防止
-        if isRestoring { 
-            return 
+        if isRestoring {
+            return
         }
-        
+
         persistenceManager.timeRemaining = timeRemaining
         persistenceManager.isRunning = (runState == .running)
         persistenceManager.isWorkSession = isWorkSession
         persistenceManager.runStateRaw = runState.rawValue
-        
-        
+
+
         switch runState {
         case .running:
-            if let endAt { 
+            if let endAt {
                 persistenceManager.endAtEpoch = endAt.timeIntervalSince1970
             }
             persistenceManager.remainingAtPause = nil
@@ -334,7 +334,7 @@ final class TimerViewModel: ObservableObject {
             persistenceManager.remainingAtPause = nil
         }
         persistenceManager.saveTimerState()
-        
+
     }
 
     /// タイマー状態を復元
@@ -342,11 +342,11 @@ final class TimerViewModel: ObservableObject {
     func restoreTimerState() {
         persistenceManager.restoreTimerState()
         isWorkSession = persistenceManager.isWorkSession
-        
-        
+
+
         // まず宣言ベースの runState を参照
         var restored = TimerRunState(rawValue: persistenceManager.runStateRaw ?? "")
-        
+
         // フォールバック推定：runState欠損時でも痕跡から推定
         if restored == nil {
             if let ts = persistenceManager.endAtEpoch, ts > 0 {
@@ -359,31 +359,31 @@ final class TimerViewModel: ObservableObject {
         }
         let state = restored ?? .idle
         runState = state
-        
+
         switch state {
         case .running:
             if let ts = persistenceManager.endAtEpoch {
                 let now = dateProvider.now()
                 let end = Date(timeIntervalSince1970: ts)
                 let remain = max(0, Int(ceil(end.timeIntervalSince(now))))
-                
+
                 if remain > 0 {
                     endAt = end
                     timeRemaining = remain
                     isRunning = true
                 } else {
                     // 時間切れの場合はセッション完了処理を実行
-                    
+
                     // セッション完了処理
                     endTime = end
                     let wasWorkSession = isWorkSession  // 変更前に保存
                     isSessionFinished = true
                     isWorkSession = false  // QuietMoon表示のために必要
-                    
+
                     // セッション完了時の処理
                     hapticService.heavyImpact()
                     notificationService.finalizeWorkPhase()
-                    
+
                     // 履歴に保存
                     let parameters = AddSessionParameters(
                         start: startTime ?? end,
@@ -394,18 +394,18 @@ final class TimerViewModel: ObservableObject {
                         memo: nil
                     )
                     historyService.add(parameters: parameters)
-                    
+
                     // Record streak if this was a work session
                     if wasWorkSession {
                         streakManager.recordTimerUsage()
                     }
-                    
+
                     // State finalize
                     endAt = nil
                     timeRemaining = 0
                     isRunning = false
                     runState = .idle
-                    
+
                 }
             } else {
                 // Safety: missing endAt
@@ -435,7 +435,7 @@ final class TimerViewModel: ObservableObject {
     func startFromRestoredIfNeeded() {
         guard runState == .running, timeRemaining > 0 else { return }
         shouldSuppressAnimation = true
-        
+
         // バックグラウンドから復帰した場合は、既にengine.resume()が呼ばれているため
         // ここでは重複起動を避ける
         if !engine.isRunning {
@@ -445,16 +445,16 @@ final class TimerViewModel: ObservableObject {
         }
         isRunning = true
     }
-    
+
     /// 起動時リカバリ：進行中セッションがあれば通知を再スケジュール
     @MainActor
     private func recoverNotificationIfNeeded() {
         guard runState == .running, let endAt = endAt, endAt > dateProvider.now() else { return }
-        
+
         // デバイス再起動後のリカバリ：通知を再スケジュール
         let phase: PomodoroPhase = isWorkSession ? .focus : .breakTime
         let timeSensitive = UserDefaults.standard.bool(forKey: "time_sensitive_notifications_enabled")
-        
+
         notificationService.scheduleSessionEndNotification(
             at: endAt,
             phase: phase,
@@ -467,10 +467,10 @@ final class TimerViewModel: ObservableObject {
     /// セッション完了時の処理（Engineコールバックから呼ばれる）
     private func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
         // Safety: drop stale completion if we're no longer running
-        guard runState == .running else { 
-            return 
+        guard runState == .running else {
+            return
         }
-        
+
         isRunning = false
         timeRemaining = 0
 
@@ -519,33 +519,33 @@ final class TimerViewModel: ObservableObject {
 
     /// バックグラウンドへ
     func appDidEnterBackground() {
-        
+
         lastBackgroundDate = dateProvider.now()
         if isRunning, let endAt = endAt {
-            
+
             // バックグラウンド移行時はタイマーエンジンを停止
             // ただし、状態はrunningのまま保持（フォアグラウンド復帰時に再開のため）
             engine.pause()
-            
+
             // endAtを保持（TimerEngineのpause()ではendAtがクリアされるため）
             // 現在の残り時間を正確に計算してendAtを更新
             let now = dateProvider.now()
             let actualRemaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
-            
+
             if actualRemaining > 0 {
                 self.endAt = now.addingTimeInterval(TimeInterval(actualRemaining))
             }
-            
+
             // Keep running state; schedule a single end notification using absolute time
             let phase: PomodoroPhase = isWorkSession ? .focus : .breakTime
             let timeSensitive = UserDefaults.standard.bool(forKey: "time_sensitive_notifications_enabled")
-            
+
             notificationService.scheduleSessionEndNotification(
                 at: self.endAt!,
                 phase: phase,
                 timeSensitive: timeSensitive
             )
-            
+
             // 状態を保存（endAtを保持）
             saveTimerState()
         } else if runState == .paused {
@@ -561,16 +561,16 @@ final class TimerViewModel: ObservableObject {
     /// フォアグラウンド復帰
     @MainActor
     func appWillEnterForeground() {
-        
+
         // Preserve pre-restore state to guard against mis-inferred idle
         let prevState = runState
         let prevRemaining = timeRemaining
-        
+
         // endAtベースで復元し、状態に応じてのみ再開（復元ロック中は保存禁止）
         isRestoring = true
         restoreTimerState()
         notificationService.cancelSessionEndNotification()
-        
+
         switch (prevState, runState) {
         case (.running, .running):
             shouldSuppressAnimation = true
@@ -580,7 +580,7 @@ final class TimerViewModel: ObservableObject {
             if let endAt = endAt {
                 let now = dateProvider.now()
                 let actualRemaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
-                
+
                 if actualRemaining > 0 {
                     timeRemaining = actualRemaining
                     engine.resume()
@@ -595,7 +595,7 @@ final class TimerViewModel: ObservableObject {
                         actualWorkedSeconds: 0
                     ))
                     // runStateはhandleSessionCompleted内で.idleに設定される
-                    
+
                     // 状態更新を確実に反映するため、UIの更新を強制
                     DispatchQueue.main.async {
                         // 状態が正しく更新されていることを確認
@@ -628,3 +628,4 @@ extension TimerViewModel {
     }
 }
 #endif
+

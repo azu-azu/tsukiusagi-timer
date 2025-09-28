@@ -3,8 +3,8 @@ import SwiftUI
 struct HistoryMonthlyView: View {
     @EnvironmentObject var historyVM: HistoryViewModel
 
-    // Stable paging model to avoid jank: fixed months array + index
-    @State private var months: [Date] = []
+    // Stable paging model with UUID-based Month objects
+    @State private var months: [Month] = []
     @State private var currentIndex: Int = 0
 
     private let calendar = Calendar.current
@@ -21,10 +21,15 @@ struct HistoryMonthlyView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .tag(idx)
+                    .id(months[idx].id) // Stable ID for proper view regeneration
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .onChange(of: currentIndex) { oldValue, newValue in
+                // Page change event handling (analytics, prefetch, etc.)
+                handlePageChange(from: oldValue, to: newValue)
+            }
         }
         .onAppear { ensureMonthsInitialized() }
     }
@@ -32,26 +37,59 @@ struct HistoryMonthlyView: View {
     // Initialize a stable window of months around today
     private func ensureMonthsInitialized() {
         guard months.isEmpty else { return }
-        let center = startOfMonth(Date())
-        let window = (-12...12).compactMap { offset in
-            calendar.date(byAdding: .month, value: offset, to: center)
-        }
-        months = window
-        currentIndex = window.firstIndex(of: center) ?? (window.count / 2)
+        months = Month.generateAroundToday(countBefore: 12, countAfter: 12)
+        currentIndex = months.firstIndex { $0.isCurrentMonth } ?? (months.count / 2)
     }
 
-    private func startOfMonth(_ date: Date) -> Date {
-        calendar.date(from: calendar.dateComponents([.year, .month], from: date)) ?? date
+    // MARK: - Page Change Handling
+    private func handlePageChange(from oldIndex: Int, to newIndex: Int) {
+        // Optional: Add analytics tracking, prefetching, or other side effects
+        // Example: Analytics.track("month_changed", properties: ["from": oldIndex, "to": newIndex])
+        
+        // Optional: Prefetch adjacent months for smoother experience
+        prefetchAdjacentMonths(around: newIndex)
+    }
+    
+    private func prefetchAdjacentMonths(around index: Int) {
+        // Optional: Preload data for adjacent months to improve performance
+        // This could trigger background data loading for months[index ± 1]
+    }
+    
+    // MARK: - Navigation Helpers
+    private func changeMonth(by delta: Int) {
+        let nextIndex = (currentIndex + delta).clamped(to: 0...(months.count - 1))
+        currentIndex = nextIndex
     }
 
     // MARK: - Page
     @ViewBuilder
-    private func MonthlyPage(month: Date) -> some View {
-        let summary = historyVM.getCalendarMonthSummary(for: month)
+    private func MonthlyPage(month: Month) -> some View {
+        MonthlyPageContent(month: month)
+            .task(id: month.id) {
+                // Optional: Preload data for this month if needed
+                // This runs when the month changes, providing smooth data loading
+                await preloadMonthData(for: month)
+            }
+    }
+    
+    private func preloadMonthData(for month: Month) async {
+        // Optional: Background data loading for smoother experience
+        // This could trigger cache warming, API calls, or other data preparation
+        // Example: await historyVM.preloadData(for: month.date)
+    }
+}
+
+// MARK: - Monthly Page Content
+private struct MonthlyPageContent: View {
+    @EnvironmentObject var historyVM: HistoryViewModel
+    let month: Month
+    
+    var body: some View {
+        let summary = historyVM.getCalendarMonthSummary(for: month.date)
         VStack(alignment: .leading, spacing: 8) {
             // Header
             HStack {
-                Text(month.formatted(.dateTime.year().month(.wide)))
+                Text(month.title)
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 Spacer()
@@ -75,7 +113,7 @@ struct HistoryMonthlyView: View {
             .roundedCard()
 
             // Weekly totals (simple bar list)
-            WeeklyTotalsList(month: month)
+            WeeklyTotalsList(month: month.date)
                 .roundedCard()
         }
         // Minimal gap below tabs
