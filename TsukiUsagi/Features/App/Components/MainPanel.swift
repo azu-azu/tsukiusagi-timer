@@ -15,12 +15,6 @@ struct MainPanel: View {
     let isMoonAnimationActive: Bool
 
     var body: some View {
-        #if DEBUG
-        let _ = print(
-          "🌙 MainPanel - isSessionFinished:\n"
-          + "  \(timerVM.isSessionFinished),\n"
-          + "  isWorkSession: \(timerVM.isWorkSession)")
-        #endif
 
         GeometryReader { geo2 in
 
@@ -118,12 +112,8 @@ struct MainPanel: View {
             let centerPull = isLandscape ? min(40, effectiveW * 0.05) : 0
 
             if timerVM.isSessionFinished {
-                #if DEBUG
-                let _ = print("🌙 MainPanel - Showing QuietMoon section")
-                #endif
                 // 終了時はQuietMoonViewのみ
                 if isLandscape {
-                    // let _ = print("🌙 MainPanel - Landscape QuietMoon")
                     // 横画面：左右分割（最高品質版）
                     HStack(spacing: safeMargin2) {
                         // 左側：QuietMoonView
@@ -182,9 +172,6 @@ struct MainPanel: View {
                         removal: .move(edge: .trailing).combined(with: .opacity)
                     ))
                 } else {
-                    #if DEBUG
-                    let _ = print("🌙 MainPanel - Portrait QuietMoon")
-                    #endif
                     // 縦画面：QuietMoonのみ（RecordedTimesはContentView側で重ねる）
                     VStack {
                         QuietMoonView(
@@ -208,9 +195,6 @@ struct MainPanel: View {
                     ))
                 }
             } else {
-                #if DEBUG
-                let _ = print("🌙 MainPanel - Showing Timer section")
-                #endif
                 // 進行中はMoon+Timerセット
                 if isLandscape {
                     // --- Landscape の Moon + Timer 横並び ---
