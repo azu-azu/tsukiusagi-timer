@@ -84,6 +84,7 @@ struct FullSessionEditContent: View {
         VStack(alignment: .leading) {
             Text("Session Name")
                 .font(DesignTokens.Fonts.labelBold)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
             TextField("Enter session name", text: Binding(
                 get: { [self] in self.sessionName },
                 set: { [self] newValue in

@@ -99,6 +99,12 @@ extension SessionManagementView {
             defaultSessionsHeader()
             defaultSessionsList()
         }
+        .padding(DesignTokens.Padding.large)
+        .background(
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
+                .fill(DesignTokens.CosmosColors.cardBackground)
+                .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
+        )
     }
 
     @ViewBuilder
@@ -115,11 +121,6 @@ extension SessionManagementView {
                 defaultSessionRow(session, isLast: index == sessionManager.defaultEntries.count - 1)
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
-                .fill(DesignTokens.CosmosColors.cardBackground)
-                .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
-        )
     }
 
     @ViewBuilder
@@ -150,6 +151,12 @@ extension SessionManagementView {
             customSessionsHeader()
             customSessionsList()
         }
+        .padding(DesignTokens.Padding.large)
+        .background(
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
+                .fill(DesignTokens.CosmosColors.cardBackground)
+                .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
+        )
     }
 
     @ViewBuilder
@@ -184,11 +191,6 @@ extension SessionManagementView {
                 }
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
-                .fill(DesignTokens.CosmosColors.cardBackground)
-                .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
-        )
     }
 
     @ViewBuilder
