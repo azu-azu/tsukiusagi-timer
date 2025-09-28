@@ -307,14 +307,10 @@ final class TimerViewModel: ObservableObject {
     @MainActor
     func saveTimerState() {
         #if DEBUG
-        print("🔍 saveTimerState: 開始 - runState=\(runState), endAt=\(endAt?.description ?? "nil"), timeRemaining=\(timeRemaining)")
         #endif
         
         // 復元中は保存しない：一瞬の初期化値で上書きする事故を防止
         if isRestoring { 
-            #if DEBUG
-            print("🔍 saveTimerState: 復元中のため保存をスキップ")
-            #endif
             return 
         }
         
@@ -323,91 +319,60 @@ final class TimerViewModel: ObservableObject {
         persistenceManager.isWorkSession = isWorkSession
         persistenceManager.runStateRaw = runState.rawValue
         
-        #if DEBUG
-        print("🔍 saveTimerState: 基本状態保存 - runStateRaw=\(runState.rawValue), isRunning=\(runState == .running)")
-        #endif
         
         switch runState {
         case .running:
             if let endAt { 
                 persistenceManager.endAtEpoch = endAt.timeIntervalSince1970
-                #if DEBUG
-                print("🔍 saveTimerState: .running - endAtEpoch=\(endAt.timeIntervalSince1970)")
-                #endif
             }
             persistenceManager.remainingAtPause = nil
         case .paused:
             persistenceManager.endAtEpoch = nil
             persistenceManager.remainingAtPause = timeRemaining
-            #if DEBUG
-            print("🔍 saveTimerState: .paused - remainingAtPause=\(timeRemaining)")
-            #endif
         case .idle:
             persistenceManager.endAtEpoch = nil
             persistenceManager.remainingAtPause = nil
-            #if DEBUG
-            print("🔍 saveTimerState: .idle - 全クリア")
-            #endif
         }
         persistenceManager.saveTimerState()
         
-        #if DEBUG
-        print("🔍 saveTimerState: 完了")
-        #endif
     }
 
     /// タイマー状態を復元
     @MainActor
     func restoreTimerState() {
-        print("🔍 restoreTimerState: 開始")
-        
         persistenceManager.restoreTimerState()
         isWorkSession = persistenceManager.isWorkSession
         
-        print("🔍 restoreTimerState: persistenceManager.runStateRaw=\(persistenceManager.runStateRaw ?? "nil")")
-        print("🔍 restoreTimerState: persistenceManager.endAtEpoch=\(persistenceManager.endAtEpoch ?? 0)")
-        print("🔍 restoreTimerState: persistenceManager.remainingAtPause=\(persistenceManager.remainingAtPause ?? 0)")
         
         // まず宣言ベースの runState を参照
         var restored = TimerRunState(rawValue: persistenceManager.runStateRaw ?? "")
-        print("🔍 restoreTimerState: 宣言ベースの復元=\(restored?.rawValue ?? "nil")")
         
         // フォールバック推定：runState欠損時でも痕跡から推定
         if restored == nil {
-            print("🔍 restoreTimerState: フォールバック推定開始")
             if let ts = persistenceManager.endAtEpoch, ts > 0 {
                 restored = .running
-                print("🔍 restoreTimerState: endAtEpochから.runningに推定")
             } else if let rp = persistenceManager.remainingAtPause, rp > 0 {
                 restored = .paused
-                print("🔍 restoreTimerState: remainingAtPauseから.pausedに推定")
             } else {
                 restored = .idle
-                print("🔍 restoreTimerState: .idleに推定")
             }
         }
         let state = restored ?? .idle
         runState = state
         
-        print("🔍 restoreTimerState: 最終状態=\(state.rawValue)")
-        
         switch state {
         case .running:
-            print("🔍 restoreTimerState: .runningケース")
             if let ts = persistenceManager.endAtEpoch {
                 let now = dateProvider.now()
                 let end = Date(timeIntervalSince1970: ts)
                 let remain = max(0, Int(ceil(end.timeIntervalSince(now))))
-                print("🔍 restoreTimerState: endAt=\(end), now=\(now), remain=\(remain)")
                 
                 if remain > 0 {
                     endAt = end
                     timeRemaining = remain
                     isRunning = true
-                    print("🔍 restoreTimerState: タイマー復元成功")
                 } else {
                     // 時間切れの場合はセッション完了処理を実行
-                    print("🔍 restoreTimerState: 時間切れ - セッション完了処理開始")
                     
                     // セッション完了処理
                     endTime = end
@@ -441,7 +406,6 @@ final class TimerViewModel: ObservableObject {
                     isRunning = false
                     runState = .idle
                     
-                    print("🔍 restoreTimerState: セッション完了処理完了 - isSessionFinished=\(isSessionFinished), isWorkSession=\(isWorkSession)")
                 }
             } else {
                 // Safety: missing endAt
@@ -449,15 +413,12 @@ final class TimerViewModel: ObservableObject {
                 timeRemaining = 0
                 isRunning = false
                 runState = .idle
-                print("🔍 restoreTimerState: endAtEpochがnilで.idleに変更")
             }
         case .paused:
-            print("🔍 restoreTimerState: .pausedケース")
             timeRemaining = max(0, persistenceManager.remainingAtPause ?? 0)
             isRunning = false
             endAt = nil
         case .idle:
-            print("🔍 restoreTimerState: .idleケース")
             // Only apply defaults when truly zero (no remaining or anchors anywhere)
             let persistedPause = persistenceManager.remainingAtPause ?? 0
             let persistedEndAt = persistenceManager.endAtEpoch ?? 0
@@ -467,8 +428,6 @@ final class TimerViewModel: ObservableObject {
             isRunning = false
             endAt = nil
         }
-        
-        print("🔍 restoreTimerState: 完了 - runState=\(runState), endAt=\(endAt?.description ?? "nil"), timeRemaining=\(timeRemaining)")
     }
 
     /// 永続化から復元後、必要なら残り秒数でエンジンを再開（起動直後や再アクティブ時用）
@@ -501,8 +460,6 @@ final class TimerViewModel: ObservableObject {
             phase: phase,
             timeSensitive: timeSensitive
         )
-        
-        print("🔔 起動時リカバリ：通知を再スケジュールしました (\(endAt))")
     }
 
     // MARK: - Private Methods
@@ -511,11 +468,8 @@ final class TimerViewModel: ObservableObject {
     private func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
         // Safety: drop stale completion if we're no longer running
         guard runState == .running else { 
-            print("🔍 handleSessionCompleted: runState != .running, skipping")
             return 
         }
-        
-        print("🔍 handleSessionCompleted: 開始 - runState=\(runState), isSessionFinished=\(isSessionFinished), isWorkSession=\(isWorkSession)")
         
         isRunning = false
         timeRemaining = 0
@@ -524,8 +478,6 @@ final class TimerViewModel: ObservableObject {
         endTime = sessionInfo.endTime
         isSessionFinished = true
         isWorkSession = false  // QuietMoon表示のために必要
-
-        print("🔍 handleSessionCompleted: 状態更新後 - isSessionFinished=\(isSessionFinished), isWorkSession=\(isWorkSession)")
 
         // セッション完了時の処理
         hapticService.heavyImpact()
@@ -551,8 +503,6 @@ final class TimerViewModel: ObservableObject {
         runState = .idle
         endAt = nil
         saveTimerState()
-        
-        print("🔍 handleSessionCompleted: 完了 - runState=\(runState), isSessionFinished=\(isSessionFinished), isWorkSession=\(isWorkSession)")
     }
 
     /// diamondアニメーションとstartPulseアニメーションを発火
@@ -569,11 +519,9 @@ final class TimerViewModel: ObservableObject {
 
     /// バックグラウンドへ
     func appDidEnterBackground() {
-        print("🔍 appDidEnterBackground: 開始 - isRunning=\(isRunning), runState=\(runState), endAt=\(endAt?.description ?? "nil")")
         
         lastBackgroundDate = dateProvider.now()
         if isRunning, let endAt = endAt {
-            print("🔍 appDidEnterBackground: 実行中タイマーをバックグラウンド処理")
             
             // バックグラウンド移行時はタイマーエンジンを停止
             // ただし、状態はrunningのまま保持（フォアグラウンド復帰時に再開のため）
@@ -583,11 +531,9 @@ final class TimerViewModel: ObservableObject {
             // 現在の残り時間を正確に計算してendAtを更新
             let now = dateProvider.now()
             let actualRemaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
-            print("🔍 appDidEnterBackground: 元endAt=\(endAt), now=\(now), actualRemaining=\(actualRemaining)")
             
             if actualRemaining > 0 {
                 self.endAt = now.addingTimeInterval(TimeInterval(actualRemaining))
-                print("🔍 appDidEnterBackground: 新しいendAt=\(self.endAt!)")
             }
             
             // Keep running state; schedule a single end notification using absolute time
@@ -602,42 +548,31 @@ final class TimerViewModel: ObservableObject {
             
             // 状態を保存（endAtを保持）
             saveTimerState()
-            print("🔍 appDidEnterBackground: 状態保存完了")
         } else if runState == .paused {
-            print("🔍 appDidEnterBackground: ポーズ状態をバックグラウンド処理")
             // Ensure paused remaining is persisted for robust restoration
             persistenceManager.remainingAtPause = timeRemaining
             persistenceManager.runStateRaw = TimerRunState.paused.rawValue
             persistenceManager.endAtEpoch = nil
             saveTimerState()
         } else {
-            print("🔍 appDidEnterBackground: その他の状態 - isRunning=\(isRunning), runState=\(runState)")
         }
-        
-        print("🔍 appDidEnterBackground: 完了")
     }
 
     /// フォアグラウンド復帰
     @MainActor
     func appWillEnterForeground() {
-        print("🔍 appWillEnterForeground: 開始")
         
         // Preserve pre-restore state to guard against mis-inferred idle
         let prevState = runState
         let prevRemaining = timeRemaining
-        
-        print("🔍 appWillEnterForeground: prevState=\(prevState), prevRemaining=\(prevRemaining)")
         
         // endAtベースで復元し、状態に応じてのみ再開（復元ロック中は保存禁止）
         isRestoring = true
         restoreTimerState()
         notificationService.cancelSessionEndNotification()
         
-        print("🔍 appWillEnterForeground: 復元後 runState=\(runState), endAt=\(endAt?.description ?? "nil")")
-        
         switch (prevState, runState) {
         case (.running, .running):
-            print("🔍 appWillEnterForeground: (.running, .running) ケース")
             shouldSuppressAnimation = true
             shouldSuppressSessionFinishedAnimation = true
             // バックグラウンドから復帰時は、正確な残り時間で再開
@@ -645,14 +580,11 @@ final class TimerViewModel: ObservableObject {
             if let endAt = endAt {
                 let now = dateProvider.now()
                 let actualRemaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
-                print("🔍 appWillEnterForeground: endAt=\(endAt), now=\(now), actualRemaining=\(actualRemaining)")
                 
                 if actualRemaining > 0 {
-                    print("🔍 appWillEnterForeground: タイマー再開")
                     timeRemaining = actualRemaining
                     engine.resume()
                 } else {
-                    print("🔍 appWillEnterForeground: 時間切れ - セッション完了処理開始")
                     // 時間切れの場合はセッション完了処理
                     // runStateを一時的に.runningに設定してhandleSessionCompletedを実行
                     runState = .running
@@ -667,30 +599,23 @@ final class TimerViewModel: ObservableObject {
                     // 状態更新を確実に反映するため、UIの更新を強制
                     DispatchQueue.main.async {
                         // 状態が正しく更新されていることを確認
-                        print("🔍 フォアグラウンド復帰時セッション完了: isSessionFinished=\(self.isSessionFinished), isWorkSession=\(self.isWorkSession)")
                     }
                 }
             } else {
-                print("🔍 appWillEnterForeground: endAtがnil")
             }
         case (.paused, .idle):
-            print("🔍 appWillEnterForeground: (.paused, .idle) ケース")
             // Roll back accidental downgrade idle -> keep paused state and remaining seconds
             runState = .paused
             isRunning = false
             let persisted = persistenceManager.remainingAtPause ?? 0
             timeRemaining = max(prevRemaining, persisted)
         case (.paused, .paused):
-            print("🔍 appWillEnterForeground: (.paused, .paused) ケース")
             isRunning = false
         default:
-            print("🔍 appWillEnterForeground: default ケース")
             isRunning = false
         }
         lastBackgroundDate = nil
         isRestoring = false
-        
-        print("🔍 appWillEnterForeground: 完了 - runState=\(runState), isSessionFinished=\(isSessionFinished), isWorkSession=\(isWorkSession)")
     }
 }
 

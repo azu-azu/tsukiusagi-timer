@@ -35,6 +35,20 @@ struct DailyTimelineView: View {
             }
             .padding(.horizontal)
         }
+        .simultaneousGesture(
+            // 左端からのスワイプを確実に認識
+            DragGesture(minimumDistance: 20, coordinateSpace: .global)
+                .onEnded { value in
+                    // 左端から右方向へのスワイプを検出
+                    if value.startLocation.x < 50 && value.translation.width > 100 {
+                        // ナビゲーションを戻す
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let window = windowScene.windows.first {
+                            findNavigationController(in: window.rootViewController)?.popViewController(animated: true)
+                        }
+                    }
+                }
+        )
         .navigationTitle(targetDate.formatted(.dateTime.weekday(.wide).month().day()))
         .navigationBarTitleDisplayMode(.inline)
         .alert(isPresented: $showRestoreAlert) {
@@ -45,6 +59,16 @@ struct DailyTimelineView: View {
             )
         }
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+        .onAppear {
+            // View Details画面ではbackスワイプを有効化
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                enableBackSwipeGesture()
+            }
+        }
+        .onDisappear {
+            // History画面に戻る際はbackスワイプを無効化
+            disableBackSwipeGesture()
+        }
     }
 
     // MARK: - Records Section
@@ -217,6 +241,51 @@ struct DailyTimelineView: View {
             }
             .padding(.top, 16)
         }
+    }
+
+    // MARK: - Back Swipe Control
+
+    private func disableBackSwipeGesture() {
+        DispatchQueue.main.async {
+            // NavigationStackのUINavigationControllerを取得してbackスワイプを無効化
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                findNavigationController(in: window.rootViewController)?
+                    .interactivePopGestureRecognizer?
+                    .isEnabled = false
+            }
+        }
+    }
+
+    private func enableBackSwipeGesture() {
+        DispatchQueue.main.async {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                let navController = findNavigationController(in: window.rootViewController)
+
+                // より安全な有効化（visual style警告を避ける）
+                if let gestureRecognizer = navController?.interactivePopGestureRecognizer {
+                    gestureRecognizer.isEnabled = true
+                    // delegateは設定しない（警告回避）
+                }
+
+            }
+        }
+    }
+
+
+    private func findNavigationController(in viewController: UIViewController?) -> UINavigationController? {
+        if let navigationController = viewController as? UINavigationController {
+            return navigationController
+        }
+
+        for child in viewController?.children ?? [] {
+            if let found = findNavigationController(in: child) {
+                return found
+            }
+        }
+
+        return nil
     }
 }
 

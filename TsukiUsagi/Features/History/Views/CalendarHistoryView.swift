@@ -9,6 +9,7 @@ struct CalendarHistoryView: View {
     @State private var selectedDate: Date?
     @State private var dailyHistories: [Date: DailyHistory] = [:]
     @State private var lastSwipeDirection: SwipeDirection?
+    @State private var isSwitchingMonth = false
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
@@ -33,7 +34,14 @@ struct CalendarHistoryView: View {
                 // カレンダーグリッド（エッジ to エッジ）
                 calendarGridView(for: selectedMonth)
                     .padding(.horizontal, 8)
-                    .simultaneousGesture(monthSwipeGesture())
+                    .highPriorityGesture(monthSwipeGesture())
+                
+                // カレンダー下の区切り線
+                Rectangle()
+                    .fill(DesignTokens.MoonColors.textSecondary.opacity(0.2))
+                    .frame(height: 1)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 12)
 
                 // 選択日の詳細表示
                 if let selectedDate = selectedDate {
@@ -51,8 +59,9 @@ struct CalendarHistoryView: View {
         }
         .scrollIndicators(.hidden)
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-        .onAppear { loadMonthData() }
-        .onChange(of: selectedMonth) { loadMonthData() }
+        .task(id: selectedMonth) {
+            await loadMonthData()
+        }
     }
 
     // MARK: - Month Navigation Header
@@ -150,7 +159,7 @@ struct CalendarHistoryView: View {
 
     // MARK: - Helper Methods
 
-    private func loadMonthData() {
+    private func loadMonthData() async {
         dailyHistories = historyVM.getCalendarDailyHistories(for: selectedMonth)
 
         // 初回表示時、当月かつ本日に記録がある場合は自動で詳細を表示
@@ -178,34 +187,30 @@ struct CalendarHistoryView: View {
 
     // MARK: - Gestures
     private func monthSwipeGesture() -> some Gesture {
-        DragGesture(minimumDistance: 15, coordinateSpace: .local)
+        DragGesture(minimumDistance: 20, coordinateSpace: .local)
             .onChanged { value in
-                let horizontal = value.translation.width
-                let vertical = abs(value.translation.height)
-                
-                // 水平スワイプが垂直より大きい場合のみ処理
-                guard abs(horizontal) > vertical else { return }
-                
-                // backのスワイプを無効化したので、より敏感に反応できる
-                let currentDirection: SwipeDirection? = horizontal > 25 ? .left : (horizontal < -25 ? .right : nil)
-                
-                // 同じ方向のスワイプは一度だけ実行
-                if let direction = currentDirection, lastSwipeDirection != direction {
-                    lastSwipeDirection = direction
-                    
-                    switch direction {
-                    case .left:
-                        // 左スワイプ（前の月）: backとの競合がなくなったので敏感に反応
-                        changeMonth(by: -1)
-                    case .right:
-                        // 右スワイプ（次の月）: 同様に敏感に反応
-                        changeMonth(by: 1)
-                    }
+                let dx = value.translation.width
+                let dy = abs(value.translation.height)
+                guard abs(dx) > dy * 1.5 else { return }     // 水平優先
+                if abs(dx) > 50 {
+                    let dir: SwipeDirection = (dx > 0) ? .left : .right
+                    if lastSwipeDirection != dir { lastSwipeDirection = dir }
                 }
             }
             .onEnded { _ in
-                // スワイプ完了時に方向をリセット
+                guard !isSwitchingMonth, let dir = lastSwipeDirection else { lastSwipeDirection = nil; return }
+                isSwitchingMonth = true
+                withAnimation(.interactiveSpring()) {
+                    switch dir {
+                    case .left:  changeMonth(by: -1)
+                    case .right: changeMonth(by:  1)
+                    }
+                }
                 lastSwipeDirection = nil
+                // 少し遅らせて再入を解放（アニメ完了待ちの簡易版）
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    isSwitchingMonth = false
+                }
             }
     }
 
