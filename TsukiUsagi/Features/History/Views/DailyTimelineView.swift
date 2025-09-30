@@ -8,6 +8,7 @@ struct DailyTimelineView: View {
 
     @State private var restoreError: String?
     @State private var showRestoreAlert = false
+    @State private var selectedRecordForMemoEdit: SessionRecord?
 
     private let cal = Calendar.current
     private let dayModeCardHeight: CGFloat = 40
@@ -58,6 +59,9 @@ struct DailyTimelineView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
+        .sheet(item: $selectedRecordForMemoEdit) { record in
+            MemoEditView(record: record)
+        }
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
         .onAppear {
             // View Details画面ではbackスワイプを有効化
@@ -88,40 +92,10 @@ struct DailyTimelineView: View {
         let displayName = historyVM.displayActivity(sessionManager: sessionManager, activity: rec.activity)
 
         HStack(spacing: 0) {
-            Text(rec.start.formatted(date: .omitted, time: .shortened))
-                .monospacedDigit()
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-
-            Spacer().frame(width: 8)
-
-            Image(systemName: "arrow.right")
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-            Spacer().frame(width: 8)
-
-            Text(rec.end.formatted(date: .omitted, time: .shortened))
-                .monospacedDigit()
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-
+            timeRangeView(rec)
             Spacer(minLength: 8)
-
-            Text("\(displayName) \(durationMinutes(rec)) min")
-                .foregroundColor(isDeleted ? DesignTokens.MoonColors.textMuted : DesignTokens.MoonColors.textPrimary)
-                .opacity(isDeleted ? 0.5 : 1.0)
-
-            if isDeleted {
-                Button("Restore") {
-                    do {
-                        try historyVM.restore(record: rec, sessionManager: sessionManager)
-                    } catch {
-                        restoreError = error.localizedDescription
-                        showRestoreAlert = true
-                    }
-                }
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.accentBlue)
-            }
+            activityInfoView(displayName: displayName, rec: rec, isDeleted: isDeleted)
+            actionButtonView(rec: rec, isDeleted: isDeleted)
         }
         .font(DesignTokens.Fonts.label)
         .frame(minHeight: dayModeCardHeight, alignment: .leading)
@@ -130,6 +104,69 @@ struct DailyTimelineView: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(DesignTokens.CosmosColors.cardBackground)
         )
+    }
+
+    @ViewBuilder
+    private func timeRangeView(_ rec: SessionRecord) -> some View {
+        Text(rec.start.formatted(date: .omitted, time: .shortened))
+            .monospacedDigit()
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+
+        Spacer().frame(width: 8)
+
+        Image(systemName: "arrow.right")
+            .font(DesignTokens.Fonts.caption)
+            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+
+        Spacer().frame(width: 8)
+
+        Text(rec.end.formatted(date: .omitted, time: .shortened))
+            .monospacedDigit()
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+    }
+
+    @ViewBuilder
+    private func activityInfoView(displayName: String, rec: SessionRecord, isDeleted: Bool) -> some View {
+        Text("\(displayName) \(durationMinutes(rec)) min")
+            .foregroundColor(isDeleted ? DesignTokens.MoonColors.textMuted : DesignTokens.MoonColors.textPrimary)
+            .opacity(isDeleted ? 0.5 : 1.0)
+    }
+
+    @ViewBuilder
+    private func actionButtonView(rec: SessionRecord, isDeleted: Bool) -> some View {
+        if isDeleted {
+            restoreButton(rec: rec)
+        } else {
+            memoButton(rec: rec)
+        }
+    }
+
+    @ViewBuilder
+    private func restoreButton(rec: SessionRecord) -> some View {
+        Button("Restore") {
+            do {
+                try historyVM.restore(record: rec, sessionManager: sessionManager)
+            } catch {
+                restoreError = error.localizedDescription
+                showRestoreAlert = true
+            }
+        }
+        .font(DesignTokens.Fonts.caption)
+        .foregroundColor(DesignTokens.MoonColors.accentBlue)
+    }
+
+    @ViewBuilder
+    private func memoButton(rec: SessionRecord) -> some View {
+        let hasMemo = rec.memo?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+        let iconName = hasMemo ? "pencil" : "plus"
+
+        Button(action: {
+            selectedRecordForMemoEdit = rec
+        }) {
+            Image(systemName: iconName)
+                .font(DesignTokens.Fonts.caption)
+                .foregroundColor(DesignTokens.MoonColors.accentBlue)
+        }
     }
 
     // MARK: - Data Methods
@@ -221,26 +258,80 @@ struct DailyTimelineView: View {
 
     @ViewBuilder
     private func memoSection() -> some View {
-        let memos = records()
-            .compactMap { $0.memo?.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+        let recordsWithMemos = recordsWithMemos()
 
-        if !memos.isEmpty {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("📝 Memos")
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-                ForEach(memos, id: \.self) { memo in
-                    Text(memo)
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        .padding(8)
-                        .roundedCard()
-                }
+        if !recordsWithMemos.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                memoSectionHeader()
+                memoItemsList(records: recordsWithMemos)
             }
             .padding(.top, 16)
         }
+    }
+
+    private func recordsWithMemos() -> [SessionRecord] {
+        return records().filter { record in
+            let memo = record.memo?.trimmingCharacters(in: .whitespacesAndNewlines)
+            return memo != nil && !memo!.isEmpty
+        }
+    }
+
+    @ViewBuilder
+    private func memoSectionHeader() -> some View {
+        Text("📝 Memos")
+            .font(DesignTokens.Fonts.sectionTitle)
+            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+    }
+
+    @ViewBuilder
+    private func memoItemsList(records: [SessionRecord]) -> some View {
+        ForEach(records, id: \.id) { record in
+            memoItemButton(record: record)
+        }
+    }
+
+    @ViewBuilder
+    private func memoItemButton(record: SessionRecord) -> some View {
+        Button(action: {
+            selectedRecordForMemoEdit = record
+        }) {
+            memoItemContent(record: record)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    @ViewBuilder
+    private func memoItemContent(record: SessionRecord) -> some View {
+        HStack {
+            memoTextContent(record: record)
+            Spacer()
+            memoEditIcon()
+        }
+        .padding(8)
+        .background(DesignTokens.CosmosColors.cardBackground)
+        .cornerRadius(6)
+    }
+
+    @ViewBuilder
+    private func memoTextContent(record: SessionRecord) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(record.memo ?? "")
+                .font(DesignTokens.Fonts.caption)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .multilineTextAlignment(.leading)
+
+            Text("\(record.start.formatted(date: .omitted, time: .shortened)) - \(record.end.formatted(date: .omitted, time: .shortened))")
+                .font(DesignTokens.Fonts.caption)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .monospacedDigit()
+        }
+    }
+
+    @ViewBuilder
+    private func memoEditIcon() -> some View {
+        Image(systemName: "pencil")
+            .font(DesignTokens.Fonts.caption)
+            .foregroundColor(DesignTokens.MoonColors.accentBlue)
     }
 
     // MARK: - Back Swipe Control

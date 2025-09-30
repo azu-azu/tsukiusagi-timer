@@ -81,9 +81,9 @@ struct TimerEditView: View {
                     // スクロール可能なコンテンツ
                     ScrollViewReader { proxy in
                         ScrollView {
-                            VStack(alignment: .leading, spacing: 40) {
+                            VStack(alignment: .leading, spacing: 24) {
                             // Session Label
-                            section(title: "Session Label") {
+                            section(title: "Session Label", isCompact: true) {
                                 SessionLabelSection(
                                     activity: $editedActivity,
                                     descriptionText: $editedSubtitle,
@@ -96,7 +96,7 @@ struct TimerEditView: View {
                             }
 
                             // Final Time
-                            section(title: "Final Time") {
+                            section(title: "Final Time", isCompact: true) {
                                 DatePicker(
                                     "Final Time",
                                     selection: $editedEnd,
@@ -109,28 +109,33 @@ struct TimerEditView: View {
                             }
 
                             // Memo
-                            section(title: "Memo") {
-                                ZStack(alignment: .topLeading) {
-                                    if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                        Text("Memo (optional)")
-                                            .font(DesignTokens.Fonts.label)
-                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 12)
-                                    }
-
-                                    // 背景レイヤにタップ検知を置いてフォーカスを確実に付与
-                                    DesignTokens.WhiteColors.surface
-                                        .contentShape(Rectangle())
-                                        .onTapGesture { isMemoFocused = true }
-
-                                    TextEditor(text: $editedMemo)
-                                        .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
-                                        .padding(8)
-                                        .scrollContentBackground(.hidden)
-                                        .background(Color.clear) // 背景は上のレイヤーに委譲
-                                        .focused($isMemoFocused)
-                                }
+                            section(title: "Memo", isCompact: true) {
+                                TextEditor(text: $editedMemo)
+                                    .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
+                                    .padding(8)
+                                    .scrollContentBackground(.hidden)
+                                    .background(DesignTokens.WhiteColors.surface)
+                                    .cornerRadius(6)
+                                    .focused($isMemoFocused)
+                                    .overlay(
+                                        // プレースホルダー
+                                        Group {
+                                            if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                                HStack {
+                                                    VStack {
+                                                        Text("Memo (optional)")
+                                                            .font(DesignTokens.Fonts.label)
+                                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                                        Spacer()
+                                                    }
+                                                    Spacer()
+                                                }
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 12)
+                                                .allowsHitTesting(false)
+                                            }
+                                        }
+                                    )
 
                                 // TextEditor直下に小さなアンカーを置く
                                 Color.clear

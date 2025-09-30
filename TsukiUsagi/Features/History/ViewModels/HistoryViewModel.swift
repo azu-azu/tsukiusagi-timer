@@ -189,6 +189,23 @@ class HistoryViewModel: ObservableObject {
         return formatter.string(from: date)
     }
 
+    // MARK: - Memo Operations
+
+    /// 指定されたレコードのmemoを更新
+    func updateMemo(for recordId: String, newMemo: String?) {
+        guard let index = history.firstIndex(where: { $0.id == recordId }) else {
+            return
+        }
+
+        history[index].memo = newMemo?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true ? nil : newMemo
+        saveHistory()
+    }
+
+    /// 指定されたレコードを取得
+    func getRecord(by id: String) -> SessionRecord? {
+        return history.first { $0.id == id }
+    }
+
     // MARK: - Save Operations
 
     /// 履歴データの永続化（共通処理）
