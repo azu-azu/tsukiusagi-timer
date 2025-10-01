@@ -11,7 +11,7 @@ struct ResetStopSectionView: View {
                 // 🛑 Reset
                 if timerVM.canForceFinish {
                     Button {
-                        timerVM.resetTimer()
+                        timerVM.resetTimer(to: timerVM.workMinutes * 60)
                         dismiss()
                     } label: {
                         HStack(spacing: 8) {
@@ -97,10 +97,13 @@ struct ResetStopSectionView_Previews: PreviewProvider {
             func sendStartNotification() {}
             func cancelNotification() {}
             func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
+            func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+            func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
             func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
             func cancelSessionEndNotification() {}
             func finalizeWorkPhase() {}
             func finalizeBreakPhase() {}
+            func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
         }
         class DummyHaptic: HapticServiceable {
             func heavyImpact() {}
@@ -113,6 +116,9 @@ struct ResetStopSectionView_Previews: PreviewProvider {
             var timeRemaining: Int = 0
             var isRunning: Bool = false
             var isWorkSession: Bool = true
+            var runStateRaw: String?
+            var endAtEpoch: Double?
+            var remainingAtPause: Int?
             func saveTimerState() {}
             func restoreTimerState() {}
         }

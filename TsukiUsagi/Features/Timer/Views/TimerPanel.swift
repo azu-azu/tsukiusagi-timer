@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TimerPanel: View {
-    @ObservedObject var timerVM: TimerViewModel
+    @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
     @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
     @Environment(\.scenePhase) private var scenePhase
@@ -70,26 +70,37 @@ struct TimerPanel: View {
         }
 
         .onChange(of: scenePhase) { _, newPhase in
+            #if DEBUG
+            print("🔍 TimerPanel: scenePhase変更 - \(newPhase)")
+            #endif
             switch newPhase {
             case .background:
-                timerVM.appDidEnterBackground()
+                #if DEBUG
+                print("🔍 TimerPanel: バックグラウンド移行")
+                #endif
+                // Save running state and absolute endAt before pausing engine
                 timerVM.saveTimerState()
+                timerVM.appDidEnterBackground()
             case .active:
+                #if DEBUG
+                print("🔍 TimerPanel: フォアグラウンド復帰")
+                #endif
                 Task { timerVM.appWillEnterForeground() }
             default:
-                break
+                #if DEBUG
+                print("🔍 TimerPanel: その他のフェーズ - \(newPhase)")
+                #endif
             }
         }
 
         .onAppear {
-            // 通知の重複防止: 先に必ずremove
-            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd"])
-            if timerVM.isRunning && timerVM.timeRemaining > 0 {
-                NotificationManager.shared.scheduleSessionEndNotification(
-                    after: timerVM.timeRemaining,
-                    phase: timerVM.isWorkSession ? .focus : .breakTime
-                )
+            // 再起動/再表示時に永続化状態から復元
+            Task { @MainActor in
+                timerVM.restoreTimerState()
+                timerVM.startFromRestoredIfNeeded()
             }
+            // 通知の再スケジューリングは、アプリ起動時のみ実行
+            // History画面からの戻りなど、単純な画面表示では実行しない
         }
     }
 

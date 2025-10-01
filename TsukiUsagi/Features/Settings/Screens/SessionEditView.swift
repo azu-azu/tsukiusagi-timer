@@ -318,7 +318,9 @@ extension SessionEditView {
             }
             dismiss()
         } catch {
+            #if DEBUG
             print("Error saving session: \(error)")
+            #endif
         }
     }
 

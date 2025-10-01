@@ -16,28 +16,40 @@ TsukiUsagi/
 │   └── todo_refactor_plan.md
 ├── README.md                                # ルート README
 ├── scripts/
-│   └── setup.sh
+│   └── replace_fonts.sh
 ├── tools/
 │   └── swiftlint_ast_font_check.swift
 ├── TsukiUsagi/                              # アプリ本体
 │   ├── Assets.xcassets/                     # 画像・色アセット
+│   │   ├── AccentColor.colorset/
+│   │   ├── AppIcon.appiconset/
+│   │   ├── moonCardBG.colorset/
+│   │   ├── moonTextMuted.colorset/
+│   │   ├── moonTextPrimary.colorset/
+│   │   ├── moonTextSecondary.colorset/
+│   │   ├── usagi_1.imageset/
+│   │   └── usagi_2.imageset/
 │   ├── CrossFeatureUI/                      # 機能横断 UI
 │   │   ├── Cards/
 │   │   │   ├── CardContainer.swift
 │   │   │   ├── NavigationCardView.swift
 │   │   │   └── TotalCard.swift
 │   │   ├── Controls/
+│   │   │   ├── PencilIcon.swift
 │   │   │   ├── PlusMinusButton.swift
+│   │   │   ├── SessionLabelSection.swift
 │   │   │   └── StartPulseAnimationModifier.swift
 │   │   └── Navigation/
 │   │       ├── HamburgerMenuButton.swift
 │   │       ├── NavigationBackModifier.swift
+│   │       ├── NavigationCardView.swift
 │   │       └── SideMenu/
 │   │           ├── SideMenuDurationView.swift
 │   │           └── SideMenuView.swift
 │   ├── DeveloperTools/
 │   │   └── Debug/
-│   │       └── PerformanceDebugView.swift
+│   │       ├── PerformanceDebugView.swift
+│   │       └── DebugTestView.swift
 │   ├── Entry/                               # アプリエントリポイント
 │   │   ├── AppDelegate.swift
 │   │   ├── ContentView.swift
@@ -45,19 +57,26 @@ TsukiUsagi/
 │   ├── Features/
 │   │   ├── App/
 │   │   │   └── Components/
-│   │   │       └── FooterBar.swift
-│   │   ├── Common/
-│   │   │   └── (共通系は CrossFeatureUI へ昇格・集約)
+│   │   │       ├── FooterBar.swift
+│   │   │       └── MainPanel.swift
 │   │   ├── History/
 │   │   │   ├── Helpers/
 │   │   │   ├── Models/
+│   │   │   │   ├── ActivityIntensity.swift
+│   │   │   │   ├── DailyHistory.swift
+│   │   │   │   └── Month.swift              # 新規追加：TabView用の安定ID管理
 │   │   │   ├── Services/
 │   │   │   ├── ViewModels/
 │   │   │   └── Views/
+│   │   │       ├── CalendarDayCell.swift
 │   │   │       ├── CalendarHistoryView.swift
 │   │   │       ├── DailyDetailView.swift
 │   │   │       ├── DailyTimelineView.swift
-│   │   │       └── HistoryView.swift
+│   │   │       ├── HistoryContainerView.swift
+│   │   │       ├── HistoryDailyView.swift
+│   │   │       ├── HistoryMonthlyView.swift # 更新：Month モデル使用
+│   │   │       ├── HistoryView.swift
+│   │   │       └── MemoEditView.swift
 │   │   ├── Settings/
 │   │   │   ├── Components/                       # 再利用 UI
 │   │   │   │   ├── Sessions/
@@ -67,20 +86,22 @@ TsukiUsagi/
 │   │   │   │   │   │   ├── SessionNameCustomInputView.swift
 │   │   │   │   │   │   └── SessionNameSelectionView.swift
 │   │   │   │   │   ├── Management/
-│   │   │   │   │   │   └── EmbeddedSessionManagementView.swift   # Screen に埋め込む再利用 UI（移動）
+│   │   │   │   │   │   └── EmbeddedSessionManagementView.swift   # 更新：UI改善
 │   │   │   │   │   ├── Rows/
 │   │   │   │   │   │   ├── SessionRowDisplayView.swift
 │   │   │   │   │   │   ├── SessionRowEditingView.swift
 │   │   │   │   │   │   └── SessionRowView.swift
-│   │   │   │   └── SettingsHeaderView.swift
+│   │   │   │   │   └── SettingsHeaderView.swift
 │   │   │   ├── Screens/                          # 画面（Screen）
 │   │   │   │   ├── NewSessionFormView.swift      # 新規作成シート
 │   │   │   │   ├── SessionEditView.swift         # 編集画面
-│   │   │   │   └── SessionManagementView.swift   # 一覧・管理画面
+│   │   │   │   └── SessionManagementView.swift   # 更新：UI改善
 │   │   │   ├── Sections/
 │   │   │   │   ├── Duration/
 │   │   │   │   │   ├── DurationHelpers.swift
 │   │   │   │   │   └── DurationSessionSettingsView.swift
+│   │   │   │   ├── Notification/                  # 新規追加
+│   │   │   │   │   └── NotificationSettingsView.swift
 │   │   │   │   ├── ResetStop/
 │   │   │   │   │   └── ResetStopSectionView.swift
 │   │   │   │   ├── SubtitleEdit/
@@ -93,17 +114,34 @@ TsukiUsagi/
 │   │   │   └── SheetBuilders/
 │   │   │       └── SessionEditSheetBuilder.swift
 │   │   ├── Streak/
+│   │   │   ├── DevOnly/                          # 開発専用機能
+│   │   │   │   ├── AchievementsView.swift
+│   │   │   │   ├── AchievementManager.swift
+│   │   │   │   ├── ShareManager.swift
+│   │   │   │   ├── SmartNotificationManager.swift
+│   │   │   │   ├── SmartNotificationToggleView.swift
+│   │   │   │   ├── StreakView.swift
+│   │   │   │   ├── TotalStreakSectionView.swift
+│   │   │   │   ├── WeeklyUsageSectionView.swift
+│   │   │   │   └── XPManager.swift
 │   │   │   ├── Manager/
+│   │   │   │   └── StreakManager.swift
 │   │   │   └── Views/
-│   │   │       ├── AchievementsView.swift
 │   │   │       ├── Components/
+│   │   │       │   └── DayCircleView.swift
 │   │   │       ├── Screens/
 │   │   │       └── Sections/
+│   │   │           └── WeeklyCalendarSectionView.swift
 │   │   └── Timer/
 │   │       ├── Components/
+│   │       │   └── TimerEditHeaderView.swift
 │   │       ├── Models/
+│   │       │   └── PomodoroPhase.swift
 │   │       ├── Services/
 │   │       ├── ViewModels/
+│   │       │   ├── TimerSessionManager.swift
+│   │       │   ├── TimerStateManager.swift
+│   │       │   └── TimerViewModel.swift
 │   │       └── Views/
 │   │           ├── RecordedTimesView.swift
 │   │           ├── TimerEditView.swift
@@ -145,9 +183,8 @@ TsukiUsagi/
 │   │   │   │   └── GearButtonToolbar.swift
 │   │   │   └── Wrappers/
 │   │   │       └── SelectableTextView.swift
-│   │   ├── Validators/
-│   │   │   └── (各種バリデータ定義)
-│   │   └── (他、Foundation 配下の補助モジュール)
+│   │   ├── Utilities/
+│   │   └── Validators/
 │   ├── GlobalComponents/
 │   │   ├── Buttons/
 │   │   │   └── KeyboardCloseButton.swift
@@ -198,7 +235,11 @@ TsukiUsagi/
 │   ├── DebugTestView.swift
 │   ├── FontTestHelpers.swift
 │   ├── FontTestView.swift
+│   ├── NotificationAndHistorySpiesTests.swift
 │   ├── SimpleSubtitleTest.swift
+│   ├── TimerPersistenceTests.swift
+│   ├── TimerViewModelTests.swift
+│   ├── TimerViewModelTransitionsTests.swift
 │   └── TsukiUsagiTests.swift
 └── TsukiUsagiUITests/
     ├── TsukiUsagiUITests.swift
@@ -206,6 +247,9 @@ TsukiUsagi/
 ```
 
 ## メモ
-- 本ドキュメントは実際のリポジトリ構造に同期済みです（最終更新: 自動化ツールにより最新コミット時点）。
+- 本ドキュメントは実際のリポジトリ構造に同期済みです（最終更新: 2025-10-01）。
 - Settings の新規作成シートは `NewSessionFormView` を使用し、Edit 画面は `SessionEditView` です。
 - Foundation 層は `DesignTokens` と拡張系ユーティリティを中核に、UIKit 連携は `UIKitSupport` 配下に整理されています。
+- History 機能に `Month.swift` モデルを追加し、TabView の安定したページ管理を実現しています。
+- Streak 機能は開発専用機能を `DevOnly` ディレクトリに分離しています。
+- 全148個のSwiftファイルで構成されています。

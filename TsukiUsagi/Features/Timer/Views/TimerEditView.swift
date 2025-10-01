@@ -6,6 +6,11 @@ struct TimerEditView: View {
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var sessionManager: SessionManager
 
+    // 新しいViewModelとBuilder（既存コードと並行動作）
+    @StateObject private var editViewModel = TimerEditViewModel()
+    private let sectionBuilder = TimerEditSectionBuilder()
+
+    // 既存のプロパティ（後方互換性のため保持）
     @State private var editedActivity = ""
     @State private var editedSubtitle = ""
     @State private var editedMemo = ""
@@ -26,32 +31,28 @@ struct TimerEditView: View {
     private let cardCornerRadius: CGFloat = 8
     private let labelCornerRadius: CGFloat = 6
 
+    // 既存の計算プロパティ（新しいViewModelに委譲）
     private var isCustomActivity: Bool {
-        let predefinedActivities = ["Work", "Study", "Read"]
-        return !predefinedActivities.contains { $0.lowercased() == editedActivity.lowercased() }
+        return editViewModel.isCustomActivity
     }
 
-    // Memoエディタの最大高さ（常に有限かつmin以上にクランプ）
+    // Memoエディタの最大高さ（新しいViewModelに委譲）
     private var memoEditorMaxHeight: CGFloat {
-        let screenHeight = UIScreen.main.bounds.height
-        let candidate = (screenHeight.isFinite && screenHeight > 0) ? screenHeight * 0.4 : 300
-        return max(120, candidate)
+        return editViewModel.memoEditorMaxHeight
     }
 
-    // safeAreaInset用のボトム余白（負・非有限を排除）
+    // safeAreaInset用のボトム余白（新しいViewModelに委譲）
     private var bottomInsetForSafeArea: CGFloat {
-        let inset = isKeyboardVisible ? keyboardBottomInset : 0
-        if inset.isFinite && inset >= 0 { return inset }
-        return 0
+        return editViewModel.bottomInsetForSafeArea
     }
 
-    // バリデーション関数の共通化
+    // バリデーション関数（新しいViewModelに委譲）
     private func isActivityEmpty() -> Bool {
-        return editedActivity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return editViewModel.isActivityEmpty()
     }
 
     private func shouldDisableSave() -> Bool {
-        return isCustomActivity && isActivityEmpty()
+        return editViewModel.shouldDisableSave()
     }
 
     // リアルタイムでエラー状態を計算
@@ -81,9 +82,9 @@ struct TimerEditView: View {
                     // スクロール可能なコンテンツ
                     ScrollViewReader { proxy in
                         ScrollView {
-                            VStack(alignment: .leading, spacing: 40) {
+                            VStack(alignment: .leading, spacing: 24) {
                             // Session Label
-                            section(title: "Session Label") {
+                            sectionBuilder.section(title: "Session Label", isCompact: true) {
                                 SessionLabelSection(
                                     activity: $editedActivity,
                                     descriptionText: $editedSubtitle,
@@ -96,7 +97,7 @@ struct TimerEditView: View {
                             }
 
                             // Final Time
-                            section(title: "Final Time") {
+                            sectionBuilder.section(title: "Final Time", isCompact: true) {
                                 DatePicker(
                                     "Final Time",
                                     selection: $editedEnd,
@@ -109,28 +110,33 @@ struct TimerEditView: View {
                             }
 
                             // Memo
-                            section(title: "Memo") {
-                                ZStack(alignment: .topLeading) {
-                                    if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                        Text("Memo (optional)")
-                                            .font(DesignTokens.Fonts.label)
-                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 12)
-                                    }
-
-                                    // 背景レイヤにタップ検知を置いてフォーカスを確実に付与
-                                    DesignTokens.WhiteColors.surface
-                                        .contentShape(Rectangle())
-                                        .onTapGesture { isMemoFocused = true }
-
-                                    TextEditor(text: $editedMemo)
-                                        .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
-                                        .padding(8)
-                                        .scrollContentBackground(.hidden)
-                                        .background(Color.clear) // 背景は上のレイヤーに委譲
-                                        .focused($isMemoFocused)
-                                }
+                            sectionBuilder.section(title: "Memo", isCompact: true) {
+                                TextEditor(text: $editedMemo)
+                                    .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
+                                    .padding(8)
+                                    .scrollContentBackground(.hidden)
+                                    .background(DesignTokens.WhiteColors.surface)
+                                    .cornerRadius(6)
+                                    .focused($isMemoFocused)
+                                    .overlay(
+                                        // プレースホルダー
+                                        Group {
+                                            if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                                HStack {
+                                                    VStack {
+                                                        Text("Memo (optional)")
+                                                            .font(DesignTokens.Fonts.label)
+                                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                                        Spacer()
+                                                    }
+                                                    Spacer()
+                                                }
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 12)
+                                                .allowsHitTesting(false)
+                                            }
+                                        }
+                                    )
 
                                 // TextEditor直下に小さなアンカーを置く
                                 Color.clear
@@ -228,8 +234,8 @@ struct TimerEditView: View {
                     // フォールバック（念のため）
                     editedEnd = timerVM.endTime ?? Date()
                     minEnd = timerVM.startTime ?? Date()
-                    editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
-                    editedSubtitle = timerVM.currentSubtitleLabel
+                    editedActivity = timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel
+                    editedSubtitle = timerVM.subtitleLabel
                     editedMemo = ""
                 }
             }
@@ -252,53 +258,7 @@ struct TimerEditView: View {
         }
     }
 
-    @ViewBuilder
-    private func section<Content: View>(
-        title: String,
-        showDone: Bool = false,
-        doneAction: (() -> Void)? = nil,
-        isCompact: Bool = false,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: isCompact ? 5 : 10) {
-            HStack {
-                Text(title)
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .fontWeight(.semibold)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    .padding(.horizontal, 4)
-                Spacer()
-                if showDone, let action = doneAction {
-                    Button("Done") {
-                        action()
-                    }
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(DesignTokens.WhiteColors.stroke)
-                    )
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: showDone)
-                }
-            }
-            VStack(alignment: .leading, spacing: 10) {
-                content()
-            }
-            .padding(
-                isCompact
-                ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
-                : EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
-            )
-            .padding(isCompact ? .init() : .all)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
-            )
-        }
-    }
+    // section関数は削除（TimerEditSectionBuilderを使用）
 }
 
 // MARK: - Change detection
@@ -306,9 +266,9 @@ private extension TimerEditView {
     var isNoChanges: Bool {
         // 比較元も履歴の最後のレコードを参照（なければVMの値でフォールバック）
         let originalActivity = historyVM.history.last?.activity
-            ?? (timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel)
+            ?? (timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel)
         let originalSubtitle = historyVM.history.last?.subtitle
-            ?? timerVM.currentSubtitleLabel
+            ?? timerVM.subtitleLabel
         let originalMemo = historyVM.history.last?.memo ?? ""
         let originalEnd = historyVM.history.last?.end ?? (timerVM.endTime ?? Date())
         let activitySame = editedActivity.trimmingCharacters(in: .whitespacesAndNewlines) == originalActivity

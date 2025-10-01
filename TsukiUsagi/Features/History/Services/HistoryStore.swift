@@ -37,11 +37,15 @@ struct HistoryStore {
                         options: [.atomic, .completeFileProtectionUnlessOpen]
                     )
                 } catch {
+                    #if DEBUG
                     print("HistoryStore save failed:", error)
+                    #endif
                 }
             }
         } catch {
+            #if DEBUG
             print("HistoryStore encoding failed:", error)
+            #endif
         }
     }
 

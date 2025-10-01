@@ -3,24 +3,33 @@ import SwiftUI
 struct HistoryMonthlyView: View {
     @EnvironmentObject var historyVM: HistoryViewModel
 
-    // Stable paging model to avoid jank: fixed months array + index
-    @State private var months: [Date] = []
+    // Stable paging model with UUID-based Month objects
+    @State private var months: [Month] = []
     @State private var currentIndex: Int = 0
 
     private let calendar = Calendar.current
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             // Page-style month pager (stable pages by index)
             TabView(selection: $currentIndex) {
                 ForEach(months.indices, id: \.self) { idx in
-                    MonthlyPage(month: months[idx])
-                        .tag(idx)
-                        .padding(.horizontal)
+                    VStack(alignment: .leading, spacing: 0) {
+                        MonthlyPage(month: months[idx])
+                            .padding(.horizontal, 8)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .tag(idx)
+                    .id(months[idx].id) // Stable ID for proper view regeneration
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .frame(maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .onChange(of: currentIndex) { oldValue, newValue in
+                // Page change event handling (analytics, prefetch, etc.)
+                handlePageChange(from: oldValue, to: newValue)
+            }
         }
         .onAppear { ensureMonthsInitialized() }
     }
@@ -28,26 +37,59 @@ struct HistoryMonthlyView: View {
     // Initialize a stable window of months around today
     private func ensureMonthsInitialized() {
         guard months.isEmpty else { return }
-        let center = startOfMonth(Date())
-        let window = (-12...12).compactMap { offset in
-            calendar.date(byAdding: .month, value: offset, to: center)
-        }
-        months = window
-        currentIndex = window.firstIndex(of: center) ?? (window.count / 2)
+        months = Month.generateAroundToday(countBefore: 12, countAfter: 12)
+        currentIndex = months.firstIndex { $0.isCurrentMonth } ?? (months.count / 2)
     }
 
-    private func startOfMonth(_ date: Date) -> Date {
-        calendar.date(from: calendar.dateComponents([.year, .month], from: date)) ?? date
+    // MARK: - Page Change Handling
+    private func handlePageChange(from oldIndex: Int, to newIndex: Int) {
+        // Optional: Add analytics tracking, prefetching, or other side effects
+        // Example: Analytics.track("month_changed", properties: ["from": oldIndex, "to": newIndex])
+
+        // Optional: Prefetch adjacent months for smoother experience
+        prefetchAdjacentMonths(around: newIndex)
+    }
+
+    private func prefetchAdjacentMonths(around index: Int) {
+        // Optional: Preload data for adjacent months to improve performance
+        // This could trigger background data loading for months[index ± 1]
+    }
+
+    // MARK: - Navigation Helpers
+    private func changeMonth(by delta: Int) {
+        let nextIndex = (currentIndex + delta).clamped(to: 0...(months.count - 1))
+        currentIndex = nextIndex
     }
 
     // MARK: - Page
     @ViewBuilder
-    private func MonthlyPage(month: Date) -> some View {
-        let summary = historyVM.getCalendarMonthSummary(for: month)
-        VStack(alignment: .leading, spacing: 12) {
+    private func MonthlyPage(month: Month) -> some View {
+        MonthlyPageContent(month: month)
+            .task(id: month.id) {
+                // Optional: Preload data for this month if needed
+                // This runs when the month changes, providing smooth data loading
+                await preloadMonthData(for: month)
+            }
+    }
+
+    private func preloadMonthData(for month: Month) async {
+        // Optional: Background data loading for smoother experience
+        // This could trigger cache warming, API calls, or other data preparation
+        // Example: await historyVM.preloadData(for: month.date)
+    }
+}
+
+// MARK: - Monthly Page Content
+private struct MonthlyPageContent: View {
+    @EnvironmentObject var historyVM: HistoryViewModel
+    let month: Month
+
+    var body: some View {
+        let summary = historyVM.getCalendarMonthSummary(for: month.date)
+        VStack(alignment: .leading, spacing: 8) {
             // Header
             HStack {
-                Text(month.formatted(.dateTime.year().month(.wide)))
+                Text(month.title)
                     .font(DesignTokens.Fonts.labelBold)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 Spacer()
@@ -71,11 +113,11 @@ struct HistoryMonthlyView: View {
             .roundedCard()
 
             // Weekly totals (simple bar list)
-            WeeklyTotalsList(month: month)
+            WeeklyTotalsList(month: month.date)
                 .roundedCard()
         }
-        // Keep top padding minimal to avoid excessive whitespace under tabs
-        .padding(.top, 4)
+        // Minimal gap below tabs
+        .padding(.top, 0)
     }
 }
 
@@ -103,16 +145,18 @@ private struct WeeklyTotalsList: View {
 
                     // bar
                     GeometryReader { geo in
-                        let maxWidth = max(1, geo.size.width)
+                        let maxWidth = max(0, geo.size.width)
                         let ratio = min(1, max(0, Double(bucket.totalMinutes) / Double(maxVal)))
                         let barWidth = CGFloat(ratio) * maxWidth
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(DesignTokens.WhiteColors.stroke)
                                 .opacity(0.2)
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(DesignTokens.MoonColors.accentBlue)
-                                .frame(width: max(1, barWidth), height: 8)
+                            if bucket.totalMinutes > 0 && barWidth > 0 {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(DesignTokens.MoonColors.accentBlue)
+                                    .frame(width: barWidth, height: 8)
+                            }
                         }
                     }
                     .frame(height: 12)
@@ -128,53 +172,65 @@ private struct WeeklyTotalsList: View {
     }
 
     private func weeklyBuckets() -> [WeeklyBucket] {
-        // Split the month into weeks (starting Sunday per current Calendar settings)
+        // Compute month boundaries
+        let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: month))!
+        let daysRange = calendar.range(of: .day, in: .month, for: month)!
+        let monthEnd = calendar.date(byAdding: .day, value: daysRange.count - 1, to: monthStart)!
+
+        // Precomputed daily map for this month
         let days = historyVM.getCalendarDailyHistories(for: month)
-        // sort keys
         let sortedKeys = days.keys.sorted()
         guard let first = sortedKeys.first else { return [] }
-        var buckets: [WeeklyBucket] = []
 
+        var buckets: [WeeklyBucket] = []
         var weekIndex = 0
         var currentWeekTotal = 0
         var currentWeekStart = first
+        var currentWeekEnd = first
 
         for key in sortedKeys {
             let comp = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: key)
             let compPrev = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: currentWeekStart)
-            if comp.weekOfYear != compPrev.weekOfYear || comp.yearForWeekOfYear != compPrev.yearForWeekOfYear {
-                // flush previous
+            let isSameWeek = (comp.weekOfYear == compPrev.weekOfYear) &&
+                            (comp.yearForWeekOfYear == compPrev.yearForWeekOfYear)
+            if !isSameWeek {
+                // flush previous with month-clipped label
+                let clippedStart = max(currentWeekStart, monthStart)
+                let clippedEnd = min(currentWeekEnd, monthEnd)
                 buckets.append(
                     WeeklyBucket(
                         index: weekIndex,
-                        label: weekLabel(currentWeekStart),
+                        label: weekLabelClipped(start: clippedStart, end: clippedEnd),
                         totalMinutes: currentWeekTotal
                     )
                 )
                 weekIndex += 1
                 currentWeekStart = key
+                currentWeekEnd = key
                 currentWeekTotal = 0
+            } else {
+                currentWeekEnd = key
             }
             currentWeekTotal += days[key]?.totalMinutes ?? 0
         }
         // flush last
+        let clippedStart = max(currentWeekStart, monthStart)
+        let clippedEnd = min(currentWeekEnd, monthEnd)
         buckets.append(
             WeeklyBucket(
                 index: weekIndex,
-                label: weekLabel(currentWeekStart),
+                label: weekLabelClipped(start: clippedStart, end: clippedEnd),
                 totalMinutes: currentWeekTotal
             )
         )
         return buckets
     }
 
-    private func weekLabel(_ date: Date) -> String {
-        let start = calendar.date(
-            from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
-        ) ?? date
-        let end = calendar.date(byAdding: .day, value: 6, to: start) ?? start
-        let fmt: Date.FormatStyle = .dateTime.month(.abbreviated).day()
-        return "\(start.formatted(fmt)) - \(end.formatted(fmt))"
+    private func weekLabelClipped(start: Date, end: Date) -> String {
+        let startDay = calendar.component(.day, from: start)
+        let endDay = calendar.component(.day, from: end)
+        if startDay == endDay { return "\(startDay)" }
+        return "\(startDay) – \(endDay)"
     }
 
     // Removed maxTotal() to avoid repeated recomputation per row

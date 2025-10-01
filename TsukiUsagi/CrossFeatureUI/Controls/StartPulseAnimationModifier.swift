@@ -14,15 +14,13 @@ struct StartPulseAnimationModifier: ViewModifier {
             .foregroundColor(flashYellow ? DesignTokens.PureColors.accentYellow : DesignTokens.PureColors.textWhite)
             .scaleEffect(flashScale ? 1.5 : 1.0, anchor: .center)
             .onReceive(publisher) { _ in
-                print("StartPulseAnimationModifier: received pulse signal")
-                withAnimation(.easeInOut(duration: 0.4)) {
-                    print("StartPulseAnimationModifier: setting flashYellow = true")
+                // duration: 数値が小さい方がゆっくり
+                withAnimation(.easeInOut(duration: 0.3)) {
                     flashYellow = true
                     flashScale = true
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    withAnimation(.easeInOut(duration: 1.8)) {
-                        print("StartPulseAnimationModifier: resetting flashYellow = false")
+                    withAnimation(.easeInOut(duration: 1.0)) {
                         flashYellow = false
                         flashScale = false
                     }

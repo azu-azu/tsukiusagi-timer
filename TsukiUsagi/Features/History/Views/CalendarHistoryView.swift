@@ -8,62 +8,59 @@ struct CalendarHistoryView: View {
     @State private var selectedMonth = Date()
     @State private var selectedDate: Date?
     @State private var dailyHistories: [Date: DailyHistory] = [:]
-
-    // Smooth paging model for months
-    @State private var months: [Date] = []
-    @State private var currentIndex: Int = 0
+    @State private var lastSwipeDirection: SwipeDirection?
+    @State private var isSwitchingMonth = false
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
 
+    private enum SwipeDirection {
+        case left, right
+    }
+
     var body: some View {
-        VStack(spacing: 8) {
-            // 月ナビゲーションヘッダー（最小限のパディングでエッジ寄せ）
-            monthNavigationHeader()
-                .padding(.horizontal, 8)
-                .padding(.top, 8)
+        ScrollView {
+            VStack(spacing: 4) {
+                // 月ナビゲーションヘッダー（最小限のパディングでエッジ寄せ）
+                monthNavigationHeader()
+                    .padding(.horizontal, 8)
+                    .padding(.top, 6)
 
-            // 曜日ヘッダー
-            weekdayHeader()
-                .padding(.horizontal, 8)
+                // 曜日ヘッダー
+                weekdayHeader()
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 2)
 
-            // カレンダーグリッド（ページングでスムーズに月移動）
-            TabView(selection: $currentIndex) {
-                ForEach(months.indices, id: \.self) { idx in
-                    calendarGridView(for: months[idx])
-                        .padding(.horizontal, 8)
-                        .tag(idx)
+                // カレンダーグリッド（エッジ to エッジ）
+                calendarGridView(for: selectedMonth)
+                    .padding(.horizontal, 8)
+                    .highPriorityGesture(monthSwipeGesture())
+
+                // カレンダー下の区切り線
+                Rectangle()
+                    .fill(DesignTokens.MoonColors.textSecondary.opacity(0.2))
+                    .frame(height: 1)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 12)
+
+                // 選択日の詳細表示
+                if let selectedDate = selectedDate {
+                    DailyDetailView(
+                        date: selectedDate,
+                        dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.top, 12)
                 }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.snappy(duration: 0.28, extraBounce: 0), value: currentIndex)
 
-            // 選択日の詳細表示
-            if let selectedDate = selectedDate {
-                DailyDetailView(
-                    date: selectedDate,
-                    dailyHistory: dailyHistories[calendar.startOfDay(for: selectedDate)]
-                )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .padding(.top, 12)
+                // 下部余白を確保
+                Spacer(minLength: 48)
             }
-
-            // 下部余白を確保
-            Spacer(minLength: 48)
         }
-        .contentShape(Rectangle())
+        .scrollIndicators(.hidden)
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-        .onAppear {
-            ensureMonthsInitialized()
-            selectedMonth = months[safe: currentIndex] ?? selectedMonth
-            loadMonthData()
-        }
-        .onChange(of: selectedMonth) { loadMonthData() }
-        .onChange(of: currentIndex) { _, newIndex in
-            if let month = months[safe: newIndex] {
-                selectedMonth = month
-                selectedDate = nil
-            }
+        .task(id: selectedMonth) {
+            await loadMonthData()
         }
     }
 
@@ -73,7 +70,7 @@ struct CalendarHistoryView: View {
     private func monthNavigationHeader() -> some View {
         HStack {
             Button {
-                pageChange(by: -1)
+                changeMonth(by: -1)
             } label: {
                 Image(systemName: "chevron.left")
                     .font(DesignTokens.Fonts.label)
@@ -91,7 +88,7 @@ struct CalendarHistoryView: View {
             Spacer()
 
             Button {
-                pageChange(by: 1)
+                changeMonth(by: 1)
             } label: {
                 Image(systemName: "chevron.right")
                     .font(DesignTokens.Fonts.label)
@@ -123,24 +120,46 @@ struct CalendarHistoryView: View {
 
     @ViewBuilder
     private func calendarGridView(for month: Date) -> some View {
-        // Get histories for this page's month to avoid pop-in during swipe
-        let map = historyVM.getCalendarDailyHistories(for: month)
-        return LazyVGrid(columns: columns, spacing: 6) {
-            ForEach(generateCalendarDates(for: month), id: \.self) { date in
+        let startOfMonth = CalendarUtilities.startOfMonth(for: month)
+        // Align first day of month to correct weekday column
+        let firstWeekday = calendar.firstWeekday // 1=Sunday (typically)
+        let weekdayOfFirst = calendar.component(.weekday, from: startOfMonth) // 1...7
+        let leadingSpacers = (weekdayOfFirst - firstWeekday + 7) % 7
+
+        let dates = generateCalendarDates(for: month)
+        let totalCells = leadingSpacers + dates.count
+        let trailingSpacers = (7 - (totalCells % 7)) % 7
+
+        LazyVGrid(columns: columns, spacing: 6) {
+            // leading empty cells
+            ForEach(0..<leadingSpacers, id: \.self) { index in
+                Color.clear.frame(width: 44, height: 44)
+                    .id("leading-\(index)")
+            }
+
+            // month dates
+            ForEach(dates, id: \.self) { date in
                 CalendarDayCell(
                     date: date,
-                    dailyHistory: map[calendar.startOfDay(for: date)],
+                    dailyHistory: dailyHistories[calendar.startOfDay(for: date)],
                     isSelected: isSelected(date),
                     isToday: CalendarUtilities.isToday(date)
                 )
                 .onTapGesture { selectDate(date) }
+                .id("date-\(date.timeIntervalSince1970)")
+            }
+
+            // trailing empty cells to complete the last row
+            ForEach(0..<trailingSpacers, id: \.self) { index in
+                Color.clear.frame(width: 44, height: 44)
+                    .id("trailing-\(index)")
             }
         }
     }
 
     // MARK: - Helper Methods
 
-    private func loadMonthData() {
+    private func loadMonthData() async {
         dailyHistories = historyVM.getCalendarDailyHistories(for: selectedMonth)
 
         // 初回表示時、当月かつ本日に記録がある場合は自動で詳細を表示
@@ -157,21 +176,42 @@ struct CalendarHistoryView: View {
         return CalendarUtilities.generateMonthDates(for: month)
     }
 
-    private func pageChange(by delta: Int) {
-        let newIndex = max(0, min((months.count - 1), currentIndex + delta))
-        guard newIndex != currentIndex else { return }
-        currentIndex = newIndex
+    private func changeMonth(by offset: Int) {
+        guard let newMonth = calendar.date(byAdding: .month, value: offset, to: selectedMonth) else { return }
+        // より速いアニメーションでレスポンシブな操作感を提供
+        withAnimation(.easeOut(duration: 0.15)) {
+            selectedMonth = newMonth
+            selectedDate = nil
+        }
     }
 
-    // MARK: - Months window setup
-    private func ensureMonthsInitialized() {
-        guard months.isEmpty else { return }
-        let center = calendar.date(from: calendar.dateComponents([.year, .month], from: Date())) ?? Date()
-        let window = (-12...12).compactMap { offset in
-            calendar.date(byAdding: .month, value: offset, to: center)
-        }
-        months = window
-        currentIndex = window.firstIndex(of: center) ?? (window.count / 2)
+    // MARK: - Gestures
+    private func monthSwipeGesture() -> some Gesture {
+        DragGesture(minimumDistance: 20, coordinateSpace: .local)
+            .onChanged { value in
+                let dx = value.translation.width
+                let dy = abs(value.translation.height)
+                guard abs(dx) > dy * 1.5 else { return }     // 水平優先
+                if abs(dx) > 50 {
+                    let dir: SwipeDirection = (dx > 0) ? .left : .right
+                    if lastSwipeDirection != dir { lastSwipeDirection = dir }
+                }
+            }
+            .onEnded { _ in
+                guard !isSwitchingMonth, let dir = lastSwipeDirection else { lastSwipeDirection = nil; return }
+                isSwitchingMonth = true
+                withAnimation(.interactiveSpring()) {
+                    switch dir {
+                    case .left:  changeMonth(by: -1)
+                    case .right: changeMonth(by: 1)
+                    }
+                }
+                lastSwipeDirection = nil
+                // 少し遅らせて再入を解放（アニメ完了待ちの簡易版）
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    isSwitchingMonth = false
+                }
+            }
     }
 
     private func monthTitle() -> String {
