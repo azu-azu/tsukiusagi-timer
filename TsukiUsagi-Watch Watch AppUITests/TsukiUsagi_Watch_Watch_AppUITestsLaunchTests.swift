@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class TsukiUsagi_Watch_Watch_AppUITestsLaunchTests: XCTestCase {
+final class TsukiUsagiWatchAppUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

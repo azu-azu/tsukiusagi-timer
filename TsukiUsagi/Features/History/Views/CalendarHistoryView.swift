@@ -13,7 +13,7 @@ struct CalendarHistoryView: View {
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
-    
+
     private enum SwipeDirection {
         case left, right
     }
@@ -35,7 +35,7 @@ struct CalendarHistoryView: View {
                 calendarGridView(for: selectedMonth)
                     .padding(.horizontal, 8)
                     .highPriorityGesture(monthSwipeGesture())
-                
+
                 // カレンダー下の区切り線
                 Rectangle()
                     .fill(DesignTokens.MoonColors.textSecondary.opacity(0.2))
@@ -203,7 +203,7 @@ struct CalendarHistoryView: View {
                 withAnimation(.interactiveSpring()) {
                     switch dir {
                     case .left:  changeMonth(by: -1)
-                    case .right: changeMonth(by:  1)
+                    case .right: changeMonth(by: 1)
                     }
                 }
                 lastSwipeDirection = nil

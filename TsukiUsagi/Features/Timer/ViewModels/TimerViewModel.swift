@@ -33,6 +33,9 @@ final class TimerViewModel: ObservableObject {
     // Streak tracking - @StateObjectではなく通常のプロパティに変更
     private let streakManager: StreakManager
 
+    // Animation Controller - 新しい分離されたアニメーション制御
+    private let animationController: any TimerAnimationControllerProtocol
+
     // 3. @PublishedなどUIバインディング用プロパティ
     @Published var timeRemaining: Int = 0
     @Published var isRunning: Bool = false
@@ -82,7 +85,8 @@ final class TimerViewModel: ObservableObject {
         persistenceManager: TimerPersistenceManageable,
         formatter: TimeFormatterUtilable,
         streakManager: StreakManager = StreakManager(), // デフォルト値を提供
-        dateProvider: DateProviding = SystemDateProvider()
+        dateProvider: DateProviding = SystemDateProvider(),
+        animationController: (any TimerAnimationControllerProtocol)? = nil // オプショナルで追加
     ) {
         // 3. Engine設定
         self.engine = engine
@@ -93,6 +97,9 @@ final class TimerViewModel: ObservableObject {
         self.persistenceManager = persistenceManager
         self.streakManager = streakManager
         self.dateProvider = dateProvider
+
+        // Animation Controller設定（既存のhapticServiceを使用）
+        self.animationController = animationController ?? TimerAnimationController(hapticService: hapticService)
 
         // 4. Engineのコールバック設定（notificationService初期化後）
         self.engine.onTick = { [weak self] seconds in
@@ -123,6 +130,7 @@ final class TimerViewModel: ObservableObject {
         switch self.runState {
         case .running:
             self.shouldSuppressAnimation = true
+            self.animationController.setAnimationSuppression(true)
             self.startFromRestoredIfNeeded()
             // 起動時リカバリ：進行中セッションがあれば通知を再スケジュール
             self.recoverNotificationIfNeeded()
@@ -174,6 +182,7 @@ final class TimerViewModel: ObservableObject {
 
         // アニメーション抑制フラグをリセット
         shouldSuppressAnimation = false
+        animationController.setAnimationSuppression(false)
 
         // 通知権限の確認（タイマー開始時）
         notificationService.ensureAuthorizationIfNeeded { granted in
@@ -291,7 +300,8 @@ final class TimerViewModel: ObservableObject {
         notificationService.sendStartNotification()
     }
     func triggerHeavyHaptic() {
-        hapticService.heavyImpact()
+        // 新しいAnimationControllerに委譲
+        animationController.triggerHeavyHaptic()
     }
     func addSessionHistory(parameters: AddSessionParameters) {
         historyService.add(parameters: parameters)
@@ -332,7 +342,6 @@ final class TimerViewModel: ObservableObject {
         persistenceManager.isWorkSession = isWorkSession
         persistenceManager.runStateRaw = runState.rawValue
 
-
         switch runState {
         case .running:
             if let endAt {
@@ -355,7 +364,6 @@ final class TimerViewModel: ObservableObject {
     func restoreTimerState() {
         persistenceManager.restoreTimerState()
         isWorkSession = persistenceManager.isWorkSession
-
 
         // まず宣言ベースの runState を参照
         var restored = TimerRunState(rawValue: persistenceManager.runStateRaw ?? "")
@@ -448,6 +456,7 @@ final class TimerViewModel: ObservableObject {
     func startFromRestoredIfNeeded() {
         guard runState == .running, timeRemaining > 0 else { return }
         shouldSuppressAnimation = true
+        animationController.setAnimationSuppression(true)
 
         // バックグラウンドから復帰した場合は、既にengine.resume()が呼ばれているため
         // ここでは重複起動を避ける
@@ -520,8 +529,12 @@ final class TimerViewModel: ObservableObject {
 
     /// diamondアニメーションとstartPulseアニメーションを発火
     private func triggerStartAnimations() {
+        // 新しいAnimationControllerに委譲
+        animationController.triggerStartAnimations()
+
+        // 既存のプロパティも同期（後方互換性のため）
+        flashStars = animationController.flashStars
         if !shouldSuppressAnimation {
-            flashStars.toggle()
             DispatchQueue.main.async {
                 self.startPulse.send()
             }
@@ -588,6 +601,8 @@ final class TimerViewModel: ObservableObject {
         case (.running, .running):
             shouldSuppressAnimation = true
             shouldSuppressSessionFinishedAnimation = true
+            animationController.setAnimationSuppression(true)
+            animationController.setSessionFinishedAnimationSuppression(true)
             // バックグラウンドから復帰時は、正確な残り時間で再開
             // engine.pause()で停止していたタイマーを正確な残り時間で再開
             if let endAt = endAt {
@@ -641,4 +656,3 @@ extension TimerViewModel {
     }
 }
 #endif
-

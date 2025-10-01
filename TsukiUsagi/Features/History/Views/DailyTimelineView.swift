@@ -1,36 +1,29 @@
 import SwiftUI
 import Foundation
-
 struct DailyTimelineView: View {
     let targetDate: Date
     @EnvironmentObject var historyVM: HistoryViewModel
     @EnvironmentObject var sessionManager: SessionManager
-
     @State private var restoreError: String?
     @State private var showRestoreAlert = false
     @State private var selectedRecordForMemoEdit: SessionRecord?
-
     private let cal = Calendar.current
     private let dayModeCardHeight: CGFloat = 40
     private let dayModeCardSpacing: CGFloat = 2
     private let timeWidth: CGFloat = 100
     private let summaryCardHeight: CGFloat = 50
-
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 // Total 表示
                 TotalCard(text: TimeFormatters.totalText(totalMinutes()))
-
                 // レコード表示
                 dayModeRecordsSection()
-
                 // 集計表示（レコードが複数ある場合のみ）
                 if records().count > 1 {
                     activitySummarySection()
                     subtitleSummarySection()
                 }
-
                 // メモ部分
                 memoSection()
             }
@@ -74,9 +67,7 @@ struct DailyTimelineView: View {
             disableBackSwipeGesture()
         }
     }
-
     // MARK: - Records Section
-
     @ViewBuilder
     private func dayModeRecordsSection() -> some View {
         VStack(alignment: .leading, spacing: dayModeCardSpacing) {
@@ -85,12 +76,10 @@ struct DailyTimelineView: View {
             }
         }
     }
-
     @ViewBuilder
     private func recordRow(_ rec: SessionRecord) -> some View {
         let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
         let displayName = historyVM.displayActivity(sessionManager: sessionManager, activity: rec.activity)
-
         HStack(spacing: 0) {
             timeRangeView(rec)
             Spacer(minLength: 8)
@@ -105,33 +94,26 @@ struct DailyTimelineView: View {
                 .fill(DesignTokens.CosmosColors.cardBackground)
         )
     }
-
     @ViewBuilder
     private func timeRangeView(_ rec: SessionRecord) -> some View {
         Text(rec.start.formatted(date: .omitted, time: .shortened))
             .monospacedDigit()
             .foregroundColor(DesignTokens.MoonColors.textPrimary)
-
         Spacer().frame(width: 8)
-
         Image(systemName: "arrow.right")
             .font(DesignTokens.Fonts.caption)
             .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
         Spacer().frame(width: 8)
-
         Text(rec.end.formatted(date: .omitted, time: .shortened))
             .monospacedDigit()
             .foregroundColor(DesignTokens.MoonColors.textPrimary)
     }
-
     @ViewBuilder
     private func activityInfoView(displayName: String, rec: SessionRecord, isDeleted: Bool) -> some View {
         Text("\(displayName) \(durationMinutes(rec)) min")
             .foregroundColor(isDeleted ? DesignTokens.MoonColors.textMuted : DesignTokens.MoonColors.textPrimary)
             .opacity(isDeleted ? 0.5 : 1.0)
     }
-
     @ViewBuilder
     private func actionButtonView(rec: SessionRecord, isDeleted: Bool) -> some View {
         if isDeleted {
@@ -140,7 +122,6 @@ struct DailyTimelineView: View {
             memoButton(rec: rec)
         }
     }
-
     @ViewBuilder
     private func restoreButton(rec: SessionRecord) -> some View {
         Button("Restore") {
@@ -154,12 +135,10 @@ struct DailyTimelineView: View {
         .font(DesignTokens.Fonts.caption)
         .foregroundColor(DesignTokens.MoonColors.accentBlue)
     }
-
     @ViewBuilder
     private func memoButton(rec: SessionRecord) -> some View {
         let hasMemo = rec.memo?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
         let iconName = hasMemo ? "pencil" : "plus"
-
         Button(action: {
             selectedRecordForMemoEdit = rec
         }) {
@@ -168,9 +147,7 @@ struct DailyTimelineView: View {
                 .foregroundColor(DesignTokens.MoonColors.accentBlue)
         }
     }
-
     // MARK: - Data Methods
-
     private func records() -> [SessionRecord] {
         return historyVM.history
             .filter { rec in
@@ -178,23 +155,18 @@ struct DailyTimelineView: View {
             }
             .sorted { $0.start < $1.start }
     }
-
     private func totalMinutes() -> Int {
         records().reduce(0) { $0 + durationMinutes($1) }
     }
-
     private func durationMinutes(_ rec: SessionRecord) -> Int {
         let sec = rec.end.timeIntervalSince(rec.start)
         return max(Int(sec) / 60, 1)
     }
-
     // MARK: - Summary Sections
-
     private struct LabelSummary {
         let label: String
         let total: Int
     }
-
     private func byActivity() -> [LabelSummary] {
         let grouped = Dictionary(grouping: records(), by: \.activity)
         return grouped.map { k, recs in
@@ -205,7 +177,6 @@ struct DailyTimelineView: View {
         }
         .sorted { $0.total > $1.total }
     }
-
     private func bySubtitle() -> [LabelSummary] {
         let recordsWithSubtitle = records().filter {
             guard let subtitle = $0.subtitle?.trimmingCharacters(in: .whitespacesAndNewlines) else { return false }
@@ -220,25 +191,21 @@ struct DailyTimelineView: View {
         }
         .sorted { $0.total > $1.total }
     }
-
     @ViewBuilder
     private func activitySummarySection() -> some View {
         summarySection(title: "By Activity", summaries: byActivity())
     }
-
     @ViewBuilder
     private func subtitleSummarySection() -> some View {
         if !bySubtitle().isEmpty {
             summarySection(title: "By Subtitle", summaries: bySubtitle())
         }
     }
-
     private func summarySection(title: String, summaries: [LabelSummary]) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
             ForEach(summaries, id: \.label) { s in
                 HStack {
                     Text(s.label)
@@ -255,11 +222,9 @@ struct DailyTimelineView: View {
         }
         .padding(.top, 16)
     }
-
     @ViewBuilder
     private func memoSection() -> some View {
         let recordsWithMemos = recordsWithMemos()
-
         if !recordsWithMemos.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 memoSectionHeader()
@@ -268,28 +233,24 @@ struct DailyTimelineView: View {
             .padding(.top, 16)
         }
     }
-
     private func recordsWithMemos() -> [SessionRecord] {
         return records().filter { record in
             let memo = record.memo?.trimmingCharacters(in: .whitespacesAndNewlines)
             return memo != nil && !memo!.isEmpty
         }
     }
-
     @ViewBuilder
     private func memoSectionHeader() -> some View {
         Text("📝 Memos")
             .font(DesignTokens.Fonts.sectionTitle)
             .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
-
     @ViewBuilder
     private func memoItemsList(records: [SessionRecord]) -> some View {
         ForEach(records, id: \.id) { record in
             memoItemButton(record: record)
         }
     }
-
     @ViewBuilder
     private func memoItemButton(record: SessionRecord) -> some View {
         Button(action: {
@@ -299,7 +260,6 @@ struct DailyTimelineView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-
     @ViewBuilder
     private func memoItemContent(record: SessionRecord) -> some View {
         HStack {
@@ -311,7 +271,6 @@ struct DailyTimelineView: View {
         .background(DesignTokens.CosmosColors.cardBackground)
         .cornerRadius(6)
     }
-
     @ViewBuilder
     private func memoTextContent(record: SessionRecord) -> some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -319,23 +278,20 @@ struct DailyTimelineView: View {
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 .multilineTextAlignment(.leading)
-
-            Text("\(record.start.formatted(date: .omitted, time: .shortened)) - \(record.end.formatted(date: .omitted, time: .shortened))")
+            Text("\(record.start.formatted(date: .omitted, time: .shortened)) - " +
+                 "\(record.end.formatted(date: .omitted, time: .shortened))")
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .monospacedDigit()
         }
     }
-
     @ViewBuilder
     private func memoEditIcon() -> some View {
         Image(systemName: "pencil")
             .font(DesignTokens.Fonts.caption)
             .foregroundColor(DesignTokens.MoonColors.accentBlue)
     }
-
     // MARK: - Back Swipe Control
-
     private func disableBackSwipeGesture() {
         DispatchQueue.main.async {
             // NavigationStackのUINavigationControllerを取得してbackスワイプを無効化
@@ -347,39 +303,31 @@ struct DailyTimelineView: View {
             }
         }
     }
-
     private func enableBackSwipeGesture() {
         DispatchQueue.main.async {
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first {
                 let navController = findNavigationController(in: window.rootViewController)
-
                 // より安全な有効化（visual style警告を避ける）
                 if let gestureRecognizer = navController?.interactivePopGestureRecognizer {
                     gestureRecognizer.isEnabled = true
                     // delegateは設定しない（警告回避）
                 }
-
             }
         }
     }
-
-
     private func findNavigationController(in viewController: UIViewController?) -> UINavigationController? {
         if let navigationController = viewController as? UINavigationController {
             return navigationController
         }
-
         for child in viewController?.children ?? [] {
             if let found = findNavigationController(in: child) {
                 return found
             }
         }
-
         return nil
     }
 }
-
 // 共通サマリーカードスタイル
 extension View {
     func summaryCardStyle(

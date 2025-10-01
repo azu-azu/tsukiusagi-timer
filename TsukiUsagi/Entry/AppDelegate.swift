@@ -19,7 +19,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // Display the notification as a banner and play a sound
         completionHandler([.banner, .sound])
     }
-    
+
     // This function will be called when the user taps on a notification or notification action
     func userNotificationCenter(
         _: UNUserNotificationCenter,
@@ -34,7 +34,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 object: nil
             )
         }
-        
+
         completionHandler()
     }
 }

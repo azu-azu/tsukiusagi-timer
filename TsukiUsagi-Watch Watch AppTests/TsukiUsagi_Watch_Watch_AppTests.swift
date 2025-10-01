@@ -6,9 +6,9 @@
 //
 
 import Testing
-@testable import TsukiUsagi_Watch_Watch_App
+@testable import TsukiUsagiWatchApp
 
-struct TsukiUsagi_Watch_Watch_AppTests {
+struct TsukiUsagiWatchAppTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

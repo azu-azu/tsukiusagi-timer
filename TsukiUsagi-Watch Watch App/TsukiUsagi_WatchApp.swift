@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct TsukiUsagi_Watch_Watch_AppApp: App {
+struct TsukiUsagiWatchApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

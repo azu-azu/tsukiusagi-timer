@@ -96,7 +96,9 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
                 completion(false)
             case .notDetermined:
                 // 初回権限要求
-                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                UNUserNotificationCenter.current().requestAuthorization(
+                    options: [.alert, .sound, .badge]
+                ) { granted, error in
                     if let error = error {
                         #if DEBUG
                         print("🔔 通知許可リクエストでエラー: \(error.localizedDescription)")
