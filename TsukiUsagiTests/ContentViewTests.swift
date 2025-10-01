@@ -32,6 +32,7 @@ class ContentViewTests: XCTestCase {
             func cancelSessionEndNotification() {}
             func finalizeWorkPhase() {}
             func finalizeBreakPhase() {}
+            func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
         }
         class DummyHaptic: HapticServiceable {
             func heavyImpact() {}

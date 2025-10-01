@@ -29,20 +29,6 @@ struct TsukiUsagiApp: App {
         // Feature Flags の初期化
         FeatureFlags.setDefaultValues()
 
-        // 通知許可のリクエスト（初回起動時のみ）
-        Task {
-            let granted = await NotificationPermissionManager.shared.requestPermissionIfNeeded()
-            if granted {
-                #if DEBUG
-                print("🔔 通知許可が承認されました - バックグラウンド時の終了通知が有効です")
-                #endif
-            } else {
-                #if DEBUG
-                print("🔔 通知許可が拒否されました - バックグラウンド時の終了通知は無効です")
-                #endif
-            }
-        }
-
         // NavigationBar外観設定
         configureNavigationBarAppearance()
 

@@ -269,6 +269,7 @@ private class PreviewSideMenuDummyNotification: PhaseNotificationServiceable {
     func cancelSessionEndNotification() {}
     func finalizeWorkPhase() {}
     func finalizeBreakPhase() {}
+    func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
 }
 
 private class PreviewSideMenuDummyHaptic: HapticServiceable {
