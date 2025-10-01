@@ -86,11 +86,10 @@ struct TimerPanel: View {
                 print("🔍 TimerPanel: フォアグラウンド復帰")
                 #endif
                 Task { timerVM.appWillEnterForeground() }
-            default:
+                default:
                 #if DEBUG
                 print("🔍 TimerPanel: その他のフェーズ - \(newPhase)")
                 #endif
-                break
             }
         }
 

@@ -116,9 +116,9 @@ struct ResetStopSectionView_Previews: PreviewProvider {
             var timeRemaining: Int = 0
             var isRunning: Bool = false
             var isWorkSession: Bool = true
-            var runStateRaw: String? = nil
-            var endAtEpoch: Double? = nil
-            var remainingAtPause: Int? = nil
+            var runStateRaw: String?
+            var endAtEpoch: Double?
+            var remainingAtPause: Int?
             func saveTimerState() {}
             func restoreTimerState() {}
         }

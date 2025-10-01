@@ -45,16 +45,16 @@ struct HistoryMonthlyView: View {
     private func handlePageChange(from oldIndex: Int, to newIndex: Int) {
         // Optional: Add analytics tracking, prefetching, or other side effects
         // Example: Analytics.track("month_changed", properties: ["from": oldIndex, "to": newIndex])
-        
+
         // Optional: Prefetch adjacent months for smoother experience
         prefetchAdjacentMonths(around: newIndex)
     }
-    
+
     private func prefetchAdjacentMonths(around index: Int) {
         // Optional: Preload data for adjacent months to improve performance
         // This could trigger background data loading for months[index ± 1]
     }
-    
+
     // MARK: - Navigation Helpers
     private func changeMonth(by delta: Int) {
         let nextIndex = (currentIndex + delta).clamped(to: 0...(months.count - 1))
@@ -71,7 +71,7 @@ struct HistoryMonthlyView: View {
                 await preloadMonthData(for: month)
             }
     }
-    
+
     private func preloadMonthData(for month: Month) async {
         // Optional: Background data loading for smoother experience
         // This could trigger cache warming, API calls, or other data preparation
@@ -83,7 +83,7 @@ struct HistoryMonthlyView: View {
 private struct MonthlyPageContent: View {
     @EnvironmentObject var historyVM: HistoryViewModel
     let month: Month
-    
+
     var body: some View {
         let summary = historyVM.getCalendarMonthSummary(for: month.date)
         VStack(alignment: .leading, spacing: 8) {
@@ -191,7 +191,8 @@ private struct WeeklyTotalsList: View {
         for key in sortedKeys {
             let comp = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: key)
             let compPrev = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: currentWeekStart)
-            let isSameWeek = (comp.weekOfYear == compPrev.weekOfYear) && (comp.yearForWeekOfYear == compPrev.yearForWeekOfYear)
+            let isSameWeek = (comp.weekOfYear == compPrev.weekOfYear) &&
+                            (comp.yearForWeekOfYear == compPrev.yearForWeekOfYear)
             if !isSameWeek {
                 // flush previous with month-clipped label
                 let clippedStart = max(currentWeekStart, monthStart)

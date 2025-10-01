@@ -5,7 +5,7 @@ struct NotificationSettingsView: View {
     @AppStorage("time_sensitive_notifications_enabled") private var timeSensitiveEnabled = false
     @State private var showingPermissionAlert = false
     @State private var permissionStatus: UNAuthorizationStatus = .notDetermined
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Time-Sensitive通知の設定
@@ -14,13 +14,13 @@ struct NotificationSettingsView: View {
                     Text("Time-Sensitive Notifications")
                         .font(DesignTokens.Fonts.labelBold)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    
+
                     Spacer()
-                    
+
                     Toggle("", isOn: $timeSensitiveEnabled)
                         .toggleStyle(SwitchToggleStyle(tint: DesignTokens.MoonColors.accentBlue))
                 }
-                
+
                 Text("Receive notifications even when Focus mode is active")
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
@@ -29,21 +29,21 @@ struct NotificationSettingsView: View {
             .padding(.vertical, 12)
             .background(DesignTokens.MoonColors.surfaceSecondary)
             .cornerRadius(12)
-            
+
             // 通知許可状態の表示
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Notification Permission Status")
                         .font(DesignTokens.Fonts.labelBold)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    
+
                     Spacer()
-                    
+
                     Text(permissionStatusText)
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(permissionStatusColor)
                 }
-                
+
                 if permissionStatus != .authorized {
                     Button("Open Settings") {
                         openAppSettings()
@@ -60,13 +60,13 @@ struct NotificationSettingsView: View {
         .onAppear {
             checkPermissionStatus()
         }
-        .onChange(of: timeSensitiveEnabled) { oldValue, newValue in
+        .onChange(of: timeSensitiveEnabled) { _, newValue in
             if newValue {
                 checkPermissionStatus()
             }
         }
     }
-    
+
     private var permissionStatusText: String {
         switch permissionStatus {
         case .authorized:
@@ -83,7 +83,7 @@ struct NotificationSettingsView: View {
             return "Unknown"
         }
     }
-    
+
     private var permissionStatusColor: Color {
         switch permissionStatus {
         case .authorized:
@@ -98,7 +98,7 @@ struct NotificationSettingsView: View {
             return .gray
         }
     }
-    
+
     private func checkPermissionStatus() {
         Task {
             let status = await NotificationPermissionManager.shared.getCurrentPermissionStatus()
@@ -107,7 +107,7 @@ struct NotificationSettingsView: View {
             }
         }
     }
-    
+
     private func openAppSettings() {
         if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(settingsUrl)

@@ -159,7 +159,10 @@ struct SideMenuView: View {
         .padding(.bottom, isLandscape ? 12 : 16)
         .background(
             LinearGradient(
-                gradient: Gradient(colors: [DesignTokens.CosmosColors.background, DesignTokens.CosmosColors.background.opacity(0.95)]),
+                gradient: Gradient(colors: [
+                    DesignTokens.CosmosColors.background,
+                    DesignTokens.CosmosColors.background.opacity(0.95)
+                ]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -285,9 +288,9 @@ private class PreviewSideMenuDummyPersistence: TimerPersistenceManageable {
     var timeRemaining: Int = 1500
     var isRunning: Bool = false
     var isWorkSession: Bool = true
-    var runStateRaw: String? = nil
-    var endAtEpoch: Double? = nil
-    var remainingAtPause: Int? = nil
+    var runStateRaw: String?
+    var endAtEpoch: Double?
+    var remainingAtPause: Int?
     func saveTimerState() {}
     func restoreTimerState() {}
 }

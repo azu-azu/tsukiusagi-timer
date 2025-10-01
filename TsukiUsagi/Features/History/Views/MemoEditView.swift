@@ -134,7 +134,8 @@ struct MemoEditView: View {
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     Spacer()
-                    Text("\(record.start.formatted(date: .omitted, time: .shortened)) - \(record.end.formatted(date: .omitted, time: .shortened))")
+                    Text("\(record.start.formatted(date: .omitted, time: .shortened)) - " +
+                         "\(record.end.formatted(date: .omitted, time: .shortened))")
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                         .monospacedDigit()
