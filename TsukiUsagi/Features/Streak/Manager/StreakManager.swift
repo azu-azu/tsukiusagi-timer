@@ -77,7 +77,7 @@ class StreakManager: ObservableObject {
 
     init() {
         self.streakData = StreakManager.loadStreakData()
-        self.achievements = achievementManager.loadAchievements()
+        self.achievements = FeatureFlags.achievements ? achievementManager.loadAchievements() : []
         self.currentLevel = UserLevel.calculateLevel(from: streakData.totalXP)
         checkWeekTransition()
     }
@@ -109,13 +109,19 @@ class StreakManager: ObservableObject {
         streakData.lastUsedDate = today
 
         // Check for new achievements
-        checkForNewAchievements()
+        if FeatureFlags.achievements {
+            checkForNewAchievements()
+        }
 
         // Calculate and award XP
-        calculateAndAwardXP()
+        if FeatureFlags.xp {
+            calculateAndAwardXP()
+        }
 
         // Update smart notifications with new streak data
-        updateSmartNotifications()
+        if FeatureFlags.smartNotifications {
+            updateSmartNotifications()
+        }
 
         // Save changes
         saveIfChanged()
@@ -145,7 +151,9 @@ class StreakManager: ObservableObject {
             if oldWeekData.weeklyUsageCount >= 5 {
                 streakData.consecutiveWeeksWithFivePlusDays += 1
                 // Award weekly completion XP
-                XPManager.awardWeeklyCompletionXP(streakData: &streakData)
+                if FeatureFlags.xp {
+                    XPManager.awardWeeklyCompletionXP(streakData: &streakData)
+                }
             } else {
                 streakData.consecutiveWeeksWithFivePlusDays = 0
             }

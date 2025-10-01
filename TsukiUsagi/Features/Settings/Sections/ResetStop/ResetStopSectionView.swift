@@ -103,6 +103,7 @@ struct ResetStopSectionView_Previews: PreviewProvider {
             func cancelSessionEndNotification() {}
             func finalizeWorkPhase() {}
             func finalizeBreakPhase() {}
+            func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
         }
         class DummyHaptic: HapticServiceable {
             func heavyImpact() {}

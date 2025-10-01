@@ -175,6 +175,19 @@ final class TimerViewModel: ObservableObject {
         // アニメーション抑制フラグをリセット
         shouldSuppressAnimation = false
 
+        // 通知権限の確認（タイマー開始時）
+        notificationService.ensureAuthorizationIfNeeded { granted in
+            if granted {
+                #if DEBUG
+                print("🔔 通知許可: 承認済み")
+                #endif
+            } else {
+                #if DEBUG
+                print("🔔 通知許可: 拒否または未承認")
+                #endif
+            }
+        }
+
         // MainActorで確実に実行
         Task { @MainActor in
             self.engine.start(seconds: actualSeconds)
