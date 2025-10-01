@@ -6,6 +6,11 @@ struct TimerEditView: View {
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var sessionManager: SessionManager
 
+    // 新しいViewModelとBuilder（既存コードと並行動作）
+    @StateObject private var editViewModel = TimerEditViewModel()
+    private let sectionBuilder = TimerEditSectionBuilder()
+
+    // 既存のプロパティ（後方互換性のため保持）
     @State private var editedActivity = ""
     @State private var editedSubtitle = ""
     @State private var editedMemo = ""
@@ -26,32 +31,28 @@ struct TimerEditView: View {
     private let cardCornerRadius: CGFloat = 8
     private let labelCornerRadius: CGFloat = 6
 
+    // 既存の計算プロパティ（新しいViewModelに委譲）
     private var isCustomActivity: Bool {
-        let predefinedActivities = ["Work", "Study", "Read"]
-        return !predefinedActivities.contains { $0.lowercased() == editedActivity.lowercased() }
+        return editViewModel.isCustomActivity
     }
 
-    // Memoエディタの最大高さ（常に有限かつmin以上にクランプ）
+    // Memoエディタの最大高さ（新しいViewModelに委譲）
     private var memoEditorMaxHeight: CGFloat {
-        let screenHeight = UIScreen.main.bounds.height
-        let candidate = (screenHeight.isFinite && screenHeight > 0) ? screenHeight * 0.4 : 300
-        return max(120, candidate)
+        return editViewModel.memoEditorMaxHeight
     }
 
-    // safeAreaInset用のボトム余白（負・非有限を排除）
+    // safeAreaInset用のボトム余白（新しいViewModelに委譲）
     private var bottomInsetForSafeArea: CGFloat {
-        let inset = isKeyboardVisible ? keyboardBottomInset : 0
-        if inset.isFinite && inset >= 0 { return inset }
-        return 0
+        return editViewModel.bottomInsetForSafeArea
     }
 
-    // バリデーション関数の共通化
+    // バリデーション関数（新しいViewModelに委譲）
     private func isActivityEmpty() -> Bool {
-        return editedActivity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return editViewModel.isActivityEmpty()
     }
 
     private func shouldDisableSave() -> Bool {
-        return isCustomActivity && isActivityEmpty()
+        return editViewModel.shouldDisableSave()
     }
 
     // リアルタイムでエラー状態を計算
@@ -83,7 +84,7 @@ struct TimerEditView: View {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 24) {
                             // Session Label
-                            section(title: "Session Label", isCompact: true) {
+                            sectionBuilder.section(title: "Session Label", isCompact: true) {
                                 SessionLabelSection(
                                     activity: $editedActivity,
                                     descriptionText: $editedSubtitle,
@@ -96,7 +97,7 @@ struct TimerEditView: View {
                             }
 
                             // Final Time
-                            section(title: "Final Time", isCompact: true) {
+                            sectionBuilder.section(title: "Final Time", isCompact: true) {
                                 DatePicker(
                                     "Final Time",
                                     selection: $editedEnd,
@@ -109,7 +110,7 @@ struct TimerEditView: View {
                             }
 
                             // Memo
-                            section(title: "Memo", isCompact: true) {
+                            sectionBuilder.section(title: "Memo", isCompact: true) {
                                 TextEditor(text: $editedMemo)
                                     .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
                                     .padding(8)
@@ -257,53 +258,7 @@ struct TimerEditView: View {
         }
     }
 
-    @ViewBuilder
-    private func section<Content: View>(
-        title: String,
-        showDone: Bool = false,
-        doneAction: (() -> Void)? = nil,
-        isCompact: Bool = false,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: isCompact ? 5 : 10) {
-            HStack {
-                Text(title)
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .fontWeight(.semibold)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    .padding(.horizontal, 4)
-                Spacer()
-                if showDone, let action = doneAction {
-                    Button("Done") {
-                        action()
-                    }
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(DesignTokens.WhiteColors.stroke)
-                    )
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: showDone)
-                }
-            }
-            VStack(alignment: .leading, spacing: 10) {
-                content()
-            }
-            .padding(
-                isCompact
-                ? EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
-                : EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
-            )
-            .padding(isCompact ? .init() : .all)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: cardCornerRadius)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
-            )
-        }
-    }
+    // section関数は削除（TimerEditSectionBuilderを使用）
 }
 
 // MARK: - Change detection
