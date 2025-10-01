@@ -111,10 +111,8 @@ enum FeatureFlags {
 
         // Streak機能のデフォルト値設定（MVPでは全て false）
         let streakKeys = [Keys.achievements, Keys.xp, Keys.sharing, Keys.smartNotifications]
-        for key in streakKeys {
-            if UserDefaults.standard.object(forKey: key) == nil {
-                UserDefaults.standard.set(false, forKey: key) // MVP: 全て無効
-            }
+        for key in streakKeys where UserDefaults.standard.object(forKey: key) == nil {
+            UserDefaults.standard.set(false, forKey: key) // MVP: 全て無効
         }
     }
 

@@ -95,55 +95,79 @@ struct MemoEditView: View {
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Activity:")
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    Spacer()
-                    Text(record.activity)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                }
+            sessionInfoContent()
+        }
+    }
 
-                if let subtitle = record.subtitle, !subtitle.isEmpty {
-                    HStack {
-                        Text("Description:")
-                            .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        Spacer()
-                        Text(subtitle)
-                            .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    }
-                }
+    @ViewBuilder
+    private func sessionInfoContent() -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            activityInfoRow()
 
-                HStack {
-                    Text("Duration:")
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    Spacer()
-                    Text(TimeFormatters.totalText(Int(record.duration / 60)))
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        .monospacedDigit()
-                }
-
-                HStack {
-                    Text("Time:")
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    Spacer()
-                    Text("\(record.start.formatted(date: .omitted, time: .shortened)) - " +
-                         "\(record.end.formatted(date: .omitted, time: .shortened))")
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        .monospacedDigit()
-                }
+            if let subtitle = record.subtitle, !subtitle.isEmpty {
+                subtitleInfoRow(subtitle: subtitle)
             }
-            .padding(12)
-            .background(DesignTokens.CosmosColors.cardBackground)
-            .cornerRadius(8)
+
+            durationInfoRow()
+            timeInfoRow()
+        }
+        .padding(12)
+        .background(DesignTokens.CosmosColors.cardBackground)
+        .cornerRadius(8)
+    }
+
+    @ViewBuilder
+    private func activityInfoRow() -> some View {
+        HStack {
+            Text("Activity:")
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            Spacer()
+            Text(record.activity)
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+        }
+    }
+
+    @ViewBuilder
+    private func subtitleInfoRow(subtitle: String) -> some View {
+        HStack {
+            Text("Description:")
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            Spacer()
+            Text(subtitle)
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+        }
+    }
+
+    @ViewBuilder
+    private func durationInfoRow() -> some View {
+        HStack {
+            Text("Duration:")
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            Spacer()
+            Text(TimeFormatters.totalText(Int(record.duration / 60)))
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .monospacedDigit()
+        }
+    }
+
+    @ViewBuilder
+    private func timeInfoRow() -> some View {
+        HStack {
+            Text("Time:")
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            Spacer()
+            Text("\(record.start.formatted(date: .omitted, time: .shortened)) - " +
+                 "\(record.end.formatted(date: .omitted, time: .shortened))")
+                .font(DesignTokens.Fonts.label)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .monospacedDigit()
         }
     }
 

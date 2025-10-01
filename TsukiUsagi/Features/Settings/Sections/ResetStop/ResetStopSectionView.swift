@@ -11,7 +11,7 @@ struct ResetStopSectionView: View {
                 // 🛑 Reset
                 if timerVM.canForceFinish {
                     Button {
-                        timerVM.resetTimer()
+                        timerVM.resetTimer(to: timerVM.workMinutes * 60)
                         dismiss()
                     } label: {
                         HStack(spacing: 8) {

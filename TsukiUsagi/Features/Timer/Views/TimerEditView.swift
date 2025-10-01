@@ -234,8 +234,8 @@ struct TimerEditView: View {
                     // フォールバック（念のため）
                     editedEnd = timerVM.endTime ?? Date()
                     minEnd = timerVM.startTime ?? Date()
-                    editedActivity = timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel
-                    editedSubtitle = timerVM.currentSubtitleLabel
+                    editedActivity = timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel
+                    editedSubtitle = timerVM.subtitleLabel
                     editedMemo = ""
                 }
             }
@@ -266,9 +266,9 @@ private extension TimerEditView {
     var isNoChanges: Bool {
         // 比較元も履歴の最後のレコードを参照（なければVMの値でフォールバック）
         let originalActivity = historyVM.history.last?.activity
-            ?? (timerVM.currentActivityLabel.isEmpty ? "Work" : timerVM.currentActivityLabel)
+            ?? (timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel)
         let originalSubtitle = historyVM.history.last?.subtitle
-            ?? timerVM.currentSubtitleLabel
+            ?? timerVM.subtitleLabel
         let originalMemo = historyVM.history.last?.memo ?? ""
         let originalEnd = historyVM.history.last?.end ?? (timerVM.endTime ?? Date())
         let activitySame = editedActivity.trimmingCharacters(in: .whitespacesAndNewlines) == originalActivity

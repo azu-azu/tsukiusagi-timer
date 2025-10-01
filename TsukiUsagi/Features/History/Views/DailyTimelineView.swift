@@ -4,6 +4,14 @@ struct DailyTimelineView: View {
     let targetDate: Date
     @EnvironmentObject var historyVM: HistoryViewModel
     @EnvironmentObject var sessionManager: SessionManager
+
+    // 新しいViewModelとBuilder（既存コードと並行動作）
+    @StateObject private var viewModel: DailyTimelineViewModel
+    private let sectionBuilder = DailyTimelineSectionBuilder()
+    private let gestureHandler = DailyTimelineGestureHandler()
+    private let dataProvider = DailyTimelineDataProvider()
+
+    // 既存のプロパティ（後方互換性のため保持）
     @State private var restoreError: String?
     @State private var showRestoreAlert = false
     @State private var selectedRecordForMemoEdit: SessionRecord?
@@ -12,43 +20,49 @@ struct DailyTimelineView: View {
     private let dayModeCardSpacing: CGFloat = 2
     private let timeWidth: CGFloat = 100
     private let summaryCardHeight: CGFloat = 50
+
+    // 初期化
+    init(targetDate: Date) {
+        self.targetDate = targetDate
+        self._viewModel = StateObject(wrappedValue: DailyTimelineViewModel(targetDate: targetDate))
+    }
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 // Total 表示
-                TotalCard(text: TimeFormatters.totalText(totalMinutes()))
+                TotalCard(text: TimeFormatters.totalText(viewModel.totalMinutes(historyVM: historyVM)))
                 // レコード表示
-                dayModeRecordsSection()
+                sectionBuilder.dayModeRecordsSection(
+                    records: viewModel.records(historyVM: historyVM),
+                    onRestore: { record in
+                        viewModel.restoreRecord(record, historyVM: historyVM, sessionManager: sessionManager)
+                    },
+                    onMemoEdit: { record in
+                        viewModel.selectRecordForMemoEdit(record)
+                    }
+                )
                 // 集計表示（レコードが複数ある場合のみ）
-                if records().count > 1 {
-                    activitySummarySection()
-                    subtitleSummarySection()
+                if viewModel.records(historyVM: historyVM).count > 1 {
+                    sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
+                    sectionBuilder.subtitleSummarySection(summaries: viewModel.bySubtitle(historyVM: historyVM))
                 }
                 // メモ部分
-                memoSection()
+                sectionBuilder.memoSection(
+                    records: viewModel.recordsWithMemos(historyVM: historyVM),
+                    onMemoEdit: { record in
+                        viewModel.selectRecordForMemoEdit(record)
+                    }
+                )
             }
             .padding(.horizontal)
         }
-        .simultaneousGesture(
-            // 左端からのスワイプを確実に認識
-            DragGesture(minimumDistance: 20, coordinateSpace: .global)
-                .onEnded { value in
-                    // 左端から右方向へのスワイプを検出
-                    if value.startLocation.x < 50 && value.translation.width > 100 {
-                        // ナビゲーションを戻す
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                           let window = windowScene.windows.first {
-                            findNavigationController(in: window.rootViewController)?.popViewController(animated: true)
-                        }
-                    }
-                }
-        )
+        .simultaneousGesture(gestureHandler.backSwipeGesture())
         .navigationTitle(targetDate.formatted(.dateTime.weekday(.wide).month().day()))
         .navigationBarTitleDisplayMode(.inline)
         .alert(isPresented: $showRestoreAlert) {
             Alert(
                 title: Text("Restore Error"),
-                message: Text(restoreError ?? ""),
+                message: Text(restoreError ?? "Unknown error"),
                 dismissButton: .default(Text("OK"))
             )
         }
@@ -139,158 +153,55 @@ struct DailyTimelineView: View {
     private func memoButton(rec: SessionRecord) -> some View {
         let hasMemo = rec.memo?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
         let iconName = hasMemo ? "pencil" : "plus"
-        Button(action: {
-            selectedRecordForMemoEdit = rec
-        }) {
-            Image(systemName: iconName)
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.accentBlue)
-        }
+        Button(
+            action: {
+                selectedRecordForMemoEdit = rec
+            },
+            label: {
+                Image(systemName: iconName)
+                    .font(DesignTokens.Fonts.caption)
+                    .foregroundColor(DesignTokens.MoonColors.accentBlue)
+            }
+        )
     }
     // MARK: - Data Methods
     private func records() -> [SessionRecord] {
-        return historyVM.history
-            .filter { rec in
-                cal.isDate(rec.start, inSameDayAs: targetDate)
-            }
-            .sorted { $0.start < $1.start }
+        return dataProvider.records(historyVM: historyVM, targetDate: targetDate)
     }
     private func totalMinutes() -> Int {
-        records().reduce(0) { $0 + durationMinutes($1) }
+        return dataProvider.totalMinutes(historyVM: historyVM, targetDate: targetDate)
     }
     private func durationMinutes(_ rec: SessionRecord) -> Int {
-        let sec = rec.end.timeIntervalSince(rec.start)
-        return max(Int(sec) / 60, 1)
+        return dataProvider.durationMinutes(rec)
     }
     // MARK: - Summary Sections
-    private struct LabelSummary {
-        let label: String
-        let total: Int
-    }
     private func byActivity() -> [LabelSummary] {
-        let grouped = Dictionary(grouping: records(), by: \.activity)
-        return grouped.map { k, recs in
-            LabelSummary(
-                label: String(describing: k),
-                total: recs.reduce(0) { $0 + durationMinutes($1) }
-            )
-        }
-        .sorted { $0.total > $1.total }
+        return dataProvider.byActivity(historyVM: historyVM, targetDate: targetDate)
     }
     private func bySubtitle() -> [LabelSummary] {
-        let recordsWithSubtitle = records().filter {
-            guard let subtitle = $0.subtitle?.trimmingCharacters(in: .whitespacesAndNewlines) else { return false }
-            return !subtitle.isEmpty
-        }
-        let grouped = Dictionary(grouping: recordsWithSubtitle) { $0.subtitle! }
-        return grouped.map { k, recs in
-            LabelSummary(
-                label: k,
-                total: recs.reduce(0) { $0 + durationMinutes($1) }
-            )
-        }
-        .sorted { $0.total > $1.total }
+        return dataProvider.bySubtitle(historyVM: historyVM, targetDate: targetDate)
     }
     @ViewBuilder
     private func activitySummarySection() -> some View {
-        summarySection(title: "By Activity", summaries: byActivity())
+        sectionBuilder.activitySummarySection(summaries: byActivity())
     }
     @ViewBuilder
     private func subtitleSummarySection() -> some View {
         if !bySubtitle().isEmpty {
-            summarySection(title: "By Subtitle", summaries: bySubtitle())
+            sectionBuilder.subtitleSummarySection(summaries: bySubtitle())
         }
-    }
-    private func summarySection(title: String, summaries: [LabelSummary]) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(title)
-                .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
-            ForEach(summaries, id: \.label) { s in
-                HStack {
-                    Text(s.label)
-                        .padding(.leading, 8)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    Spacer()
-                    Text(TimeFormatters.totalText(s.total))
-                        .monospacedDigit()
-                        .frame(width: timeWidth, alignment: .trailing)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                }
-                .summaryCardStyle(height: summaryCardHeight)
-            }
-        }
-        .padding(.top, 16)
     }
     @ViewBuilder
     private func memoSection() -> some View {
         let recordsWithMemos = recordsWithMemos()
         if !recordsWithMemos.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
-                memoSectionHeader()
-                memoItemsList(records: recordsWithMemos)
-            }
-            .padding(.top, 16)
+            sectionBuilder.memoSection(records: recordsWithMemos, onMemoEdit: selectRecordForMemoEdit)
         }
     }
     private func recordsWithMemos() -> [SessionRecord] {
-        return records().filter { record in
-            let memo = record.memo?.trimmingCharacters(in: .whitespacesAndNewlines)
-            return memo != nil && !memo!.isEmpty
-        }
+        return dataProvider.recordsWithMemos(historyVM: historyVM, targetDate: targetDate)
     }
-    @ViewBuilder
-    private func memoSectionHeader() -> some View {
-        Text("📝 Memos")
-            .font(DesignTokens.Fonts.sectionTitle)
-            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-    }
-    @ViewBuilder
-    private func memoItemsList(records: [SessionRecord]) -> some View {
-        ForEach(records, id: \.id) { record in
-            memoItemButton(record: record)
-        }
-    }
-    @ViewBuilder
-    private func memoItemButton(record: SessionRecord) -> some View {
-        Button(action: {
-            selectedRecordForMemoEdit = record
-        }) {
-            memoItemContent(record: record)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-    @ViewBuilder
-    private func memoItemContent(record: SessionRecord) -> some View {
-        HStack {
-            memoTextContent(record: record)
-            Spacer()
-            memoEditIcon()
-        }
-        .padding(8)
-        .background(DesignTokens.CosmosColors.cardBackground)
-        .cornerRadius(6)
-    }
-    @ViewBuilder
-    private func memoTextContent(record: SessionRecord) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(record.memo ?? "")
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                .multilineTextAlignment(.leading)
-            Text("\(record.start.formatted(date: .omitted, time: .shortened)) - " +
-                 "\(record.end.formatted(date: .omitted, time: .shortened))")
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                .monospacedDigit()
-        }
-    }
-    @ViewBuilder
-    private func memoEditIcon() -> some View {
-        Image(systemName: "pencil")
-            .font(DesignTokens.Fonts.caption)
-            .foregroundColor(DesignTokens.MoonColors.accentBlue)
-    }
+
     // MARK: - Back Swipe Control
     private func disableBackSwipeGesture() {
         DispatchQueue.main.async {
@@ -303,6 +214,7 @@ struct DailyTimelineView: View {
             }
         }
     }
+
     private func enableBackSwipeGesture() {
         DispatchQueue.main.async {
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -316,6 +228,7 @@ struct DailyTimelineView: View {
             }
         }
     }
+
     private func findNavigationController(in viewController: UIViewController?) -> UINavigationController? {
         if let navigationController = viewController as? UINavigationController {
             return navigationController
@@ -327,26 +240,9 @@ struct DailyTimelineView: View {
         }
         return nil
     }
-}
-// 共通サマリーカードスタイル
-extension View {
-    func summaryCardStyle(
-        height: CGFloat = 32,
-        cornerRadius: CGFloat = 6,
-        backgroundColor: Color = DesignTokens.CosmosColors.cardBackground,
-        padding: EdgeInsets = EdgeInsets(
-            top: 4,
-            leading: DesignTokens.Padding.cardHorizontal,
-            bottom: 4,
-            trailing: DesignTokens.Padding.cardHorizontal
-        )
-    ) -> some View {
-        font(DesignTokens.Fonts.label)
-            .padding(padding)
-            .frame(height: height)
-            .background(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(backgroundColor)
-            )
+
+    // MARK: - Memo Edit
+    private func selectRecordForMemoEdit(_ record: SessionRecord) {
+        selectedRecordForMemoEdit = record
     }
 }

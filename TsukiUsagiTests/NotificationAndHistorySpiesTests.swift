@@ -121,7 +121,7 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         guard let params = spyHistory.added.first else { return }
         XCTAssertEqual(params.phase, .focus)
         XCTAssertGreaterThan(params.end, params.start)
-        XCTAssertEqual(params.activity, vm.currentActivityLabel)
-        XCTAssertEqual(params.subtitle ?? "", vm.currentSubtitleLabel)
+        XCTAssertEqual(params.activity, vm.activityLabel)
+        XCTAssertEqual(params.subtitle ?? "", vm.subtitleLabel)
     }
 }

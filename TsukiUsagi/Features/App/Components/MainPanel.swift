@@ -4,8 +4,8 @@ struct MainPanel: View {
     let size: CGSize
     let safeAreaInsets: EdgeInsets
     let isLandscape: Bool
-    @ObservedObject var timerVM: TimerViewModel
-    // ← let から @ObservedObject に変更
+    @EnvironmentObject private var timerVM: TimerViewModel
+    // ← @ObservedObject から @EnvironmentObject に変更
     let moonTitle: String
     let landscapeMargin: CGFloat
     let moonPortraitYOffsetRatio: CGFloat
@@ -218,7 +218,7 @@ struct MainPanel: View {
                         // TimerPanel
                         VStack {
                             Spacer()
-                            TimerPanel(timerVM: timerVM)
+                            TimerPanel()
                                 .frame(
                                     minWidth: moonSize,
                                     maxWidth: moonSize * 1.5,
@@ -248,7 +248,7 @@ struct MainPanel: View {
                         )
                         .allowsHitTesting(false)
 
-                        TimerPanel(timerVM: timerVM)
+                        TimerPanel()
                             .frame(
                                 minWidth: moonSize,
                                 maxWidth: moonSize * 1.5,

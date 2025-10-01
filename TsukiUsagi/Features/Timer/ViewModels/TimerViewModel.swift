@@ -8,8 +8,6 @@
 import Combine
 import SwiftUI
 import UIKit
-
-// 1. 各Serviceable/Engineableのimport
 import Foundation
 
 enum TimerRunState: String {
@@ -21,7 +19,9 @@ enum TimerRunState: String {
 /// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
 @MainActor
 final class TimerViewModel: ObservableObject {
-    // 2. DIプロパティ
+
+    // MARK: - Dependencies
+
     private let engine: TimerEngineable
     private let notificationService: PhaseNotificationServiceable
     private let hapticService: HapticServiceable
@@ -29,14 +29,19 @@ final class TimerViewModel: ObservableObject {
     private let persistenceManager: TimerPersistenceManageable
     private let formatter: TimeFormatterUtilable
     private let dateProvider: DateProviding
-
-    // Streak tracking - @StateObjectではなく通常のプロパティに変更
     private let streakManager: StreakManager
 
-    // Animation Controller - 新しい分離されたアニメーション制御
-    private let animationController: any TimerAnimationControllerProtocol
+    // MARK: - Managers
 
-    // 3. @PublishedなどUIバインディング用プロパティ
+    private let animationController: any TimerAnimationControllerProtocol
+    private let statePersistenceManager: TimerStatePersistenceManager
+    private let notificationAndHapticManager: TimerNotificationAndHapticManager
+    private let sessionManager: TimerSessionManager
+    private let stateManager: TimerStateManager
+    private let displayManager: TimerDisplayManager
+
+    // MARK: - Published Properties (Delegated to Managers)
+
     @Published var timeRemaining: Int = 0
     @Published var isRunning: Bool = false
     @Published private(set) var runState: TimerRunState = .idle
@@ -44,24 +49,22 @@ final class TimerViewModel: ObservableObject {
     @Published var isSessionFinished = false
     @Published private(set) var startTime: Date?
     @Published private(set) var endTime: Date?
-    private var endAt: Date?
-    // 復元中ロック（この間は保存/初期化を抑止）
-    private var isRestoring = false
     @Published var flashStars = false
     @Published private(set) var lastBackgroundDate: Date?
     @Published var shouldSuppressAnimation = false
     @Published var shouldSuppressSessionFinishedAnimation = false
 
     // User-configurable
-    @AppStorage("activityLabel") private var activityLabel: String = "Work"
-    @AppStorage("subtitleLabel") private var subtitleLabel: String = ""
-    @AppStorage("workMinutes") private var workMinutes: Int = 25
+    @AppStorage("activityLabel") var activityLabel: String = "Work"
+    @AppStorage("subtitleLabel") var subtitleLabel: String = ""
+    @AppStorage("workMinutes") var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
 
     // 🔔 START アニメ用トリガー
     let startPulse = PassthroughSubject<Void, Never>()
 
-    // 実際のセッション時間を分で計算
+    // MARK: - Initialization
+
     var actualSessionMinutes: Int {
         guard let start = startTime, let end = endTime else { return 1 }
         let diff = Calendar.current.dateComponents([.minute], from: start, to: end)
@@ -71,12 +74,12 @@ final class TimerViewModel: ObservableObject {
 
     var workLengthMinutes: Int { workMinutes }
 
-    // Stopボタンの有効判定
     var canForceFinish: Bool {
         isWorkSession && startTime != nil
     }
 
-    // 4. DIイニシャライザ - StreakManagerもDIで受け取るように変更
+    // MARK: - Initialization
+
     init(
         engine: TimerEngineable,
         notificationService: PhaseNotificationServiceable,
@@ -84,11 +87,10 @@ final class TimerViewModel: ObservableObject {
         historyService: SessionHistoryServiceable,
         persistenceManager: TimerPersistenceManageable,
         formatter: TimeFormatterUtilable,
-        streakManager: StreakManager = StreakManager(), // デフォルト値を提供
+        streakManager: StreakManager = StreakManager(),
         dateProvider: DateProviding = SystemDateProvider(),
-        animationController: (any TimerAnimationControllerProtocol)? = nil // オプショナルで追加
+        animationController: (any TimerAnimationControllerProtocol)? = nil
     ) {
-        // 3. Engine設定
         self.engine = engine
         self.notificationService = notificationService
         self.hapticService = hapticService
@@ -98,561 +100,276 @@ final class TimerViewModel: ObservableObject {
         self.streakManager = streakManager
         self.dateProvider = dateProvider
 
-        // Animation Controller設定（既存のhapticServiceを使用）
+        // Initialize managers
         self.animationController = animationController ?? TimerAnimationController(hapticService: hapticService)
+        self.statePersistenceManager = TimerStatePersistenceManager(
+            persistenceManager: persistenceManager,
+            dateProvider: dateProvider
+        )
+        self.notificationAndHapticManager = TimerNotificationAndHapticManager(
+            notificationService: notificationService,
+            hapticService: hapticService
+        )
+        self.sessionManager = TimerSessionManager(
+            historyService: historyService,
+            streakManager: streakManager,
+            dateProvider: dateProvider
+        )
+        self.stateManager = TimerStateManager(
+            engine: engine,
+            formatter: formatter,
+            dateProvider: dateProvider
+        )
+        self.displayManager = TimerDisplayManager(formatter: formatter)
 
-        // 4. Engineのコールバック設定（notificationService初期化後）
-        self.engine.onTick = { [weak self] seconds in
-            guard let self else { return }
-            guard self.runState == .running else { return }
-            self.timeRemaining = seconds
-        }
-        self.engine.onSessionCompleted = { [weak self] sessionInfo in
-            guard let self else { return }
-            // Ignore delayed completion when not actively running (e.g., after pause/restore)
-            guard self.runState == .running else { return }
-            self.handleSessionCompleted(sessionInfo)
-        }
-
-        // Simulator用：UserDefaultsの初期値を強制設定
-        #if targetEnvironment(simulator)
-        if UserDefaults.standard.integer(forKey: "workMinutes") == 0 {
-            UserDefaults.standard.set(25, forKey: "workMinutes")
-        }
-        if UserDefaults.standard.integer(forKey: "breakMinutes") == 0 {
-            UserDefaults.standard.set(5, forKey: "breakMinutes")
-        }
-        #endif
-
-        // 最優先で復元し、その結果に応じて初期化/再開を判断
-        self.isRestoring = true
-        self.restoreTimerState()
-        switch self.runState {
-        case .running:
-            self.shouldSuppressAnimation = true
-            self.animationController.setAnimationSuppression(true)
-            self.startFromRestoredIfNeeded()
-            // 起動時リカバリ：進行中セッションがあれば通知を再スケジュール
-            self.recoverNotificationIfNeeded()
-        case .paused:
-            // 保持した残り秒数のまま静止。初期化しない
-            break
-        case .idle:
-            // ここでは初期化しない（本当にゼロの判定は restore 側で実施）
-            break
-        }
-        self.isRestoring = false
+        setupBindings()
+        setupEngineCallbacks()
     }
 
-    // MARK: - Public API
+    // MARK: - Setup Methods
 
-    /// 設定変更を即反映（STOP中だけ）
-    func refreshAfterSettingsChange() {
-        // Idle かつ復元完了後のみ初期時間を更新（paused は維持）
-        guard runState == .idle, !isRestoring else { return }
+    private func setupBindings() {
+        // Bind to state manager
+        stateManager.$timeRemaining.assign(to: &$timeRemaining)
+        stateManager.$isRunning.assign(to: &$isRunning)
+        stateManager.$runState.assign(to: &$runState)
+        stateManager.$isWorkSession.assign(to: &$isWorkSession)
+        stateManager.$isSessionFinished.assign(to: &$isSessionFinished)
 
-        let minutes = isWorkSession ? workMinutes : breakMinutes
-        let newTimeRemaining = minutes * 60
+        // Bind to session manager
+        sessionManager.$startTime.assign(to: &$startTime)
+        sessionManager.$endTime.assign(to: &$endTime)
 
-        timeRemaining = newTimeRemaining
+        // Bind to animation controller (direct assignment since protocol doesn't support @Published)
+        // These will be manually synchronized in the methods
     }
 
-    // 6. タイマー制御はengine経由
-    func startTimer(seconds: Int) {
-        // If paused, treat start as resume to preserve remaining time
-        if runState == .paused, timeRemaining > 0 {
-            resumeTimer()
-            return
-        }
-        // セッション完了状態をクリア（重要：これを最初に行う）
-        if isSessionFinished {
-            isSessionFinished = false
+    private func setupEngineCallbacks() {
+        engine.onTick = { [weak self] seconds in
+            self?.stateManager.timeRemaining = seconds
         }
 
-        // timeRemainingが0の場合は設定値で初期化
-        let actualSeconds = seconds > 0 ? seconds : workMinutes * 60
-
-        let now = dateProvider.now()
-        startTime = now
-        isWorkSession = true
-        isRunning = true
-        timeRemaining = actualSeconds
-        endAt = now.addingTimeInterval(TimeInterval(actualSeconds))
-        runState = .running
-
-        // アニメーション抑制フラグをリセット
-        shouldSuppressAnimation = false
-        animationController.setAnimationSuppression(false)
-
-        // 通知権限の確認（タイマー開始時）
-        notificationService.ensureAuthorizationIfNeeded { granted in
-            if granted {
-                #if DEBUG
-                print("🔔 通知許可: 承認済み")
-                #endif
-            } else {
-                #if DEBUG
-                print("🔔 通知許可: 拒否または未承認")
-                #endif
-            }
-        }
-
-        // MainActorで確実に実行
-        Task { @MainActor in
-            self.engine.start(seconds: actualSeconds)
-
-            let newIsRunning = self.engine.isRunning
-            self.isRunning = newIsRunning
-
-            // アニメーションを発火
-            self.triggerStartAnimations()
-            // Persist state
-            self.saveTimerState()
+        engine.onSessionCompleted = { [weak self] sessionInfo in
+            self?.handleSessionCompleted(sessionInfo)
         }
     }
 
+    // MARK: - Public Methods
+
+    /// タイマー開始
+    func startTimer() {
+        guard timeRemaining > 0 else { return }
+
+        sessionManager.startSession(
+            isWorkSession: isWorkSession,
+            activityLabel: activityLabel,
+            subtitleLabel: subtitleLabel
+        )
+
+        stateManager.startTimer()
+        animationController.triggerStartAnimations()
+        notificationAndHapticManager.sendStartNotification()
+
+        // Send start pulse
+        startPulse.send()
+    }
+
+    /// タイマー一時停止
     func pauseTimer() {
-        guard runState == .running else { return }
-        // Recompute remaining from endAt for accuracy
-        let now = dateProvider.now()
-        if let endAt { timeRemaining = max(0, Int(ceil(endAt.timeIntervalSince(now)))) }
-        endAt = nil
-        engine.pause()
-        isRunning = false
-        runState = .paused
-        // Persist explicit paused snapshot immediately (stronger than generic save)
-        persistenceManager.remainingAtPause = timeRemaining
-        persistenceManager.runStateRaw = TimerRunState.paused.rawValue
-        persistenceManager.endAtEpoch = nil
-        saveTimerState()
+        stateManager.pauseTimer()
+        notificationAndHapticManager.triggerLightHaptic()
     }
 
+    /// タイマー再開
     func resumeTimer() {
-        guard runState == .paused, timeRemaining > 0 else { return }
-        let now = dateProvider.now()
-        endAt = now.addingTimeInterval(TimeInterval(timeRemaining))
-        runState = .running
-        isRunning = true
-        engine.start(seconds: timeRemaining)
-        saveTimerState()
+        stateManager.resumeTimer()
+        animationController.triggerStartAnimations()
+        notificationAndHapticManager.sendStartNotification()
     }
 
+    /// タイマー停止
     func stopTimer() {
-        engine.stop()
-        isRunning = false
-        runState = .idle
-        endAt = nil
-        saveTimerState()
-    }
-
-    func resetTimer(to seconds: Int) {
-        engine.reset(to: seconds)
-        isRunning = engine.isRunning
-        runState = .idle
-        endAt = nil
-        saveTimerState()
+        stateManager.stopTimer()
+        sessionManager.resetSession()
     }
 
     /// タイマーリセット
-    func resetTimer() {
-        stopTimer()
-
-        // 状態を正しい順序でリセット
-        isRunning = false
-        isSessionFinished = false  // 先にfalseにする
-        isWorkSession = true      // その後でtrueにする
-        // Resetは明示操作のみ初期化。pause復帰と混ざらない
-        timeRemaining = workMinutes * 60
-        startTime = nil
-        endTime = nil
+    func resetTimer(to seconds: Int) {
+        stateManager.resetTimer(to: seconds)
+        sessionManager.resetSession()
+        animationController.resetAnimationState()
     }
 
-    /// 強制終了（Stopボタン用）
-    func forceFinishWorkSession() {
-        endTime = dateProvider.now()
-        // ★ startTime が残っているうちに履歴保存
-        if let start = startTime, let end = endTime {
-            let parameters = AddSessionParameters(
-                start: start,
-                end: end,
-                phase: .focus,
-                activity: activityLabel,
-                subtitle: subtitleLabel,
-                memo: nil
-            )
-            historyService.add(parameters: parameters)
+    /// セッション完了処理
+    func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
+        sessionManager.completeSession(
+            isWorkSession: isWorkSession,
+            activityLabel: activityLabel,
+            subtitleLabel: subtitleLabel
+        )
 
-            // Record streak for manually finished work session
-            streakManager.recordTimerUsage()
-        }
-        stopTimer()
-        isSessionFinished = true
-        isWorkSession = false  // QuietMoon表示のために必要
+        stateManager.handleSessionCompleted(sessionInfo)
+        animationController.triggerSessionFinishedAnimations()
+        notificationAndHapticManager.triggerHeavyHaptic()
     }
 
-    /// 外部からendTimeを更新するためのメソッド
-    func setEndTime(_ date: Date) {
-        endTime = date
+    /// 強制終了
+    func forceFinish() {
+        guard canForceFinish else { return }
+
+        sessionManager.completeSession(
+            isWorkSession: isWorkSession,
+            activityLabel: activityLabel,
+            subtitleLabel: subtitleLabel
+        )
+
+        stateManager.stopTimer()
+        animationController.triggerSessionFinishedAnimations()
+        notificationAndHapticManager.triggerHeavyHaptic()
     }
 
-    // 7. 通知・ハプティック・履歴保存・フォーマットもServiceable経由
-    func sendStartNotification() {
-        notificationService.sendStartNotification()
-    }
-    func triggerHeavyHaptic() {
-        // 新しいAnimationControllerに委譲
-        animationController.triggerHeavyHaptic()
-    }
-    func addSessionHistory(parameters: AddSessionParameters) {
-        historyService.add(parameters: parameters)
-    }
-    func formatTime(_ seconds: Int) -> String {
-        formatter.format(seconds: seconds)
-    }
-    func formatDate(_ date: Date?) -> String {
-        formatter.format(date: date)
+    /// セッション完了状態をリセット
+    func resetSessionFinished() {
+        stateManager.resetSessionFinished()
     }
 
-    // プライベート
-    private func formatTime(_ date: Date?) -> String {
-        formatter.format(date: date)
-    }
-
-    var formattedStartTime: String { formatDate(startTime) }
-    var formattedEndTime: String { formatDate(endTime) }
-
-    // 公開getter
-    public var currentActivityLabel: String { activityLabel }
-    public var currentSubtitleLabel: String { subtitleLabel }
-    public var currentStreakManager: StreakManager { streakManager }
-
-    /// タイマー状態を永続化
-    @MainActor
+    /// タイマー状態を保存
     func saveTimerState() {
-        #if DEBUG
-        #endif
-
-        // 復元中は保存しない：一瞬の初期化値で上書きする事故を防止
-        if isRestoring {
-            return
-        }
-
-        persistenceManager.timeRemaining = timeRemaining
-        persistenceManager.isRunning = (runState == .running)
-        persistenceManager.isWorkSession = isWorkSession
-        persistenceManager.runStateRaw = runState.rawValue
-
-        switch runState {
-        case .running:
-            if let endAt {
-                persistenceManager.endAtEpoch = endAt.timeIntervalSince1970
-            }
-            persistenceManager.remainingAtPause = nil
-        case .paused:
-            persistenceManager.endAtEpoch = nil
-            persistenceManager.remainingAtPause = timeRemaining
-        case .idle:
-            persistenceManager.endAtEpoch = nil
-            persistenceManager.remainingAtPause = nil
-        }
-        persistenceManager.saveTimerState()
-
+        statePersistenceManager.saveTimerState(
+            timeRemaining: timeRemaining,
+            isRunning: isRunning,
+            runState: runState,
+            isWorkSession: isWorkSession,
+            endAt: sessionManager.endAt
+        )
     }
 
     /// タイマー状態を復元
-    @MainActor
     func restoreTimerState() {
-        persistenceManager.restoreTimerState()
-        isWorkSession = persistenceManager.isWorkSession
+        let result = statePersistenceManager.restoreTimerState()
 
-        // まず宣言ベースの runState を参照
-        var restored = TimerRunState(rawValue: persistenceManager.runStateRaw ?? "")
+        switch result {
+        case .success(let timeRemaining, let isRunning, let runState, let isWorkSession, let endAt):
+            stateManager.restoreState(
+                timeRemaining: timeRemaining,
+                isRunning: isRunning,
+                runState: runState,
+                isWorkSession: isWorkSession
+            )
 
-        // フォールバック推定：runState欠損時でも痕跡から推定
-        if restored == nil {
-            if let ts = persistenceManager.endAtEpoch, ts > 0 {
-                restored = .running
-            } else if let rp = persistenceManager.remainingAtPause, rp > 0 {
-                restored = .paused
-            } else {
-                restored = .idle
+            if let endAt = endAt {
+                sessionManager.setEndAt(endAt)
             }
-        }
-        let state = restored ?? .idle
-        runState = state
 
-        switch state {
-        case .running:
-            if let ts = persistenceManager.endAtEpoch {
-                let now = dateProvider.now()
-                let end = Date(timeIntervalSince1970: ts)
-                let remain = max(0, Int(ceil(end.timeIntervalSince(now))))
+        case .failed:
+            // 復元失敗時はデフォルト状態
+            stateManager.resetTimer(to: workMinutes * 60)
 
-                if remain > 0 {
-                    endAt = end
-                    timeRemaining = remain
-                    isRunning = true
-                } else {
-                    // 時間切れの場合はセッション完了処理を実行
-
-                    // セッション完了処理
-                    endTime = end
-                    let wasWorkSession = isWorkSession  // 変更前に保存
-                    isSessionFinished = true
-                    isWorkSession = false  // QuietMoon表示のために必要
-
-                    // セッション完了時の処理
-                    hapticService.heavyImpact()
-                    notificationService.finalizeWorkPhase()
-
-                    // 履歴に保存
-                    let parameters = AddSessionParameters(
-                        start: startTime ?? end,
-                        end: end,
-                        phase: wasWorkSession ? .focus : .breakTime,
-                        activity: activityLabel,
-                        subtitle: subtitleLabel,
-                        memo: nil
-                    )
-                    historyService.add(parameters: parameters)
-
-                    // Record streak if this was a work session
-                    if wasWorkSession {
-                        streakManager.recordTimerUsage()
-                    }
-
-                    // State finalize
-                    endAt = nil
-                    timeRemaining = 0
-                    isRunning = false
-                    runState = .idle
-
-                }
-            } else {
-                // Safety: missing endAt
-                endAt = nil
-                timeRemaining = 0
-                isRunning = false
-                runState = .idle
-            }
-        case .paused:
-            timeRemaining = max(0, persistenceManager.remainingAtPause ?? 0)
-            isRunning = false
-            endAt = nil
-        case .idle:
-            // Only apply defaults when truly zero (no remaining or anchors anywhere)
-            let persistedPause = persistenceManager.remainingAtPause ?? 0
-            let persistedEndAt = persistenceManager.endAtEpoch ?? 0
-            if timeRemaining == 0 && persistedPause == 0 && persistedEndAt == 0 {
-                timeRemaining = workMinutes * 60
-            }
-            isRunning = false
-            endAt = nil
+        case .noData:
+            // データがない場合は何もしない
+            break
         }
     }
 
-    /// 永続化から復元後、必要なら残り秒数でエンジンを再開（起動直後や再アクティブ時用）
-    @MainActor
+    /// 復元が必要かどうかを判定
+    func shouldRestore() -> Bool {
+        return statePersistenceManager.shouldRestore()
+    }
+
+    /// 復元後の自動再開が必要かどうかを判定
+    func shouldAutoResume() -> Bool {
+        return statePersistenceManager.shouldAutoResume()
+    }
+
+    /// 永続化から復元後、必要なら残り秒数でエンジンを再開
     func startFromRestoredIfNeeded() {
         guard runState == .running, timeRemaining > 0 else { return }
-        shouldSuppressAnimation = true
-        animationController.setAnimationSuppression(true)
 
-        // バックグラウンドから復帰した場合は、既にengine.resume()が呼ばれているため
-        // ここでは重複起動を避ける
-        if !engine.isRunning {
-            // Reset engine first to avoid any residual state before starting
-            engine.reset(to: timeRemaining)
-            engine.start(seconds: timeRemaining)
+        let now = dateProvider.now()
+        if let endAt = sessionManager.endAt, endAt > now {
+            let remaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
+            if remaining > 0 {
+                stateManager.timeRemaining = remaining
+                stateManager.startTimer()
+            }
         }
-        isRunning = true
     }
 
-    /// 起動時リカバリ：進行中セッションがあれば通知を再スケジュール
-    @MainActor
-    private func recoverNotificationIfNeeded() {
-        guard runState == .running, let endAt = endAt, endAt > dateProvider.now() else { return }
-
-        // デバイス再起動後のリカバリ：通知を再スケジュール
-        let phase: PomodoroPhase = isWorkSession ? .focus : .breakTime
-        let timeSensitive = UserDefaults.standard.bool(forKey: "time_sensitive_notifications_enabled")
-
-        notificationService.scheduleSessionEndNotification(
-            at: endAt,
-            phase: phase,
-            timeSensitive: timeSensitive
-        )
-    }
-
-    // MARK: - Private Methods
-
-    /// セッション完了時の処理（Engineコールバックから呼ばれる）
-    private func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
-        // Safety: drop stale completion if we're no longer running
-        guard runState == .running else {
-            return
-        }
-
-        isRunning = false
-        timeRemaining = 0
-
-        // セッション完了状態を設定（順序重要）
-        endTime = sessionInfo.endTime
-        isSessionFinished = true
-        isWorkSession = false  // QuietMoon表示のために必要
-
-        // セッション完了時の処理
-        hapticService.heavyImpact()
-        notificationService.finalizeWorkPhase()
-
-        // 履歴に保存
-        let parameters = AddSessionParameters(
-            start: sessionInfo.startTime,
-            end: sessionInfo.endTime,
-            phase: sessionInfo.phase == .focus ? .focus : .breakTime,
-            activity: activityLabel,
-            subtitle: subtitleLabel,
-            memo: nil
-        )
-        historyService.add(parameters: parameters)
-
-        // Record streak if this was a work session
-        if sessionInfo.phase == .focus {
-            streakManager.recordTimerUsage()
-        }
-
-        // State finalize: drop endAt, set idle, persist via ViewModel API
-        runState = .idle
-        endAt = nil
+    /// アプリがバックグラウンドに移行
+    func applicationDidEnterBackground() {
+        lastBackgroundDate = dateProvider.now()
         saveTimerState()
     }
 
-    /// diamondアニメーションとstartPulseアニメーションを発火
-    private func triggerStartAnimations() {
-        // 新しいAnimationControllerに委譲
-        animationController.triggerStartAnimations()
-
-        // 既存のプロパティも同期（後方互換性のため）
-        flashStars = animationController.flashStars
-        if !shouldSuppressAnimation {
-            DispatchQueue.main.async {
-                self.startPulse.send()
+    /// アプリがフォアグラウンドに復帰
+    func applicationWillEnterForeground() {
+        if shouldRestore() {
+            restoreTimerState()
+            if shouldAutoResume() {
+                startFromRestoredIfNeeded()
             }
         }
     }
 
-    // MARK: - Background Handling
-
-    /// バックグラウンドへ
-    func appDidEnterBackground() {
-
-        lastBackgroundDate = dateProvider.now()
-        if isRunning, let endAt = endAt {
-
-            // バックグラウンド移行時はタイマーエンジンを停止
-            // ただし、状態はrunningのまま保持（フォアグラウンド復帰時に再開のため）
-            engine.pause()
-
-            // endAtを保持（TimerEngineのpause()ではendAtがクリアされるため）
-            // 現在の残り時間を正確に計算してendAtを更新
-            let now = dateProvider.now()
-            let actualRemaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
-
-            if actualRemaining > 0 {
-                self.endAt = now.addingTimeInterval(TimeInterval(actualRemaining))
-            }
-
-            // Keep running state; schedule a single end notification using absolute time
-            let phase: PomodoroPhase = isWorkSession ? .focus : .breakTime
-            let timeSensitive = UserDefaults.standard.bool(forKey: "time_sensitive_notifications_enabled")
-
-            notificationService.scheduleSessionEndNotification(
-                at: self.endAt!,
-                phase: phase,
-                timeSensitive: timeSensitive
-            )
-
-            // 状態を保存（endAtを保持）
-            saveTimerState()
-        } else if runState == .paused {
-            // Ensure paused remaining is persisted for robust restoration
-            persistenceManager.remainingAtPause = timeRemaining
-            persistenceManager.runStateRaw = TimerRunState.paused.rawValue
-            persistenceManager.endAtEpoch = nil
-            saveTimerState()
-        } else {
-        }
+    /// アニメーション抑制を設定
+    func setAnimationSuppression(_ suppress: Bool) {
+        animationController.setAnimationSuppression(suppress)
+        notificationAndHapticManager.setAnimationSuppression(suppress)
     }
 
-    /// フォアグラウンド復帰
-    @MainActor
-    func appWillEnterForeground() {
-
-        // Preserve pre-restore state to guard against mis-inferred idle
-        let prevState = runState
-        let prevRemaining = timeRemaining
-
-        // endAtベースで復元し、状態に応じてのみ再開（復元ロック中は保存禁止）
-        isRestoring = true
-        restoreTimerState()
-        notificationService.cancelSessionEndNotification()
-
-        switch (prevState, runState) {
-        case (.running, .running):
-            shouldSuppressAnimation = true
-            shouldSuppressSessionFinishedAnimation = true
-            animationController.setAnimationSuppression(true)
-            animationController.setSessionFinishedAnimationSuppression(true)
-            // バックグラウンドから復帰時は、正確な残り時間で再開
-            // engine.pause()で停止していたタイマーを正確な残り時間で再開
-            if let endAt = endAt {
-                let now = dateProvider.now()
-                let actualRemaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
-
-                if actualRemaining > 0 {
-                    timeRemaining = actualRemaining
-                    engine.resume()
-                } else {
-                    // 時間切れの場合はセッション完了処理
-                    // runStateを一時的に.runningに設定してhandleSessionCompletedを実行
-                    runState = .running
-                    handleSessionCompleted(TimerSessionInfo(
-                        startTime: startTime ?? now,
-                        endTime: endAt,
-                        phase: isWorkSession ? .focus : .breakTime,
-                        actualWorkedSeconds: 0
-                    ))
-                    // runStateはhandleSessionCompleted内で.idleに設定される
-
-                    // 状態更新を確実に反映するため、UIの更新を強制
-                    DispatchQueue.main.async {
-                        // 状態が正しく更新されていることを確認
-                    }
-                }
-            } else {
-            }
-        case (.paused, .idle):
-            // Roll back accidental downgrade idle -> keep paused state and remaining seconds
-            runState = .paused
-            isRunning = false
-            let persisted = persistenceManager.remainingAtPause ?? 0
-            timeRemaining = max(prevRemaining, persisted)
-        case (.paused, .paused):
-            isRunning = false
-        default:
-            isRunning = false
-        }
-        lastBackgroundDate = nil
-        isRestoring = false
+    /// セッション完了アニメーション抑制を設定
+    func setSessionFinishedAnimationSuppression(_ suppress: Bool) {
+        animationController.setSessionFinishedAnimationSuppression(suppress)
+        notificationAndHapticManager.setSessionFinishedAnimationSuppression(suppress)
     }
-}
 
-#if DEBUG
-extension TimerViewModel {
-    func _setPreviewState(startTime: Date?, isWorkSession: Bool, isRunning: Bool) {
+    /// 設定変更後のリフレッシュ
+    func refreshAfterSettingsChange() {
+        // 設定変更後の処理（必要に応じて実装）
+        // 現在は空の実装
+    }
+
+    /// プレビュー状態を設定（テスト用）
+    func _setPreviewState(startTime: Date, isWorkSession: Bool, isRunning: Bool) {
         self.startTime = startTime
         self.isWorkSession = isWorkSession
         self.isRunning = isRunning
     }
+
+    /// 時間表示文字列を取得
+    func formatTime(_ seconds: Int) -> String {
+        return displayManager.timeDisplayString(for: seconds)
+    }
+
+    /// アプリがバックグラウンドに移行
+    func appDidEnterBackground() {
+        applicationDidEnterBackground()
+    }
+
+    /// アプリがフォアグラウンドに復帰
+    func appWillEnterForeground() {
+        applicationWillEnterForeground()
+    }
+
+    /// 終了時刻を設定
+    func setEndTime(_ endTime: Date?) {
+        sessionManager.setEndAt(endTime)
+    }
+
+    /// 作業セッションを強制終了
+    func forceFinishWorkSession() {
+        forceFinish()
+    }
+
+    /// 開始時刻のフォーマット済み文字列
+    var formattedStartTime: String {
+        guard let startTime = startTime else { return "" }
+        return TimeFormatters.formatTime(date: startTime)
+    }
+
+    /// 終了時刻のフォーマット済み文字列
+    var formattedEndTime: String {
+        guard let endTime = endTime else { return "" }
+        return TimeFormatters.formatTime(date: endTime)
+    }
 }
-#endif

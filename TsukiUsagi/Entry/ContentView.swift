@@ -110,7 +110,6 @@ struct ContentView: View {
                             size: size,
                             safeAreaInsets: safeAreaInsets,
                             isLandscape: isLandscape,
-                            timerVM: timerVM,
                             moonTitle: moonTitle,
                             landscapeMargin: landscapeMargin,
                             moonPortraitYOffsetRatio: moonPortraitYOffsetRatio,
@@ -303,8 +302,10 @@ struct ContentView: View {
                 timerVM.stopTimer()
             } else {
                 // セッション完了後の再スタート時は設定値を使用
-                let secondsToStart = timerVM.isSessionFinished ? timerVM.workLengthMinutes * 60 : timerVM.timeRemaining
-                timerVM.startTimer(seconds: secondsToStart)
+                if timerVM.isSessionFinished {
+                    timerVM.resetTimer(to: timerVM.workLengthMinutes * 60)
+                }
+                timerVM.startTimer()
             }
         }
         .frame(width: buttonWidth, height: buttonHeight)
