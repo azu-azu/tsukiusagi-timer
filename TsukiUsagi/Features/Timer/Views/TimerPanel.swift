@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TimerPanel: View {
-    @ObservedObject var timerVM: TimerViewModel
+    @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var historyVM: HistoryViewModel
     @AppStorage("sessionLabel") private var sessionLabel: String = "Work"
     @Environment(\.scenePhase) private var scenePhase
@@ -86,7 +86,7 @@ struct TimerPanel: View {
                 print("🔍 TimerPanel: フォアグラウンド復帰")
                 #endif
                 Task { timerVM.appWillEnterForeground() }
-                default:
+            default:
                 #if DEBUG
                 print("🔍 TimerPanel: その他のフェーズ - \(newPhase)")
                 #endif

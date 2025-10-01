@@ -115,7 +115,7 @@ struct SideMenuDurationView: View {
     private func resetButton() -> some View {
         if timerVM.canForceFinish {
             Button {
-                timerVM.resetTimer()
+                timerVM.resetTimer(to: timerVM.workMinutes * 60)
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isPresented = false
                 }

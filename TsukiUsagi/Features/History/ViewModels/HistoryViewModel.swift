@@ -33,6 +33,7 @@ class HistoryViewModel: ObservableObject {
 
     // ✅ カレンダー機能用の新規追加
     @Published private(set) var fixedDate: Date?
+    @Published var selectedDate: Date = Date()
 
     private let store = HistoryStore() // 下で定義
 
