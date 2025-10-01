@@ -142,23 +142,6 @@ enum MoonMessage {
             "Sometimes, being near is enough to glow."
             // 光らなくてもいい
             // 太陽のそばにいるだけで、輝ける
-        ]),
-
-        MoonMessageEntry(lines: [
-            "You often feel tired, ",
-            "You often feel tired, ",
-            "You often feel tired, ",
-            "You often feel tired, ",
-            "You often feel tired, ",
-            "You often feel tired, ",
-            "You often feel tired, ",
-            "You often feel tired, ",
-            "You often feel tired, ",
-            "not because you've done too much,",
-            "",
-            "but because you've done too little of what sparks a light in you.",
-            "",
-            "— Alexander Den Heijer"
         ])
     ]
 

@@ -247,7 +247,7 @@ TsukiUsagi/
 ```
 
 ## メモ
-- 本ドキュメントは実際のリポジトリ構造に同期済みです（最終更新: 2025-09-28）。
+- 本ドキュメントは実際のリポジトリ構造に同期済みです（最終更新: 2025-10-01）。
 - Settings の新規作成シートは `NewSessionFormView` を使用し、Edit 画面は `SessionEditView` です。
 - Foundation 層は `DesignTokens` と拡張系ユーティリティを中核に、UIKit 連携は `UIKitSupport` 配下に整理されています。
 - History 機能に `Month.swift` モデルを追加し、TabView の安定したページ管理を実現しています。
