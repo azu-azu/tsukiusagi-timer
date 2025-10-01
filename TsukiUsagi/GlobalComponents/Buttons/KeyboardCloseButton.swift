@@ -11,7 +11,7 @@ struct KeyboardCloseButton: View {
         }
         .foregroundColor(DesignTokens.MoonColors.textPrimary)
         .padding(isCompact ? 4 : 6)
-        .background(Circle().fill(Color.black.opacity(0.8)))
+        .background(Circle().fill(DesignTokens.CosmosColors.background.opacity(0.8)))
     }
 }
 

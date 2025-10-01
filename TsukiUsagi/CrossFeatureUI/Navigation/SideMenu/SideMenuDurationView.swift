@@ -81,9 +81,7 @@ struct SideMenuDurationView: View {
                 HStack {
                     Spacer()
                     NavigationLink(destination: DurationSessionSettingsView()) {
-                        Image(systemName: "pencil")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        PencilIcon(size: .medium)
                             .frame(width: 20, height: 20)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -117,7 +115,7 @@ struct SideMenuDurationView: View {
     private func resetButton() -> some View {
         if timerVM.canForceFinish {
             Button {
-                timerVM.resetTimer()
+                timerVM.resetTimer(to: timerVM.workMinutes * 60)
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isPresented = false
                 }
@@ -221,11 +219,10 @@ struct SideMenuDurationRowView: View {
             .padding(.horizontal, blockHorizontalPadding)
             .padding(.vertical, 6)
 
-            // ボタン部分のカード背景
+            // ボタン部分のカード背景（デザイントークン）
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(DesignTokens.MoonColors.textPrimary.opacity(0.1))
-                    // .fill(.black.opacity(0.8))
+                    .fill(DesignTokens.CosmosColors.cardBackgroundAlt)
             )
         }
         .padding(.vertical, 4)
@@ -271,10 +268,13 @@ private class SideMenuPreviewDummyNotification: PhaseNotificationServiceable {
     func sendStartNotification() {}
     func cancelNotification() {}
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
+    func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+    func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
     func cancelSessionEndNotification() {}
     func finalizeWorkPhase() {}
     func finalizeBreakPhase() {}
+    func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
 }
 
 private class SideMenuPreviewDummyHaptic: HapticServiceable {
@@ -290,6 +290,9 @@ private class SideMenuPreviewDummyPersistence: TimerPersistenceManageable {
     var timeRemaining: Int = 1500
     var isRunning: Bool = false
     var isWorkSession: Bool = true
+    var runStateRaw: String?
+    var endAtEpoch: Double?
+    var remainingAtPause: Int?
     func saveTimerState() {}
     func restoreTimerState() {}
 }

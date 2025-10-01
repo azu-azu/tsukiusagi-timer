@@ -32,6 +32,12 @@ struct EmbeddedSessionManagementView: View {
             // Add Custom Session Button
             addCustomSessionButton()
         }
+        .padding(DesignTokens.Padding.large)
+        .background(
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
+                .fill(DesignTokens.CosmosColors.cardBackground)
+                .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
+        )
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .edit(let session):
@@ -79,9 +85,7 @@ struct EmbeddedSessionManagementView: View {
             Button {
                 selectedSession = session
                 activeSheet = .edit(session)
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
+            } label: { Label("Edit", systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
         }
         .accessibilityElement(children: .combine)
@@ -124,9 +128,7 @@ struct EmbeddedSessionManagementView: View {
             Button {
                 selectedSession = session
                 activeSheet = .edit(session)
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
+            } label: { Label("Edit", systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
             if !session.isDefault {
                 Button(role: .destructive) {
@@ -181,9 +183,7 @@ struct EmbeddedSessionManagementView: View {
 
             Spacer()
 
-            Image(systemName: "pencil")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolSmall)
+            PencilIcon(size: .small)
         }
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .padding(.vertical, DesignTokens.Padding.medium)
@@ -263,59 +263,23 @@ struct EmbeddedSessionManagementView: View {
 extension EmbeddedSessionManagementView {
     @ViewBuilder
     fileprivate func defaultSessionsSection() -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
-            Text(NSLocalizedString("default_sessions_title", comment: ""))
-                .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-            VStack(spacing: 0) {
-                ForEach(Array(sessionManager.defaultEntries.enumerated()), id: \.element.id) { index, session in
-                    defaultSessionRow(session, isLast: index == sessionManager.defaultEntries.count - 1)
-                }
+        VStack(spacing: 0) {
+            ForEach(Array(sessionManager.defaultEntries.enumerated()), id: \.element.id) { index, session in
+                defaultSessionRow(session, isLast: index == sessionManager.defaultEntries.count - 1)
             }
-            .background(
-                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
-                    .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
-            )
         }
     }
 
     @ViewBuilder
     fileprivate func customSessionsSection() -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
-            HStack {
-                Text(NSLocalizedString("custom_sessions_title", comment: ""))
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-                Spacer()
-
-                Text("\(sessionManager.customEntries.count)")
-                    .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.MoonColors.textMuted)
-                    .padding(.horizontal, DesignTokens.Padding.small)
-                    .padding(.vertical, DesignTokens.Padding.extraSmall)
-                    .background(
-                        Capsule()
-                            .fill(DesignTokens.MoonColors.textMuted.opacity(0.1))
-                    )
-            }
-
-            VStack(spacing: 0) {
-                if sessionManager.customEntries.isEmpty {
-                    emptyCustomSessionsView()
-                } else {
-                    ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
-                        customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
-                    }
+        VStack(spacing: 0) {
+            if sessionManager.customEntries.isEmpty {
+                emptyCustomSessionsView()
+            } else {
+                ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
+                    customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
                 }
             }
-            .background(
-                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
-                    .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
-            )
         }
     }
 }

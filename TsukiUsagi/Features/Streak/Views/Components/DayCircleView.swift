@@ -15,12 +15,15 @@ struct DayCircleView: View {
 
     var body: some View {
         Circle()
-            .fill(circleColor)
+            .fill(isToday ? DesignTokens.BlackColors.primary : circleColor)
             .frame(width: 32, height: 32)
             .overlay(
                 Text(weekdayText)
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(isUsed ? DesignTokens.PureColors.textWhite : DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(
+                        isToday ? DesignTokens.PureColors.textWhite :
+                        (isUsed ? DesignTokens.PureColors.textWhite : DesignTokens.MoonColors.textSecondary)
+                    )
             )
             .overlay(alignment: .bottom) {
                 if isToday && !isUsed && !isFutureDay {

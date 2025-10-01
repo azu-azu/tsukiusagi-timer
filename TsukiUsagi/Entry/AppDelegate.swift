@@ -19,4 +19,22 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // Display the notification as a banner and play a sound
         completionHandler([.banner, .sound])
     }
+
+    // This function will be called when the user taps on a notification or notification action
+    func userNotificationCenter(
+        _: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        // Handle notification action
+        if response.actionIdentifier == "OPEN_TIMER" {
+            // Deep Link: タイマー画面に遷移
+            NotificationCenter.default.post(
+                name: NSNotification.Name("OpenTimerFromNotification"),
+                object: nil
+            )
+        }
+
+        completionHandler()
+    }
 }

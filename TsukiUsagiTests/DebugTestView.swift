@@ -14,6 +14,7 @@ struct FontDebugTestView: View {
                 .foregroundColor(.gray)
         }
         .onAppear {
+            #if DEBUG
             print("🟢 FontDebugTestView appeared")
 
             print("🔍 フォント一覧:")
@@ -23,6 +24,7 @@ struct FontDebugTestView: View {
                     print("    🔤 \(name)")
                 }
             }
+            #endif
         }
     }
 }

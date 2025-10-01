@@ -33,6 +33,7 @@ class HistoryViewModel: ObservableObject {
 
     // ✅ カレンダー機能用の新規追加
     @Published private(set) var fixedDate: Date?
+    @Published var selectedDate: Date = Date()
 
     private let store = HistoryStore() // 下で定義
 
@@ -187,6 +188,23 @@ class HistoryViewModel: ObservableObject {
         formatter.dateFormat = "yyyyMMdd_HHmmss"
         formatter.timeZone = TimeZone.current
         return formatter.string(from: date)
+    }
+
+    // MARK: - Memo Operations
+
+    /// 指定されたレコードのmemoを更新
+    func updateMemo(for recordId: String, newMemo: String?) {
+        guard let index = history.firstIndex(where: { $0.id == recordId }) else {
+            return
+        }
+
+        history[index].memo = newMemo?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true ? nil : newMemo
+        saveHistory()
+    }
+
+    /// 指定されたレコードを取得
+    func getRecord(by id: String) -> SessionRecord? {
+        return history.first { $0.id == id }
     }
 
     // MARK: - Save Operations

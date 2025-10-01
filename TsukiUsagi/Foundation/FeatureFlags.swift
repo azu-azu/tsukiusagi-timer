@@ -8,6 +8,12 @@ enum FeatureFlags {
     private enum Keys {
         /// 統一UI の有効/無効
         static let unifiedUI = "enableUnifiedUI"
+
+        /// Streak機能のフラグ
+        static let achievements = "enableAchievements"
+        static let xp = "enableXP"
+        static let sharing = "enableSharing"
+        static let smartNotifications = "enableSmartNotifications"
     }
 
     // MARK: - Unified UI
@@ -29,6 +35,64 @@ enum FeatureFlags {
         }
     }
 
+    // MARK: - Streak Features
+
+    /// アチーブメント機能の有効/無効
+    /// MVPでは false をデフォルトとする
+    static var achievements: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: Keys.achievements) == nil {
+                return false // MVP: デフォルト値
+            }
+            return UserDefaults.standard.bool(forKey: Keys.achievements)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.achievements)
+        }
+    }
+
+    /// XP機能の有効/無効
+    /// MVPでは false をデフォルトとする
+    static var xp: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: Keys.xp) == nil {
+                return false // MVP: デフォルト値
+            }
+            return UserDefaults.standard.bool(forKey: Keys.xp)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.xp)
+        }
+    }
+
+    /// シェア機能の有効/無効
+    /// MVPでは false をデフォルトとする
+    static var sharing: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: Keys.sharing) == nil {
+                return false // MVP: デフォルト値
+            }
+            return UserDefaults.standard.bool(forKey: Keys.sharing)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.sharing)
+        }
+    }
+
+    /// スマート通知機能の有効/無効
+    /// MVPでは false をデフォルトとする
+    static var smartNotifications: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: Keys.smartNotifications) == nil {
+                return false // MVP: デフォルト値
+            }
+            return UserDefaults.standard.bool(forKey: Keys.smartNotifications)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.smartNotifications)
+        }
+    }
+
     // MARK: - Initialization
 
     /// アプリ起動時にデフォルト値を設定
@@ -44,6 +108,12 @@ enum FeatureFlags {
                 UserDefaults.standard.set(false, forKey: Keys.unifiedUI)
             #endif
         }
+
+        // Streak機能のデフォルト値設定（MVPでは全て false）
+        let streakKeys = [Keys.achievements, Keys.xp, Keys.sharing, Keys.smartNotifications]
+        for key in streakKeys where UserDefaults.standard.object(forKey: key) == nil {
+            UserDefaults.standard.set(false, forKey: key) // MVP: 全て無効
+        }
     }
 
     // MARK: - Reset
@@ -53,6 +123,11 @@ enum FeatureFlags {
     static func resetToDefaults() {
         #if DEBUG
             UserDefaults.standard.removeObject(forKey: Keys.unifiedUI)
+            // Streak機能のフラグもリセット
+            let streakKeys = [Keys.achievements, Keys.xp, Keys.sharing, Keys.smartNotifications]
+            for key in streakKeys {
+                UserDefaults.standard.removeObject(forKey: key)
+            }
             setDefaultValues()
         #endif
     }
@@ -65,6 +140,10 @@ enum FeatureFlags {
             return """
             Feature Flags Debug Info:
             - enableUnifiedUI: \(enableUnifiedUI)
+            - achievements: \(achievements)
+            - xp: \(xp)
+            - sharing: \(sharing)
+            - smartNotifications: \(smartNotifications)
             - Keys.unifiedUI: \(Keys.unifiedUI)
             """
         #else

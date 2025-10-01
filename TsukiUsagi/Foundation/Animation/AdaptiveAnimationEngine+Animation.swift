@@ -90,7 +90,9 @@ extension AdaptiveAnimationEngine {
     }
 
     internal func updateAnimationQuality(to newQuality: AnimationQuality, reason: String) {
+        #if DEBUG
         print("🎛 Animation Quality: \(animationQuality) → \(newQuality) (\(reason))")
+        #endif
 
         DispatchQueue.main.async {
             self.animationQuality = newQuality
