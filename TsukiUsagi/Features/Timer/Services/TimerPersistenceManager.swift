@@ -69,11 +69,11 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
         self.timeRemaining = 0
         self.isRunning = false
         self.isWorkSession = true
-        
+
         // 古い永続化データをクリア（アプリ起動時は常にリセット）
         clearPersistedState()
     }
-    
+
     /// 設定済みの作業時間で初期化
     func initializeWithWorkMinutes(_ minutes: Int) {
         self.timeRemaining = minutes * 60
@@ -81,7 +81,7 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
         self.isWorkSession = true
         clearPersistedState()
     }
-    
+
     /// 永続化された状態をクリア
     private func clearPersistedState() {
         storedRemainingSeconds = 0

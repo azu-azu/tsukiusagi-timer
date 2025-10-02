@@ -126,17 +126,17 @@ final class TimerStateManager: ObservableObject {
     func setSessionFinished(_ finished: Bool) {
         isSessionFinished = finished
     }
-    
+
     /// 作業セッション状態を設定
     func setWorkSession(_ isWork: Bool) {
         isWorkSession = isWork
     }
-    
+
     /// セッション完了状態をリセット
     func resetSessionFinished() {
         isSessionFinished = false
     }
-    
+
     /// 設定済みの作業時間で初期化
     func initializeWithWorkMinutes(_ minutes: Int) {
         timeRemaining = minutes * 60
