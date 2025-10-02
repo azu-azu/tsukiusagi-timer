@@ -70,26 +70,15 @@ struct TimerPanel: View {
         }
 
         .onChange(of: scenePhase) { _, newPhase in
-            #if DEBUG
-            print("🔍 TimerPanel: scenePhase変更 - \(newPhase)")
-            #endif
             switch newPhase {
             case .background:
-                #if DEBUG
-                print("🔍 TimerPanel: バックグラウンド移行")
-                #endif
                 // Save running state and absolute endAt before pausing engine
                 timerVM.saveTimerState()
                 timerVM.appDidEnterBackground()
             case .active:
-                #if DEBUG
-                print("🔍 TimerPanel: フォアグラウンド復帰")
-                #endif
                 Task { timerVM.appWillEnterForeground() }
             default:
-                #if DEBUG
-                print("🔍 TimerPanel: その他のフェーズ - \(newPhase)")
-                #endif
+                break
             }
         }
 

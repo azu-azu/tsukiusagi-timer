@@ -293,6 +293,7 @@ private class PreviewSideMenuDummyPersistence: TimerPersistenceManageable {
     var remainingAtPause: Int?
     func saveTimerState() {}
     func restoreTimerState() {}
+    func initializeWithWorkMinutes(_ minutes: Int) {}
 }
 
 private class PreviewSideMenuDummyFormatter: TimeFormatterUtilable {

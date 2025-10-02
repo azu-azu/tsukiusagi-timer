@@ -31,11 +31,15 @@ final class TimerStateManager: ObservableObject {
     init(
         engine: TimerEngineable,
         formatter: TimeFormatterUtilable,
-        dateProvider: DateProviding
+        dateProvider: DateProviding,
+        defaultWorkMinutes: Int = 25
     ) {
         self.engine = engine
         self.formatter = formatter
         self.dateProvider = dateProvider
+
+        // 初期値は0（initializeWithWorkMinutesで正しい時間が設定される）
+        self.timeRemaining = 0
 
         setupEngineBindings()
     }
@@ -60,6 +64,7 @@ final class TimerStateManager: ObservableObject {
 
         isRunning = true
         runState = .running
+        isSessionFinished = false // セッション完了状態をリセット
         engine.start(seconds: timeRemaining)
     }
 
@@ -117,8 +122,27 @@ final class TimerStateManager: ObservableObject {
         self.isWorkSession = isWorkSession
     }
 
+    /// セッション完了状態を設定
+    func setSessionFinished(_ finished: Bool) {
+        isSessionFinished = finished
+    }
+    
+    /// 作業セッション状態を設定
+    func setWorkSession(_ isWork: Bool) {
+        isWorkSession = isWork
+    }
+    
     /// セッション完了状態をリセット
     func resetSessionFinished() {
+        isSessionFinished = false
+    }
+    
+    /// 設定済みの作業時間で初期化
+    func initializeWithWorkMinutes(_ minutes: Int) {
+        timeRemaining = minutes * 60
+        isRunning = false
+        runState = .idle
+        isWorkSession = true
         isSessionFinished = false
     }
 }

@@ -91,7 +91,15 @@ struct NewSessionFormView: View {
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
             TextField(NSLocalizedString("session_name_placeholder", comment: ""), text: $sessionName)
-                .textFieldStyle(.roundedBorder)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(DesignTokens.CosmosColors.cardBackground)
+                .cornerRadius(DesignTokens.CornerRadius.medium)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                        .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+                )
                 .focused($focusedField, equals: .sessionName)
 
             Text(NSLocalizedString("session_name_hint", comment: ""))
@@ -174,7 +182,15 @@ struct NewSessionFormView: View {
                     }
                 }
             ))
-            .textFieldStyle(.roundedBorder)
+            .textFieldStyle(PlainTextFieldStyle())
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .cornerRadius(DesignTokens.CornerRadius.medium)
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                    .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+            )
             .focused($focusedField, equals: .description(index))
 
             Button {
@@ -191,7 +207,15 @@ struct NewSessionFormView: View {
     private func addDescriptionField() -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
             TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
-                .textFieldStyle(.roundedBorder)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(DesignTokens.CosmosColors.cardBackground)
+                .cornerRadius(DesignTokens.CornerRadius.medium)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                        .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+                )
                 .focused($focusedField, equals: .newDescription)
 
             Button {

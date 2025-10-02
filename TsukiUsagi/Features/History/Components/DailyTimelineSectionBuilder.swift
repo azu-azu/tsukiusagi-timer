@@ -44,10 +44,11 @@ struct DailyTimelineSectionBuilder {
             timeRangeView(rec)
             activityInfoView(displayName: rec.activity, rec: rec, isDeleted: false)
             Spacer()
-            actionButtonView(rec: rec, isDeleted: false, onRestore: onRestore, onMemoEdit: onMemoEdit)
+            durationView(rec)
         }
         .frame(height: dayModeCardHeight)
-        .background(Color(.systemBackground))
+        .padding(.horizontal, 12)
+        .background(DesignTokens.CosmosColors.cardBackground)
         .cornerRadius(8)
     }
 
@@ -57,7 +58,7 @@ struct DailyTimelineSectionBuilder {
         Text("\(rec.start.formatted(date: .omitted, time: .shortened)) - " +
              "\(rec.end.formatted(date: .omitted, time: .shortened))")
             .font(.caption)
-            .foregroundColor(.secondary)
+            .foregroundColor(DesignTokens.MoonColors.textSecondary)
             .frame(width: timeWidth, alignment: .leading)
     }
 
@@ -66,8 +67,29 @@ struct DailyTimelineSectionBuilder {
     private func activityInfoView(displayName: String, rec: SessionRecord, isDeleted: Bool) -> some View {
         Text(displayName)
             .font(.body)
-            .foregroundColor(isDeleted ? .secondary : .primary)
+            .foregroundColor(isDeleted ? DesignTokens.MoonColors.textSecondary : DesignTokens.MoonColors.textPrimary)
             .strikethrough(isDeleted)
+    }
+    /// 時間表示
+    @ViewBuilder
+    private func durationView(_ rec: SessionRecord) -> some View {
+        let totalSeconds = Int(rec.end.timeIntervalSince(rec.start))
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+
+        Text(durationText(minutes: minutes, seconds: seconds))
+            .font(.body)
+            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+    }
+
+    private func durationText(minutes: Int, seconds: Int) -> String {
+        if minutes > 0 && seconds > 0 {
+            return "\(minutes) min \(seconds) s"
+        } else if minutes > 0 {
+            return "\(minutes) min"
+        } else {
+            return "\(seconds) s"
+        }
     }
 
     /// アクションボタン表示
@@ -128,22 +150,23 @@ struct DailyTimelineSectionBuilder {
     private func summarySection(title: String, summaries: [LabelSummary]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.headline)
-                .foregroundColor(.primary)
+                .font(.caption)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
             LazyVStack(spacing: 4) {
                 ForEach(summaries, id: \LabelSummary.label) { summary in
                     HStack {
                         Text(summary.label)
                             .font(.body)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
                         Spacer()
                         Text("\(summary.totalMinutes) min")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     }
                     .frame(height: summaryCardHeight)
                     .padding(.horizontal, 12)
-                    .background(Color(.systemGray6))
+                    .background(DesignTokens.CosmosColors.cardBackground)
                     .cornerRadius(8)
                 }
             }
@@ -165,9 +188,9 @@ struct DailyTimelineSectionBuilder {
     /// メモセクションヘッダー
     @ViewBuilder
     private func memoSectionHeader() -> some View {
-        Text("Memos")
-            .font(.headline)
-            .foregroundColor(.primary)
+        Text("Reflect")
+            .font(.caption)
+            .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
 
     /// メモアイテム一覧
@@ -177,8 +200,14 @@ struct DailyTimelineSectionBuilder {
         onMemoEdit: @escaping (SessionRecord) -> Void
     ) -> some View {
         LazyVStack(spacing: 4) {
-            ForEach(records, id: \.id) { record in
-                memoItemButton(record: record, onMemoEdit: onMemoEdit)
+            if records.isEmpty {
+                // メモが登録されていない場合の新規追加ボタン
+                addMemoButton(onMemoEdit: onMemoEdit)
+            } else {
+                // 既存のメモアイテム
+                ForEach(records, id: \.id) { record in
+                    memoItemButton(record: record, onMemoEdit: onMemoEdit)
+                }
             }
         }
     }
@@ -189,26 +218,20 @@ struct DailyTimelineSectionBuilder {
         record: SessionRecord,
         onMemoEdit: @escaping (SessionRecord) -> Void
     ) -> some View {
-        Button(
-            action: { onMemoEdit(record) },
-            label: {
-                memoItemContent(record: record)
-            }
-        )
-        .buttonStyle(PlainButtonStyle())
+        memoItemContent(record: record, onMemoEdit: onMemoEdit)
     }
 
     /// メモアイテム内容
     @ViewBuilder
-    private func memoItemContent(record: SessionRecord) -> some View {
+    private func memoItemContent(record: SessionRecord, onMemoEdit: @escaping (SessionRecord) -> Void) -> some View {
         HStack(spacing: 8) {
             memoTextContent(record: record)
             Spacer()
-            memoEditIcon()
+            memoEditButton(record: record, onMemoEdit: onMemoEdit)
         }
         .frame(height: summaryCardHeight)
         .padding(.horizontal, 12)
-        .background(Color(.systemGray6))
+        .background(DesignTokens.CosmosColors.cardBackground)
         .cornerRadius(8)
     }
 
@@ -218,19 +241,81 @@ struct DailyTimelineSectionBuilder {
         VStack(alignment: .leading, spacing: 2) {
             Text(record.activity)
                 .font(.body)
-                .foregroundColor(.primary)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
             Text(record.memo ?? "")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .lineLimit(2)
         }
     }
 
-    /// メモ編集アイコン
+    /// メモ編集ボタン
     @ViewBuilder
-    private func memoEditIcon() -> some View {
-        Image(systemName: "pencil")
-            .foregroundColor(.blue)
-            .font(.caption)
+    private func memoEditButton(record: SessionRecord, onMemoEdit: @escaping (SessionRecord) -> Void) -> some View {
+        Button(
+            action: {
+                onMemoEdit(record)
+            },
+            label: {
+                Image(systemName: "pencil")
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .font(.title2)
+            }
+        )
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    /// 新規メモ追加ボタン（メモが登録されていない場合）
+    @ViewBuilder
+    private func addMemoButton(onMemoEdit: @escaping (SessionRecord) -> Void) -> some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Add reflection")
+                    .font(.body)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                Text("Tap the pencil to add your thoughts")
+                    .font(.caption)
+                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+            }
+            Spacer()
+            Button(
+                action: {
+                    // ダミーのSessionRecordを作成して新規追加をトリガー
+                    let dummyRecord = SessionRecord(
+                        id: UUID().uuidString,
+                        start: Date(),
+                        end: Date(),
+                        phase: .focus,
+                        activity: "New Reflection",
+                        subtitle: "",
+                        memo: ""
+                    )
+                    onMemoEdit(dummyRecord)
+                },
+                label: {
+                    Image(systemName: "pencil")
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        .font(.title2)
+                }
+            )
+            .buttonStyle(PlainButtonStyle())
+        }
+        .frame(height: summaryCardHeight)
+        .padding(.horizontal, 12)
+        .background(DesignTokens.CosmosColors.cardBackground)
+        .cornerRadius(8)
+        .onTapGesture {
+            // ダミーのSessionRecordを作成して新規追加をトリガー
+            let dummyRecord = SessionRecord(
+                id: UUID().uuidString,
+                start: Date(),
+                end: Date(),
+                phase: .focus,
+                activity: "New Reflection",
+                subtitle: "",
+                memo: ""
+            )
+            onMemoEdit(dummyRecord)
+        }
     }
 }

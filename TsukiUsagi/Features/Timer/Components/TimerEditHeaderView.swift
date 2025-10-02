@@ -117,6 +117,7 @@ private class DummyPersistenceManager: TimerPersistenceManageable {
     var remainingAtPause: Int?
     func saveTimerState() {}
     func restoreTimerState() {}
+    func initializeWithWorkMinutes(_ minutes: Int) {}
 }
 
 private class DummyFormatter: TimeFormatterUtilable {

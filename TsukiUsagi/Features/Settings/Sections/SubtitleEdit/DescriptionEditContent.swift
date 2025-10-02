@@ -138,7 +138,15 @@ struct DescriptionEditContent: View {
                         "Description \(index + 1)",
                         text: binding(for: index)
                     )
-                    .textFieldStyle(.roundedBorder)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(DesignTokens.CosmosColors.cardBackground)
+                    .cornerRadius(DesignTokens.CornerRadius.medium)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                            .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+                    )
                     .focused($focusedField, equals: index)
                     .submitLabel(index == descriptions.count - 1 ? .done : .next)
                     .onSubmit {

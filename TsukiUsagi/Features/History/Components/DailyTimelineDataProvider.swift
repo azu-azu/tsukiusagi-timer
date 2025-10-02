@@ -22,17 +22,17 @@ struct DailyTimelineDataProvider {
             .sorted { $0.start < $1.start }
     }
 
-    /// 総時間（分）を計算
-    func totalMinutes(historyVM: HistoryViewModel, targetDate: Date) -> Int {
+    /// 総時間（秒）を計算
+    func totalSeconds(historyVM: HistoryViewModel, targetDate: Date) -> Int {
         return records(historyVM: historyVM, targetDate: targetDate)
             .reduce(0) { total, rec in
-                total + durationMinutes(rec)
+                total + Int(rec.end.timeIntervalSince(rec.start))
             }
     }
 
-    /// 記録の時間（分）を計算
-    func durationMinutes(_ rec: SessionRecord) -> Int {
-        return Int(rec.end.timeIntervalSince(rec.start) / 60)
+    /// 記録の時間（秒）を計算
+    func durationSeconds(_ rec: SessionRecord) -> Int {
+        return Int(rec.end.timeIntervalSince(rec.start))
     }
 
     /// アクティビティ別集計
@@ -40,9 +40,10 @@ struct DailyTimelineDataProvider {
         let records = records(historyVM: historyVM, targetDate: targetDate)
         let grouped = Dictionary(grouping: records) { $0.activity }
         return grouped.map { activity, records in
-            let totalMinutes = records.reduce(0) { total, rec in
-                total + durationMinutes(rec)
+            let totalSeconds = records.reduce(0) { total, rec in
+                total + durationSeconds(rec)
             }
+            let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
             return LabelSummary(label: activity, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }
@@ -53,9 +54,10 @@ struct DailyTimelineDataProvider {
         let grouped = Dictionary(grouping: records) { $0.subtitle ?? "" }
         return grouped.compactMap { subtitle, records in
             guard !subtitle.isEmpty else { return nil }
-            let totalMinutes = records.reduce(0) { total, rec in
-                total + durationMinutes(rec)
+            let totalSeconds = records.reduce(0) { total, rec in
+                total + durationSeconds(rec)
             }
+            let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
             return LabelSummary(label: subtitle, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }

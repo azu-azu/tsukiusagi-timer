@@ -53,6 +53,7 @@ final class TimerEngine: TimerEngineable {
         actualWorkedSeconds = 0
         lastResumedTime = Date()
         pausedRemaining = nil
+        timeRemaining = seconds // 正しい残り時間を設定
         endAt = Date().addingTimeInterval(TimeInterval(seconds))
 
         scheduleTimer()
@@ -91,6 +92,7 @@ final class TimerEngine: TimerEngineable {
         guard remain > 0 else { return }
         isRunning = true
         lastResumedTime = Date()
+        timeRemaining = remain // 正しい残り時間を設定
         endAt = Date().addingTimeInterval(TimeInterval(remain))
         pausedRemaining = nil
         scheduleTimer()

@@ -62,6 +62,10 @@ final class TimerViewModel: ObservableObject {
 
     // 🔔 START アニメ用トリガー
     let startPulse = PassthroughSubject<Void, Never>()
+    
+    // MARK: - Private Properties
+    
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
 
@@ -118,12 +122,17 @@ final class TimerViewModel: ObservableObject {
         self.stateManager = TimerStateManager(
             engine: engine,
             formatter: formatter,
-            dateProvider: dateProvider
+            dateProvider: dateProvider,
+            defaultWorkMinutes: 25 // デフォルト値を使用
         )
         self.displayManager = TimerDisplayManager(formatter: formatter)
 
         setupBindings()
         setupEngineCallbacks()
+        
+        // 設定済みの作業時間でPersistenceManagerとStateManagerを初期化
+        persistenceManager.initializeWithWorkMinutes(workMinutes)
+        stateManager.initializeWithWorkMinutes(workMinutes)
     }
 
     // MARK: - Setup Methods
@@ -140,8 +149,15 @@ final class TimerViewModel: ObservableObject {
         sessionManager.$startTime.assign(to: &$startTime)
         sessionManager.$endTime.assign(to: &$endTime)
 
-        // Bind to animation controller (direct assignment since protocol doesn't support @Published)
-        // These will be manually synchronized in the methods
+        // Bind to animation controller (cast to concrete type to access @Published properties)
+        if let concreteController = animationController as? TimerAnimationController {
+            concreteController.$flashStars.assign(to: &$flashStars)
+            concreteController.$shouldSuppressAnimation.assign(to: &$shouldSuppressAnimation)
+            concreteController.$shouldSuppressSessionFinishedAnimation.assign(to: &$shouldSuppressSessionFinishedAnimation)
+            
+            // Sync startPulse from animation controller to TimerViewModel
+            concreteController.startPulse.subscribe(startPulse).store(in: &cancellables)
+        }
     }
 
     private func setupEngineCallbacks() {
@@ -158,7 +174,10 @@ final class TimerViewModel: ObservableObject {
 
     /// タイマー開始
     func startTimer() {
-        guard timeRemaining > 0 else { return }
+        // quiet moon画面からのstart時は、時間を設定してから開始
+        let targetTime = isSessionFinished ? workLengthMinutes * 60 : timeRemaining
+        
+        guard targetTime > 0 else { return }
 
         sessionManager.startSession(
             isWorkSession: isWorkSession,
@@ -166,6 +185,12 @@ final class TimerViewModel: ObservableObject {
             subtitleLabel: subtitleLabel
         )
 
+        // 時間を設定してからstartTimerを呼ぶ
+        stateManager.timeRemaining = targetTime
+        // quiet moon画面からのstart時は、isWorkSessionをtrueに設定
+        if isSessionFinished {
+            stateManager.isWorkSession = true
+        }
         stateManager.startTimer()
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
@@ -187,7 +212,7 @@ final class TimerViewModel: ObservableObject {
         notificationAndHapticManager.sendStartNotification()
     }
 
-    /// タイマー停止
+    /// タイマー停止（完全停止 - セッションリセット）
     func stopTimer() {
         stateManager.stopTimer()
         sessionManager.resetSession()
@@ -197,6 +222,12 @@ final class TimerViewModel: ObservableObject {
     func resetTimer(to seconds: Int) {
         stateManager.resetTimer(to: seconds)
         sessionManager.resetSession()
+        animationController.resetAnimationState()
+    }
+    
+    /// タイマーのみリセット（セッション情報は保持）
+    func resetTimerOnly(to seconds: Int) {
+        stateManager.resetTimer(to: seconds)
         animationController.resetAnimationState()
     }
 
@@ -211,6 +242,13 @@ final class TimerViewModel: ObservableObject {
         stateManager.handleSessionCompleted(sessionInfo)
         animationController.triggerSessionFinishedAnimations()
         notificationAndHapticManager.triggerHeavyHaptic()
+        
+        // セッション終了通知を送信
+        if isWorkSession {
+            notificationService.finalizeWorkPhase()
+        } else {
+            notificationService.finalizeBreakPhase()
+        }
     }
 
     /// 強制終了
@@ -224,6 +262,8 @@ final class TimerViewModel: ObservableObject {
         )
 
         stateManager.stopTimer()
+        stateManager.setSessionFinished(true) // セッション完了状態を設定
+        stateManager.setWorkSession(false) // 作業セッションを終了
         animationController.triggerSessionFinishedAnimations()
         notificationAndHapticManager.triggerHeavyHaptic()
     }
@@ -246,6 +286,11 @@ final class TimerViewModel: ObservableObject {
 
     /// タイマー状態を復元
     func restoreTimerState() {
+        // タイマーが実行中の場合は復元しない
+        if isRunning {
+            return
+        }
+        
         let result = statePersistenceManager.restoreTimerState()
 
         switch result {

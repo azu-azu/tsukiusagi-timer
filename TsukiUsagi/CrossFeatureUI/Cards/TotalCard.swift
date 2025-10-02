@@ -88,7 +88,6 @@ struct TotalCard: View {
             RoundedRectangle(cornerRadius: cornerRadius)
                 .fill(backgroundColor)
         )
-        .padding(.horizontal, DesignTokens.Padding.medium)
     }
 }
 

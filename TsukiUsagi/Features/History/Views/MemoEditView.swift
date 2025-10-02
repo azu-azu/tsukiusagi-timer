@@ -12,6 +12,11 @@ struct MemoEditView: View {
     @FocusState private var isMemoFocused: Bool
 
     private let memoEditorMaxHeight: CGFloat = 300
+    
+    // 新規追加かどうかを判定
+    private var isNewRecord: Bool {
+        return record.activity == "New Reflection" && (record.memo?.isEmpty ?? true)
+    }
 
     var body: some View {
         NavigationStack {
@@ -37,7 +42,7 @@ struct MemoEditView: View {
                     Color.clear.frame(height: keyboardBottomInset)
                 }
             }
-            .navigationTitle("Edit Memo")
+            .navigationTitle(isNewRecord ? "Add Reflection" : "Edit Reflection")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -213,7 +218,25 @@ struct MemoEditView: View {
         let trimmedMemo = editedMemo.trimmingCharacters(in: .whitespacesAndNewlines)
         let finalMemo = trimmedMemo.isEmpty ? nil : trimmedMemo
 
-        historyVM.updateMemo(for: record.id, newMemo: finalMemo)
+        if isNewRecord {
+            // 新規追加の場合
+            if let finalMemo = finalMemo {
+                let newRecord = SessionRecord(
+                    id: UUID().uuidString,
+                    start: Date(),
+                    end: Date(),
+                    phase: .focus,
+                    activity: "Reflection",
+                    subtitle: "",
+                    memo: finalMemo
+                )
+                historyVM.addRecord(newRecord)
+            }
+        } else {
+            // 既存レコードの更新
+            historyVM.updateMemo(for: record.id, newMemo: finalMemo)
+        }
+        
         dismiss()
     }
 }

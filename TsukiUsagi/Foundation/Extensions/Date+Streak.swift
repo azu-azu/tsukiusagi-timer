@@ -43,10 +43,6 @@ extension Date {
 
         let result = calendar.date(byAdding: .day, value: offset, to: today) ?? self
 
-        // デバッグ用ログ（必要に応じて削除）
-        #if DEBUG
-        print("[DEBUG] Target Date for index \(dayOfWeek): \(result) | Now: \(Date())")
-        #endif
 
         return result
     }
