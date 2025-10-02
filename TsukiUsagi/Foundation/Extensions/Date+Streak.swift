@@ -43,7 +43,6 @@ extension Date {
 
         let result = calendar.date(byAdding: .day, value: offset, to: today) ?? self
 
-
         return result
     }
 

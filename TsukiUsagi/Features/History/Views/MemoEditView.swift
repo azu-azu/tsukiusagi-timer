@@ -12,7 +12,7 @@ struct MemoEditView: View {
     @FocusState private var isMemoFocused: Bool
 
     private let memoEditorMaxHeight: CGFloat = 300
-    
+
     // 新規追加かどうかを判定
     private var isNewRecord: Bool {
         return record.activity == "New Reflection" && (record.memo?.isEmpty ?? true)
@@ -236,7 +236,7 @@ struct MemoEditView: View {
             // 既存レコードの更新
             historyVM.updateMemo(for: record.id, newMemo: finalMemo)
         }
-        
+
         dismiss()
     }
 }

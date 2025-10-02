@@ -206,7 +206,7 @@ class HistoryViewModel: ObservableObject {
     func getRecord(by id: String) -> SessionRecord? {
         return history.first { $0.id == id }
     }
-    
+
     /// 新しいレコードを追加
     func addRecord(_ record: SessionRecord) {
         history.append(record)
