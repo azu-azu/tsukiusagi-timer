@@ -30,6 +30,28 @@ enum TimeFormatters {
             return String(format: FormatterConstants.DurationText.minutesOnly, minutes)
         }
     }
+
+    /// 秒を時間、分、秒に変換して表示用の文字列を返す
+    /// - Parameter totalSeconds: 総秒数
+    /// - Returns: フォーマットされた文字列（例：「2 h 30 min 15 s」または「45 min 30 s」または「30 s」）
+    static func totalTextWithSeconds(_ totalSeconds: Int) -> String {
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let seconds = totalSeconds % 60
+
+        var components: [String] = []
+        if hours > 0 {
+            components.append("\(hours) h")
+        }
+        if minutes > 0 {
+            components.append("\(minutes) min")
+        }
+        if seconds > 0 || components.isEmpty {
+            components.append("\(seconds) s")
+        }
+
+        return components.joined(separator: " ")
+    }
 }
 
 /// TimeFormatterUtil class implementation for protocol compatibility

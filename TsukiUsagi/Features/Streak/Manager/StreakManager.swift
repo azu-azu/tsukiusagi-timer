@@ -127,7 +127,6 @@ class StreakManager: ObservableObject {
         saveIfChanged()
 
         #if DEBUG
-        print("📅 Streak Manager: Marked today as used. Total streak: \\(streakData.totalContinuousStreak)")
         #endif
     }
 
@@ -172,11 +171,9 @@ class StreakManager: ObservableObject {
                     streakData.totalContinuousStreak = 0
                     streakData.currentWeeklyStreak = 0
                     streakData.consecutiveWeeksWithFivePlusDays = 0 // Reset consistency tracking
-                    print("📅 Streak Manager: Streak broken due to gap. Days since last use: \\(daysSinceLastUse)")
                 } else {
                     // Streak continues, reset weekly streak counter
                     streakData.currentWeeklyStreak = 0
-                    print("📅 Streak Manager: Week transition: \\(streakData.totalContinuousStreak)\n")
                 }
             }
 
@@ -284,9 +281,9 @@ class StreakManager: ObservableObject {
         do {
             let data = try JSONEncoder().encode(streakData)
             userDefaults.set(data, forKey: streakDataKey)
-            print("📅 Streak Manager: Data saved successfully")
+            // Data saved successfully
         } catch {
-            print("📅 Streak Manager: Failed to save data - \\(error)")
+            // Failed to save data
         }
     }
 
@@ -298,17 +295,14 @@ class StreakManager: ObservableObject {
             // No existing data, create new
             let today = Date()
             let newData = StreakData(weekStartDate: today.startOfWeek)
-            print("📅 Streak Manager: Created new streak data")
             return newData
         }
 
         do {
             let streakData = try JSONDecoder().decode(StreakData.self, from: data)
-            print("📅 Streak Manager: existing streak data - Total streak: \\(streakData.totalContinuousStreak)")
             return streakData
         } catch {
             // Failed to decode, create new
-            print("📅 Streak Manager: Failed to decode data, creating new - \\(error)")
             let today = Date()
             return StreakData(weekStartDate: today.startOfWeek)
         }

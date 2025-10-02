@@ -109,8 +109,8 @@ struct TimerEditView: View {
                                 .colorScheme(.dark)
                             }
 
-                            // Memo
-                            sectionBuilder.section(title: "Memo", isCompact: true) {
+                            // Reflect
+                            sectionBuilder.section(title: "Reflect", isCompact: true) {
                                 TextEditor(text: $editedMemo)
                                     .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
                                     .padding(8)
@@ -123,9 +123,12 @@ struct TimerEditView: View {
                                         Group {
                                             if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                                 HStack {
-                                                    VStack {
-                                                        Text("Memo (optional)")
+                                                    VStack(alignment: .leading, spacing: 4) {
+                                                        Text("Reflect")
                                                             .font(DesignTokens.Fonts.label)
+                                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                                        Text("Write anything you feel")
+                                                            .font(DesignTokens.Fonts.caption)
                                                             .foregroundColor(DesignTokens.MoonColors.textMuted)
                                                         Spacer()
                                                     }

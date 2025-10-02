@@ -51,9 +51,10 @@ extension HistoryViewModel {
             calendar.isDate(record.start, inSameDayAs: startOfDay)
         }
 
-        let totalMinutes = daySessions.reduce(0) { total, record in
-            total + durationMinutes(record)
+        let totalSeconds = daySessions.reduce(0) { total, record in
+            total + durationSeconds(record)
         }
+        let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
 
         // ✅ sessionManagerパラメータを削除して、直接activityを使用
         let activities = Dictionary(grouping: daySessions) { record in
@@ -61,9 +62,10 @@ extension HistoryViewModel {
             // record.activityを直接使用するか、簡易版を作成
             String(describing: record.activity)
         }.mapValues { sessions in
-            sessions.reduce(0) { total, record in
-                total + durationMinutes(record)
+            let seconds = sessions.reduce(0) { total, record in
+                total + durationSeconds(record)
             }
+            return (seconds + 59) / 60  // 表示用に切り上げ
         }
 
         return DailyHistory(
@@ -103,9 +105,8 @@ extension HistoryViewModel {
 
     // MARK: - Private Helpers
 
-    private func durationMinutes(_ record: SessionRecord) -> Int {
-        let seconds = record.end.timeIntervalSince(record.start)
-        return max(Int(seconds) / 60, 1)
+    private func durationSeconds(_ record: SessionRecord) -> Int {
+        return Int(record.end.timeIntervalSince(record.start))
     }
 }
 

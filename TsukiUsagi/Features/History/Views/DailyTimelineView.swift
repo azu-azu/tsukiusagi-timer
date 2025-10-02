@@ -27,34 +27,36 @@ struct DailyTimelineView: View {
         self._viewModel = StateObject(wrappedValue: DailyTimelineViewModel(targetDate: targetDate))
     }
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                // Total 表示
-                TotalCard(text: TimeFormatters.totalText(viewModel.totalMinutes(historyVM: historyVM)))
-                // レコード表示
-                sectionBuilder.dayModeRecordsSection(
-                    records: viewModel.records(historyVM: historyVM),
-                    onRestore: { record in
-                        viewModel.restoreRecord(record, historyVM: historyVM, sessionManager: sessionManager)
-                    },
-                    onMemoEdit: { record in
-                        viewModel.selectRecordForMemoEdit(record)
-                    }
-                )
-                // 集計表示（レコードが複数ある場合のみ）
-                if viewModel.records(historyVM: historyVM).count > 1 {
-                    sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
-                    sectionBuilder.subtitleSummarySection(summaries: viewModel.bySubtitle(historyVM: historyVM))
-                }
-                // メモ部分
-                sectionBuilder.memoSection(
-                    records: viewModel.recordsWithMemos(historyVM: historyVM),
-                    onMemoEdit: { record in
-                        viewModel.selectRecordForMemoEdit(record)
-                    }
-                )
-            }
+        VStack(spacing: 0) {
+            // Total 表示（固定）
+            TotalCard(text: TimeFormatters.totalTextWithSeconds(
+                dataProvider.totalSeconds(historyVM: historyVM, targetDate: targetDate)
+            ))
             .padding(.horizontal)
+
+            // スクロール可能なコンテンツ
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    // レコード表示
+                    sectionBuilder.dayModeRecordsSection(
+                        records: viewModel.records(historyVM: historyVM),
+                        onRestore: { record in
+                            viewModel.restoreRecord(record, historyVM: historyVM, sessionManager: sessionManager)
+                        },
+                        onMemoEdit: { record in
+                            viewModel.selectRecordForMemoEdit(record)
+                        }
+                    )
+                    // 集計表示（レコードが複数ある場合のみ）
+                    if viewModel.records(historyVM: historyVM).count > 1 {
+                        sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
+                        sectionBuilder.subtitleSummarySection(summaries: viewModel.bySubtitle(historyVM: historyVM))
+                    }
+                    // メモ部分
+                    memoSection()
+                }
+                .padding(.horizontal)
+            }
         }
         .simultaneousGesture(gestureHandler.backSwipeGesture())
         .navigationTitle(targetDate.formatted(.dateTime.weekday(.wide).month().day()))
@@ -124,7 +126,7 @@ struct DailyTimelineView: View {
     }
     @ViewBuilder
     private func activityInfoView(displayName: String, rec: SessionRecord, isDeleted: Bool) -> some View {
-        Text("\(displayName) \(durationMinutes(rec)) min")
+        Text("\(displayName) \(durationSeconds(rec) / 60) min")
             .foregroundColor(isDeleted ? DesignTokens.MoonColors.textMuted : DesignTokens.MoonColors.textPrimary)
             .opacity(isDeleted ? 0.5 : 1.0)
     }
@@ -168,11 +170,11 @@ struct DailyTimelineView: View {
     private func records() -> [SessionRecord] {
         return dataProvider.records(historyVM: historyVM, targetDate: targetDate)
     }
-    private func totalMinutes() -> Int {
-        return dataProvider.totalMinutes(historyVM: historyVM, targetDate: targetDate)
+    private func totalSeconds() -> Int {
+        return dataProvider.totalSeconds(historyVM: historyVM, targetDate: targetDate)
     }
-    private func durationMinutes(_ rec: SessionRecord) -> Int {
-        return dataProvider.durationMinutes(rec)
+    private func durationSeconds(_ rec: SessionRecord) -> Int {
+        return dataProvider.durationSeconds(rec)
     }
     // MARK: - Summary Sections
     private func byActivity() -> [LabelSummary] {
@@ -191,13 +193,19 @@ struct DailyTimelineView: View {
             sectionBuilder.subtitleSummarySection(summaries: bySubtitle())
         }
     }
-    @ViewBuilder
+
     private func memoSection() -> some View {
         let recordsWithMemos = recordsWithMemos()
-        if !recordsWithMemos.isEmpty {
-            sectionBuilder.memoSection(records: recordsWithMemos, onMemoEdit: selectRecordForMemoEdit)
+        let onMemoEditClosure: (SessionRecord) -> Void = { record in
+            self.selectRecordForMemoEdit(record)
         }
+
+        // DailyTimelineSectionBuilderを直接インスタンス化
+        let sectionBuilder = DailyTimelineSectionBuilder()
+
+        return sectionBuilder.memoSection(records: recordsWithMemos, onMemoEdit: onMemoEditClosure)
     }
+
     private func recordsWithMemos() -> [SessionRecord] {
         return dataProvider.recordsWithMemos(historyVM: historyVM, targetDate: targetDate)
     }

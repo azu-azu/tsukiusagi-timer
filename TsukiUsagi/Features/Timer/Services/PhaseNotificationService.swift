@@ -30,8 +30,8 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
 
     func sendStartNotification() {
         hapticService.heavyImpact()
-        // 開始時の通知は即座に送信
-        notificationManager.sendPhaseChangeNotification(for: .focus)
+        // 開始時の通知は無効化（ユーザーリクエストにより不要）
+        // notificationManager.sendPhaseChangeNotification(for: .focus)
     }
 
     func cancelNotification() {

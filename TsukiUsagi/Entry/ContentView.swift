@@ -170,6 +170,8 @@ struct ContentView: View {
                         if showDiamondStars {
                             DiamondStarsOnceView {
                                 showDiamondStars = false
+                                // flashStarsをfalseに戻して、次回のアニメーション発火を可能にする
+                                timerVM.flashStars = false
                             }
                             .allowsHitTesting(false)
                         }
@@ -230,8 +232,10 @@ struct ContentView: View {
                                 }
                             }
                     )
-                    .onReceive(timerVM.$flashStars.dropFirst()) { _ in
-                        showDiamondStars = true
+                    .onReceive(timerVM.$flashStars.dropFirst()) { flashStars in
+                        if flashStars {
+                            showDiamondStars = true
+                        }
                     }
                     // シート提示は MainPanel へ移譲
                     .sheet(isPresented: $showingEditRecord) {
@@ -299,13 +303,14 @@ struct ContentView: View {
         Button(timerVM.isRunning ? "PAUSE" : "START") {
             HapticManager.shared.buttonTapFeedback()
             if timerVM.isRunning {
-                timerVM.stopTimer()
+                timerVM.pauseTimer() // PAUSE時はpauseTimer()を使用
             } else {
                 // セッション完了後の再スタート時は設定値を使用
                 if timerVM.isSessionFinished {
-                    timerVM.resetTimer(to: timerVM.workLengthMinutes * 60)
+                    timerVM.startTimer()
+                } else {
+                    timerVM.startTimer()
                 }
-                timerVM.startTimer()
             }
         }
         .frame(width: buttonWidth, height: buttonHeight)

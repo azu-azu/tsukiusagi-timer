@@ -155,7 +155,15 @@ extension SessionEditView {
                     .italic()
             } else {
                 TextField(NSLocalizedString("enter_session_name_placeholder", comment: ""), text: $editedName)
-                    .textFieldStyle(.roundedBorder)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(DesignTokens.CosmosColors.cardBackground)
+                    .cornerRadius(DesignTokens.CornerRadius.medium)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                            .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+                    )
                     .focused($focusedField, equals: .editedName)
             }
         }
@@ -227,7 +235,15 @@ extension SessionEditView {
                     }
                 }
             ))
-            .textFieldStyle(.roundedBorder)
+            .textFieldStyle(PlainTextFieldStyle())
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .cornerRadius(DesignTokens.CornerRadius.medium)
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                    .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+            )
             .focused($focusedField, equals: .description(index))
 
             Button {
@@ -243,7 +259,15 @@ extension SessionEditView {
     fileprivate func addDescriptionField() -> some View {
         HStack(spacing: 8) {
             TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
-                .textFieldStyle(.roundedBorder)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(DesignTokens.CosmosColors.cardBackground)
+                .cornerRadius(DesignTokens.CornerRadius.medium)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                        .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+                )
                 .focused($focusedField, equals: .newDescription)
 
             Button {

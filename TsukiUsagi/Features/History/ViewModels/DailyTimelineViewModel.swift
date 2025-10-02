@@ -36,15 +36,14 @@ final class DailyTimelineViewModel: ObservableObject {
         return historyVM.history.filter { calendar.isDate($0.start, inSameDayAs: targetDate) }
     }
 
-    /// 総時間（分）を計算
-    func totalMinutes(historyVM: HistoryViewModel) -> Int {
-        return records(historyVM: historyVM).reduce(0) { $0 + durationMinutes($1) }
+    /// 総時間（秒）を計算
+    func totalSeconds(historyVM: HistoryViewModel) -> Int {
+        return records(historyVM: historyVM).reduce(0) { $0 + durationSeconds($1) }
     }
 
-    /// レコードの時間（分）を計算
-    func durationMinutes(_ rec: SessionRecord) -> Int {
-        let diff = calendar.dateComponents([.minute], from: rec.start, to: rec.end)
-        return diff.minute ?? 0
+    /// レコードの時間（秒）を計算
+    func durationSeconds(_ rec: SessionRecord) -> Int {
+        return Int(rec.end.timeIntervalSince(rec.start))
     }
 
     /// アクティビティ別集計
@@ -52,7 +51,8 @@ final class DailyTimelineViewModel: ObservableObject {
         let records = records(historyVM: historyVM)
         let grouped = Dictionary(grouping: records) { $0.activity }
         return grouped.map { activity, records in
-            let totalMinutes = records.reduce(0) { $0 + durationMinutes($1) }
+            let totalSeconds = records.reduce(0) { $0 + durationSeconds($1) }
+            let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
             return LabelSummary(label: activity, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }
@@ -63,7 +63,8 @@ final class DailyTimelineViewModel: ObservableObject {
         let grouped = Dictionary(grouping: records) { $0.subtitle ?? "" }
         return grouped.compactMap { subtitle, records in
             guard !subtitle.isEmpty else { return nil }
-            let totalMinutes = records.reduce(0) { $0 + durationMinutes($1) }
+            let totalSeconds = records.reduce(0) { $0 + durationSeconds($1) }
+            let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
             return LabelSummary(label: subtitle, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }

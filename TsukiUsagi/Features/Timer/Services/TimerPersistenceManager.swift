@@ -14,6 +14,7 @@ protocol TimerPersistenceManageable: AnyObject {
 
     func saveTimerState()
     func restoreTimerState()
+    func initializeWithWorkMinutes(_ minutes: Int)
 }
 
 /// バックグラウンド対応と状態永続化を担当するManager
@@ -64,12 +65,33 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
     }
 
     init() {
+        // アプリ起動時は0で開始（initializeWithWorkMinutesで正しい時間が設定される）
         self.timeRemaining = 0
-        self.isRunning = storedIsRunning
-        self.isWorkSession = storedIsWorkSession
-
-        // 初期化後に永続化された値を復元
-        self.timeRemaining = storedRemainingSeconds
+        self.isRunning = false
+        self.isWorkSession = true
+        
+        // 古い永続化データをクリア（アプリ起動時は常にリセット）
+        clearPersistedState()
+    }
+    
+    /// 設定済みの作業時間で初期化
+    func initializeWithWorkMinutes(_ minutes: Int) {
+        self.timeRemaining = minutes * 60
+        self.isRunning = false
+        self.isWorkSession = true
+        clearPersistedState()
+    }
+    
+    /// 永続化された状態をクリア
+    private func clearPersistedState() {
+        storedRemainingSeconds = 0
+        storedIsRunning = false
+        storedIsWorkSession = true
+        storedBackgroundTimestamp = 0
+        storedEndAtTimestamp = 0
+        storedRunState = ""
+        storedEndAtEpoch = 0
+        storedRemainingAtPause = 0
     }
 
     func saveTimerState() {

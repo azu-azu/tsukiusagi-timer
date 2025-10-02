@@ -36,7 +36,7 @@ final class TimerAnimationController: TimerAnimationControllerProtocol {
     /// スタートアニメーションを発火（星の点滅 + パルス）
     func triggerStartAnimations() {
         if !shouldSuppressAnimation {
-            flashStars.toggle()
+            flashStars = true
             DispatchQueue.main.async {
                 self.startPulse.send()
             }

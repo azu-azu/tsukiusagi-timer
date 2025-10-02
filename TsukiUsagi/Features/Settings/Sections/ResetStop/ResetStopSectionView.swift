@@ -121,6 +121,7 @@ struct ResetStopSectionView_Previews: PreviewProvider {
             var remainingAtPause: Int?
             func saveTimerState() {}
             func restoreTimerState() {}
+            func initializeWithWorkMinutes(_ minutes: Int) {}
         }
         class DummyFormatter: TimeFormatterUtilable {
             func format(seconds: Int) -> String { "00:00" }
