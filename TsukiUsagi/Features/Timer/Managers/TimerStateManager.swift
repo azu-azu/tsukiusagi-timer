@@ -49,6 +49,10 @@ final class TimerStateManager: ObservableObject {
     private func setupEngineBindings() {
         engine.onTick = { [weak self] remaining in
             self?.timeRemaining = remaining
+            // TimerEngineの状態と同期
+            if let self = self, self.engine.isRunning != self.isRunning {
+                self.isRunning = self.engine.isRunning
+            }
         }
 
         engine.onSessionCompleted = { [weak self] sessionInfo in
@@ -62,51 +66,55 @@ final class TimerStateManager: ObservableObject {
     func startTimer() {
         guard timeRemaining > 0 else { return }
 
-        isRunning = true
         runState = .running
         isSessionFinished = false // セッション完了状態をリセット
         engine.start(seconds: timeRemaining)
+        isRunning = engine.isRunning
     }
 
     /// タイマー一時停止
     func pauseTimer() {
-        isRunning = false
         runState = .paused
         engine.pause()
+        isRunning = engine.isRunning
     }
 
     /// タイマー再開
     func resumeTimer() {
         guard timeRemaining > 0 else { return }
 
-        isRunning = true
         runState = .running
         engine.resume()
+        isRunning = engine.isRunning
     }
 
     /// タイマー停止
     func stopTimer() {
-        isRunning = false
         runState = .idle
         engine.stop()
+        isRunning = engine.isRunning
     }
 
     /// タイマーリセット
     func resetTimer(to seconds: Int) {
         timeRemaining = seconds
-        isRunning = false
         runState = .idle
         isSessionFinished = false
         engine.reset(to: seconds)
+        isRunning = engine.isRunning
     }
 
     /// セッション完了処理
     func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
+        
         isSessionFinished = true
-        isWorkSession = false
+        // isWorkSessionは変更しない（完了したセッションの種類を保持）
         timeRemaining = 0
-        isRunning = false
         runState = .idle
+        // セッション完了時は確実にisRunningをfalseに設定
+        isRunning = false
+        engine.stop()
+        
     }
 
     /// 状態を復元

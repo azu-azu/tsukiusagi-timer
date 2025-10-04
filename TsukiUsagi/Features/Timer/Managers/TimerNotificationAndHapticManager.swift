@@ -112,6 +112,16 @@ final class TimerNotificationAndHapticManager: ObservableObject {
         recoverNotificationIfNeeded()
     }
 
+    /// Work Phase完了時の処理
+    func finalizeWorkPhase() {
+        notificationService.finalizeWorkPhase()
+    }
+
+    /// Break Phase完了時の処理
+    func finalizeBreakPhase() {
+        notificationService.finalizeBreakPhase()
+    }
+
     // MARK: - Private Methods
 
     /// 通知の復元が必要かチェック

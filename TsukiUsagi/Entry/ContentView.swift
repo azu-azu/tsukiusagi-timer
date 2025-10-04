@@ -13,7 +13,7 @@ struct ContentView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // State
-    @State private var showingSideMenu = false
+    @State fileprivate var showingSideMenu = false
     @State private var showDiamondStars = false
     @State private var showingEditRecord = false
     @FocusState private var isQuietMoonFocused: Bool
@@ -38,72 +38,32 @@ struct ContentView: View {
 
     // MARK: - Computed Properties
 
-    /// より正確な向き判定（iPad Split View対応）
-    private func safeIsLandscape(size: CGSize) -> Bool {
-        guard size.width > 0, size.height > 0 else { return false }
-        return horizontalClass == .regular ||
-            (size.width > size.height && size.width > 600)
-    }
-
-    /// デバイス別のマージン調整
-    private var landscapeMargin: CGFloat {
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            return 40 // iPad は余裕を持たせる
-        } else {
-            return 20 // iPhone はコンパクトに
-        }
-    }
-
-    /// 星アニメ可否の単一の真理
-    private var shouldAnimateStars: Bool {
-        if reduceMotion { return false }
-        if showingSideMenu { return false }
-        let isInitial = timerVM.timeRemaining == timerVM.workLengthMinutes * 60
-        return timerVM.isRunning || isInitial
-    }
-
-    /// ハンバーガーメニューボタン共通アクション
-    private func hamburgerMenuAction() {
-        HapticManager.shared.buttonTapFeedback()
-        withAnimation(.easeInOut(duration: 0.3)) {
-            showingSideMenu.toggle()
-        }
-    }
-
     var body: some View {
         NavigationStack {
             GeometryReader { geo in
                 let size = geo.size
                 let safeAreaInsets = geo.safeAreaInsets
-                let isLandscape = safeIsLandscape(size: size)
+                let isLandscape = safeIsLandscape(size: size, horizontalClass: horizontalClass)
 
                 if size.width > 0 && size.height > 0 {
                     ZStack(alignment: .bottom) {
                         // 背景レイヤ
-                        BackgroundGradientView().ignoresSafeArea()
-                        AwakeEnablerView(hidden: true)
-                        StaticStarsView(starCount: staticStarCount)
-
-                        // セッション未完了かつアニメーション可時に星エフェクト表示
-                        if !timerVM.isSessionFinished && shouldAnimateStars {
-                            let baseCount = isLowPowerMode ? 24 : flowingStarCount
-                            let flowingCount = isLandscape ? Int(Double(baseCount) * 0.7) : baseCount
-                            let dur: ClosedRange<Double> = isLandscape ? 28 ... 44 : 24 ... 40
-                            FlowingStarsView(
-                                starCount: flowingCount,
-                                angle: .degrees(90), // 下向き
-                                durationRange: dur,
-                                sizeRange: 2 ... 4,
-                                spawnArea: nil
-                            )
-                            FlowingStarsView(
-                                starCount: flowingCount,
-                                angle: .degrees(-90), // 上向き
-                                durationRange: dur,
-                                sizeRange: 2 ... 4,
-                                spawnArea: nil
-                            )
-                        }
+                        backgroundLayer(params: ContentView.BackgroundLayerParams(
+                            size: size,
+                            safeAreaInsets: safeAreaInsets,
+                            staticStarCount: staticStarCount,
+                            flowingStarCount: flowingStarCount,
+                            isLowPowerMode: isLowPowerMode,
+                            isSessionFinished: timerVM.isSessionFinished,
+                            shouldAnimateStars: shouldAnimateStars(
+                                reduceMotion: reduceMotion,
+                                showingSideMenu: showingSideMenu,
+                                timeRemaining: timerVM.timeRemaining,
+                                workLengthMinutes: timerVM.workLengthMinutes,
+                                isRunning: timerVM.isRunning
+                            ),
+                            isLandscape: isLandscape
+                        ))
 
                         // Moon+Timerセット or QuietMoonView
                         MainPanel(
@@ -111,60 +71,51 @@ struct ContentView: View {
                             safeAreaInsets: safeAreaInsets,
                             isLandscape: isLandscape,
                             moonTitle: moonTitle,
-                            landscapeMargin: landscapeMargin,
+                            landscapeMargin: landscapeMargin(),
                             moonPortraitYOffsetRatio: moonPortraitYOffsetRatio,
                             moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
                             isQuietMoonFocused: $isQuietMoonFocused,
                             showingEditRecord: $showingEditRecord,
-                            isMoonAnimationActive: shouldAnimateStars
+                            isMoonAnimationActive: shouldAnimateStars(
+                                reduceMotion: reduceMotion,
+                                showingSideMenu: showingSideMenu,
+                                timeRemaining: timerVM.timeRemaining,
+                                workLengthMinutes: timerVM.workLengthMinutes,
+                                isRunning: timerVM.isRunning
+                            )
                         )
 
-                        // footerBarはZStackの一番下（ギアボタンと日付を削除）
-                        FooterBar(
+                        // フッターレイヤ
+                        footerLayer(params: ContentView.FooterLayerParams(
+                            safeAreaInsets: safeAreaInsets,
                             buttonHeight: buttonHeight,
                             buttonWidth: buttonWidth,
-                            dateString: "", // 日付表示を削除
-                            onGearTap: nil, // ギアボタンを無効化
-                            startPauseButton: startPauseButton()
-                        )
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, safeAreaInsets.bottom)
-                        .zIndex(AppConstants.footerZIndex)
-
-                        // ギアボタン（左下）と日付表示（右下）
-                        VStack {
-                            Spacer()
-                            HStack {
-                                // ギアボタン（左下）
-                                HamburgerMenuButton(action: hamburgerMenuAction)
-                                    .padding(.leading, 16)
-                                    .padding(.bottom, safeAreaInsets.bottom)
-
-                                Spacer()
-                                // 日付表示（右下）
-                                Text(DateFormatters.displayDateNoYear.string(from: today))
-                                    .font(DesignTokens.Fonts.footerDate)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                    .padding(.trailing, 16)
-                                    .padding(.bottom, safeAreaInsets.bottom)
-                            }
+                            today: today,
+                            isRunning: timerVM.isRunning,
+                            isSessionFinished: timerVM.isSessionFinished,
+                            showingSideMenu: $showingSideMenu,
+                            onPause: { [weak timerVM] in timerVM?.pauseTimer() },
+                            onStart: { [weak timerVM] in timerVM?.startTimer() }
+                        ))
+                        .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
+                        .onAppear {
                         }
-                        .zIndex(2001) // サイドメニューより下にしたいならOK（上にしたいならSideMenuをより大きく）
-
-                        // RecordedTimesViewを縦画面時のみfooterBarの直上に追加（位置は従来のまま）
-                        if timerVM.isSessionFinished && !timerVM.isWorkSession && !isLandscape {
-                            RecordedTimesView(
-                                formattedStartTime: timerVM.formattedStartTime,
-                                formattedEndTime: timerVM.formattedEndTime,
-                                actualSessionMinutes: timerVM.actualSessionMinutes,
-                                onEdit: { showingEditRecord = true }
-                            )
-                            .sessionVisibility(isVisible: timerVM.isSessionFinished)
-                            .padding(.bottom, AppConstants.footerBarHeight +
-                                    safeAreaInsets.bottom + AppConstants.recordedTimesBottomSpacing)
-                            .zIndex(AppConstants.overlayZIndex)
-                            .sessionEndTransition(timerVM)
+                        .onChange(of: timerVM.isRunning) { _, newValue in
                         }
+                        .onChange(of: timerVM.isSessionFinished) { _, newValue in
+                        }
+
+                        // RecordedTimesViewレイヤ
+                        recordedTimesLayer(params: ContentView.RecordedTimesLayerParams(
+                            isLandscape: isLandscape,
+                            safeAreaInsets: safeAreaInsets,
+                            isSessionFinished: timerVM.isSessionFinished,
+                            isWorkSession: timerVM.isWorkSession,
+                            formattedStartTime: timerVM.formattedStartTime,
+                            formattedEndTime: timerVM.formattedEndTime,
+                            actualSessionMinutes: timerVM.actualSessionMinutes,
+                            showingEditRecord: $showingEditRecord
+                        ))
 
                         // ダイヤモンドスター
                         if showDiamondStars {
@@ -264,6 +215,13 @@ struct ContentView: View {
                         NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
                     ) { _ in
                         today = Date()
+                        timerVM.appWillEnterForeground()
+                    }
+                    // バックグラウンド移行時の処理
+                    .onReceive(
+                        NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+                    ) { _ in
+                        timerVM.appDidEnterBackground()
                     }
                     // 画面常駐時に0時を跨いだら日付を更新
                     .onAppear { scheduleMidnightTick() }
@@ -298,27 +256,6 @@ struct ContentView: View {
     }
 
     // MARK: - Start / Pause Button
-
-    private func startPauseButton() -> some View {
-        Button(timerVM.isRunning ? "PAUSE" : "START") {
-            HapticManager.shared.buttonTapFeedback()
-            if timerVM.isRunning {
-                timerVM.pauseTimer() // PAUSE時はpauseTimer()を使用
-            } else {
-                // セッション完了後の再スタート時は設定値を使用
-                if timerVM.isSessionFinished {
-                    timerVM.startTimer()
-                } else {
-                    timerVM.startTimer()
-                }
-            }
-        }
-        .frame(width: buttonWidth, height: buttonHeight)
-        .background(Color.white.opacity(0.2),
-                    in: RoundedRectangle(cornerRadius: 20))
-        .titleWhiteAvenir(weight: .bold)
-        .foregroundColor(DesignTokens.PureColors.textWhite)
-    }
 
     // MARK: - Helper Methods
 }

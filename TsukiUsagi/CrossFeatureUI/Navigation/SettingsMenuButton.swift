@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct HamburgerMenuButton: View {
+struct SettingsMenuButton: View {
     let action: () -> Void
 
     var body: some View {
@@ -18,9 +18,9 @@ struct HamburgerMenuButton: View {
 }
 
 #if DEBUG
-struct HamburgerMenuButton_Previews: PreviewProvider {
+struct SettingsMenuButton_Previews: PreviewProvider {
     static var previews: some View {
-        HamburgerMenuButton {
+        SettingsMenuButton {
             print("Menu tapped")
         }
         .background(DesignTokens.BlackColors.primary)

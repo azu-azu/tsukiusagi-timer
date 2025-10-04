@@ -62,12 +62,47 @@ final class NotificationManager {
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {
         checkNotificationStatus { [weak self] allowed in
             guard allowed else {
-                #if DEBUG
-                print("通知は許可されていません")
-                #endif
                 return
             }
+            #if DEBUG
+            print("log: phase_send=\(phase)")
+            #endif
             self?.schedule(for: phase)
+        }
+    }
+
+    /// テスト用：即時通知を送信
+    func sendTestNotification(for phase: PomodoroPhase) {
+        let content = UNMutableNotificationContent()
+
+        switch phase {
+        case .focus:
+            content.title = "Time to Focus 🌕"
+            content.body = "Let's begin, quietly centered."
+        case .breakTime:
+            content.title = "Time to Rest 🌑"
+            content.body = "The moon is still. So can you be."
+        }
+
+        content.sound = .default
+        content.categoryIdentifier = "TIMER_CATEGORY"
+
+        let request = UNNotificationRequest(
+            identifier: "test_\(phase)_\(UUID().uuidString)",
+            content: content,
+            trigger: nil // 即座に送信
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                #if DEBUG
+                print("🔔 テスト通知失敗 (\(phase)): \(error.localizedDescription)")
+                #endif
+            } else {
+                #if DEBUG
+                print("🔔 テスト通知成功 (\(phase))")
+                #endif
+            }
         }
     }
 
@@ -92,53 +127,63 @@ final class NotificationManager {
 
     // 絶対時刻での通知スケジューリング実装
     private func scheduleNotificationAtAbsoluteTime(endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {
+        let now = Date()
+        let delta = endAt.timeIntervalSince(now)
+
+        #if DEBUG
+        print("log: schedule_absolute phase=\(phase) at=\(endAt) delta=\(Int(delta))s timeSensitive=\(timeSensitive)")
+        #endif
+
+
+        // 通知IDをフェーズ別に分ける
+        let id = (phase == .focus) ? "SessionEnd.focus" : "SessionEnd.break"
+
+        // 既存の同フェーズ通知をキャンセル
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
+
         let content = UNMutableNotificationContent()
         switch phase {
         case .focus:
-            content.title = "Time to Rest 🌑"
-            content.body = "The moon is still. So can you be."
-        case .breakTime:
             content.title = "Time to Focus 🌕"
             content.body = "Let's begin, quietly centered."
+            content.threadIdentifier = "pomodoro.focus"
+        case .breakTime:
+            content.title = "Time to Rest 🌑"
+            content.body = "The moon is still. So can you be."
+            content.threadIdentifier = "pomodoro.break"
         }
         content.sound = .default
-        content.categoryIdentifier = "TIMER_CATEGORY" // Deep Link対応
+        content.categoryIdentifier = "TIMER_CATEGORY"
 
         // Time-Sensitive対応（iOS 15+）
         if #available(iOS 15.0, *), timeSensitive {
             content.interruptionLevel = .timeSensitive
         }
 
-        // 絶対時刻でのトリガー設定
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second],
-            from: endAt
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        // 安全策：秒未満は切り上げ、1秒未満の場合はTimeIntervalTriggerを使用
+        var trigger: UNNotificationTrigger
+        if delta >= 1 {
+            var components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: endAt)
+            // 安全策：秒未満は切り上げ
+            if let s = components.second, s < 0 { components.second = 0 }
+            trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        } else {
+            trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        }
 
-        // 重複防止：既存通知を削除してから追加
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd"])
         let request = UNNotificationRequest(
-            identifier: "SessionEnd",
+            identifier: id,
             content: content,
             trigger: trigger
         )
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                #if DEBUG
-                print("🔔 通知スケジューリング失敗: \(error.localizedDescription)")
-                #endif
-            } else {
-                #if DEBUG
-                print("🔔 通知スケジューリング成功: \(endAt)")
-                #endif
-            }
-        }
+
+        UNUserNotificationCenter.current().add(request) { _ in }
     }
 
     // セッション終了通知をキャンセル
     func cancelSessionEndNotification() {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd"])
+
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd.focus", "SessionEnd.break"])
     }
 
     // 重複通知の完全防止：既存通知をチェックしてからスケジューリング
@@ -147,17 +192,16 @@ final class NotificationManager {
         let pendingRequests = await center.pendingNotificationRequests()
 
         // SessionEnd通知が複数ある場合は全て削除
-        let sessionEndRequests = pendingRequests.filter { $0.identifier == "SessionEnd" }
+        let sessionEndRequests = pendingRequests.filter { $0.identifier.hasPrefix("SessionEnd") }
         if sessionEndRequests.count > 1 {
-            #if DEBUG
-            print("🔔 重複通知を検出: \(sessionEndRequests.count)件 → 全て削除")
-            #endif
-            center.removePendingNotificationRequests(withIdentifiers: ["SessionEnd"])
+
+            center.removePendingNotificationRequests(withIdentifiers: ["SessionEnd.focus", "SessionEnd.break"])
         }
     }
 
     // 内部: 通知作成
     private func schedule(for phase: PomodoroPhase) {
+
         let content = UNMutableNotificationContent()
 
         switch phase {
@@ -168,6 +212,8 @@ final class NotificationManager {
             content.title = "Time to Rest 🌑"
             content.body = "The moon is still. So can you be."
         }
+
+
 
         // 音＋バイブ
         content.sound = .default
@@ -179,16 +225,9 @@ final class NotificationManager {
             trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
         )
 
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                #if DEBUG
-                print("通知失敗: \(error.localizedDescription)")
-                #endif
-            } else {
-                #if DEBUG
-                print("通知成功")
-                #endif
-            }
-        }
+
+
+        UNUserNotificationCenter.current().add(request) { _ in }
     }
+
 }
