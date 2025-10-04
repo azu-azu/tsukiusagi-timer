@@ -119,7 +119,8 @@ final class TimerEngine: TimerEngineable {
         actualWorkedSeconds = 0
         lastResumedTime = Date()
         endAt = Date().addingTimeInterval(TimeInterval(seconds))
-        onTick?(timeRemaining)
+        // 即座にtickを呼び出して正確な残り時間を反映
+        tick()
     }
 
     private func handleSessionCompleted() {

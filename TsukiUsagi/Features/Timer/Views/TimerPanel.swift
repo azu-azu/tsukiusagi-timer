@@ -74,7 +74,7 @@ struct TimerPanel: View {
             case .background:
                 // Save running state and absolute endAt before pausing engine
                 timerVM.saveTimerState()
-                timerVM.appDidEnterBackground()
+                // appDidEnterBackground()はContentViewで処理されるため、ここでは不要
             case .active:
                 Task { timerVM.appWillEnterForeground() }
             default:
