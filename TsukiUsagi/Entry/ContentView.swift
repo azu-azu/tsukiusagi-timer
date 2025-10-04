@@ -100,9 +100,9 @@ struct ContentView: View {
                         .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
                         .onAppear {
                         }
-                        .onChange(of: timerVM.isRunning) { _, newValue in
+                        .onChange(of: timerVM.isRunning) { _, _ in
                         }
-                        .onChange(of: timerVM.isSessionFinished) { _, newValue in
+                        .onChange(of: timerVM.isSessionFinished) { _, _ in
                         }
 
                         // RecordedTimesViewレイヤ
