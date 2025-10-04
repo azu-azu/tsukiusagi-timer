@@ -134,7 +134,6 @@ final class NotificationManager {
         print("log: schedule_absolute phase=\(phase) at=\(endAt) delta=\(Int(delta))s timeSensitive=\(timeSensitive)")
         #endif
 
-
         // 通知IDをフェーズ別に分ける
         let id = (phase == .focus) ? "SessionEnd.focus" : "SessionEnd.break"
 
@@ -163,7 +162,10 @@ final class NotificationManager {
         // 安全策：秒未満は切り上げ、1秒未満の場合はTimeIntervalTriggerを使用
         var trigger: UNNotificationTrigger
         if delta >= 1 {
-            var components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: endAt)
+            var components = Calendar.current.dateComponents(
+                [.year, .month, .day, .hour, .minute, .second],
+                from: endAt
+            )
             // 安全策：秒未満は切り上げ
             if let s = components.second, s < 0 { components.second = 0 }
             trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
@@ -183,7 +185,9 @@ final class NotificationManager {
     // セッション終了通知をキャンセル
     func cancelSessionEndNotification() {
 
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["SessionEnd.focus", "SessionEnd.break"])
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: ["SessionEnd.focus", "SessionEnd.break"]
+        )
     }
 
     // 重複通知の完全防止：既存通知をチェックしてからスケジューリング
@@ -213,8 +217,6 @@ final class NotificationManager {
             content.body = "The moon is still. So can you be."
         }
 
-
-
         // 音＋バイブ
         content.sound = .default
 
@@ -224,8 +226,6 @@ final class NotificationManager {
             content: content,
             trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
         )
-
-
 
         UNUserNotificationCenter.current().add(request) { _ in }
     }

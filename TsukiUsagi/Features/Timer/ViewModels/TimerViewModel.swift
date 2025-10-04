@@ -401,13 +401,16 @@ final class TimerViewModel: ObservableObject {
 
     /// アプリがフォアグラウンドに復帰
     func appWillEnterForeground() {
-        lifecycleCoordinator.willEnterForeground(
+        let params = TimerForegroundParams(
             isSessionFinished: isSessionFinished,
             isBackgroundCompleted: isBackgroundCompleted,
             timeRemaining: timeRemaining,
             isRunning: isRunning,
             isWorkSession: isWorkSession,
             startTime: startTime
+        )
+        lifecycleCoordinator.willEnterForeground(
+            params: params
         ) { [weak self] info in
             self?.handleSessionCompleted(info)
         }

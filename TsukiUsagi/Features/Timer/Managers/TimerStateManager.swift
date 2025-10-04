@@ -106,7 +106,6 @@ final class TimerStateManager: ObservableObject {
 
     /// セッション完了処理
     func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
-        
         isSessionFinished = true
         // isWorkSessionは変更しない（完了したセッションの種類を保持）
         timeRemaining = 0
@@ -114,7 +113,6 @@ final class TimerStateManager: ObservableObject {
         // セッション完了時は確実にisRunningをfalseに設定
         isRunning = false
         engine.stop()
-        
     }
 
     /// 状態を復元

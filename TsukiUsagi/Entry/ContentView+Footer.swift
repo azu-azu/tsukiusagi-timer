@@ -65,7 +65,6 @@ extension ContentView {
         .zIndex(2010) // SideMenuViewより高く設定してタップ可能にする
     }
 
-
     // MARK: - Button Components
 
     struct StartPauseButtonParams {
@@ -79,12 +78,11 @@ extension ContentView {
 
     func startPauseButton(params: StartPauseButtonParams) -> some View {
         Button(params.isRunning ? "PAUSE" : "START") {
-            
             // セッション完了後でタイマーが実行中の場合のみ無視
             guard !(params.isSessionFinished && params.isRunning) else {
                 return
             }
-            
+
             HapticManager.shared.buttonTapFeedback()
             if params.isRunning {
                 params.onPause() // PAUSE時はpauseTimer()を使用
@@ -96,8 +94,8 @@ extension ContentView {
         .background(Color.white.opacity(params.isSessionFinished ? 0.1 : 0.2),
                     in: RoundedRectangle(cornerRadius: 20))
         .titleWhiteAvenir(weight: .bold)
-        .foregroundColor(params.isSessionFinished ? 
-                        DesignTokens.PureColors.textWhite.opacity(0.5) : 
+        .foregroundColor(params.isSessionFinished ?
+                        DesignTokens.PureColors.textWhite.opacity(0.5) :
                         DesignTokens.PureColors.textWhite)
         .disabled(false) // セッション完了後も新しいセッションを開始できるようにする
         .allowsHitTesting(true)

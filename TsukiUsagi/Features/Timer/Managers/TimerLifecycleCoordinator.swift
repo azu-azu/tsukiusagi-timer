@@ -7,6 +7,15 @@
 
 import Foundation
 
+struct TimerForegroundParams {
+    let isSessionFinished: Bool
+    let isBackgroundCompleted: Bool
+    let timeRemaining: Int
+    let isRunning: Bool
+    let isWorkSession: Bool
+    let startTime: Date?
+}
+
 @MainActor
 final class TimerLifecycleCoordinator {
 
@@ -45,22 +54,18 @@ final class TimerLifecycleCoordinator {
     // MARK: - Foreground
 
     func willEnterForeground(
-        isSessionFinished: Bool,
-        isBackgroundCompleted: Bool,
-        timeRemaining: Int,
-        isRunning: Bool,
-        isWorkSession: Bool,
-        startTime: Date?,
+        params: TimerForegroundParams,
         handleCompleted: (TimerSessionInfo) -> Void
     ) {
         notificationAndHapticManager.appWillEnterForeground()
 
         // まだ完了処理していないが、すでに時間切れで停止している場合はここで完了処理
-        if !isSessionFinished && !isBackgroundCompleted && timeRemaining <= 0 && !isRunning {
+        if !params.isSessionFinished && !params.isBackgroundCompleted &&
+           params.timeRemaining <= 0 && !params.isRunning {
             let sessionInfo = TimerSessionInfo(
-                startTime: startTime ?? dateProvider.now(),
+                startTime: params.startTime ?? dateProvider.now(),
                 endTime: dateProvider.now(),
-                phase: isWorkSession ? .focus : .breakTime,
+                phase: params.isWorkSession ? .focus : .breakTime,
                 actualWorkedSeconds: 0
             )
             handleCompleted(sessionInfo)
@@ -68,7 +73,7 @@ final class TimerLifecycleCoordinator {
         }
 
         // バックグラウンドで完了していない場合のみ復元・再始動
-        if !isSessionFinished {
+        if !params.isSessionFinished {
             restoreTimerState()
             if stateManager.runState == .running && stateManager.timeRemaining > 0 {
                 startFromRestoredIfNeeded()
