@@ -45,7 +45,7 @@ struct ResetStopSectionView: View {
                 // 🛑 Stop
                 if timerVM.canForceFinish {
                     Button {
-                        timerVM.forceFinishWorkSession()
+                        timerVM.forceFinish()
                         dismiss()
                     } label: {
                         HStack(spacing: 8) {

@@ -83,13 +83,10 @@ struct TimerPanel: View {
         }
 
         .onAppear {
-            // 再起動/再表示時に永続化状態から復元
+            // 再起動/再表示時の復元と再始動はライフサイクル経由で統一
             Task { @MainActor in
-                timerVM.restoreTimerState()
-                timerVM.startFromRestoredIfNeeded()
+                timerVM.appWillEnterForeground()
             }
-            // 通知の再スケジューリングは、アプリ起動時のみ実行
-            // History画面からの戻りなど、単純な画面表示では実行しない
         }
     }
 

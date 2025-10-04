@@ -39,6 +39,7 @@ final class TimerViewModel: ObservableObject {
     private let sessionManager: TimerSessionManager
     private let stateManager: TimerStateManager
     private let displayManager: TimerDisplayManager
+    private let lifecycleCoordinator: TimerLifecycleCoordinator
 
     // MARK: - Published Properties (Delegated to Managers)
 
@@ -127,6 +128,13 @@ final class TimerViewModel: ObservableObject {
             defaultWorkMinutes: 25 // デフォルト値を使用
         )
         self.displayManager = TimerDisplayManager(formatter: formatter)
+        self.lifecycleCoordinator = TimerLifecycleCoordinator(
+            statePersistenceManager: statePersistenceManager,
+            notificationAndHapticManager: notificationAndHapticManager,
+            dateProvider: dateProvider,
+            sessionManager: sessionManager,
+            stateManager: stateManager
+        )
 
         setupBindings()
         setupEngineCallbacks()
@@ -181,10 +189,7 @@ final class TimerViewModel: ObservableObject {
 
         guard targetTime > 0 else { return }
 
-        // ★ Start は常に Work から（Break完了後など false 残留を潰す）
-        if isSessionFinished || !isWorkSession {
-            stateManager.setWorkSession(true)
-        }
+        ensureWorkOnStart()
 
         sessionManager.startSession(
             isWorkSession: isWorkSession,
@@ -208,7 +213,12 @@ final class TimerViewModel: ObservableObject {
         sessionManager.setEndAt(endAt)
         // 次のセッションの種類に基づいて通知フェーズを決定
         let phase: PomodoroPhase = isWorkSession ? .breakTime : .focus
-        // notificationService.scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: true)
+        // ★ 開始時にのみ次フェーズを予約（cancel→addはサービス側で実施）
+        notificationService.scheduleSessionEndNotification(
+            at: endAt,
+            phase: phase,
+            timeSensitive: true
+        )
 
         // Send start pulse
         startPulse.send()
@@ -225,22 +235,22 @@ final class TimerViewModel: ObservableObject {
 
     /// タイマー再開
     func resumeTimer() {
-        // ★ 再開時も常に Work から（Break完了直後などで false が残るのを防止）
-        if isSessionFinished || !isWorkSession {
-            stateManager.setWorkSession(true)
-        }
-
+        // 再開時はフェーズを強制変更しない（休憩再開を潰さない）
         stateManager.resumeTimer()
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
 
-        // 再開時に通知をリスケジューリング（即座通知で代用するため無効化）
+        // 再開時に通知をリスケジューリング
         if timeRemaining > 0 {
             let endAt = dateProvider.now().addingTimeInterval(TimeInterval(timeRemaining))
             sessionManager.setEndAt(endAt)
             // 次のセッションの種類に基づいて通知フェーズを決定
             let phase: PomodoroPhase = isWorkSession ? .breakTime : .focus
-            // notificationService.rescheduleEnd(at: endAt, phase: phase, timeSensitive: true)
+            notificationService.rescheduleEnd(
+                at: endAt,
+                phase: phase,
+                timeSensitive: true
+            )
         }
     }
 
@@ -253,15 +263,17 @@ final class TimerViewModel: ObservableObject {
 
     /// タイマーリセット
     func resetTimer(to seconds: Int) {
-        stateManager.resetTimer(to: seconds)
-        sessionManager.resetSession()
-        animationController.resetAnimationState()
-        notificationService.cancelSessionEndNotification()
+        resetTimer(to: seconds, keepSession: false)
     }
 
-    /// タイマーのみリセット（セッション情報は保持）
-    func resetTimerOnly(to seconds: Int) {
+    /// タイマーリセット（セッション保持の有無を選択）
+    func resetTimer(to seconds: Int, keepSession: Bool) {
         stateManager.resetTimer(to: seconds)
+        if keepSession {
+            // セッション情報は保持
+        } else {
+            sessionManager.resetSession()
+        }
         animationController.resetAnimationState()
         notificationService.cancelSessionEndNotification()
     }
@@ -282,11 +294,10 @@ final class TimerViewModel: ObservableObject {
         // 次フェーズを先に決定（isWorkSession は「完了した側」を指す）
         let nextPhase: PomodoroPhase = isWorkSession ? .breakTime : .focus
 
-        // 予約通知は使っていない設計なので念のためキャンセル
+        // ペンディング予約の重複を避けるためキャンセル
         notificationService.cancelSessionEndNotification()
 
-        // ★ トグルする「前」に、次フェーズ即時通知を出す
-        notificationService.sendPhaseChangeNotification(for: nextPhase)
+        // 即時通知は送らない（開始時に予約済みのため、完了時は重複を避ける）
 
         // ★ Work完了直後に、Break終了（= 次のFocus）を絶対時刻で予約
         if isWorkSession {
@@ -343,90 +354,9 @@ final class TimerViewModel: ObservableObject {
         )
     }
 
-    /// タイマー状態を復元
-    func restoreTimerState() {
-        // タイマーが実行中の場合は復元しない
-        if isRunning {
-            return
-        }
+    // 復元系はライフサイクルCoordinatorへ移譲済み
 
-        let result = statePersistenceManager.restoreTimerState()
-
-        switch result {
-        case .success(let timeRemaining, let isRunning, let runState, let isWorkSession, let endAt):
-            stateManager.restoreState(
-                timeRemaining: timeRemaining,
-                isRunning: isRunning,
-                runState: runState,
-                isWorkSession: isWorkSession
-            )
-
-            if let endAt = endAt {
-                sessionManager.setEndAt(endAt)
-            }
-
-        case .failed:
-            // 復元失敗時はデフォルト状態
-            stateManager.resetTimer(to: workMinutes * 60)
-
-        case .noData:
-            // データがない場合は何もしない
-            break
-        }
-    }
-
-
-    /// 永続化から復元後、必要なら残り秒数でエンジンを再開
-    func startFromRestoredIfNeeded() {
-        guard runState == .running, timeRemaining > 0 else { return }
-
-        let now = dateProvider.now()
-        if let endAt = sessionManager.endAt, endAt > now {
-            let remaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
-            if remaining > 0 {
-                stateManager.timeRemaining = remaining
-                stateManager.startTimer()
-            }
-        }
-    }
-
-    /// アプリがバックグラウンドに移行
-    func applicationDidEnterBackground() {
-        lastBackgroundDate = dateProvider.now()
-        saveTimerState()
-        notificationAndHapticManager.appDidEnterBackground()
-
-        // バックグラウンド移行時に完了状態をチェック
-        if timeRemaining <= 0 && isRunning {
-            isBackgroundCompleted = true
-        }
-    }
-
-    /// アプリがフォアグラウンドに復帰
-    func applicationWillEnterForeground() {
-        notificationAndHapticManager.appWillEnterForeground()
-
-        // セッション完了状態をチェック（復元処理の前に行う）
-        // ただし、バックグラウンドで既に完了したセッションは再処理しない
-        if !isSessionFinished && !isBackgroundCompleted && timeRemaining <= 0 && !isRunning {
-            let sessionInfo = TimerSessionInfo(
-                startTime: startTime ?? Date(),
-                endTime: Date(),
-                phase: isWorkSession ? .focus : .breakTime,
-                actualWorkedSeconds: 0
-            )
-            handleSessionCompleted(sessionInfo)
-        }
-
-        // バックグラウンドでセッションが完了した場合の処理
-        // セッション完了後は復元処理を行わない
-        if !isSessionFinished {
-            restoreTimerState()
-            if runState == .running && timeRemaining > 0 {
-                startFromRestoredIfNeeded()
-            }
-        }
-    }
+    // application* は廃止（app* に統一）
 
     /// アニメーション抑制を設定
     func setAnimationSuppression(_ suppress: Bool) {
@@ -460,12 +390,27 @@ final class TimerViewModel: ObservableObject {
 
     /// アプリがバックグラウンドに移行
     func appDidEnterBackground() {
-        applicationDidEnterBackground()
+        saveTimerState()
+        let result = lifecycleCoordinator.didEnterBackground(
+            timeRemaining: timeRemaining,
+            isRunning: isRunning
+        )
+        lastBackgroundDate = result.lastBackgroundDate
+        isBackgroundCompleted = result.isBackgroundCompleted
     }
 
     /// アプリがフォアグラウンドに復帰
     func appWillEnterForeground() {
-        applicationWillEnterForeground()
+        lifecycleCoordinator.willEnterForeground(
+            isSessionFinished: isSessionFinished,
+            isBackgroundCompleted: isBackgroundCompleted,
+            timeRemaining: timeRemaining,
+            isRunning: isRunning,
+            isWorkSession: isWorkSession,
+            startTime: startTime
+        ) { [weak self] info in
+            self?.handleSessionCompleted(info)
+        }
     }
 
     /// 終了時刻を設定
@@ -473,20 +418,14 @@ final class TimerViewModel: ObservableObject {
         sessionManager.setEndAt(endTime)
     }
 
-    /// 作業セッションを強制終了
-    func forceFinishWorkSession() {
-        forceFinish()
+    // MARK: - Private Helpers
+
+    /// Start時にWorkへ強制統一（Break完了残留を潰す）
+    private func ensureWorkOnStart() {
+        if isSessionFinished || !isWorkSession {
+            stateManager.setWorkSession(true)
+        }
     }
 
-    /// 開始時刻のフォーマット済み文字列
-    var formattedStartTime: String {
-        guard let startTime = startTime else { return "" }
-        return TimeFormatters.formatTime(date: startTime)
-    }
-
-    /// 終了時刻のフォーマット済み文字列
-    var formattedEndTime: String {
-        guard let endTime = endTime else { return "" }
-        return TimeFormatters.formatTime(date: endTime)
-    }
+    // 表示系のフォーマットはUI側で実施
 }

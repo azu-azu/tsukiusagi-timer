@@ -150,7 +150,7 @@ struct SideMenuDurationView: View {
     private func stopButton() -> some View {
         if timerVM.canForceFinish {
             Button {
-                timerVM.forceFinishWorkSession()
+                timerVM.forceFinish()
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isPresented = false
                 }

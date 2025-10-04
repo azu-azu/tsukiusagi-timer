@@ -141,8 +141,8 @@ struct MainPanel: View {
                         VStack {
                             Spacer()
                             RecordedTimesView(
-                                formattedStartTime: timerVM.formattedStartTime,
-                                formattedEndTime: timerVM.formattedEndTime,
+                                formattedStartTime: TimeFormatters.formatTime(date: timerVM.startTime),
+                                formattedEndTime: TimeFormatters.formatTime(date: timerVM.endTime),
                                 actualSessionMinutes: timerVM.actualSessionMinutes,
                                 onEdit: { showingEditRecord = true }
                             )
