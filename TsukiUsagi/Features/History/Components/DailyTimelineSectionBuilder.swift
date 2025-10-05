@@ -2,7 +2,7 @@
 //  DailyTimelineSectionBuilder.swift
 //  TsukiUsagi
 //
-//  Created by Kazumi on 2025/01/01.
+//  Created by Azu on 2025/01/01.
 //
 
 import SwiftUI

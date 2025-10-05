@@ -2,7 +2,7 @@
 //  TimerLifecycleCoordinator.swift
 //  TsukiUsagi
 //
-//  Created by Kazumi on 2025/10/04.
+//  Created by Azu on 2025/10/04.
 //
 
 import Foundation
