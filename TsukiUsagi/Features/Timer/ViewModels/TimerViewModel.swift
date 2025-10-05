@@ -21,34 +21,31 @@ enum TimerRunState: String {
 final class TimerViewModel: ObservableObject {
 
     // MARK: - Dependencies
-
-    private let engine: TimerEngineable
-    private let notificationService: PhaseNotificationServiceable
-    private let hapticService: HapticServiceable
-    private let historyService: SessionHistoryServiceable
-    private let persistenceManager: TimerPersistenceManageable
-    private let formatter: TimeFormatterUtilable
-    private let dateProvider: DateProviding
-    private let streakManager: StreakManager
+    let engine: TimerEngineable
+    let notificationService: PhaseNotificationServiceable
+    let hapticService: HapticServiceable
+    let historyService: SessionHistoryServiceable
+    let persistenceManager: TimerPersistenceManageable
+    let formatter: TimeFormatterUtilable
+    let dateProvider: DateProviding
+    let streakManager: StreakManager
 
     // MARK: - Managers
-
-    private let animationController: any TimerAnimationControllerProtocol
-    private let statePersistenceManager: TimerStatePersistenceManager
-    private let notificationAndHapticManager: TimerNotificationAndHapticManager
-    private let sessionManager: TimerSessionManager
-    private let stateManager: TimerStateManager
-    private let displayManager: TimerDisplayManager
-    private let lifecycleCoordinator: TimerLifecycleCoordinator
+    let animationController: any TimerAnimationControllerProtocol
+    let statePersistenceManager: TimerStatePersistenceManager
+    let notificationAndHapticManager: TimerNotificationAndHapticManager
+    let sessionManager: TimerSessionManager
+    let stateManager: TimerStateManager
+    let displayManager: TimerDisplayManager
+    let lifecycleCoordinator: TimerLifecycleCoordinator
 
     // MARK: - Published Properties (Delegated to Managers)
-
     @Published var timeRemaining: Int = 0
     @Published var isRunning: Bool = false
     @Published private(set) var runState: TimerRunState = .idle
     @Published var isWorkSession: Bool = true
     @Published var isSessionFinished = false
-    @Published private var isBackgroundCompleted = false
+    @Published var isBackgroundCompleted = false
     @Published private(set) var startTime: Date?
     @Published private(set) var endTime: Date?
     @Published var flashStars = false
@@ -60,17 +57,15 @@ final class TimerViewModel: ObservableObject {
     @AppStorage("activityLabel") var activityLabel: String = "Work"
     @AppStorage("subtitleLabel") var subtitleLabel: String = ""
     @AppStorage("workMinutes") var workMinutes: Int = 25
-    @AppStorage("breakMinutes") private var breakMinutes: Int = 5
+    @AppStorage("breakMinutes") var breakMinutes: Int = 5
 
     // 🔔 START アニメ用トリガー
     let startPulse = PassthroughSubject<Void, Never>()
 
     // MARK: - Private Properties
-
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
-
     var actualSessionMinutes: Int {
         guard let start = startTime, let end = endTime else { return 1 }
         let diff = Calendar.current.dateComponents([.minute], from: start, to: end)
@@ -85,7 +80,6 @@ final class TimerViewModel: ObservableObject {
     }
 
     // MARK: - Initialization
-
     init(
         engine: TimerEngineable,
         notificationService: PhaseNotificationServiceable,
@@ -145,7 +139,6 @@ final class TimerViewModel: ObservableObject {
     }
 
     // MARK: - Setup Methods
-
     private func setupBindings() {
         // Bind to state manager
         stateManager.$timeRemaining.assign(to: &$timeRemaining)
@@ -180,170 +173,9 @@ final class TimerViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Public Methods
+    // MARK: - Public Methods are implemented in TimerViewModel+SessionControl
 
-    /// タイマー開始
-    func startTimer() {
-        // quiet moon画面からのstart時は、時間を設定してから開始
-        let targetTime = isSessionFinished ? workLengthMinutes * 60 : timeRemaining
-
-        guard targetTime > 0 else { return }
-
-        ensureWorkOnStart()
-
-        sessionManager.startSession(
-            isWorkSession: isWorkSession,
-            activityLabel: activityLabel,
-            subtitleLabel: subtitleLabel
-        )
-
-        // 時間を設定してからstartTimerを呼ぶ
-        stateManager.timeRemaining = targetTime
-        // セッション完了状態をリセット
-        if isSessionFinished {
-            stateManager.resetSessionFinished() // セッション完了状態をリセット
-            isBackgroundCompleted = false // バックグラウンド完了フラグをリセット
-        }
-        stateManager.startTimer()
-        animationController.triggerStartAnimations()
-        notificationAndHapticManager.sendStartNotification()
-
-        // バックグラウンド時の通知をスケジューリング（即座通知で代用するため無効化）
-        let endAt = dateProvider.now().addingTimeInterval(TimeInterval(targetTime))
-        sessionManager.setEndAt(endAt)
-        // 次のセッションの種類に基づいて通知フェーズを決定
-        let phase: PomodoroPhase = isWorkSession ? .breakTime : .focus
-        // ★ 開始時にのみ次フェーズを予約（cancel→addはサービス側で実施）
-        notificationService.scheduleSessionEndNotification(
-            at: endAt,
-            phase: phase,
-            timeSensitive: true
-        )
-
-        // Send start pulse
-        startPulse.send()
-    }
-
-    /// タイマー一時停止
-    func pauseTimer() {
-        stateManager.pauseTimer()
-        notificationAndHapticManager.triggerLightHaptic()
-
-        // 通知をキャンセル（一時停止中は通知不要）
-        notificationService.cancelSessionEndNotification()
-    }
-
-    /// タイマー再開
-    func resumeTimer() {
-        // 再開時はフェーズを強制変更しない（休憩再開を潰さない）
-        stateManager.resumeTimer()
-        animationController.triggerStartAnimations()
-        notificationAndHapticManager.sendStartNotification()
-
-        // 再開時に通知をリスケジューリング
-        if timeRemaining > 0 {
-            let endAt = dateProvider.now().addingTimeInterval(TimeInterval(timeRemaining))
-            sessionManager.setEndAt(endAt)
-            // 次のセッションの種類に基づいて通知フェーズを決定
-            let phase: PomodoroPhase = isWorkSession ? .breakTime : .focus
-            notificationService.rescheduleEnd(
-                at: endAt,
-                phase: phase,
-                timeSensitive: true
-            )
-        }
-    }
-
-    /// タイマー停止（完全停止 - セッションリセット）
-    func stopTimer() {
-        stateManager.stopTimer()
-        sessionManager.resetSession()
-        notificationService.cancelSessionEndNotification()
-    }
-
-    /// タイマーリセット
-    func resetTimer(to seconds: Int) {
-        resetTimer(to: seconds, keepSession: false)
-    }
-
-    /// タイマーリセット（セッション保持の有無を選択）
-    func resetTimer(to seconds: Int, keepSession: Bool) {
-        stateManager.resetTimer(to: seconds)
-        if keepSession {
-            // セッション情報は保持
-        } else {
-            sessionManager.resetSession()
-        }
-        animationController.resetAnimationState()
-        notificationService.cancelSessionEndNotification()
-    }
-
-    /// セッション完了処理
-    func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
-
-        sessionManager.completeSession(
-            isWorkSession: isWorkSession,
-            activityLabel: activityLabel,
-            subtitleLabel: subtitleLabel
-        )
-
-        stateManager.handleSessionCompleted(sessionInfo)
-        animationController.triggerSessionFinishedAnimations()
-        notificationAndHapticManager.triggerHeavyHaptic()
-
-        // 次フェーズを先に決定（isWorkSession は「完了した側」を指す）
-        let nextPhase: PomodoroPhase = isWorkSession ? .breakTime : .focus
-
-        // ペンディング予約の重複を避けるためキャンセル
-        notificationService.cancelSessionEndNotification()
-
-        // 即時通知は送らない（開始時に予約済みのため、完了時は重複を避ける）
-
-        // ★ Work完了直後に、Break終了（= 次のFocus）を絶対時刻で予約
-        if isWorkSession {
-            let breakEndAt = dateProvider.now().addingTimeInterval(TimeInterval(breakMinutes * 60))
-            notificationService.scheduleSessionEndNotification(
-                at: breakEndAt,
-                phase: .focus,
-                timeSensitive: true
-            )
-        }
-
-        // それからフェーズをトグル
-        if isWorkSession {
-            stateManager.setWorkSession(false) // Work → Break
-        } else {
-            stateManager.setWorkSession(true)  // Break → Work
-        }
-
-    }
-
-    /// 強制終了
-    func forceFinish() {
-        guard canForceFinish else { return }
-
-        sessionManager.completeSession(
-            isWorkSession: isWorkSession,
-            activityLabel: activityLabel,
-            subtitleLabel: subtitleLabel
-        )
-
-        stateManager.stopTimer()
-        stateManager.setSessionFinished(true) // セッション完了状態を設定
-        stateManager.setWorkSession(false) // 作業セッションを終了
-        animationController.triggerSessionFinishedAnimations()
-        notificationAndHapticManager.triggerHeavyHaptic()
-
-        // スケジュール済みの通知をキャンセル
-        notificationService.cancelSessionEndNotification()
-    }
-
-    /// セッション完了状態をリセット
-    func resetSessionFinished() {
-        stateManager.resetSessionFinished()
-    }
-
-    /// タイマー状態を保存
+    /// 現在のタイマー状態を永続化
     func saveTimerState() {
         statePersistenceManager.saveTimerState(
             timeRemaining: timeRemaining,
@@ -353,10 +185,6 @@ final class TimerViewModel: ObservableObject {
             endAt: sessionManager.endAt
         )
     }
-
-    // 復元系はライフサイクルCoordinatorへ移譲済み
-
-    // application* は廃止（app* に統一）
 
     /// アニメーション抑制を設定
     func setAnimationSuppression(_ suppress: Bool) {
@@ -383,10 +211,7 @@ final class TimerViewModel: ObservableObject {
         self.isRunning = isRunning
     }
 
-    /// 時間表示文字列を取得
-    func formatTime(_ seconds: Int) -> String {
-        return displayManager.timeDisplayString(for: seconds)
-    }
+    // formatting implemented in extension
 
     /// アプリがバックグラウンドに移行
     func appDidEnterBackground() {
@@ -416,19 +241,7 @@ final class TimerViewModel: ObservableObject {
         }
     }
 
-    /// 終了時刻を設定
-    func setEndTime(_ endTime: Date?) {
-        sessionManager.setEndAt(endTime)
-    }
-
-    // MARK: - Private Helpers
-
-    /// Start時にWorkへ強制統一（Break完了残留を潰す）
-    private func ensureWorkOnStart() {
-        if isSessionFinished || !isWorkSession {
-            stateManager.setWorkSession(true)
-        }
-    }
+    // MARK: - Private Helpers are implemented in TimerViewModel+SessionControl
 
     // 表示系のフォーマットはUI側で実施
 }
