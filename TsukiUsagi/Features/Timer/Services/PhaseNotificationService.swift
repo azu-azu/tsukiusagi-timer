@@ -40,11 +40,15 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     }
 
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
+        // 予約の衝突を防ぐため、必ず cancel → add
+        notificationManager.cancelSessionEndNotification()
         // バックグラウンド時の終了時刻通知をスケジュール（後方互換性）
         notificationManager.scheduleSessionEndNotification(after: seconds, phase: phase)
     }
 
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {
+        // 予約の衝突を防ぐため、必ず cancel → add
+        notificationManager.cancelSessionEndNotification()
         // 絶対時刻での通知スケジューリング
         notificationManager.scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: timeSensitive)
     }
