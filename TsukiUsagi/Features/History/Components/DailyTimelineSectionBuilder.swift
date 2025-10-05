@@ -33,6 +33,33 @@ struct DailyTimelineSectionBuilder {
         }
     }
 
+    /// アクティビティ集計セクション
+    @ViewBuilder
+    func activitySummarySection(summaries: [LabelSummary]) -> some View {
+        summarySection(title: "Activity Summary", summaries: summaries)
+    }
+
+    /// サブタイトル集計セクション
+    @ViewBuilder
+    func subtitleSummarySection(summaries: [LabelSummary]) -> some View {
+        summarySection(title: "Subtitle Summary", summaries: summaries)
+    }
+
+    /// メモセクション
+    @ViewBuilder
+    func memoSection(
+        records: [SessionRecord],
+        onMemoEdit: @escaping (SessionRecord) -> Void
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            memoSectionHeader()
+            memoItemsList(records: records, onMemoEdit: onMemoEdit)
+        }
+    }
+}
+
+// MARK: - Row / Time / Info
+extension DailyTimelineSectionBuilder {
     /// レコード行
     @ViewBuilder
     private func recordRow(
@@ -70,6 +97,7 @@ struct DailyTimelineSectionBuilder {
             .foregroundColor(isDeleted ? DesignTokens.MoonColors.textSecondary : DesignTokens.MoonColors.textPrimary)
             .strikethrough(isDeleted)
     }
+
     /// 時間表示
     @ViewBuilder
     private func durationView(_ rec: SessionRecord) -> some View {
@@ -91,7 +119,10 @@ struct DailyTimelineSectionBuilder {
             return "\(seconds) s"
         }
     }
+}
 
+// MARK: - Actions
+extension DailyTimelineSectionBuilder {
     /// アクションボタン表示
     @ViewBuilder
     private func actionButtonView(
@@ -132,19 +163,10 @@ struct DailyTimelineSectionBuilder {
             }
         )
     }
+}
 
-    /// アクティビティ集計セクション
-    @ViewBuilder
-    func activitySummarySection(summaries: [LabelSummary]) -> some View {
-        summarySection(title: "Activity Summary", summaries: summaries)
-    }
-
-    /// サブタイトル集計セクション
-    @ViewBuilder
-    func subtitleSummarySection(summaries: [LabelSummary]) -> some View {
-        summarySection(title: "Subtitle Summary", summaries: summaries)
-    }
-
+// MARK: - Summary
+extension DailyTimelineSectionBuilder {
     /// 集計セクション共通
     @ViewBuilder
     private func summarySection(title: String, summaries: [LabelSummary]) -> some View {
@@ -172,19 +194,10 @@ struct DailyTimelineSectionBuilder {
             }
         }
     }
+}
 
-    /// メモセクション
-    @ViewBuilder
-    func memoSection(
-        records: [SessionRecord],
-        onMemoEdit: @escaping (SessionRecord) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            memoSectionHeader()
-            memoItemsList(records: records, onMemoEdit: onMemoEdit)
-        }
-    }
-
+// MARK: - Memo
+extension DailyTimelineSectionBuilder {
     /// メモセクションヘッダー
     @ViewBuilder
     private func memoSectionHeader() -> some View {
