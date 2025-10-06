@@ -200,8 +200,14 @@ final class TimerViewModel: ObservableObject {
 
     /// 設定変更後のリフレッシュ
     func refreshAfterSettingsChange() {
-        // 設定変更後の処理（必要に応じて実装）
-        // 現在は空の実装
+        // 表示系に最新値を反映
+        displayManager.setWorkMinutes(workMinutes)
+        displayManager.setBreakMinutes(breakMinutes)
+
+        // アイドル中は即時に残り時間を最新のworkMinutesに合わせる（初回起動直後の変更も含む）
+        if runState == .idle && !isRunning && !isSessionFinished {
+            stateManager.resetTimer(to: workMinutes * 60)
+        }
     }
 
     /// プレビュー状態を設定（テスト用）
