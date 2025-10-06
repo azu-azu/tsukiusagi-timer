@@ -59,29 +59,77 @@ final class TimerLifecycleCoordinator {
     ) {
         notificationAndHapticManager.appWillEnterForeground()
 
-        // まだ完了処理していないが、すでに時間切れで停止している場合はここで完了処理
-        if !params.isSessionFinished && !params.isBackgroundCompleted &&
-           params.timeRemaining <= 0 && !params.isRunning {
-            let sessionInfo = TimerSessionInfo(
-                startTime: params.startTime ?? dateProvider.now(),
-                endTime: dateProvider.now(),
-                phase: params.isWorkSession ? .focus : .breakTime,
-                actualWorkedSeconds: 0
-            )
-            handleCompleted(sessionInfo)
-            return
+        // Task 1: Pre-update state before UI render
+        // 復帰直後に endAt を基準に timeRemaining を確定させ、
+        // 最初のフレームから正しい残り時間（0を含む）を描画できるようにする。
+        if !params.isSessionFinished {
+            // 状態復元を先に実施
+            restoreTimerState()
+
+            // endAt から残り時間を導出して即時反映（UI先行安定）
+            if let endAt = sessionManager.endAt {
+                let now = dateProvider.now()
+                let remaining = remainingSeconds(until: endAt, now: now)
+                stateManager.timeRemaining = remaining
+                #if DEBUG
+                print("[Resume] pre-update: endAt=\(endAt), now=\(now), remaining=\(remaining)s, runState=\(stateManager.runState)")
+                #endif
+            }
         }
 
-        // バックグラウンドで完了していない場合のみ復元・再始動
+        // Task 4: Add immediate completion when expired (endAt を唯一の真実として判定)
+        if !params.isSessionFinished, let endAt = sessionManager.endAt {
+            let now = dateProvider.now()
+            if now >= endAt {
+                #if DEBUG
+                print("[Resume] complete: now (\(now)) >= endAt (\(endAt)) -> finalize silently")
+                #endif
+                // 一度だけ画面内で静かな完了チップを表示するための通知
+                NotificationCenter.default.post(name: Notification.Name("TimerSilentCompleted"), object: nil)
+
+                let start = sessionManager.startTime ?? params.startTime ?? now
+                let sessionInfo = TimerSessionInfo(
+                    startTime: start,
+                    endTime: endAt, // 終了の事実は endAt に一致させる
+                    phase: stateManager.isWorkSession ? .focus : .breakTime,
+                    actualWorkedSeconds: 0,
+                    isSilent: true
+                )
+                handleCompleted(sessionInfo)
+                return
+            }
+        }
+
+        // バックグラウンドで完了していない場合のみ再始動の判定（復元は上で済み）
         if !params.isSessionFinished {
-            restoreTimerState()
-            if stateManager.runState == .running && stateManager.timeRemaining > 0 {
-                startFromRestoredIfNeeded()
+            // 再始動の判定も endAt ベースに統一
+            if stateManager.runState == .running, let endAt = sessionManager.endAt {
+                let now = dateProvider.now()
+                let remaining = remainingSeconds(until: endAt, now: now)
+                if remaining > 0 {
+                    #if DEBUG
+                    print("[Resume] restart: remaining=\(remaining)s (endAt=\(endAt), now=\(now)) -> startFromRestored")
+                    #endif
+                    startFromRestoredIfNeeded()
+                } else {
+                    #if DEBUG
+                    print("[Resume] no-restart: remaining=\(remaining)s, runState=\(stateManager.runState)")
+                    #endif
+                }
+            } else {
+                #if DEBUG
+                print("[Resume] no action: finished=\(params.isSessionFinished), runState=\(stateManager.runState), hasEndAt=\(sessionManager.endAt != nil)")
+                #endif
             }
         }
     }
 
     // MARK: - Private (restore orchestration)
+
+    /// endAt から残り秒数を導出（負値は0に、端数は切り上げ）
+    private func remainingSeconds(until endAt: Date, now: Date) -> Int {
+        return max(0, Int(ceil(endAt.timeIntervalSince(now))))
+    }
 
     private func restoreTimerState() {
         let result = statePersistenceManager.restoreTimerState()
@@ -94,7 +142,17 @@ final class TimerLifecycleCoordinator {
                 runState: runState,
                 isWorkSession: isWorkSession
             )
-            if let endAt = endAt { sessionManager.setEndAt(endAt) }
+            // 既にアプリ内で最新の endAt が設定されている場合は、復元値で上書きしない
+            if sessionManager.endAt == nil, let endAt = endAt {
+                sessionManager.setEndAt(endAt)
+                #if DEBUG
+                print("[Restore] applied persisted endAt=\(endAt)")
+                #endif
+            } else if let persisted = endAt, let current = sessionManager.endAt {
+                #if DEBUG
+                print("[Restore] keep in-memory endAt=\(current), skip persisted=\(persisted)")
+                #endif
+            }
 
         case .failed:
             // 復元失敗時はデフォルト状態（workMinutesはVM側初期化でセット済み前提のためここでは触らない）
@@ -108,10 +166,13 @@ final class TimerLifecycleCoordinator {
     private func startFromRestoredIfNeeded() {
         let now = dateProvider.now()
         if let endAt = sessionManager.endAt, endAt > now {
-            let remaining = max(0, Int(ceil(endAt.timeIntervalSince(now))))
+            let remaining = remainingSeconds(until: endAt, now: now)
             if remaining > 0 {
                 stateManager.timeRemaining = remaining
                 stateManager.startTimer()
+                #if DEBUG
+                print("[Resume] started from restored: remaining=\(remaining)s")
+                #endif
             }
         }
     }

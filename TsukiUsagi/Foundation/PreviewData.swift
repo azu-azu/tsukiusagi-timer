@@ -33,7 +33,8 @@ struct PreviewData {
             phase: .focus,
             activity: "Preview Work",
             subtitle: "Sample session",
-            memo: "This is a preview memo"
+            memo: "This is a preview memo",
+            completedSilently: false
         )
         historyViewModel.add(parameters: parameters1)
 
@@ -43,7 +44,8 @@ struct PreviewData {
             phase: .focus,
             activity: "Preview Study",
             subtitle: "Another sample",
-            memo: nil
+            memo: nil,
+            completedSilently: false
         )
         historyViewModel.add(parameters: parameters2)
         return historyViewModel
