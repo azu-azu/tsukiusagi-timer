@@ -9,6 +9,8 @@ struct SessionRecord: Codable, Identifiable {
     var activity: String // 上位
     var subtitle: String? // 下位
     var memo: String? // ←★ new
+    // 静かな完了（通知を出さず復帰時に確定）
+    var completedSilently: Bool?
 
     // 履歴行のduration（秒）
     var duration: TimeInterval { end.timeIntervalSince(start) }
@@ -22,6 +24,7 @@ struct AddSessionParameters {
     let activity: String
     let subtitle: String?
     let memo: String?
+    let completedSilently: Bool
 }
 
 // MARK: - Supporting Types
@@ -55,7 +58,8 @@ class HistoryViewModel: ObservableObject {
             phase: parameters.phase,
             activity: parameters.activity,
             subtitle: parameters.subtitle,
-            memo: parameters.memo
+            memo: parameters.memo,
+            completedSilently: parameters.completedSilently
         )
 
         history.append(record)

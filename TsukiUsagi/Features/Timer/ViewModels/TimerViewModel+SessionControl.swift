@@ -13,6 +13,9 @@ extension TimerViewModel {
 
     /// タイマー開始
     func startTimer() {
+        #if DEBUG
+        print("[Start] before: finished=\(isSessionFinished), runState=\(runState), isRunning=\(isRunning), timeRemaining=\(timeRemaining)")
+        #endif
         // アイドル時は最新のworkMinutesを採用、進行/一時停止中は残り秒数を尊重
         let targetTime: Int = (runState == .idle) ? workLengthMinutes * 60 : timeRemaining
 
@@ -34,6 +37,9 @@ extension TimerViewModel {
             isBackgroundCompleted = false // バックグラウンド完了フラグをリセット
         }
         stateManager.startTimer()
+        #if DEBUG
+        print("[Start] after startTimer: runState=\(runState), isRunning=\(isRunning), timeRemaining=\(timeRemaining)")
+        #endif
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
 
@@ -108,10 +114,13 @@ extension TimerViewModel {
 
     /// セッション完了処理
     func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
-        sessionManager.completeSession(
+        // 保存のSoT（真実）は endAt/セッション情報の endTime を優先
+        sessionManager.handleExpiredSession(
+            end: sessionInfo.endTime,
             isWorkSession: isWorkSession,
             activityLabel: activityLabel,
-            subtitleLabel: subtitleLabel
+            subtitleLabel: subtitleLabel,
+            completedSilently: sessionInfo.isSilent
         )
 
         stateManager.handleSessionCompleted(sessionInfo)

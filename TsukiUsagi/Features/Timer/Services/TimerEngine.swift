@@ -11,6 +11,8 @@ struct TimerSessionInfo {
     let endTime: Date
     let phase: TimerSessionPhase
     let actualWorkedSeconds: Int
+    // 復帰時の静かな完了かどうか（デフォルトはfalse）
+    let isSilent: Bool
 }
 
 /// タイマー制御の責務のみを持つプロトコル
@@ -133,7 +135,8 @@ final class TimerEngine: TimerEngineable {
             startTime: startTime,
             endTime: endTime,
             phase: isWorkSession ? .focus : .breakTime,
-            actualWorkedSeconds: actualWorkedSeconds
+            actualWorkedSeconds: actualWorkedSeconds,
+            isSilent: false
         )
         onSessionCompleted?(sessionInfo)
     }

@@ -49,7 +49,8 @@ final class TimerSessionManager: ObservableObject {
         isWorkSession: Bool,
         activityLabel: String,
         subtitleLabel: String,
-        memo: String? = nil
+        memo: String? = nil,
+        completedSilently: Bool = false
     ) {
         guard let startTime = startTime else { return }
 
@@ -62,7 +63,8 @@ final class TimerSessionManager: ObservableObject {
             phase: isWorkSession ? .focus : .breakTime,
             activity: activityLabel,
             subtitle: subtitleLabel,
-            memo: memo
+            memo: memo,
+            completedSilently: completedSilently
         )
         historyService.add(parameters: parameters)
 
@@ -89,7 +91,8 @@ final class TimerSessionManager: ObservableObject {
         end: Date,
         isWorkSession: Bool,
         activityLabel: String,
-        subtitleLabel: String
+        subtitleLabel: String,
+        completedSilently: Bool = false
     ) {
         endTime = end
 
@@ -100,7 +103,8 @@ final class TimerSessionManager: ObservableObject {
             phase: isWorkSession ? .focus : .breakTime,
             activity: activityLabel,
             subtitle: subtitleLabel,
-            memo: nil
+            memo: nil,
+            completedSilently: completedSilently
         )
         historyService.add(parameters: parameters)
 

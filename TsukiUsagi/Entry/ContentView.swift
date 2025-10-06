@@ -21,6 +21,8 @@ struct ContentView: View {
     @State private var today = Date()
     @State private var showSavedToast = false
     @State private var savedToastWorkItem: DispatchWorkItem?
+    @State private var showSilentCompleteChip = false
+    @State private var silentCompleteWorkItem: DispatchWorkItem?
 
     private let moonTitle = "Centered"
 
@@ -95,7 +97,11 @@ struct ContentView: View {
                             isSessionFinished: timerVM.isSessionFinished,
                             showingSideMenu: $showingSideMenu,
                             onPause: { [weak timerVM] in timerVM?.pauseTimer() },
-                            onStart: { [weak timerVM] in timerVM?.startTimer() }
+                            onStart: { [weak timerVM] in
+                                // QuietMoon の残留フォーカスを明示的に解除しておく
+                                isQuietMoonFocused = false
+                                timerVM?.startTimer()
+                            }
                         ))
                         .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
                         .onAppear {
@@ -138,6 +144,31 @@ struct ContentView: View {
                                     .font(DesignTokens.Fonts.symbolMedium)
                                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 Text("Saved")
+                                    .font(DesignTokens.Fonts.label)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(DesignTokens.CosmosColors.cardBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(DesignTokens.WhiteColors.stroke)
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .zIndex(3000)
+                            .allowsHitTesting(false)
+                        }
+
+                        // 静かな完了チップ（通知OFFでも“終わってた”を軽く示す）
+                        if showSilentCompleteChip {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .font(DesignTokens.Fonts.symbolMedium)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                Text("Completed")
                                     .font(DesignTokens.Fonts.label)
                                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                             }
@@ -235,6 +266,16 @@ struct ContentView: View {
                         }
                         savedToastWorkItem = work
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+                    }
+                    // 復帰直後の“静かな完了”を軽く表示（ワンショット）
+                    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerSilentCompleted"))) { _ in
+                        silentCompleteWorkItem?.cancel()
+                        withAnimation(.easeInOut(duration: 0.2)) { showSilentCompleteChip = true }
+                        let work = DispatchWorkItem {
+                            withAnimation(.easeInOut(duration: 0.3)) { showSilentCompleteChip = false }
+                        }
+                        silentCompleteWorkItem = work
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: work)
                     }
                     // SessionManagerからのサイドメニュー開きリクエストを監視
                     .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in

@@ -111,7 +111,10 @@ struct MainPanel: View {
             // 双方を少し中央へ寄せるための微小オフセット（機種に依らず控えめに）
             let centerPull = isLandscape ? min(40, effectiveW * 0.05) : 0
 
-            if timerVM.isSessionFinished {
+            // 完了表示は「完了フラグ かつ 実行中でない（runState / isRunning のどちらでも）」。
+            // 実行中シグナルが一瞬でも立てば、確実に進行中画面を優先する。
+            let isActivelyRunning = (timerVM.runState == .running) || timerVM.isRunning
+            if timerVM.isSessionFinished && !isActivelyRunning {
                 // 終了時はQuietMoonViewのみ
                 if isLandscape {
                     // 横画面：左右分割（最高品質版）
