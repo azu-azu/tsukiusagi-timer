@@ -96,6 +96,10 @@ struct SideMenuDurationView: View {
             sessionControlSection()
         }
         .padding(.vertical, 4)
+        .onChange(of: workMinutes) { _, _ in
+            // 初回起動直後を含め、変更時に即時反映
+            timerVM.refreshAfterSettingsChange()
+        }
     }
 
     // MARK: - Session Control Section

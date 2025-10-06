@@ -13,8 +13,8 @@ extension TimerViewModel {
 
     /// タイマー開始
     func startTimer() {
-        // quiet moon画面からのstart時は、時間を設定してから開始
-        let targetTime = isSessionFinished ? workLengthMinutes * 60 : timeRemaining
+        // アイドル時は最新のworkMinutesを採用、進行/一時停止中は残り秒数を尊重
+        let targetTime: Int = (runState == .idle) ? workLengthMinutes * 60 : timeRemaining
 
         guard targetTime > 0 else { return }
 
