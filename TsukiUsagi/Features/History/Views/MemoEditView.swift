@@ -2,6 +2,8 @@ import SwiftUI
 
 struct MemoEditView: View {
     let record: SessionRecord
+    /// Anchor date for new reflections so they appear in the opened day's details
+    let anchorDate: Date?
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var historyVM: HistoryViewModel
 
@@ -221,10 +223,14 @@ struct MemoEditView: View {
         if isNewRecord {
             // 新規追加の場合
             if let finalMemo = finalMemo {
+                // 新規反映は詳細画面の対象日に紐付ける
+                let now = Date()
+                let startOnTarget = anchoredDateTime(baseDay: anchorDate ?? record.start, timeOf: now)
+                let endOnTarget = startOnTarget.addingTimeInterval(60) // 1分幅でソート上の視認性を確保
                 let newRecord = SessionRecord(
                     id: UUID().uuidString,
-                    start: Date(),
-                    end: Date(),
+                    start: startOnTarget,
+                    end: endOnTarget,
                     phase: .focus,
                     activity: "Reflection",
                     subtitle: "",
@@ -238,5 +244,20 @@ struct MemoEditView: View {
         }
 
         dismiss()
+    }
+
+    /// 指定日の年月日に、指定時刻（now）の時分秒を合成して返す
+    private func anchoredDateTime(baseDay: Date, timeOf now: Date) -> Date {
+        let cal = Calendar.current
+        let day = cal.dateComponents([.year, .month, .day], from: baseDay)
+        let tod = cal.dateComponents([.hour, .minute, .second], from: now)
+        var comps = DateComponents()
+        comps.year = day.year
+        comps.month = day.month
+        comps.day = day.day
+        comps.hour = tod.hour
+        comps.minute = tod.minute
+        comps.second = tod.second
+        return cal.date(from: comps) ?? baseDay
     }
 }
