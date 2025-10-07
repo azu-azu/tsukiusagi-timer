@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if DEBUG
+import os
+#endif
 
 struct TimerForegroundParams {
     let isSessionFinished: Bool
@@ -46,6 +49,12 @@ final class TimerLifecycleCoordinator {
         isRunning: Bool
     ) -> (isBackgroundCompleted: Bool, lastBackgroundDate: Date) {
         let now = dateProvider.now()
+#if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK didEnterBackground ENTER {isRunning:\(isRunning), timeRemaining:\(timeRemaining)}")
+        } else { print("🌙TSK didEnterBackground ENTER {isRunning:\(isRunning), timeRemaining:\(timeRemaining)}") }
+#endif
         notificationAndHapticManager.appDidEnterBackground()
         let isCompletedInBackground = (timeRemaining <= 0 && isRunning)
         return (isCompletedInBackground, now)
@@ -57,6 +66,12 @@ final class TimerLifecycleCoordinator {
         params: TimerForegroundParams,
         handleCompleted: (TimerSessionInfo) -> Void
     ) {
+#if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK willEnterForeground ENTER {isFinished:\(params.isSessionFinished), isRunning:\(params.isRunning)}")
+        } else { print("🌙TSK willEnterForeground ENTER {}") }
+#endif
         notificationAndHapticManager.appWillEnterForeground()
 
         // Task 1: Pre-update state before UI render
@@ -72,6 +87,10 @@ final class TimerLifecycleCoordinator {
                 let remaining = remainingSeconds(until: endAt, now: now)
                 stateManager.timeRemaining = remaining
                 #if DEBUG
+                if #available(iOS 14.0, *) {
+                    let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+                    logger.info("🌙TSK willEnterForeground RESTORE {endAt:\(endAt as NSDate), remaining:\(remaining)}")
+                } else { print("🌙TSK willEnterForeground RESTORE {remaining:\(remaining)}") }
                 #endif
             }
         }
@@ -81,6 +100,10 @@ final class TimerLifecycleCoordinator {
             let now = dateProvider.now()
             if now >= endAt {
                 #if DEBUG
+                if #available(iOS 14.0, *) {
+                    let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+                    logger.info("🌙TSK willEnterForeground SILENT-COMPLETE {now:\(now as NSDate), endAt:\(endAt as NSDate)}")
+                } else { print("🌙TSK willEnterForeground SILENT-COMPLETE {}") }
                 #endif
                 // 一度だけ画面内で静かな完了チップを表示するための通知
                 NotificationCenter.default.post(name: Notification.Name("TimerSilentCompleted"), object: nil)
@@ -106,14 +129,26 @@ final class TimerLifecycleCoordinator {
                 let remaining = remainingSeconds(until: endAt, now: now)
                 if remaining > 0 {
                     #if DEBUG
+                    if #available(iOS 14.0, *) {
+                        let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+                        logger.info("🌙TSK willEnterForeground RESTART-FROM-RESTORE {remaining:\(remaining)}")
+                    } else { print("🌙TSK willEnterForeground RESTART-FROM-RESTORE {remaining:\(remaining)}") }
                     #endif
                     startFromRestoredIfNeeded()
                 } else {
                     #if DEBUG
+                    if #available(iOS 14.0, *) {
+                        let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+                        logger.info("🌙TSK willEnterForeground NO-RESTART {remaining:\(remaining)}")
+                    } else { print("🌙TSK willEnterForeground NO-RESTART {remaining:\(remaining)}") }
                     #endif
                 }
             } else {
                 #if DEBUG
+                    if #available(iOS 14.0, *) {
+                        let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+                        logger.info("🌙TSK willEnterForeground NO-RESTART {runState:\(String(describing: self.stateManager.runState))}")
+                    } else { print("🌙TSK willEnterForeground NO-RESTART {}") }
                 #endif
             }
         }
