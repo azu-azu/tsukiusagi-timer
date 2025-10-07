@@ -33,37 +33,7 @@ final class NotificationManager {
     // 直近に発行したidentifierを記録（delivered明示削除用、最小限の保持）
     private var lastIssuedIdForPhase: [PomodoroPhase: String] = [:]
 
-#if DEBUG
-    // MARK: - Debug logging helpers (🌙TSK)
-    private static let tskSubsystem = "jp.tsukiusagi.timer"
-    private static let tskCategory = "notification"
-    @available(iOS 14.0, *)
-    private static let tskLogger = Logger(subsystem: tskSubsystem, category: tskCategory)
-
-    private func isoNow() -> String {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return f.string(from: Date())
-    }
-
-    private func ctx() -> String {
-        switch UIApplication.shared.applicationState {
-        case .active: return "FG"
-        case .background: return "BG"
-        case .inactive: return "IN"
-        @unknown default: return "UK"
-        }
-    }
-
-    private func tskLog(_ message: @autoclosure () -> String) {
-        let text = "🌙TSK \(isoNow()) \(ctx()) \(#function) \(message())"
-        if #available(iOS 14.0, *) {
-            NotificationManager.tskLogger.info("\(text, privacy: .public)")
-        } else {
-            print(text)
-        }
-    }
-#endif
+    // Debug logging helpers removed (🌙TSK)
 
     // 通知カテゴリの設定（Deep Link対応）
     private func setupNotificationCategories() {
@@ -188,9 +158,7 @@ final class NotificationManager {
         let now = Date()
         let delta = endAt.timeIntervalSince(now)
 
-        #if DEBUG
-        print("log: schedule_absolute phase=\(phase) at=\(endAt) delta=\(Int(delta))s timeSensitive=\(timeSensitive)")
-        #endif
+        // debug removed
 
         // 通知ID: フェーズ別プリフィクス + ユニークサフィックス（抑制回避）
         let prefix = id(for: phase)
@@ -239,10 +207,7 @@ final class NotificationManager {
         )
 
         UNUserNotificationCenter.current().add(request) { _ in }
-#if DEBUG
-        let deltaSeconds = Int(max(0, endAt.timeIntervalSince(now)))
-        tskLog("SCHEDULED {id:\(uniqueId), phase:\(String(describing: phase)), delta:\(deltaSeconds)s}")
-#endif
+        // debug removed
         // 記録
         lastIssuedIdForPhase[phase] = uniqueId
     }
@@ -260,15 +225,9 @@ final class NotificationManager {
     ) {
         let center = UNUserNotificationCenter.current()
         if removePending {
-#if DEBUG
-            tskLog("PENDING-REMOVED {ids:\(ids)}")
-#endif
             center.removePendingNotificationRequests(withIdentifiers: ids)
         }
         if removeDelivered {
-#if DEBUG
-            tskLog("DELIVERED-REMOVED {ids:\(ids)}")
-#endif
             center.removeDeliveredNotifications(withIdentifiers: ids)
         }
     }
@@ -285,9 +244,7 @@ final class NotificationManager {
         let isFocusIncoming = identifier.hasPrefix(ID.focus)
         let prevPhase: PomodoroPhase = isFocusIncoming ? .breakTime : .focus
         if let lastId = lastIssuedIdForPhase[prevPhase] {
-#if DEBUG
-            tskLog("DELIVERED-REMOVED on willPresent previous-phase {prev:\(String(describing: prevPhase)), id:\(lastId)}")
-#endif
+            // debug removed
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [lastId])
         }
     }
@@ -298,9 +255,6 @@ final class NotificationManager {
         let pending = await center.pendingNotificationRequests()
         let ids = pending.map { $0.identifier }.filter { $0.hasPrefix(prefix) }
         if !ids.isEmpty {
-#if DEBUG
-            tskLog("PENDING-REMOVED by prefix {prefix:\(prefix), count:\(ids.count)}")
-#endif
             center.removePendingNotificationRequests(withIdentifiers: ids)
         }
     }
