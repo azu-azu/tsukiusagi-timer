@@ -37,7 +37,14 @@ struct DailyTimelineView: View {
             // スクロール可能なコンテンツ
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    // レコード表示
+                    // 集計表示（レコードが複数ある場合のみ）
+                    if viewModel.records(historyVM: historyVM).count > 1 {
+                        sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
+                        sectionBuilder.subtitleSummarySection(summaries: viewModel.bySubtitle(historyVM: historyVM))
+                    }
+                    // メモ（Reflect）
+                    memoSection()
+                    // レコード詳細（時間別）
                     sectionBuilder.dayModeRecordsSection(
                         records: viewModel.records(historyVM: historyVM),
                         onRestore: { record in
@@ -47,13 +54,6 @@ struct DailyTimelineView: View {
                             viewModel.selectRecordForMemoEdit(record)
                         }
                     )
-                    // 集計表示（レコードが複数ある場合のみ）
-                    if viewModel.records(historyVM: historyVM).count > 1 {
-                        sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
-                        sectionBuilder.subtitleSummarySection(summaries: viewModel.bySubtitle(historyVM: historyVM))
-                    }
-                    // メモ部分
-                    memoSection()
                 }
                 .padding(.horizontal)
             }

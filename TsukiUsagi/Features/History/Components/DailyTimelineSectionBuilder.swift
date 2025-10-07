@@ -182,7 +182,8 @@ extension DailyTimelineSectionBuilder {
                             .font(.body)
                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
                         Spacer()
-                        Text("\(summary.totalMinutes) min")
+                        // total と同じ h min s 形式に合わせる（分→秒に変換して表示）
+                        Text(TimeFormatters.totalTextWithSeconds(summary.totalMinutes * 60))
                             .font(.caption)
                             .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     }
