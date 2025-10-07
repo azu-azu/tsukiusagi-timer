@@ -39,6 +39,8 @@ final class NotificationManager {
         UNUserNotificationCenter.current()
             .requestAuthorization(options: [.alert, .sound]) { granted, error in
                 if let error = error {
+                    #if DEBUG
+                    #endif
                     completion(false); return
                 }
                 completion(granted)
