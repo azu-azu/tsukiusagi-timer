@@ -21,13 +21,13 @@ final class NotificationManager {
     }
 
     // MARK: - Phase-scoped identifiers
-    enum ID {
+    enum NotificationID {
         static let focus = "SessionEnd.focus"
         static let rest  = "SessionEnd.break"
     }
 
     func id(for phase: PomodoroPhase) -> String {
-        return (phase == .focus) ? ID.focus : ID.rest
+        return (phase == .focus) ? NotificationID.focus : NotificationID.rest
     }
 
     // 直近に発行したidentifierを記録（delivered明示削除用、最小限の保持）
@@ -219,7 +219,7 @@ final class NotificationManager {
 
     /// 柔軟な取消: 既定は pending のみ。必要時に delivered も削除
     func cancelSessionEndNotifications(
-        ids: [String] = [ID.focus, ID.rest],
+        ids: [String] = [NotificationID.focus, NotificationID.rest],
         removeDelivered: Bool = false,
         removePending: Bool = true
     ) {
@@ -233,7 +233,7 @@ final class NotificationManager {
     }
 
     /// 明示的に delivered を掃除（復旧・手動クリア等）
-    func clearDelivered(ids: [String] = [ID.focus, ID.rest]) {
+    func clearDelivered(ids: [String] = [NotificationID.focus, NotificationID.rest]) {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
     }
 
@@ -241,7 +241,7 @@ final class NotificationManager {
 
     /// 新規通知のidentifierからフェーズを推定し、反対フェーズの直近 delivered をクリア（提示直前専用）
     func clearPreviousPhaseDeliveredForIncoming(identifier: String) {
-        let isFocusIncoming = identifier.hasPrefix(ID.focus)
+        let isFocusIncoming = identifier.hasPrefix(NotificationID.focus)
         let prevPhase: PomodoroPhase = isFocusIncoming ? .breakTime : .focus
         if let lastId = lastIssuedIdForPhase[prevPhase] {
             // debug removed
