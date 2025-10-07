@@ -39,9 +39,6 @@ final class NotificationManager {
         UNUserNotificationCenter.current()
             .requestAuthorization(options: [.alert, .sound]) { granted, error in
                 if let error = error {
-                    #if DEBUG
-                    print("通知許可リクエスト失敗: \(error.localizedDescription)")
-                    #endif
                     completion(false); return
                 }
                 completion(granted)

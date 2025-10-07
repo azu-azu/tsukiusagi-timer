@@ -71,9 +71,6 @@ final class TimerLifecycleCoordinator {
                 let now = dateProvider.now()
                 let remaining = remainingSeconds(until: endAt, now: now)
                 stateManager.timeRemaining = remaining
-                #if DEBUG
-                print("[Resume] pre-update: endAt=\(endAt), now=\(now), remaining=\(remaining)s, runState=\(stateManager.runState)")
-                #endif
             }
         }
 
@@ -81,9 +78,6 @@ final class TimerLifecycleCoordinator {
         if !params.isSessionFinished, let endAt = sessionManager.endAt {
             let now = dateProvider.now()
             if now >= endAt {
-                #if DEBUG
-                print("[Resume] complete: now (\(now)) >= endAt (\(endAt)) -> finalize silently")
-                #endif
                 // 一度だけ画面内で静かな完了チップを表示するための通知
                 NotificationCenter.default.post(name: Notification.Name("TimerSilentCompleted"), object: nil)
 
