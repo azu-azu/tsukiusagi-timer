@@ -55,8 +55,18 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {
         // 予約の衝突を防ぐため、これから張るIDの pending のみを取消
         // debug log removed
-        let id = notificationManager.id(for: phase)
-        notificationManager.cancelSessionEndNotifications(ids: [id], removeDelivered: false, removePending: true)
+        let focusId = notificationManager.id(for: .focus)
+        let breakId = notificationManager.id(for: .breakTime)
+        // まず全フェーズの pending を整理（過去予約の取りこぼし防止）
+        notificationManager.cancelSessionEndNotifications(
+            ids: [focusId, breakId],
+            removeDelivered: false,
+            removePending: true
+        )
+        // FG での再START時、同フェーズの古い delivered が残っていると抑制される場合があるため整理
+        if phase == .breakTime, UIApplication.shared.applicationState == .active {
+            notificationManager.clearLastDelivered(for: .breakTime)
+        }
         // 絶対時刻での通知スケジューリング
         notificationManager.scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: timeSensitive)
     }
@@ -72,8 +82,18 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
 
             // キャンセルしてから再スケジュール
             // debug log removed
-            let id = notificationManager.id(for: phase)
-            notificationManager.cancelSessionEndNotifications(ids: [id], removeDelivered: false, removePending: true)
+            let focusId = notificationManager.id(for: .focus)
+            let breakId = notificationManager.id(for: .breakTime)
+            notificationManager.cancelSessionEndNotifications(
+                ids: [focusId, breakId],
+                removeDelivered: false,
+                removePending: true
+            )
+            if phase == .breakTime,
+               UIApplication.shared.applicationState == .active
+            {
+                notificationManager.clearLastDelivered(for: .breakTime)
+            }
             notificationManager.scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: timeSensitive)
         }
     }

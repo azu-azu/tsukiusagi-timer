@@ -142,10 +142,9 @@ final class NotificationManager {
         checkNotificationStatus { [weak self] allowed in
             guard allowed else { return }
             Task { [weak self] in
-                // 予約前に対象フェーズの pending を prefix ベースで整理
-                if let prefix = self?.id(for: phase) {
-                    await self?.removePendingForPrefix(prefix)
-                }
+                // 予約前に全フェーズの pending を接頭辞で整理（取りこぼし防止）
+                await self?.removePendingForPrefix(NotificationID.focus)
+                await self?.removePendingForPrefix(NotificationID.rest)
                 await MainActor.run { [weak self] in
                     self?.scheduleNotificationAtAbsoluteTime(endAt: endAt, phase: phase, timeSensitive: timeSensitive)
                 }
@@ -237,15 +236,32 @@ final class NotificationManager {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
     }
 
+    /// 直近に発行した同フェーズの delivered を正確なIDで削除
+    func clearLastDelivered(for phase: PomodoroPhase) {
+        if let lastId = lastIssuedIdForPhase[phase] {
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [lastId])
+        }
+    }
+
     // clearPreviousPhaseDeliveredIfNeeded は抑制解除に副作用があるため撤去
 
-    /// 新規通知のidentifierからフェーズを推定し、反対フェーズの直近 delivered をクリア（提示直前専用）
+    /// 新規通知のidentifierからフェーズを推定し、
+    /// 1) 反対フェーズの直近 delivered
+    /// 2) 同一フェーズの古い delivered（incomingとは別ID）
+    /// を提示直前に整理する（OS抑制度合いの差異対策）。
     func clearPreviousPhaseDeliveredForIncoming(identifier: String) {
         let isFocusIncoming = identifier.hasPrefix(NotificationID.focus)
         let prevPhase: PomodoroPhase = isFocusIncoming ? .breakTime : .focus
-        if let lastId = lastIssuedIdForPhase[prevPhase] {
-            // debug removed
-            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [lastId])
+        let samePhase: PomodoroPhase = isFocusIncoming ? .focus : .breakTime
+
+        let center = UNUserNotificationCenter.current()
+        // 反対フェーズを整理（正確なID指定）
+        if let lastPrev = lastIssuedIdForPhase[prevPhase] {
+            center.removeDeliveredNotifications(withIdentifiers: [lastPrev])
+        }
+        // 同一フェーズの古い delivered を整理（incoming と同一IDは残す）
+        if let lastSame = lastIssuedIdForPhase[samePhase], lastSame != identifier {
+            center.removeDeliveredNotifications(withIdentifiers: [lastSame])
         }
     }
 
