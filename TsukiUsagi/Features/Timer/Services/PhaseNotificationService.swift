@@ -90,8 +90,7 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
                 removePending: true
             )
             if phase == .breakTime,
-               UIApplication.shared.applicationState == .active
-            {
+               UIApplication.shared.applicationState == .active {
                 notificationManager.clearLastDelivered(for: .breakTime)
             }
             notificationManager.scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: timeSensitive)
