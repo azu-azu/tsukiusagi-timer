@@ -172,12 +172,26 @@ private class DummyHistoryService: SessionHistoryServiceable {
 }
 
 private class DummyPersistenceManager: TimerPersistenceManageable {
+    // Core persisted values
     var timeRemaining: Int = 0
     var isRunning: Bool = false
     var isWorkSession: Bool = true
 
+    // New robust state
+    var runStateRaw: String?
+    var endAtEpoch: Double?
+    var remainingAtPause: Int?
+
     func saveTimerState() {}
     func restoreTimerState() {}
+    func initializeWithWorkMinutes(_ minutes: Int) {
+        timeRemaining = minutes * 60
+        isRunning = false
+        isWorkSession = true
+        runStateRaw = nil
+        endAtEpoch = nil
+        remainingAtPause = nil
+    }
 }
 
 private class DummyFormatter: TimeFormatterUtilable {
