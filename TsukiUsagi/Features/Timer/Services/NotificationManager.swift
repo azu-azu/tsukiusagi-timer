@@ -38,7 +38,9 @@ final class NotificationManager {
     func requestAuthorization(completion: @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current()
             .requestAuthorization(options: [.alert, .sound]) { granted, error in
-                if let error = error {
+                if error != nil {
+                    #if DEBUG
+                    #endif
                     completion(false); return
                 }
                 completion(granted)

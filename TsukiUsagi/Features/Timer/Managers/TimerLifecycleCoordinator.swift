@@ -71,6 +71,8 @@ final class TimerLifecycleCoordinator {
                 let now = dateProvider.now()
                 let remaining = remainingSeconds(until: endAt, now: now)
                 stateManager.timeRemaining = remaining
+                #if DEBUG
+                #endif
             }
         }
 
@@ -78,6 +80,8 @@ final class TimerLifecycleCoordinator {
         if !params.isSessionFinished, let endAt = sessionManager.endAt {
             let now = dateProvider.now()
             if now >= endAt {
+                #if DEBUG
+                #endif
                 // 一度だけ画面内で静かな完了チップを表示するための通知
                 NotificationCenter.default.post(name: Notification.Name("TimerSilentCompleted"), object: nil)
 
@@ -102,17 +106,14 @@ final class TimerLifecycleCoordinator {
                 let remaining = remainingSeconds(until: endAt, now: now)
                 if remaining > 0 {
                     #if DEBUG
-                    print("[Resume] restart: remaining=\(remaining)s (endAt=\(endAt), now=\(now)) -> startFromRestored")
                     #endif
                     startFromRestoredIfNeeded()
                 } else {
                     #if DEBUG
-                    print("[Resume] no-restart: remaining=\(remaining)s, runState=\(stateManager.runState)")
                     #endif
                 }
             } else {
                 #if DEBUG
-                print("[Resume] no action: finished=\(params.isSessionFinished), runState=\(stateManager.runState), hasEndAt=\(sessionManager.endAt != nil)")
                 #endif
             }
         }
@@ -140,11 +141,9 @@ final class TimerLifecycleCoordinator {
             if sessionManager.endAt == nil, let endAt = endAt {
                 sessionManager.setEndAt(endAt)
                 #if DEBUG
-                print("[Restore] applied persisted endAt=\(endAt)")
                 #endif
-            } else if let persisted = endAt, let current = sessionManager.endAt {
+            } else if let _ = endAt, let _ = sessionManager.endAt {
                 #if DEBUG
-                print("[Restore] keep in-memory endAt=\(current), skip persisted=\(persisted)")
                 #endif
             }
 
@@ -165,7 +164,6 @@ final class TimerLifecycleCoordinator {
                 stateManager.timeRemaining = remaining
                 stateManager.startTimer()
                 #if DEBUG
-                print("[Resume] started from restored: remaining=\(remaining)s")
                 #endif
             }
         }

@@ -1,3 +1,43 @@
+//
+//  TimerViewModel+SessionControl.swift
+//  TsukiUsagi
+//
+//  Extracted session control APIs to reduce TimerViewModel size.
+//
+
+import Foundation
+import Combine
+
+@MainActor
+extension TimerViewModel {
+
+    /// タイマー開始
+    func startTimer() {
+        #if DEBUG
+        #endif
+        // アイドル時は最新のworkMinutesを採用、進行/一時停止中は残り秒数を尊重
+        let targetTime: Int = (runState == .idle) ? workLengthMinutes * 60 : timeRemaining
+
+        guard targetTime > 0 else { return }
+
+        ensureWorkOnStart()
+
+        sessionManager.startSession(
+            isWorkSession: isWorkSession,
+            activityLabel: activityLabel,
+            subtitleLabel: subtitleLabel
+        )
+
+        // 時間を設定してからstartTimerを呼ぶ
+        stateManager.timeRemaining = targetTime
+        // セッション完了状態をリセット
+        if isSessionFinished {
+            stateManager.resetSessionFinished() // セッション完了状態をリセット
+            isBackgroundCompleted = false // バックグラウンド完了フラグをリセット
+        }
+        stateManager.startTimer()
+        #if DEBUG
+        #endif
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
 
