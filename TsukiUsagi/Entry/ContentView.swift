@@ -268,7 +268,11 @@ struct ContentView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
                     }
                     // 復帰直後の“静かな完了”を軽く表示（ワンショット）
-                    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerSilentCompleted"))) { _ in
+                    .onReceive(
+                        NotificationCenter.default.publisher(
+                            for: Notification.Name("TimerSilentCompleted")
+                        )
+                    ) { _ in
                         silentCompleteWorkItem?.cancel()
                         withAnimation(.easeInOut(duration: 0.2)) { showSilentCompleteChip = true }
                         let work = DispatchWorkItem {
