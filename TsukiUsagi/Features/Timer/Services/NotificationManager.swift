@@ -136,8 +136,10 @@ final class NotificationManager {
         // 通知IDをフェーズ別に分ける
         let id = (phase == .focus) ? "SessionEnd.focus" : "SessionEnd.break"
 
-        // 既存の同フェーズ通知をキャンセル
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
+        // 既存の同フェーズ通知を完全に掃除（pending + delivered）
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [id])
+        center.removeDeliveredNotifications(withIdentifiers: [id])
 
         let content = UNMutableNotificationContent()
         switch phase {
@@ -181,12 +183,12 @@ final class NotificationManager {
         UNUserNotificationCenter.current().add(request) { _ in }
     }
 
-    // セッション終了通知をキャンセル
+    // セッション終了通知をキャンセル（pending + delivered）
     func cancelSessionEndNotification() {
-
-        UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: ["SessionEnd.focus", "SessionEnd.break"]
-        )
+        let center = UNUserNotificationCenter.current()
+        let ids = ["SessionEnd.focus", "SessionEnd.break"]
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+        center.removeDeliveredNotifications(withIdentifiers: ids)
     }
 
     // 重複通知の完全防止：既存通知をチェックしてからスケジューリング
