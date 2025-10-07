@@ -7,6 +7,10 @@
 
 import Foundation
 import UserNotifications
+#if DEBUG
+import os
+import UIKit
+#endif
 
 // PomodoroPhase は既にプロジェクト内で定義されているので再宣言しない
 
@@ -16,22 +20,74 @@ final class NotificationManager {
         setupNotificationCategories()
     }
 
+    // MARK: - Phase-scoped identifiers
+    enum ID {
+        static let focus = "SessionEnd.focus"
+        static let rest  = "SessionEnd.break"
+    }
+
+    func id(for phase: PomodoroPhase) -> String {
+        return (phase == .focus) ? ID.focus : ID.rest
+    }
+
+    // 直近に発行したidentifierを記録（delivered明示削除用、最小限の保持）
+    private var lastIssuedIdForPhase: [PomodoroPhase: String] = [:]
+
+#if DEBUG
+    // MARK: - Debug logging helpers (🌙TSK)
+    private static let tskSubsystem = "jp.tsukiusagi.timer"
+    private static let tskCategory = "notification"
+    @available(iOS 14.0, *)
+    private static let tskLogger = Logger(subsystem: tskSubsystem, category: tskCategory)
+
+    private func isoNow() -> String {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f.string(from: Date())
+    }
+
+    private func ctx() -> String {
+        switch UIApplication.shared.applicationState {
+        case .active: return "FG"
+        case .background: return "BG"
+        case .inactive: return "IN"
+        @unknown default: return "UK"
+        }
+    }
+
+    private func tskLog(_ message: @autoclosure () -> String) {
+        let text = "🌙TSK \(isoNow()) \(ctx()) \(#function) \(message())"
+        if #available(iOS 14.0, *) {
+            NotificationManager.tskLogger.info("\(text, privacy: .public)")
+        } else {
+            print(text)
+        }
+    }
+#endif
+
     // 通知カテゴリの設定（Deep Link対応）
     private func setupNotificationCategories() {
-        let timerAction = UNNotificationAction(
+        let openTimer = UNNotificationAction(
             identifier: "OPEN_TIMER",
             title: "タイマーを開く",
             options: [.foreground]
         )
 
-        let timerCategory = UNNotificationCategory(
-            identifier: "TIMER_CATEGORY",
-            actions: [timerAction],
+        let focusCategory = UNNotificationCategory(
+            identifier: "TIMER_FOCUS",
+            actions: [openTimer],
             intentIdentifiers: [],
             options: []
         )
 
-        UNUserNotificationCenter.current().setNotificationCategories([timerCategory])
+        let restCategory = UNNotificationCategory(
+            identifier: "TIMER_REST",
+            actions: [openTimer],
+            intentIdentifiers: [],
+            options: []
+        )
+
+        UNUserNotificationCenter.current().setNotificationCategories([focusCategory, restCategory])
     }
 
     // 権限リクエスト
@@ -116,7 +172,10 @@ final class NotificationManager {
         checkNotificationStatus { [weak self] allowed in
             guard allowed else { return }
             Task { [weak self] in
-                await self?.ensureSingleNotification()
+                // 予約前に対象フェーズの pending を prefix ベースで整理
+                if let prefix = self?.id(for: phase) {
+                    await self?.removePendingForPrefix(prefix)
+                }
                 await MainActor.run { [weak self] in
                     self?.scheduleNotificationAtAbsoluteTime(endAt: endAt, phase: phase, timeSensitive: timeSensitive)
                 }
@@ -133,27 +192,26 @@ final class NotificationManager {
         print("log: schedule_absolute phase=\(phase) at=\(endAt) delta=\(Int(delta))s timeSensitive=\(timeSensitive)")
         #endif
 
-        // 通知IDをフェーズ別に分ける
-        let id = (phase == .focus) ? "SessionEnd.focus" : "SessionEnd.break"
-
-        // 既存の同フェーズ通知を完全に掃除（pending + delivered）
-        let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: [id])
-        center.removeDeliveredNotifications(withIdentifiers: [id])
+        // 通知ID: フェーズ別プリフィクス + ユニークサフィックス（抑制回避）
+        let prefix = id(for: phase)
+        let uniqueId = "\(prefix).\(Int(endAt.timeIntervalSince1970))"
 
         let content = UNMutableNotificationContent()
         switch phase {
         case .focus:
             content.title = "Time to Focus 🌕"
             content.body = "Let's begin, quietly centered."
-            content.threadIdentifier = "pomodoro.focus"
+            content.categoryIdentifier = "TIMER_FOCUS"
         case .breakTime:
             content.title = "Time to Rest 🌑"
             content.body = "The moon is still. So can you be."
-            content.threadIdentifier = "pomodoro.break"
+            content.categoryIdentifier = "TIMER_REST"
         }
         content.sound = .default
-        content.categoryIdentifier = "TIMER_CATEGORY"
+        // 次フェーズ識別のため userInfo に埋め込む
+        content.userInfo = ["phase": (phase == .focus ? "focus" : "breakTime")]
+        // 1つ前の delivered が残っていても抑制されないよう、threadIdentifier もユニーク化
+        content.threadIdentifier = uniqueId
 
         // Time-Sensitive対応（iOS 15+）
         if #available(iOS 15.0, *), timeSensitive {
@@ -175,32 +233,75 @@ final class NotificationManager {
         }
 
         let request = UNNotificationRequest(
-            identifier: id,
+            identifier: uniqueId,
             content: content,
             trigger: trigger
         )
 
         UNUserNotificationCenter.current().add(request) { _ in }
+#if DEBUG
+        let deltaSeconds = Int(max(0, endAt.timeIntervalSince(now)))
+        tskLog("SCHEDULED {id:\(uniqueId), phase:\(String(describing: phase)), delta:\(deltaSeconds)s}")
+#endif
+        // 記録
+        lastIssuedIdForPhase[phase] = uniqueId
     }
 
-    // セッション終了通知をキャンセル（pending + delivered）
+    // セッション終了通知をキャンセル（既定: pending のみ）
     func cancelSessionEndNotification() {
-        let center = UNUserNotificationCenter.current()
-        let ids = ["SessionEnd.focus", "SessionEnd.break"]
-        center.removePendingNotificationRequests(withIdentifiers: ids)
-        center.removeDeliveredNotifications(withIdentifiers: ids)
+        cancelSessionEndNotifications()
     }
 
-    // 重複通知の完全防止：既存通知をチェックしてからスケジューリング
-    private func ensureSingleNotification() async {
+    /// 柔軟な取消: 既定は pending のみ。必要時に delivered も削除
+    func cancelSessionEndNotifications(
+        ids: [String] = [ID.focus, ID.rest],
+        removeDelivered: Bool = false,
+        removePending: Bool = true
+    ) {
         let center = UNUserNotificationCenter.current()
-        let pendingRequests = await center.pendingNotificationRequests()
+        if removePending {
+#if DEBUG
+            tskLog("PENDING-REMOVED {ids:\(ids)}")
+#endif
+            center.removePendingNotificationRequests(withIdentifiers: ids)
+        }
+        if removeDelivered {
+#if DEBUG
+            tskLog("DELIVERED-REMOVED {ids:\(ids)}")
+#endif
+            center.removeDeliveredNotifications(withIdentifiers: ids)
+        }
+    }
 
-        // SessionEnd通知が複数ある場合は全て削除
-        let sessionEndRequests = pendingRequests.filter { $0.identifier.hasPrefix("SessionEnd") }
-        if sessionEndRequests.count > 1 {
+    /// 明示的に delivered を掃除（復旧・手動クリア等）
+    func clearDelivered(ids: [String] = [ID.focus, ID.rest]) {
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
+    }
 
-            center.removePendingNotificationRequests(withIdentifiers: ["SessionEnd.focus", "SessionEnd.break"])
+    // clearPreviousPhaseDeliveredIfNeeded は抑制解除に副作用があるため撤去
+
+    /// 新規通知のidentifierからフェーズを推定し、反対フェーズの直近 delivered をクリア（提示直前専用）
+    func clearPreviousPhaseDeliveredForIncoming(identifier: String) {
+        let isFocusIncoming = identifier.hasPrefix(ID.focus)
+        let prevPhase: PomodoroPhase = isFocusIncoming ? .breakTime : .focus
+        if let lastId = lastIssuedIdForPhase[prevPhase] {
+#if DEBUG
+            tskLog("DELIVERED-REMOVED on willPresent previous-phase {prev:\(String(describing: prevPhase)), id:\(lastId)}")
+#endif
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [lastId])
+        }
+    }
+
+    // 対象プリフィクスの pending をすべて削除（重複/残留対策）
+    private func removePendingForPrefix(_ prefix: String) async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        let ids = pending.map { $0.identifier }.filter { $0.hasPrefix(prefix) }
+        if !ids.isEmpty {
+#if DEBUG
+            tskLog("PENDING-REMOVED by prefix {prefix:\(prefix), count:\(ids.count)}")
+#endif
+            center.removePendingNotificationRequests(withIdentifiers: ids)
         }
     }
 

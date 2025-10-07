@@ -1,5 +1,8 @@
 import UIKit
 import UserNotifications
+#if DEBUG
+import os
+#endif
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(
@@ -13,11 +16,21 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     // This function will be called when the app is in the foreground
     func userNotificationCenter(
         _: UNUserNotificationCenter,
-        willPresent _: UNNotification,
+        willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        // Display the notification as a banner and play a sound
-        completionHandler([.banner, .sound])
+        // 提示直前に、前フェーズ delivered を整頓
+        NotificationManager.shared.clearPreviousPhaseDeliveredForIncoming(identifier: notification.request.identifier)
+        // Display the notification as a banner and play a sound (also list + badge)
+#if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK \(Self.isoNow(), privacy: .public) FG willPresent WILL-PRESENT {}")
+        } else {
+            print("🌙TSK \(Self.isoNow()) FG willPresent WILL-PRESENT {}")
+        }
+#endif
+        completionHandler([.banner, .list, .sound, .badge])
     }
 
     // This function will be called when the user taps on a notification or notification action
@@ -35,6 +48,33 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             )
         }
 
+#if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            let state: String
+            switch UIApplication.shared.applicationState {
+            case .active: state = "FG"
+            case .background: state = "BG"
+            case .inactive: state = "IN"
+            @unknown default: state = "UK"
+            }
+            let id = response.notification.request.identifier
+            let action = response.actionIdentifier
+            logger.info("🌙TSK \(Self.isoNow(), privacy: .public) \(state, privacy: .public) didReceive DID-RECEIVE {id:\(id, privacy: .public), action:\(action, privacy: .public)}")
+        } else {
+            print("🌙TSK \(Self.isoNow()) didReceive DID-RECEIVE {}")
+        }
+#endif
         completionHandler()
     }
 }
+
+#if DEBUG
+extension AppDelegate {
+    fileprivate static func isoNow() -> String {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f.string(from: Date())
+    }
+}
+#endif

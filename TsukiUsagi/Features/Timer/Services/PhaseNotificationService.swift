@@ -1,5 +1,9 @@
 import Foundation
 import UserNotifications
+#if DEBUG
+import os
+import UIKit
+#endif
 
 protocol PhaseNotificationServiceable: AnyObject {
     func sendStartNotification()
@@ -40,15 +44,47 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     }
 
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
-        // 予約の衝突を防ぐため、必ず cancel → add
-        notificationManager.cancelSessionEndNotification()
-        // バックグラウンド時の終了時刻通知をスケジュール（後方互換性）
+        // 予約の衝突を防ぐため、これから張るIDの pending のみを取消
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            let state: String
+            switch UIApplication.shared.applicationState {
+            case .active: state = "FG"
+            case .background: state = "BG"
+            case .inactive: state = "IN"
+            @unknown default: state = "UK"
+            }
+            logger.info("🌙TSK \(Self.isoNow(), privacy: .public) \(state, privacy: .public) scheduleSessionEndNotification CALL {after:\(seconds), phase:\(String(describing: phase))}")
+        } else {
+            print("🌙TSK \(Self.isoNow()) scheduleSessionEndNotification CALL {after:\(seconds)}")
+        }
+        #endif
+        let id = notificationManager.id(for: phase)
+        notificationManager.cancelSessionEndNotifications(ids: [id], removeDelivered: false, removePending: true)
+        // バックグラウンド時の終了時刻通知をスケジューリング（後方互換性）
         notificationManager.scheduleSessionEndNotification(after: seconds, phase: phase)
     }
 
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {
-        // 予約の衝突を防ぐため、必ず cancel → add
-        notificationManager.cancelSessionEndNotification()
+        // 予約の衝突を防ぐため、これから張るIDの pending のみを取消
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            let state: String
+            switch UIApplication.shared.applicationState {
+            case .active: state = "FG"
+            case .background: state = "BG"
+            case .inactive: state = "IN"
+            @unknown default: state = "UK"
+            }
+            logger.info("🌙TSK \(Self.isoNow(), privacy: .public) \(state, privacy: .public) scheduleSessionEndNotification CALL {at:\(endAt, privacy: .public), phase:\(String(describing: phase))}")
+        } else {
+            print("🌙TSK \(Self.isoNow()) scheduleSessionEndNotification CALL {at:\(endAt), phase:\(phase)}")
+        }
+        #endif
+        let id = notificationManager.id(for: phase)
+        notificationManager.cancelSessionEndNotifications(ids: [id], removeDelivered: false, removePending: true)
         // 絶対時刻での通知スケジューリング
         notificationManager.scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: timeSensitive)
     }
@@ -63,7 +99,23 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
             try? await Task.sleep(nanoseconds: 300_000_000)
 
             // キャンセルしてから再スケジュール
-            notificationManager.cancelSessionEndNotification()
+            #if DEBUG
+            if #available(iOS 14.0, *) {
+                let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+                let state: String
+                switch UIApplication.shared.applicationState {
+                case .active: state = "FG"
+                case .background: state = "BG"
+                case .inactive: state = "IN"
+                @unknown default: state = "UK"
+                }
+                logger.info("🌙TSK \(Self.isoNow(), privacy: .public) \(state, privacy: .public) rescheduleEnd RESCHEDULE-FIRE {at:\(endAt, privacy: .public), phase:\(String(describing: phase))}")
+            } else {
+                print("🌙TSK \(Self.isoNow()) rescheduleEnd RESCHEDULE-FIRE {at:\(endAt), phase:\(phase)}")
+            }
+            #endif
+            let id = notificationManager.id(for: phase)
+            notificationManager.cancelSessionEndNotifications(ids: [id], removeDelivered: false, removePending: true)
             notificationManager.scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: timeSensitive)
         }
     }
@@ -74,8 +126,23 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     }
 
     func cancelSessionEndNotification() {
-        // セッション終了通知をキャンセル
-        notificationManager.cancelSessionEndNotification()
+        // セッション終了通知をキャンセル（既定: pending のみ）
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            let state: String
+            switch UIApplication.shared.applicationState {
+            case .active: state = "FG"
+            case .background: state = "BG"
+            case .inactive: state = "IN"
+            @unknown default: state = "UK"
+            }
+            logger.info("🌙TSK \(Self.isoNow(), privacy: .public) \(state, privacy: .public) cancelSessionEndNotification CALL {}")
+        } else {
+            print("🌙TSK \(Self.isoNow()) cancelSessionEndNotification CALL {}")
+        }
+        #endif
+        notificationManager.cancelSessionEndNotifications()
     }
 
     func finalizeWorkPhase() {
@@ -124,3 +191,13 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
         }
     }
 }
+
+#if DEBUG
+extension PhaseNotificationService {
+    fileprivate static func isoNow() -> String {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f.string(from: Date())
+    }
+}
+#endif

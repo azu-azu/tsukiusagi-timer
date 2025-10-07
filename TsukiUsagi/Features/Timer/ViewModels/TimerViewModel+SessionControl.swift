@@ -7,6 +7,10 @@
 
 import Foundation
 import Combine
+#if DEBUG
+import os
+import UIKit
+#endif
 
 @MainActor
 extension TimerViewModel {
@@ -14,6 +18,12 @@ extension TimerViewModel {
     /// タイマー開始
     func startTimer() {
         #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK startTimer ENTER {isWork:\(self.isWorkSession), runState:\(String(describing: self.runState))}")
+        } else {
+            print("🌙TSK startTimer ENTER {isWork:\(self.isWorkSession)}")
+        }
         #endif
         // アイドル時は最新のworkMinutesを採用、進行/一時停止中は残り秒数を尊重
         let targetTime: Int = (runState == .idle) ? workLengthMinutes * 60 : timeRemaining
@@ -36,8 +46,6 @@ extension TimerViewModel {
             isBackgroundCompleted = false // バックグラウンド完了フラグをリセット
         }
         stateManager.startTimer()
-        #if DEBUG
-        #endif
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
 
@@ -46,6 +54,14 @@ extension TimerViewModel {
         sessionManager.setEndAt(endAt)
         // 次のセッションの種類に基づいて通知フェーズを決定
         let phase: PomodoroPhase = isWorkSession ? .breakTime : .focus
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK startTimer SCHEDULE-REQUEST {endAt:\(endAt as NSDate), phase:\(String(describing: phase))}")
+        } else {
+            print("🌙TSK startTimer SCHEDULE-REQUEST {endAt:\(endAt), phase:\(phase)}")
+        }
+        #endif
         // ★ 開始時にのみ次フェーズを予約（cancel→addはサービス側で実施）
         notificationService.scheduleSessionEndNotification(
             at: endAt,
@@ -62,6 +78,12 @@ extension TimerViewModel {
         stateManager.pauseTimer()
         notificationAndHapticManager.triggerLightHaptic()
         // 通知をキャンセル（一時停止中は通知不要）
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK pauseTimer ENTER {}")
+        } else { print("🌙TSK pauseTimer ENTER {}") }
+        #endif
         notificationService.cancelSessionEndNotification()
     }
 
@@ -78,6 +100,12 @@ extension TimerViewModel {
             sessionManager.setEndAt(endAt)
             // 次のセッションの種類に基づいて通知フェーズを決定
             let phase: PomodoroPhase = isWorkSession ? .breakTime : .focus
+            #if DEBUG
+            if #available(iOS 14.0, *) {
+                let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+                logger.info("🌙TSK resumeTimer SCHEDULE-REQUEST {endAt:\(endAt as NSDate), phase:\(String(describing: phase))}")
+            } else { print("🌙TSK resumeTimer SCHEDULE-REQUEST {endAt:\(endAt), phase:\(phase)}") }
+            #endif
             notificationService.rescheduleEnd(
                 at: endAt,
                 phase: phase,
@@ -88,6 +116,12 @@ extension TimerViewModel {
 
     /// タイマー停止（完全停止 - セッションリセット）
     func stopTimer() {
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK stopTimer ENTER {}")
+        } else { print("🌙TSK stopTimer ENTER {}") }
+        #endif
         stateManager.stopTimer()
         sessionManager.resetSession()
         notificationService.cancelSessionEndNotification()
@@ -100,6 +134,12 @@ extension TimerViewModel {
 
     /// タイマーリセット（セッション保持の有無を選択）
     func resetTimer(to seconds: Int, keepSession: Bool) {
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK resetTimer ENTER {seconds:\(seconds), keepSession:\(keepSession)}")
+        } else { print("🌙TSK resetTimer ENTER {seconds:\(seconds), keepSession:\(keepSession)}") }
+        #endif
         stateManager.resetTimer(to: seconds)
         if keepSession {
             // セッション情報は保持
@@ -112,6 +152,12 @@ extension TimerViewModel {
 
     /// セッション完了処理
     func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK handleSessionCompleted ENTER {silent:\(sessionInfo.isSilent)}")
+        } else { print("🌙TSK handleSessionCompleted ENTER {silent:\(sessionInfo.isSilent)}") }
+        #endif
         // 保存のSoT（真実）は endAt/セッション情報の endTime を優先
         sessionManager.handleExpiredSession(
             end: sessionInfo.endTime,
@@ -133,6 +179,12 @@ extension TimerViewModel {
         // ★ Work完了直後に、Break終了（= 次のFocus）を絶対時刻で予約
         if isWorkSession {
             let breakEndAt = dateProvider.now().addingTimeInterval(TimeInterval(breakMinutes * 60))
+            #if DEBUG
+            if #available(iOS 14.0, *) {
+                let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+                logger.info("🌙TSK handleSessionCompleted SCHEDULE-REQUEST {breakEndAt:\(breakEndAt as NSDate), phase:focus}")
+            } else { print("🌙TSK handleSessionCompleted SCHEDULE-REQUEST {breakEndAt:\(breakEndAt), phase:focus}") }
+            #endif
             notificationService.scheduleSessionEndNotification(
                 at: breakEndAt,
                 phase: .focus,
@@ -151,6 +203,12 @@ extension TimerViewModel {
     /// 強制終了
     func forceFinish() {
         guard canForceFinish else { return }
+        #if DEBUG
+        if #available(iOS 14.0, *) {
+            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
+            logger.info("🌙TSK forceFinish ENTER {}")
+        } else { print("🌙TSK forceFinish ENTER {}") }
+        #endif
 
         sessionManager.completeSession(
             isWorkSession: isWorkSession,
