@@ -142,7 +142,7 @@ final class TimerLifecycleCoordinator {
                 sessionManager.setEndAt(endAt)
                 #if DEBUG
                 #endif
-            } else if let persisted = endAt, let current = sessionManager.endAt {
+            } else if let _ = endAt, let _ = sessionManager.endAt {
                 #if DEBUG
                 #endif
             }
