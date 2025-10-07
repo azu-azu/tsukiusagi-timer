@@ -22,14 +22,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // 提示直前に、前フェーズ delivered を整頓
         NotificationManager.shared.clearPreviousPhaseDeliveredForIncoming(identifier: notification.request.identifier)
         // Display the notification as a banner and play a sound (also list + badge)
-#if DEBUG
-        if #available(iOS 14.0, *) {
-            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
-            logger.info("🌙TSK \(Self.isoNow(), privacy: .public) FG willPresent WILL-PRESENT {}")
-        } else {
-            print("🌙TSK \(Self.isoNow()) FG willPresent WILL-PRESENT {}")
-        }
-#endif
         completionHandler([.banner, .list, .sound, .badge])
     }
 
@@ -48,33 +40,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             )
         }
 
-#if DEBUG
-        if #available(iOS 14.0, *) {
-            let logger = Logger(subsystem: "jp.tsukiusagi.timer", category: "notification")
-            let state: String
-            switch UIApplication.shared.applicationState {
-            case .active: state = "FG"
-            case .background: state = "BG"
-            case .inactive: state = "IN"
-            @unknown default: state = "UK"
-            }
-            let id = response.notification.request.identifier
-            let action = response.actionIdentifier
-            logger.info("🌙TSK \(Self.isoNow(), privacy: .public) \(state, privacy: .public) didReceive DID-RECEIVE {id:\(id, privacy: .public), action:\(action, privacy: .public)}")
-        } else {
-            print("🌙TSK \(Self.isoNow()) didReceive DID-RECEIVE {}")
-        }
-#endif
+        // debug log removed
         completionHandler()
     }
 }
 
-#if DEBUG
-extension AppDelegate {
-    fileprivate static func isoNow() -> String {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return f.string(from: Date())
-    }
-}
-#endif
+// debug helpers removed
