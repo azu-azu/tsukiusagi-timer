@@ -142,7 +142,7 @@ final class TimerLifecycleCoordinator {
                 sessionManager.setEndAt(endAt)
                 #if DEBUG
                 #endif
-            } else if let _ = endAt, let _ = sessionManager.endAt {
+            } else if endAt != nil, sessionManager.endAt != nil {
                 #if DEBUG
                 #endif
             }
