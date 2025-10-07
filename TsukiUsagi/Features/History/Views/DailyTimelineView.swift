@@ -69,7 +69,7 @@ struct DailyTimelineView: View {
             )
         }
         .sheet(item: $selectedRecordForMemoEdit) { record in
-            MemoEditView(record: record)
+            MemoEditView(record: record, anchorDate: targetDate)
         }
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
         .onAppear {
