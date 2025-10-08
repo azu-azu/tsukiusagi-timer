@@ -121,9 +121,9 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     }
 
     func cancelSessionEndNotification() {
-        // セッション終了通知をキャンセル（既定: pending のみ）
-        // debug log removed
-        notificationManager.cancelSessionEndNotifications()
+        // セッション終了通知の pending を prefix 単位でキャンセル
+        // 一意ID (prefix.epoch.uuid) に対応
+        notificationManager.removeAllSessionEndPendingByPrefix()
     }
 
     func finalizeWorkPhase() {
