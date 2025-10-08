@@ -337,6 +337,16 @@ final class NotificationManager {
         }
     }
 
+    /// セッション終了通知（Focus/Rest）の pending を prefix 単位で全削除
+    /// 一意ID (prefix.epoch.uuid) 方式と整合させるため、Exact-ID ではなく prefix ベースで掃除する
+    func removeAllSessionEndPendingByPrefix() {
+        Task { [weak self] in
+            guard let self else { return }
+            await self.removePendingForPrefix(NotificationID.focus)
+            await self.removePendingForPrefix(NotificationID.rest)
+        }
+    }
+
     // 内部: 通知作成
     private func schedule(for phase: PomodoroPhase) {
 
