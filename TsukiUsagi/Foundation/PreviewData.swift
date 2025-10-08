@@ -1,4 +1,4 @@
- #if DEBUG
+#if DEBUG
 import SwiftUI
 
 /// プレビュー用のMockデータ
@@ -314,4 +314,4 @@ extension View {
         }
     }
 }
- #endif
+#endif
