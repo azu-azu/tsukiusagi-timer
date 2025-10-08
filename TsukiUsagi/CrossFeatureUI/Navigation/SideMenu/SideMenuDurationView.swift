@@ -7,9 +7,6 @@ struct SideMenuDurationView: View {
     @AppStorage("subtitleLabel") private var subtitleLabel: String = ""
 
     @EnvironmentObject private var timerVM: TimerViewModel
-    @EnvironmentObject private var historyVM: HistoryViewModel
-    @EnvironmentObject private var sessionManager: SessionManager
-
     @Binding var isPresented: Bool
 
     private let blockHorizontalPadding: CGFloat = 6
@@ -110,7 +107,6 @@ struct SideMenuDurationView: View {
             resetButton()
             stopButton()
         }
-        .padding(.horizontal, 0)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -248,8 +244,7 @@ struct SideMenuDurationView_Previews: PreviewProvider {
                 persistenceManager: SideMenuPreviewDummyPersistence(),
                 formatter: SideMenuPreviewDummyFormatter()
             ))
-            .environmentObject(HistoryViewModel())
-            .environmentObject(SessionManager())
+
             .padding()
             .background(DesignTokens.CosmosColors.background)
     }
@@ -274,6 +269,8 @@ private class SideMenuPreviewDummyNotification: PhaseNotificationServiceable {
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
     func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+    func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
+    func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
     func cancelSessionEndNotification() {}
     func finalizeWorkPhase() {}

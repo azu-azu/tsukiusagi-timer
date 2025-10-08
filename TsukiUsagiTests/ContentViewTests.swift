@@ -33,10 +33,6 @@ class ContentViewTests: XCTestCase {
             .environmentObject(historyVM)
             .environmentObject(timerVM)
 
-        // 横画面判定のテスト
-        let landscapeSize = CGSize(width: 800, height: 600)
-        let portraitSize = CGSize(width: 375, height: 812)
-
         // 実際のテストは View の内部実装に依存するため、
         // ここでは基本的な構造のテストを行う
         XCTAssertNotNil(view)
@@ -44,10 +40,9 @@ class ContentViewTests: XCTestCase {
 
     func testSafeIsLandscapeWithZeroSize() {
         // ゼロサイズでの安全な判定テスト
-        let zeroSize = CGSize.zero
         // このテストは実際の実装に依存するため、
         // 基本的な構造の確認のみ
-        XCTAssertNotNil(zeroSize)
+        XCTAssertNotNil(CGSize.zero)
     }
 
     // MARK: - Accessibility Tests
@@ -155,6 +150,8 @@ private class DummyNotificationService: PhaseNotificationServiceable {
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
     func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+    func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
+    func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
     func cancelSessionEndNotification() {}
     func finalizeWorkPhase() {}

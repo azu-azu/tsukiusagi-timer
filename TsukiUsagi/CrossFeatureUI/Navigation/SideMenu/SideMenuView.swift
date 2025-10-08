@@ -8,9 +8,7 @@ struct SideMenuView: View {
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var sessionManager: SessionManager
 
-    // Environment for orientation detection
-    @Environment(\.horizontalSizeClass) private var horizontalClass
-    @Environment(\.verticalSizeClass) private var verticalClass
+    // Environment for orientation detection (not needed; using GeometryReader size)
 
     // MARK: - Layout Constants
 
@@ -83,9 +81,7 @@ struct SideMenuView: View {
                                 icon: "chart.bar.fill",
                                 title: "History",
                                 itemVerticalPadding: itemVerticalPadding,
-                                destination: AnyView(
-                                    HistoryView()
-                                )
+                                destination: HistoryView()
                             )
 
                             Divider()
@@ -116,7 +112,6 @@ struct SideMenuView: View {
                 .frame(width: menuWidth)
                 .padding(.leading, leadingOffset + SideMenuView.menuHorizontalPadding)
                 .frame(maxHeight: .infinity)
-                // .background(Color(red: 0.0, green: 0.1, blue: 0.2).opacity(0.9))
                 .background(DesignTokens.CosmosColors.background.opacity(0.9))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .shadow(color: DesignTokens.BlackColors.primary.opacity(0.4), radius: 8, x: -4, y: 0)
@@ -268,6 +263,8 @@ private class PreviewSideMenuDummyNotification: PhaseNotificationServiceable {
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
     func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+    func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
+    func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
     func cancelSessionEndNotification() {}
     func finalizeWorkPhase() {}

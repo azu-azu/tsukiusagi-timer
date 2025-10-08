@@ -188,6 +188,6 @@ extension View {
     }
     .padding()
     .previewColorSchemes()
-    .previewEnvironment(PreviewData.EnvironmentValues.normal)
-    .previewEnvironment(PreviewData.EnvironmentValues.accessibility)
+    .previewEnvironment(PreviewData.PreviewEnv.normal)
+    .previewEnvironment(PreviewData.PreviewEnv.accessibility)
 }
