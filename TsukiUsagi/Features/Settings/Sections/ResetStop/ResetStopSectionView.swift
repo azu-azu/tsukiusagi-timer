@@ -6,6 +6,12 @@ struct ResetStopSectionView: View {
 
     private let cardCornerRadius: CGFloat = 8
 
+    private var resetTitle: String {
+        timerVM.isWorkSession
+            ? "Reset Timer (No Save)"
+            : "Reset Timer (already saved)"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
                 // 🛑 Reset
@@ -16,11 +22,8 @@ struct ResetStopSectionView: View {
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "arrow.uturn.backward")
-                            Text(timerVM.isWorkSession
-                                ? "Reset Timer (No Save)"
-                                : "Reset Timer (already saved)"
-                            )
-                            .font(DesignTokens.Fonts.label)
+                            Text(resetTitle)
+                                .font(DesignTokens.Fonts.label)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -29,12 +32,9 @@ struct ResetStopSectionView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.uturn.backward")
                             .foregroundColor(DesignTokens.MoonColors.textMuted)
-                        Text(timerVM.isWorkSession
-                            ? "Reset Timer (No Save)"
-                            : "Reset Timer (already saved)"
-                        )
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        Text(resetTitle)
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.MoonColors.textMuted)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -67,10 +67,10 @@ struct ResetStopSectionView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
         }
-        .padding(.all)
+        .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: cardCornerRadius)
                 .fill(DesignTokens.CosmosColors.cardBackground)
         )
         .debugSection(String(describing: Self.self), position: .topLeading)
@@ -99,6 +99,8 @@ struct ResetStopSectionView_Previews: PreviewProvider {
             func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
             func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
             func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+            func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
+            func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
             func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
             func cancelSessionEndNotification() {}
             func finalizeWorkPhase() {}

@@ -46,6 +46,13 @@ struct ContentView: View {
                 let size = geo.size
                 let safeAreaInsets = geo.safeAreaInsets
                 let isLandscape = safeIsLandscape(size: size, horizontalClass: horizontalClass)
+                let shouldAnimate = shouldAnimateStars(
+                    reduceMotion: reduceMotion,
+                    showingSideMenu: showingSideMenu,
+                    timeRemaining: timerVM.timeRemaining,
+                    workLengthMinutes: timerVM.workLengthMinutes,
+                    isRunning: timerVM.isRunning
+                )
 
                 if size.width > 0 && size.height > 0 {
                     ZStack(alignment: .bottom) {
@@ -57,13 +64,7 @@ struct ContentView: View {
                             flowingStarCount: flowingStarCount,
                             isLowPowerMode: isLowPowerMode,
                             isSessionFinished: timerVM.isSessionFinished,
-                            shouldAnimateStars: shouldAnimateStars(
-                                reduceMotion: reduceMotion,
-                                showingSideMenu: showingSideMenu,
-                                timeRemaining: timerVM.timeRemaining,
-                                workLengthMinutes: timerVM.workLengthMinutes,
-                                isRunning: timerVM.isRunning
-                            ),
+                            shouldAnimateStars: shouldAnimate,
                             isLandscape: isLandscape
                         ))
 
@@ -78,13 +79,7 @@ struct ContentView: View {
                             moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
                             isQuietMoonFocused: $isQuietMoonFocused,
                             showingEditRecord: $showingEditRecord,
-                            isMoonAnimationActive: shouldAnimateStars(
-                                reduceMotion: reduceMotion,
-                                showingSideMenu: showingSideMenu,
-                                timeRemaining: timerVM.timeRemaining,
-                                workLengthMinutes: timerVM.workLengthMinutes,
-                                isRunning: timerVM.isRunning
-                            )
+                            isMoonAnimationActive: shouldAnimate
                         )
 
                         // フッターレイヤ
@@ -104,12 +99,6 @@ struct ContentView: View {
                             }
                         ))
                         .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
-                        .onAppear {
-                        }
-                        .onChange(of: timerVM.isRunning) { _, _ in
-                        }
-                        .onChange(of: timerVM.isSessionFinished) { _, _ in
-                        }
 
                         // RecordedTimesViewレイヤ
                         recordedTimesLayer(params: ContentView.RecordedTimesLayerParams(

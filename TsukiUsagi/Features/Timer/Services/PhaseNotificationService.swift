@@ -1,8 +1,8 @@
 import Foundation
 import UserNotifications
+import UIKit
 #if DEBUG
 import os
-import UIKit
 #endif
 
 protocol PhaseNotificationServiceable: AnyObject {
@@ -11,6 +11,10 @@ protocol PhaseNotificationServiceable: AnyObject {
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase)
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool)
     func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool)
+    // 連鎖（2本）予約: Work終了とBreak終了（=次Focus）を同時に張る
+    func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool)
+    // 冪等Focus予約: Break終了時刻に対してFocusのみを再予約
+    func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool)
     func sendPhaseChangeNotification(for phase: PomodoroPhase)
     func cancelSessionEndNotification()
     func finalizeWorkPhase()
@@ -34,8 +38,7 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
 
     func sendStartNotification() {
         hapticService.heavyImpact()
-        // 開始時の通知は無効化（ユーザーリクエストにより不要）
-        // notificationManager.sendPhaseChangeNotification(for: .focus)
+        // 開始時のpushは不要なため送信しない（仕様）
     }
 
     func cancelNotification() {
@@ -95,6 +98,21 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
             }
             notificationManager.scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: timeSensitive)
         }
+    }
+
+    // MARK: - Chained / Idempotent APIs
+
+    func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {
+        // 初回にprefix掃除→掃除なしで2本を順次予約
+        notificationManager.scheduleChainedSessionEnds(
+            workEndAt: workEndAt,
+            breakEndAt: breakEndAt,
+            timeSensitive: timeSensitive
+        )
+    }
+
+    func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {
+        notificationManager.scheduleFocusAfterClearingPending(at: breakEndAt, timeSensitive: timeSensitive)
     }
 
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {

@@ -1,3 +1,4 @@
+ #if DEBUG
 import SwiftUI
 
 /// プレビュー用のMockデータ
@@ -71,6 +72,8 @@ struct PreviewData {
             func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
             func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
             func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+            func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
+            func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
             func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
             func cancelSessionEndNotification() {}
             func finalizeWorkPhase() {}
@@ -239,23 +242,23 @@ struct PreviewData {
 
     // MARK: - Environment Values
 
-    /// プレビュー用の環境値
-    struct EnvironmentValues {
+    /// プレビュー用の環境値（SwiftUIの EnvironmentValues と混同しない名称）
+    struct PreviewEnv {
         /// 通常の環境値
-        static let normal = EnvironmentValues()
+        static let normal = PreviewEnv()
 
         /// アクセシビリティ対応の環境値
-        static let accessibility = EnvironmentValues(
+        static let accessibility = PreviewEnv(
             sizeCategory: .accessibilityExtraExtraExtraLarge,
             colorScheme: .dark,
             accessibilityReduceMotion: true
         )
 
         /// ダークモード
-        static let darkMode = EnvironmentValues(colorScheme: .dark)
+        static let darkMode = PreviewEnv(colorScheme: .dark)
 
         /// ライトモード
-        static let lightMode = EnvironmentValues(colorScheme: .light)
+        static let lightMode = PreviewEnv(colorScheme: .light)
 
         // プロパティ
         let sizeCategory: ContentSizeCategory
@@ -278,7 +281,7 @@ struct PreviewData {
 
 extension View {
     /// プレビュー用の環境値を適用
-    func previewEnvironment(_ values: PreviewData.EnvironmentValues) -> some View {
+    func previewEnvironment(_ values: PreviewData.PreviewEnv) -> some View {
         environment(\.sizeCategory, values.sizeCategory)
             .preferredColorScheme(values.colorScheme)
     }
@@ -294,7 +297,7 @@ extension View {
 
     /// アクセシビリティ対応のプレビュー
     func previewAccessibility() -> some View {
-        previewEnvironment(PreviewData.EnvironmentValues.accessibility)
+        previewEnvironment(PreviewData.PreviewEnv.accessibility)
             .previewDisplayName("Accessibility")
     }
 
@@ -302,12 +305,13 @@ extension View {
     func previewColorSchemes() -> some View {
         Group {
             self
-                .previewEnvironment(PreviewData.EnvironmentValues.lightMode)
+                .previewEnvironment(PreviewData.PreviewEnv.lightMode)
                 .previewDisplayName("Light Mode")
 
             self
-                .previewEnvironment(PreviewData.EnvironmentValues.darkMode)
+                .previewEnvironment(PreviewData.PreviewEnv.darkMode)
                 .previewDisplayName("Dark Mode")
         }
     }
 }
+ #endif

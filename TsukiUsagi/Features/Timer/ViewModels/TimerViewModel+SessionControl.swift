@@ -6,11 +6,6 @@
 //
 
 import Foundation
-import Combine
-#if DEBUG
-import os
-import UIKit
-#endif
 
 @MainActor
 extension TimerViewModel {
@@ -42,18 +37,26 @@ extension TimerViewModel {
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
 
-        // バックグラウンド時の通知をスケジューリング（即座通知で代用するため無効化）
+        // 終了時刻を設定し、次フェーズの通知を連鎖で予約
         let endAt = dateProvider.now().addingTimeInterval(TimeInterval(targetTime))
         sessionManager.setEndAt(endAt)
-        // 次のセッションの種類に基づいて通知フェーズを決定
-        let phase: PomodoroPhase = isWorkSession ? .breakTime : .focus
-        // debug log removed
-        // ★ 開始時にのみ次フェーズを予約（cancel→addはサービス側で実施）
-        notificationService.scheduleSessionEndNotification(
-            at: endAt,
-            phase: phase,
-            timeSensitive: true
-        )
+        // 次のセッションの種類に応じて連鎖/冪等予約
+        if isWorkSession {
+            // Work→Rest と Rest→Focus を開始時点で連鎖予約
+            let workEndAt = endAt
+            let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
+            notificationService.scheduleChainedSessionEnds(
+                workEndAt: workEndAt,
+                breakEndAt: breakEndAt,
+                timeSensitive: true
+            )
+        } else {
+            // Break中開始（稀）: Focusのみ冪等予約
+            notificationService.ensureFocusAt(
+                breakEndAt: endAt,
+                timeSensitive: true
+            )
+        }
 
         // Send start pulse
         startPulse.send()
@@ -79,14 +82,21 @@ extension TimerViewModel {
         if timeRemaining > 0 {
             let endAt = dateProvider.now().addingTimeInterval(TimeInterval(timeRemaining))
             sessionManager.setEndAt(endAt)
-            // 次のセッションの種類に基づいて通知フェーズを決定
-            let phase: PomodoroPhase = isWorkSession ? .breakTime : .focus
-        // debug log removed
-            notificationService.rescheduleEnd(
-                at: endAt,
-                phase: phase,
-                timeSensitive: true
-            )
+            // 現在のフェーズに応じて再スケジュール（連鎖/冪等）
+            if isWorkSession {
+                let workEndAt = endAt
+                let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
+                notificationService.scheduleChainedSessionEnds(
+                    workEndAt: workEndAt,
+                    breakEndAt: breakEndAt,
+                    timeSensitive: true
+                )
+            } else {
+                notificationService.ensureFocusAt(
+                    breakEndAt: endAt,
+                    timeSensitive: true
+                )
+            }
         }
     }
 
@@ -137,13 +147,11 @@ extension TimerViewModel {
 
         // 即時通知は送らない（開始時に予約済みのため、完了時は重複を避ける）
 
-        // ★ Work完了直後に、Break終了（= 次のFocus）を絶対時刻で予約
+        // FG冪等: Work完了時に Focusのみを再確認・再予約（BGで既に張られていてもOK）
         if isWorkSession {
             let breakEndAt = dateProvider.now().addingTimeInterval(TimeInterval(breakMinutes * 60))
-        // debug log removed
-            notificationService.scheduleSessionEndNotification(
-                at: breakEndAt,
-                phase: .focus,
+            notificationService.ensureFocusAt(
+                breakEndAt: breakEndAt,
                 timeSensitive: true
             )
         }

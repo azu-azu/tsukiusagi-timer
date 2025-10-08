@@ -6,7 +6,7 @@ import XCTest
 final class SpyNotificationService: PhaseNotificationServiceable {
     enum Call: Equatable {
         case start
-        case scheduleEnd(Int, PomodoroPhase)
+        case schedulePhase(PomodoroPhase)
         case cancelEnd
         case phaseChange(PomodoroPhase)
         case cancelAll
@@ -18,12 +18,25 @@ final class SpyNotificationService: PhaseNotificationServiceable {
     func sendStartNotification() { calls.append(.start) }
     func cancelNotification() { calls.append(.cancelAll) }
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
-        calls.append(.scheduleEnd(seconds, phase))
+        calls.append(.schedulePhase(phase))
     }
     func sendPhaseChangeNotification(for phase: PomodoroPhase) { calls.append(.phaseChange(phase)) }
     func cancelSessionEndNotification() { calls.append(.cancelEnd) }
     func finalizeWorkPhase() { calls.append(.finalizeWork) }
     func finalizeBreakPhase() { calls.append(.finalizeBreak) }
+    func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {
+        calls.append(.schedulePhase(phase))
+    }
+    func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {
+        calls.append(.schedulePhase(phase))
+    }
+    func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {
+        calls.append(.schedulePhase(.breakTime))
+        calls.append(.schedulePhase(.focus))
+    }
+    func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {
+        calls.append(.schedulePhase(.focus))
+    }
 }
 
 final class SpyHistoryService: SessionHistoryServiceable {
@@ -58,7 +71,7 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(spyNotification.calls.count, 2)
         // Find first schedule and first cancel occurrence order (with XCTUnwrap)
         let firstScheduleIndex = try XCTUnwrap(
-            spyNotification.calls.firstIndex { if case .scheduleEnd = $0 { return true } else { return false } },
+            spyNotification.calls.firstIndex { if case .schedulePhase = $0 { return true } else { return false } },
             "scheduleEnd が一度も呼ばれていない"
         )
         let firstCancelIndex = try XCTUnwrap(
@@ -68,11 +81,10 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         XCTAssertLessThan(firstScheduleIndex, firstCancelIndex)
 
         // Validate schedule parameters
-        if case let .scheduleEnd(seconds, phase)? = spyNotification.calls.first(where: {
-            if case .scheduleEnd = $0 { return true } else { return false }
+        if case let .schedulePhase(phase)? = spyNotification.calls.first(where: {
+            if case .schedulePhase = $0 { return true } else { return false }
         }) {
             XCTAssertEqual(phase, .focus)
-            XCTAssertGreaterThan(seconds, 0)
         } else {
             XCTFail("No scheduleEnd call recorded")
         }
@@ -83,11 +95,11 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
             "背景遷移の流れで finalizeBreak は呼ばれないはず"
         )
 
-        // Call count assertion: scheduleEnd should be exactly once in this flow
-        XCTAssertEqual(
-            spyNotification.calls.filter { if case .scheduleEnd = $0 { return true } else { return false } }.count,
+        // Call count assertion: schedule should occur at least once in this flow
+        XCTAssertGreaterThanOrEqual(
+            spyNotification.calls.filter { if case .schedulePhase = $0 { return true } else { return false } }.count,
             1,
-            "scheduleEnd は1回だけのはず"
+            "scheduleEnd は少なくとも1回呼ばれるはず"
         )
     }
 

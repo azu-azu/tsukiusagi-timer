@@ -19,8 +19,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        // 提示直前に、前フェーズ delivered を整頓
-        NotificationManager.shared.clearPreviousPhaseDeliveredForIncoming(identifier: notification.request.identifier)
+        // 提示直前は「前フェーズ delivered のみ」を整理（同フェーズはスケジュール時に整理済み）
+        NotificationManager.shared.clearPreviousPhaseDeliveredOnly(forIncoming: notification.request.identifier)
         // Display the notification as a banner and play a sound (also list + badge)
         completionHandler([.banner, .list, .sound, .badge])
     }
