@@ -234,16 +234,65 @@ struct DailyTimelineView: View {
 
     private struct SummaryCardView: View {
         let summary: DaySummary
+        private let maxDescriptions = 5
 
         var body: some View {
             VStack(alignment: .leading, spacing: 16) {
-                Text(TimeFormatters.totalTextWithSeconds(Int(summary.total)))
+                Text(formattedDuration(summary.total))
                     .font(DesignTokens.Fonts.title)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     .monospacedDigit()
 
-                SummaryRow(label: "Session", value: summary.sessionName ?? "—")
-                SummaryRow(label: "Description", value: summary.description ?? "—")
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Session")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        Text(summary.sessionName ?? "—")
+                            .font(DesignTokens.Fonts.labelBold)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .lineLimit(1)
+                    }
+                    Spacer()
+                    Text(formattedDuration(summary.total))
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        .monospacedDigit()
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Description")
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+
+                    if summary.descriptions.isEmpty {
+                        Text("—")
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    } else {
+                        ForEach(Array(summary.descriptions.prefix(maxDescriptions).enumerated()), id: \.offset) { index, slice in
+                            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                Text(slice.title)
+                                    .font(DesignTokens.Fonts.label)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                    .lineLimit(1)
+                                Spacer()
+                                Text(formattedDuration(slice.duration))
+                                    .font(DesignTokens.Fonts.caption)
+                                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                    .monospacedDigit()
+                            }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("\(slice.title) \(readableDuration(slice.duration))")
+                        }
+
+                        if summary.descriptions.count > maxDescriptions {
+                            Text("+ \(summary.descriptions.count - maxDescriptions) more")
+                                .font(DesignTokens.Fonts.caption)
+                                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        }
+                    }
+                }
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -251,22 +300,27 @@ struct DailyTimelineView: View {
             .cornerRadius(12)
         }
 
-        private struct SummaryRow: View {
-            let label: String
-            let value: String
+        private func formattedDuration(_ interval: TimeInterval) -> String {
+            TimeFormatters.totalTextWithSeconds(Int(interval.rounded()))
+        }
 
-            var body: some View {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(label)
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    Text(value)
-                        .font(DesignTokens.Fonts.labelBold)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                }
+        private func readableDuration(_ interval: TimeInterval) -> String {
+            let seconds = max(0, Int(interval.rounded()))
+            let hours = seconds / 3600
+            let minutes = (seconds % 3600) / 60
+            let secs = seconds % 60
+
+            var parts: [String] = []
+            if hours > 0 {
+                parts.append("\(hours) hours")
             }
+            if minutes > 0 {
+                parts.append("\(minutes) minutes")
+            }
+            if secs > 0 || parts.isEmpty {
+                parts.append("\(secs) seconds")
+            }
+            return parts.joined(separator: " ")
         }
     }
 
@@ -276,7 +330,7 @@ struct DailyTimelineView: View {
         let error: Error?
         let onRetry: () -> Void
 
-        private let placeholderJP = "気づき、学び、感情、次回の方針を書こう…"
+        private let placeholderText = "Capture insights, feelings, and next steps…"
 
         var body: some View {
             VStack(alignment: .leading, spacing: 12) {
@@ -296,7 +350,7 @@ struct DailyTimelineView: View {
                         .accessibilityIdentifier("history_detail_reflection_editor")
 
                     if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Text(placeholderJP)
+                        Text(placeholderText)
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.MoonColors.textMuted)
                             .padding(.horizontal, 18)

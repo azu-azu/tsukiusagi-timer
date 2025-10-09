@@ -98,7 +98,11 @@ final class HistoryReflectionTests: XCTestCase {
 
         let summary = provider.makeDaySummary(historyVM: historyVM, targetDate: baseDay)
         XCTAssertEqual(summary.sessionName, "Work")
-        XCTAssertEqual(summary.description, "Latest")
+        XCTAssertEqual(summary.descriptions.count, 2)
+        XCTAssertEqual(summary.descriptions.first?.title, "Latest")
+        XCTAssertEqual(Int(summary.descriptions.first?.duration ?? 0), 5400)
+        XCTAssertEqual(summary.descriptions.last?.title, "Initial")
+        XCTAssertEqual(Int(summary.descriptions.last?.duration ?? 0), 3600)
         XCTAssertEqual(Int(summary.total), 3600 + 5400 + 1200)
     }
 
