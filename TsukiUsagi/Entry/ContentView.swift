@@ -331,7 +331,7 @@ struct ContentView: View {
                     // History 保存失敗: 非ブロッキングトースト表示
                     .onReceive(
                         NotificationCenter.default.publisher(for: Notification.Name("HistorySaveFailed"))
-                    ) { notif in
+                    ) { _ in
                         historyToastWorkItem?.cancel()
                         historyToastMessage = "Save failed. Retrying…"
                         withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }

@@ -80,7 +80,7 @@ struct TimerEditView: View {
                     .zIndex(1)
 
                     // スクロール可能なコンテンツ
-                    ScrollViewReader { proxy in
+                    ScrollViewReader { _ in
                         ScrollView {
                             VStack(alignment: .leading, spacing: 24) {
                             // Session Label
