@@ -190,9 +190,20 @@ extension TimerViewModel {
         stateManager.resetSessionFinished()
     }
 
-    /// 終了時刻を設定
+    /// 終了時刻を設定（旧API）
+    /// - Warning: UI更新用途では使用しないこと。代わりに applyEditedEndTime(_:) を使用
+    @available(
+        *,
+        deprecated,
+        message: "Use applyEditedEndTime(_:) for UI updates. This method previously updated endAt only."
+    )
     func setEndTime(_ endTime: Date?) {
-        sessionManager.setEndAt(endTime)
+        if let endTime { applyEditedEndTime(endTime) }
+    }
+
+    /// 編集確定後の終了時刻をUIに即時反映（Quiet Moon用のSSOT: endTime を更新）
+    func applyEditedEndTime(_ editedEnd: Date) {
+        sessionManager.overrideEndTime(editedEnd)
     }
 
     /// 時間表示文字列を取得

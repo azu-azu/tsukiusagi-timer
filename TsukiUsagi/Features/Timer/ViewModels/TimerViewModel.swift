@@ -66,11 +66,22 @@ final class TimerViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
+    /// 編集・自然完了いずれでも、開始〜終了の分数を丸め規約に従って算出
+    /// 近似規約: 最近接、ちょうど0.5は切り上げ（ties away from zero）
     var actualSessionMinutes: Int {
-        guard let start = startTime, let end = endTime else { return 1 }
-        let diff = Calendar.current.dateComponents([.minute], from: start, to: end)
-        let minutes = diff.minute ?? 0
-        return max(minutes, 1)
+        guard let start = startTime, let end = endTime else { return 0 }
+        let seconds = end.timeIntervalSince(start)
+        let minutes = (seconds / 60.0).rounded(.toNearestOrAwayFromZero)
+        return max(0, Int(minutes))
+    }
+
+    /// Final表示の単一真実源（hasEndTime）
+    var hasRecordedEndTime: Bool { endTime != nil }
+
+    /// 未来のFinalかどうか（UIバッジ等で利用）
+    var isFutureFinal: Bool {
+        guard let end = endTime else { return false }
+        return end > dateProvider.now()
     }
 
     var workLengthMinutes: Int { workMinutes }

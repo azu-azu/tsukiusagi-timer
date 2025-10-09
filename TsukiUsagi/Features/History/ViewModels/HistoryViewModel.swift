@@ -39,6 +39,9 @@ class HistoryViewModel: ObservableObject {
     @Published var selectedDate: Date = Date()
 
     private let store = HistoryStore() // 下で定義
+    private var saveRetryAttempts: Int = 0
+    private var saveRetryWorkItem: DispatchWorkItem?
+    private let maxRetryAttempts: Int = 5
 
     init() { history = store.load() } // 起動時に読込
 
@@ -219,9 +222,25 @@ class HistoryViewModel: ObservableObject {
 
     // MARK: - Save Operations
 
-    /// 履歴データの永続化（共通処理）
+    /// 履歴データの永続化（共通処理）: 楽観的UI + 失敗時に指数バックオフで自動リトライ
     private func saveHistory() {
-        store.save(history)
+        // 進行中のリトライがあればキャンセルして最新スナップショットを使う
+        saveRetryWorkItem?.cancel()
+        let snapshot = history
+        store.save(snapshot) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                Task { @MainActor in
+                    self.saveRetryAttempts = 0
+                }
+            case .failure(let error):
+                Task { @MainActor in
+                    NotificationCenter.default.post(name: Notification.Name("HistorySaveFailed"), object: error)
+                    self.scheduleHistorySaveRetry()
+                }
+            }
+        }
     }
 
     /// 外部API用の保存メソッド（後方互換性）
@@ -242,4 +261,31 @@ class HistoryViewModel: ObservableObject {
         }
         saveHistory()
     }
+
+    /// UIのCTAから呼ばれる明示的な再試行
+    func retryPendingSave() {
+        saveRetryWorkItem?.cancel()
+        saveRetryAttempts = 0
+        saveHistory()
+    }
+}
+
+// MARK: - Retry helpers
+private extension HistoryViewModel {
+    func scheduleHistorySaveRetry() {
+        guard saveRetryAttempts < maxRetryAttempts else {
+            NotificationCenter.default.post(name: Notification.Name("HistorySaveGaveUp"), object: nil)
+            return
+        }
+        saveRetryAttempts += 1
+        let delay = min(30.0, pow(2.0, Double(saveRetryAttempts - 1))) // 1,2,4,8,16,30cap
+        NotificationCenter.default.post(name: Notification.Name("HistorySaveRetrying"), object: delay)
+
+        let work = DispatchWorkItem { [weak self] in
+            self?.saveHistory()
+        }
+        saveRetryWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+    }
+
 }

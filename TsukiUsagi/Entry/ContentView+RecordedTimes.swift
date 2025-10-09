@@ -7,10 +7,10 @@ extension ContentView {
     struct RecordedTimesLayerParams {
         let isLandscape: Bool
         let safeAreaInsets: EdgeInsets
-        let isSessionFinished: Bool
+        let hasRecordedEndTime: Bool
         let isWorkSession: Bool
-        let formattedStartTime: String
-        let formattedEndTime: String
+        let startTime: Date?
+        let endTime: Date?
         let actualSessionMinutes: Int
         let showingEditRecord: Binding<Bool>
     }
@@ -18,14 +18,16 @@ extension ContentView {
     @ViewBuilder
     func recordedTimesLayer(params: RecordedTimesLayerParams) -> some View {
         // RecordedTimesViewを縦画面時のみfooterBarの直上に追加（位置は従来のまま）
-        if params.isSessionFinished && !params.isWorkSession && !params.isLandscape {
+        if params.hasRecordedEndTime && !params.isWorkSession && !params.isLandscape {
             RecordedTimesView(
-                formattedStartTime: params.formattedStartTime,
-                formattedEndTime: params.formattedEndTime,
+                startTime: params.startTime,
+                endTime: params.endTime,
                 actualSessionMinutes: params.actualSessionMinutes,
                 onEdit: { params.showingEditRecord.wrappedValue = true }
             )
-            .sessionVisibility(isVisible: params.isSessionFinished)
+            // Final time の更新で確実に再構築させる（分表示も含めて）
+            .id("recorded-\(Int(params.endTime?.timeIntervalSince1970 ?? 0))-\(params.actualSessionMinutes)")
+            .sessionVisibility(isVisible: params.hasRecordedEndTime)
             .padding(.bottom, AppConstants.footerBarHeight +
                     params.safeAreaInsets.bottom + AppConstants.recordedTimesBottomSpacing)
             .zIndex(AppConstants.overlayZIndex)

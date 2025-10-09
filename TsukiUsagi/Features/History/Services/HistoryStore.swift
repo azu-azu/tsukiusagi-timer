@@ -25,7 +25,8 @@ struct HistoryStore {
 
     // MARK: - Save
 
-    func save(_ data: [SessionRecord]) {
+    /// 非同期に保存し、結果をコールバックで返す
+    func save(_ data: [SessionRecord], completion: ((Result<Void, Error>) -> Void)? = nil) {
         do {
             let encoded = try encoder.encode(data)
             let fileURL = url // capture value for thread safety
@@ -36,16 +37,19 @@ struct HistoryStore {
                         to: fileURL,
                         options: [.atomic, .completeFileProtectionUnlessOpen]
                     )
+                    completion?(.success(()))
                 } catch {
                     #if DEBUG
-                    print("HistoryStore save failed:", error)
+                    print("[history_save_failed] HistoryStore save failed:", error)
                     #endif
+                    completion?(.failure(error))
                 }
             }
         } catch {
             #if DEBUG
-            print("HistoryStore encoding failed:", error)
+            print("[history_save_failed] HistoryStore encoding failed:", error)
             #endif
+            completion?(.failure(error))
         }
     }
 
