@@ -32,8 +32,8 @@ struct PreviewData {
             start: Date().addingTimeInterval(-3600),
             end: Date(),
             phase: .focus,
-            activity: "Preview Work",
-            subtitle: "Sample session",
+            sessionName: "Preview Work",
+            description: "Sample session",
             memo: "This is a preview memo",
             completedSilently: false
         )
@@ -43,8 +43,8 @@ struct PreviewData {
             start: Date().addingTimeInterval(-7200),
             end: Date().addingTimeInterval(-3600),
             phase: .focus,
-            activity: "Preview Study",
-            subtitle: "Another sample",
+            sessionName: "Preview Study",
+            description: "Another sample",
             memo: nil,
             completedSilently: false
         )
@@ -216,8 +216,8 @@ struct PreviewData {
             start: Date().addingTimeInterval(-3600),
             end: Date(),
             phase: .focus,
-            activity: "Work",
-            subtitle: "Professional tasks",
+            sessionName: "Work",
+            description: "Professional tasks",
             memo: "Completed the main project milestone"
         ),
         SessionRecord(
@@ -225,8 +225,8 @@ struct PreviewData {
             start: Date().addingTimeInterval(-7200),
             end: Date().addingTimeInterval(-3600),
             phase: .focus,
-            activity: "Study",
-            subtitle: "Learning activities",
+            sessionName: "Study",
+            description: "Learning activities",
             memo: "Reviewed SwiftUI documentation"
         ),
         SessionRecord(
@@ -234,8 +234,8 @@ struct PreviewData {
             start: Date().addingTimeInterval(-10800),
             end: Date().addingTimeInterval(-7200),
             phase: .focus,
-            activity: "Read",
-            subtitle: "Reading time",
+            sessionName: "Read",
+            description: "Reading time",
             memo: "Finished chapter 5 of the book"
         )
     ]

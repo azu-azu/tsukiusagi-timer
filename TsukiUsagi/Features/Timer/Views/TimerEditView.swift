@@ -216,8 +216,8 @@ struct TimerEditView: View {
                 if let last = historyVM.history.last {
                     editedEnd = last.end
                     minEnd = last.start
-                    editedActivity = last.activity
-                    editedSubtitle = last.subtitle ?? ""
+                    editedActivity = last.sessionName
+                    editedSubtitle = last.description ?? ""
                     editedMemo = last.memo ?? ""
                 } else {
                     // フォールバック（念のため）
@@ -246,8 +246,8 @@ struct TimerEditView: View {
                 if let last = historyVM.history.last {
                     editedEnd = last.end
                     minEnd = last.start
-                    editedActivity = last.activity
-                    editedSubtitle = last.subtitle ?? ""
+                    editedActivity = last.sessionName
+                    editedSubtitle = last.description ?? ""
                     editedMemo = last.memo ?? ""
                 } else {
                     editedEnd = timerVM.endTime ?? Date()
@@ -268,9 +268,9 @@ struct TimerEditView: View {
 private extension TimerEditView {
     var isNoChanges: Bool {
         // 比較元も履歴の最後のレコードを参照（なければVMの値でフォールバック）
-        let originalActivity = historyVM.history.last?.activity
+        let originalActivity = historyVM.history.last?.sessionName
             ?? (timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel)
-        let originalSubtitle = historyVM.history.last?.subtitle
+        let originalSubtitle = historyVM.history.last?.description
             ?? timerVM.subtitleLabel
         let originalMemo = historyVM.history.last?.memo ?? ""
         let originalEnd = historyVM.history.last?.end ?? (timerVM.endTime ?? Date())

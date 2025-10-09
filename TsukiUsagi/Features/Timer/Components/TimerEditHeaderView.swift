@@ -34,8 +34,8 @@ struct TimerEditHeaderView: View {
                     dismiss: dismiss,
                     onSave: {
                         historyVM.updateLast(
-                            activity: editedActivity,
-                            subtitle: editedSubtitle,
+                            sessionName: editedActivity,
+                            description: editedSubtitle,
                             memo: editedMemo,
                             end: editedEnd
                         )
@@ -148,6 +148,6 @@ private class DummyFormatter: TimeFormatterUtilable {
 }
 
 private class DummyHistoryViewModel: ObservableObject {
-    func updateLast(activity: String, subtitle: String, memo: String, end: Date) {}
+    func updateLast(sessionName: String, description: String, memo: String, end: Date) {}
 }
 #endif

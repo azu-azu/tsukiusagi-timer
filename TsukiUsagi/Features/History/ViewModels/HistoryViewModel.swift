@@ -6,14 +6,34 @@ struct SessionRecord: Codable, Identifiable {
     var id: String // UUID から String に変更（固定値）
     var start, end: Date
     var phase: PomodoroPhase
-    var activity: String // 上位
-    var subtitle: String? // 下位
-    var memo: String? // ←★ new
+    var sessionName: String // 上位
+    var description: String? // 下位
+    var memo: String? // ←★ legacy memo
     // 静かな完了（通知を出さず復帰時に確定）
     var completedSilently: Bool?
 
     // 履歴行のduration（秒）
     var duration: TimeInterval { end.timeIntervalSince(start) }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, start, end, phase, memo, completedSilently
+        case sessionName = "activity"
+        case description = "subtitle"
+    }
+
+    // MARK: - Legacy accessors (temporary)
+
+    @available(*, deprecated, message: "Use sessionName instead of activity")
+    var activity: String {
+        get { sessionName }
+        set { sessionName = newValue }
+    }
+
+    @available(*, deprecated, message: "Use description instead of subtitle")
+    var subtitle: String? {
+        get { description }
+        set { description = newValue }
+    }
 }
 
 // MARK: - Add Session Parameters
@@ -21,8 +41,8 @@ struct AddSessionParameters {
     let start: Date
     let end: Date
     let phase: PomodoroPhase
-    let activity: String
-    let subtitle: String?
+    let sessionName: String
+    let description: String?
     let memo: String?
     let completedSilently: Bool
 }
@@ -33,17 +53,27 @@ struct AddSessionParameters {
 @MainActor
 class HistoryViewModel: ObservableObject {
     @Published private(set) var history: [SessionRecord] = []
+    @Published private(set) var reflectionsByDay: [Date: DayReflection] = [:]
+    @Published private(set) var isSavingReflections = false
+    @Published private(set) var reflectionSaveError: Error?
 
     // ✅ カレンダー機能用の新規追加
     @Published private(set) var fixedDate: Date?
     @Published var selectedDate: Date = Date()
 
-    private let store = HistoryStore() // 下で定義
+    private let store: HistoryStore // 下で定義
+    private var migrationVersion: Int = 1
     private var saveRetryAttempts: Int = 0
     private var saveRetryWorkItem: DispatchWorkItem?
     private let maxRetryAttempts: Int = 5
 
-    init() { history = store.load() } // 起動時に読込
+    init(store: HistoryStore = HistoryStore()) {
+        self.store = store
+        let snapshot = store.load()
+        history = snapshot.sessions
+        reflectionsByDay = snapshot.reflections
+        migrationVersion = snapshot.migrationVersion
+    } // 起動時に読込
 
     func add(parameters: AddSessionParameters) {
         guard parameters.phase == .focus else { return } // ← 休憩は記録しない
@@ -59,8 +89,8 @@ class HistoryViewModel: ObservableObject {
             start: parameters.start,
             end: parameters.end,
             phase: parameters.phase,
-            activity: parameters.activity,
-            subtitle: parameters.subtitle,
+            sessionName: parameters.sessionName,
+            description: parameters.description,
             memo: parameters.memo,
             completedSilently: parameters.completedSilently
         )
@@ -71,21 +101,31 @@ class HistoryViewModel: ObservableObject {
 
     // MARK: - isDeleted判定
 
-    func isDeleted(sessionManager: SessionManager, activity: String) -> Bool {
-        !sessionManager.allEntries.contains(where: { $0.sessionName == activity })
+    func isDeleted(sessionManager: SessionManager, sessionName: String) -> Bool {
+        !sessionManager.allEntries.contains(where: { $0.sessionName == sessionName })
     }
 
     // (Deleted)表記付きアクティビティ名
+    func displaySessionName(sessionManager: SessionManager, sessionName: String) -> String {
+        isDeleted(sessionManager: sessionManager, sessionName: sessionName) ? "\(sessionName) (Deleted)" : sessionName
+    }
+
+    @available(*, deprecated, message: "Use isDeleted(sessionManager:sessionName:) instead")
+    func isDeleted(sessionManager: SessionManager, activity: String) -> Bool {
+        isDeleted(sessionManager: sessionManager, sessionName: activity)
+    }
+
+    @available(*, deprecated, message: "Use displaySessionName(sessionManager:sessionName:) instead")
     func displayActivity(sessionManager: SessionManager, activity: String) -> String {
-        isDeleted(sessionManager: sessionManager, activity: activity) ? "\(activity) (Deleted)" : activity
+        displaySessionName(sessionManager: sessionManager, sessionName: activity)
     }
 
     // 復元処理
     func restore(record: SessionRecord, sessionManager: SessionManager) throws {
         try sessionManager.addOrUpdateEntry(
             originalKey: "",
-            sessionName: record.activity,
-            descriptions: record.subtitle != nil ? [record.subtitle!] : []
+            sessionName: record.sessionName,
+            descriptions: record.description != nil ? [record.description!] : []
         )
         // 復元後、ViewでisDeletedを再判定すること
     }
@@ -137,7 +177,7 @@ class HistoryViewModel: ObservableObject {
         }
 
         let activities = Dictionary(grouping: daySessions) { record in
-            record.activity // 既存のactivityプロパティを直接使用
+            record.sessionName
         }.mapValues { sessions in
             sessions.reduce(0) { total, record in
                 total + calendarDurationMinutes(record)
@@ -165,8 +205,8 @@ class HistoryViewModel: ObservableObject {
         // 全アクティビティを集計
         var allActivities: [String: Int] = [:]
         for daily in values {
-            for (activity, minutes) in daily.activities {
-                allActivities[activity, default: 0] += minutes
+            for (sessionName, minutes) in daily.activities {
+                allActivities[sessionName, default: 0] += minutes
             }
         }
 
@@ -220,24 +260,81 @@ class HistoryViewModel: ObservableObject {
         saveHistory()
     }
 
+    // MARK: - Reflection Operations
+
+    func reflectionText(for date: Date) -> String {
+        reflectionsByDay[HistoryDateKey.dayKey(for: date)]?.text ?? ""
+    }
+
+    func reflection(for date: Date) -> DayReflection? {
+        reflectionsByDay[HistoryDateKey.dayKey(for: date)]
+    }
+
+    func updateReflection(for date: Date, text: String) {
+        let key = HistoryDateKey.dayKey(for: date)
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if trimmed.isEmpty {
+            if reflectionsByDay.removeValue(forKey: key) != nil {
+                isSavingReflections = true
+                saveHistory()
+            }
+            return
+        }
+
+        var reflection = reflectionsByDay[key] ?? DayReflection(
+            date: key,
+            text: "",
+            lastUpdatedAt: Date(),
+            isPendingSave: false
+        )
+
+        if reflection.text == trimmed {
+            return
+        }
+
+        reflection.text = trimmed
+        reflection.lastUpdatedAt = Date()
+        reflection.isPendingSave = true
+        reflectionsByDay[key] = reflection
+        isSavingReflections = true
+        saveHistory()
+    }
+
+    func retrySaveReflection() {
+        reflectionSaveError = nil
+        retryPendingSave()
+    }
+
     // MARK: - Save Operations
 
     /// 履歴データの永続化（共通処理）: 楽観的UI + 失敗時に指数バックオフで自動リトライ
     private func saveHistory() {
         // 進行中のリトライがあればキャンセルして最新スナップショットを使う
         saveRetryWorkItem?.cancel()
-        let snapshot = history
+        let snapshotReflections = reflectionsByDay
+        let snapshot = HistorySnapshot(
+            migrationVersion: max(migrationVersion, 1),
+            sessions: history,
+            reflections: snapshotReflections
+        )
         store.save(snapshot) { [weak self] result in
             guard let self else { return }
             switch result {
             case .success:
                 Task { @MainActor in
                     self.saveRetryAttempts = 0
+                    self.migrationVersion = max(self.migrationVersion, 1)
+                    self.markReflectionsAsSaved(snapshotReflections)
+                    self.isSavingReflections = self.reflectionsByDay.values.contains { $0.isPendingSave }
+                    self.reflectionSaveError = nil
                 }
             case .failure(let error):
                 Task { @MainActor in
+                    self.reflectionSaveError = error
                     NotificationCenter.default.post(name: Notification.Name("HistorySaveFailed"), object: error)
                     self.scheduleHistorySaveRetry()
+                    self.isSavingReflections = self.reflectionsByDay.values.contains { $0.isPendingSave }
                 }
             }
         }
@@ -248,13 +345,13 @@ class HistoryViewModel: ObservableObject {
         saveHistory()
     }
 
-    func updateLast(activity: String,
-                    subtitle: String,
+    func updateLast(sessionName: String,
+                    description: String,
                     memo: String,
                     end: Date? = nil) {
         guard let i = history.indices.last else { return }
-        history[i].activity = activity
-        history[i].subtitle = subtitle
+        history[i].sessionName = sessionName
+        history[i].description = description
         history[i].memo = memo
         if let end = end {
             history[i].end = end
@@ -272,6 +369,20 @@ class HistoryViewModel: ObservableObject {
 
 // MARK: - Retry helpers
 private extension HistoryViewModel {
+    func markReflectionsAsSaved(_ snapshotReflections: [Date: DayReflection]) {
+        var updated = reflectionsByDay
+        for (date, reflection) in snapshotReflections where reflection.isPendingSave {
+            guard let current = updated[date],
+                current.lastUpdatedAt == reflection.lastUpdatedAt else {
+                continue
+            }
+            var saved = current
+            saved.isPendingSave = false
+            updated[date] = saved
+        }
+        reflectionsByDay = updated
+    }
+
     func scheduleHistorySaveRetry() {
         guard saveRetryAttempts < maxRetryAttempts else {
             NotificationCenter.default.post(name: Notification.Name("HistorySaveGaveUp"), object: nil)

@@ -46,26 +46,26 @@ final class DailyTimelineViewModel: ObservableObject {
         return Int(rec.end.timeIntervalSince(rec.start))
     }
 
-    /// アクティビティ別集計
+    /// セッション別集計
     func byActivity(historyVM: HistoryViewModel) -> [LabelSummary] {
         let records = records(historyVM: historyVM)
-        let grouped = Dictionary(grouping: records) { $0.activity }
-        return grouped.map { activity, records in
+        let grouped = Dictionary(grouping: records) { $0.sessionName }
+        return grouped.map { sessionName, records in
             let totalSeconds = records.reduce(0) { $0 + durationSeconds($1) }
             let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
-            return LabelSummary(label: activity, count: records.count, totalMinutes: totalMinutes)
+            return LabelSummary(label: sessionName, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }
 
-    /// サブタイトル別集計
+    /// 説明別集計
     func bySubtitle(historyVM: HistoryViewModel) -> [LabelSummary] {
         let records = records(historyVM: historyVM)
-        let grouped = Dictionary(grouping: records) { $0.subtitle ?? "" }
-        return grouped.compactMap { subtitle, records in
-            guard !subtitle.isEmpty else { return nil }
+        let grouped = Dictionary(grouping: records) { $0.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "" }
+        return grouped.compactMap { description, records in
+            guard !description.isEmpty else { return nil }
             let totalSeconds = records.reduce(0) { $0 + durationSeconds($1) }
             let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
-            return LabelSummary(label: subtitle, count: records.count, totalMinutes: totalMinutes)
+            return LabelSummary(label: description, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }
 

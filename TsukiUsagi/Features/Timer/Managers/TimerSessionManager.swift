@@ -61,8 +61,8 @@ final class TimerSessionManager: ObservableObject {
             start: startTime,
             end: endTime!,
             phase: isWorkSession ? .focus : .breakTime,
-            activity: activityLabel,
-            subtitle: subtitleLabel,
+            sessionName: activityLabel,
+            description: subtitleLabel,
             memo: memo,
             completedSilently: completedSilently
         )
@@ -115,8 +115,8 @@ final class TimerSessionManager: ObservableObject {
             start: startTime ?? end,
             end: end,
             phase: isWorkSession ? .focus : .breakTime,
-            activity: activityLabel,
-            subtitle: subtitleLabel,
+            sessionName: activityLabel,
+            description: subtitleLabel,
             memo: nil,
             completedSilently: completedSilently
         )
