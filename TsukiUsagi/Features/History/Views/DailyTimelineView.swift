@@ -238,11 +238,6 @@ struct DailyTimelineView: View {
 
         var body: some View {
             VStack(alignment: .leading, spacing: 16) {
-                Text(formattedDuration(summary.total))
-                    .font(DesignTokens.Fonts.title)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                    .monospacedDigit()
-
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Session")
@@ -254,7 +249,7 @@ struct DailyTimelineView: View {
                             .lineLimit(1)
                     }
                     Spacer()
-                    Text(formattedDuration(summary.total))
+                    Text(sessionDurationText)
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
                         .monospacedDigit()
@@ -300,8 +295,9 @@ struct DailyTimelineView: View {
             .cornerRadius(12)
         }
 
-        private func formattedDuration(_ interval: TimeInterval) -> String {
-            TimeFormatters.totalTextWithSeconds(Int(interval.rounded()))
+        private var sessionDurationText: String {
+            guard summary.sessionDuration > 0 else { return "—" }
+            return formattedDuration(summary.sessionDuration)
         }
 
         private func readableDuration(_ interval: TimeInterval) -> String {
@@ -321,6 +317,10 @@ struct DailyTimelineView: View {
                 parts.append("\(secs) seconds")
             }
             return parts.joined(separator: " ")
+        }
+
+        private func formattedDuration(_ interval: TimeInterval) -> String {
+            TimeFormatters.totalTextWithSeconds(Int(interval.rounded()))
         }
     }
 
