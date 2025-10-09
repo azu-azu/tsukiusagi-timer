@@ -151,7 +151,8 @@ struct MainPanel: View {
                             )
                             // Final time の更新で確実に再構築させる（分表示も含めて）
                             .id(
-                                "recorded-\(Int(timerVM.endTime?.timeIntervalSince1970 ?? 0))-\(timerVM.actualSessionMinutes)"
+                                "recorded-\(Int(timerVM.endTime?.timeIntervalSince1970 ?? 0))-" +
+                                "\(timerVM.actualSessionMinutes)"
                             )
                             .sessionVisibility(isVisible: timerVM.hasRecordedEndTime)
                             .sessionEndTransition(timerVM)
