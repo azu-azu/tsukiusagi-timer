@@ -27,24 +27,44 @@ struct TimerEditHeaderView: View {
     }
 
     var body: some View {
-        CommonHeaderView(
-            configuration: .cancelSave(
-                title: "Edit Record",
-                dismiss: dismiss,
-                onSave: {
-                    historyVM.updateLast(
-                        activity: editedActivity,
-                        subtitle: editedSubtitle,
-                        memo: editedMemo,
-                        end: editedEnd
-                    )
-                    timerVM.setEndTime(editedEnd)
-                    // 保存完了通知を投げて、呼び出し側で閉じる＋HUD表示などを行う
-                    NotificationCenter.default.post(name: Notification.Name("TimerEditSaved"), object: nil)
-                },
-                isSaveDisabled: shouldDisableSave() || isSaveDisabledExtra
+        VStack(spacing: 8) {
+            CommonHeaderView(
+                configuration: .cancelSave(
+                    title: "Edit Record",
+                    dismiss: dismiss,
+                    onSave: {
+                        historyVM.updateLast(
+                            activity: editedActivity,
+                            subtitle: editedSubtitle,
+                            memo: editedMemo,
+                            end: editedEnd
+                        )
+                        // UI即時反映（Quiet Moon / RecordedTimesView）
+                        timerVM.applyEditedEndTime(editedEnd)
+                        // 保存完了通知を投げて、呼び出し側で閉じる＋HUD表示などを行う
+                        NotificationCenter.default.post(name: Notification.Name("TimerEditSaved"), object: nil)
+                    },
+                    isSaveDisabled: shouldDisableSave() || isSaveDisabledExtra
+                )
             )
-        )
+
+            // 明示的な Reset アクション（自動スクロール/自動戻しは廃止）
+            HStack {
+                Spacer()
+                Button {
+                    NotificationCenter.default.post(name: Notification.Name("TimerEditReset"), object: nil)
+                } label: {
+                    Label("Reset", systemImage: "arrow.uturn.left")
+                        .labelStyle(.titleAndIcon)
+                }
+                .buttonStyle(.bordered)
+                .tint(.gray)
+                .accessibilityIdentifier("resetEditedRecordButton")
+                .accessibilityLabel("Reset to original")
+                .accessibilityHint("Restore the record to its original values")
+            }
+            .padding(.horizontal)
+        }
         .debugComponent("TimerEditHeaderView", position: .topLeading)
     }
 }

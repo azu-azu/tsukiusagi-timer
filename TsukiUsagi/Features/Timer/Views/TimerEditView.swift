@@ -161,20 +161,6 @@ struct TimerEditView: View {
                             // 下端の余白は safeAreaInset で作るのが安定
                             Color.clear.frame(height: bottomInsetForSafeArea)
                         }
-                        // 発火タイミングは bottom inset 更新に寄せる（多重発火を抑制）
-                        .onChange(of: keyboardBottomInset) { _, _ in
-                            guard isKeyboardVisible, isMemoFocused, !isAutoScrolling else { return }
-                            isAutoScrolling = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-                                withAnimation(.easeOut(duration: 0.22)) {
-                                    proxy.scrollTo(SectionID.memoAnchor, anchor: .bottom)
-                                }
-                                // スロットル
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
-                                    isAutoScrolling = false
-                                }
-                            }
-                        }
                     }
                 }
                 // 角丸クリップを外し、シートの下地色が見えないようにする
@@ -245,18 +231,32 @@ struct TimerEditView: View {
             // 保存系のアクションはヘッダー内のボタンで行われる想定
             // 保存成功時のフィードバックと閉じ処理を注入
             .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
-                // 保存後のレイアウト変化中にスクロールが走らないようフラグを一時的に立てる
-                isAutoScrolling = true
                 HapticManager.shared.buttonTapFeedback()
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                // 微遅延で閉じる（0.1s）し、フラグはさらに後で解除
+                // 微遅延で閉じる（0.1s）
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
                     dismiss()
                     UIAccessibility.post(notification: .announcement, argument: "Saved")
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.40) {
-                    isAutoScrolling = false
+            }
+            // Reset通知を受けて元の値に戻す（UIはWYSIWYGで即時反映）
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditReset"))) { _ in
+                HapticManager.shared.buttonTapFeedback()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                if let last = historyVM.history.last {
+                    editedEnd = last.end
+                    minEnd = last.start
+                    editedActivity = last.activity
+                    editedSubtitle = last.subtitle ?? ""
+                    editedMemo = last.memo ?? ""
+                } else {
+                    editedEnd = timerVM.endTime ?? Date()
+                    minEnd = timerVM.startTime ?? Date()
+                    editedActivity = timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel
+                    editedSubtitle = timerVM.subtitleLabel
+                    editedMemo = ""
                 }
+                UIAccessibility.post(notification: .announcement, argument: "Reset to original")
             }
         }
     }

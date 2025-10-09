@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct RecordedTimesView: View {
-    let formattedStartTime: String
-    let formattedEndTime: String
+    let startTime: Date?
+    let endTime: Date?
     let actualSessionMinutes: Int
     let onEdit: () -> Void
 
@@ -11,12 +11,29 @@ struct RecordedTimesView: View {
             VStack(spacing: 4) {
                 // 上２行：中央
                 VStack(spacing: 4) {
-                    Text("Start 🌕 \(formattedStartTime)")
-                    Text("Final 🌑 \(formattedEndTime)")
+                    Text("Start 🌕 \(TimeFormatters.formatTime(date: startTime))")
+                        .accessibilityIdentifier("startLabel")
+                    Text("Final 🌑 \(TimeFormatters.formatTime(date: endTime))")
+                        .accessibilityIdentifier("finalLabel")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
+            }
+
+            // 未来Finalバッジ（endTime が未来の場合に表示）
+            if let end = endTime, end > Date() {
+                Text("Future")
+                    .font(DesignTokens.Fonts.caption)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(DesignTokens.CosmosColors.cardBackground)
+                    .overlay(
+                        Capsule().stroke(DesignTokens.WhiteColors.stroke, lineWidth: 1)
+                    )
+                    .clipShape(Capsule())
+                    .accessibilityIdentifier("futureFinalBadge")
             }
 
             // ３行目の分数表示
@@ -25,6 +42,7 @@ struct RecordedTimesView: View {
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 .frame(maxWidth: 110)
+                .accessibilityIdentifier("finalMinutesLabel")
 
             // ✏️
             HStack {

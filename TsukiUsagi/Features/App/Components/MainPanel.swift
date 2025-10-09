@@ -144,12 +144,14 @@ struct MainPanel: View {
                         VStack {
                             Spacer()
                             RecordedTimesView(
-                                formattedStartTime: TimeFormatters.formatTime(date: timerVM.startTime),
-                                formattedEndTime: TimeFormatters.formatTime(date: timerVM.endTime),
+                                startTime: timerVM.startTime,
+                                endTime: timerVM.endTime,
                                 actualSessionMinutes: timerVM.actualSessionMinutes,
                                 onEdit: { showingEditRecord = true }
                             )
-                            .sessionVisibility(isVisible: timerVM.isSessionFinished)
+                            // Final time の更新で確実に再構築させる（分表示も含めて）
+                            .id("recorded-\(Int(timerVM.endTime?.timeIntervalSince1970 ?? 0))-\(timerVM.actualSessionMinutes)")
+                            .sessionVisibility(isVisible: timerVM.hasRecordedEndTime)
                             .sessionEndTransition(timerVM)
                             Spacer()
                         }

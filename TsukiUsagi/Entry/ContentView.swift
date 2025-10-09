@@ -21,8 +21,14 @@ struct ContentView: View {
     @State private var today = Date()
     @State private var showSavedToast = false
     @State private var savedToastWorkItem: DispatchWorkItem?
+    // History save retry UI
+    @State private var showHistoryToast = false
+    @State private var historyToastMessage = ""
+    @State private var historyToastWorkItem: DispatchWorkItem?
+    @State private var showHistorySaveBanner = false
     @State private var showSilentCompleteChip = false
     @State private var silentCompleteWorkItem: DispatchWorkItem?
+    @State private var recordedTimesNonce = UUID()
 
     private let moonTitle = "Centered"
 
@@ -104,13 +110,14 @@ struct ContentView: View {
                         recordedTimesLayer(params: ContentView.RecordedTimesLayerParams(
                             isLandscape: isLandscape,
                             safeAreaInsets: safeAreaInsets,
-                            isSessionFinished: timerVM.isSessionFinished,
+                            hasRecordedEndTime: timerVM.hasRecordedEndTime,
                             isWorkSession: timerVM.isWorkSession,
-                            formattedStartTime: TimeFormatters.formatTime(date: timerVM.startTime),
-                            formattedEndTime: TimeFormatters.formatTime(date: timerVM.endTime),
+                            startTime: timerVM.startTime,
+                            endTime: timerVM.endTime,
                             actualSessionMinutes: timerVM.actualSessionMinutes,
                             showingEditRecord: $showingEditRecord
                         ))
+                        .id("recorded-layer-\(recordedTimesNonce)")
 
                         // ダイヤモンドスター
                         if showDiamondStars {
@@ -136,6 +143,7 @@ struct ContentView: View {
                                     .font(DesignTokens.Fonts.label)
                                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                             }
+                            .accessibilityIdentifier("savedToast")
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
                             .background(DesignTokens.CosmosColors.cardBackground)
@@ -149,6 +157,68 @@ struct ContentView: View {
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                             .zIndex(3000)
                             .allowsHitTesting(false)
+                        }
+
+                        // History 保存リトライ用の非ブロッキングトースト
+                        if showHistoryToast {
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(DesignTokens.Fonts.symbolMedium)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                Text(historyToastMessage)
+                                    .font(DesignTokens.Fonts.label)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            }
+                            .accessibilityIdentifier("historySaveToast")
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(DesignTokens.CosmosColors.cardBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(DesignTokens.WhiteColors.stroke)
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 64)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .zIndex(3001)
+                            .allowsHitTesting(false)
+                        }
+
+                        // History 保存あきらめバナー（CTAつき、非ブロッキング）
+                        if showHistorySaveBanner {
+                            HStack(spacing: 12) {
+                                Image(systemName: "icloud.slash")
+                                    .font(DesignTokens.Fonts.symbolMedium)
+                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Couldn’t save history")
+                                        .font(DesignTokens.Fonts.label)
+                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                    Text("You can retry in background.")
+                                        .font(DesignTokens.Fonts.caption)
+                                        .foregroundColor(DesignTokens.MoonColors.textPrimary.opacity(0.8))
+                                }
+                                Spacer()
+                                Button("Retry") {
+                                    historyVM.retryPendingSave()
+                                }
+                                .accessibilityIdentifier("historySaveRetryButton")
+                                .buttonStyle(.bordered)
+                            }
+                            .accessibilityIdentifier("historySaveBanner")
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(DesignTokens.CosmosColors.cardBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(DesignTokens.WhiteColors.stroke)
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .zIndex(3002)
                         }
 
                         // 静かな完了チップ（通知OFFでも“終わってた”を軽く示す）
@@ -250,11 +320,45 @@ struct ContentView: View {
                         // 既存の消去予約をキャンセルして、表示時間をリセット
                         savedToastWorkItem?.cancel()
                         withAnimation(.easeInOut(duration: 0.2)) { showSavedToast = true }
+                        // Quiet Moonの記録表示を確実に再構築
+                        recordedTimesNonce = UUID()
                         let work = DispatchWorkItem {
                             withAnimation(.easeInOut(duration: 0.3)) { showSavedToast = false }
                         }
                         savedToastWorkItem = work
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+                    }
+                    // History 保存失敗: 非ブロッキングトースト表示
+                    .onReceive(
+                        NotificationCenter.default.publisher(for: Notification.Name("HistorySaveFailed"))
+                    ) { notif in
+                        historyToastWorkItem?.cancel()
+                        historyToastMessage = "Save failed. Retrying…"
+                        withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
+                        let work = DispatchWorkItem {
+                            withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
+                        }
+                        historyToastWorkItem = work
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+                    }
+                    // History 保存リトライ: 次回リトライまでの秒数を表示
+                    .onReceive(
+                        NotificationCenter.default.publisher(for: Notification.Name("HistorySaveRetrying"))
+                    ) { notif in
+                        guard let delay = notif.object as? Double else { return }
+                        historyToastWorkItem?.cancel()
+                        historyToastMessage = String(format: "Retrying in %.0fs…", delay)
+                        withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
+                        let work = DispatchWorkItem {
+                            withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
+                        }
+                        historyToastWorkItem = work
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.3, execute: work)
+                    }
+                    // History 保存断念: CTA付きバナー表示
+                    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("HistorySaveGaveUp"))) { _ in
+                        withAnimation(.easeInOut(duration: 0.2)) { showHistorySaveBanner = true }
+                        // 自動では消さない（ユーザーがRetryまたはスクロール等で自然に消える運用でもOK）
                     }
                     // 復帰直後の“静かな完了”を軽く表示（ワンショット）
                     .onReceive(
@@ -269,6 +373,10 @@ struct ContentView: View {
                         }
                         silentCompleteWorkItem = work
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: work)
+                    }
+                    // Final Time 変更でレイヤーを確実に再構築
+                    .onChange(of: timerVM.endTime) { _, _ in
+                        recordedTimesNonce = UUID()
                     }
                     // SessionManagerからのサイドメニュー開きリクエストを監視
                     .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
