@@ -73,7 +73,7 @@ struct DailyTimelineDataProvider {
     func makeDaySummary(historyVM: HistoryViewModel, targetDate: Date) -> DaySummary {
         let dayRecords = records(historyVM: historyVM, targetDate: targetDate)
         guard !dayRecords.isEmpty else {
-            return DaySummary(total: 0, sessionName: nil, description: nil)
+            return DaySummary(total: 0, sessionName: nil, descriptions: [])
         }
 
         let totalDuration = dayRecords.reduce(0) { $0 + $1.duration }
@@ -91,29 +91,31 @@ struct DailyTimelineDataProvider {
 
         let dominantName = dominantSessions.first?.sessionName
 
-        let latestNonEmptyDescription = dominantSessions
-            .sorted { $0.end > $1.end }
-            .compactMap { ($0.description).trimmedNonEmpty }
-            .first
-
-        let mostFrequentDescription = dominantSessions
-            .compactMap { ($0.description).trimmedNonEmpty }
-            .mostFrequent()
-
-        let description = latestNonEmptyDescription ?? mostFrequentDescription
+        let descriptions = Dictionary(grouping: dominantSessions) { ($0.description).trimmedNonEmpty ?? "" }
+            .compactMap { key, sessions -> DescSlice? in
+                guard !key.isEmpty else { return nil }
+                let duration = sessions.reduce(0) { $0 + $1.duration }
+                return DescSlice(title: key, duration: duration)
+            }
+            .sorted { $0.duration > $1.duration }
 
         return DaySummary(
             total: totalDuration,
             sessionName: dominantName,
-            description: description
+            descriptions: descriptions
         )
     }
+}
+
+struct DescSlice: Hashable {
+    let title: String
+    let duration: TimeInterval
 }
 
 struct DaySummary {
     let total: TimeInterval
     let sessionName: String?
-    let description: String?
+    let descriptions: [DescSlice]
 }
 
 // MARK: - Helpers

@@ -16,7 +16,7 @@ final class HistoryDetailViewModel: ObservableObject {
 
     init(targetDate: Date) {
         self.targetDate = targetDate
-        self.summary = DaySummary(total: 0, sessionName: nil, description: nil)
+        self.summary = DaySummary(total: 0, sessionName: nil, descriptions: [])
     }
 
     func attach(historyViewModel: HistoryViewModel) {
