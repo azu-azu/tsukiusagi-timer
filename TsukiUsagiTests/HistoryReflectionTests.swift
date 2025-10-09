@@ -103,6 +103,7 @@ final class HistoryReflectionTests: XCTestCase {
         XCTAssertEqual(Int(summary.descriptions.first?.duration ?? 0), 5400)
         XCTAssertEqual(summary.descriptions.last?.title, "Initial")
         XCTAssertEqual(Int(summary.descriptions.last?.duration ?? 0), 3600)
+        XCTAssertEqual(Int(summary.sessionDuration), 3600 + 5400)
         XCTAssertEqual(Int(summary.total), 3600 + 5400 + 1200)
     }
 

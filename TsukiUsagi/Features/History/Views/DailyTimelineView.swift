@@ -238,16 +238,15 @@ struct DailyTimelineView: View {
 
         var body: some View {
             VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Session")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        Text(summary.sessionName ?? "—")
-                            .font(DesignTokens.Fonts.labelBold)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            .lineLimit(1)
-                    }
+                Text("Session")
+                    .font(DesignTokens.Fonts.caption)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Text(summary.sessionName ?? "—")
+                        .font(DesignTokens.Fonts.labelBold)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .lineLimit(1)
                     Spacer()
                     Text(sessionDurationText)
                         .font(DesignTokens.Fonts.label)
@@ -265,7 +264,7 @@ struct DailyTimelineView: View {
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     } else {
-                        ForEach(Array(summary.descriptions.prefix(maxDescriptions).enumerated()), id: \.offset) { index, slice in
+                        ForEach(Array(summary.descriptions.prefix(maxDescriptions)), id: \.title) { slice in
                             HStack(alignment: .firstTextBaseline, spacing: 12) {
                                 Text(slice.title)
                                     .font(DesignTokens.Fonts.label)
