@@ -55,4 +55,3 @@ final class FutureFinalFlagsTests: XCTestCase {
         XCTAssertEqual(vm.actualSessionMinutes, 90)
     }
 }
-
