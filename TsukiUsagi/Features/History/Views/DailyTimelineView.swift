@@ -1,5 +1,6 @@
 import SwiftUI
 import Foundation
+import UIKit
 struct DailyTimelineView: View {
     let targetDate: Date
     @EnvironmentObject var historyVM: HistoryViewModel
@@ -11,6 +12,7 @@ struct DailyTimelineView: View {
     private let sectionBuilder = DailyTimelineSectionBuilder()
     private let gestureHandler = DailyTimelineGestureHandler()
     private let dataProvider = DailyTimelineDataProvider()
+    @FocusState private var isReflectionFocused: Bool
 
     // 既存のプロパティ（後方互換性のため保持）
     @State private var restoreError: String?
@@ -47,7 +49,8 @@ struct DailyTimelineView: View {
                             text: $detailViewModel.reflectionText,
                             isSaving: detailViewModel.isSaving,
                             error: detailViewModel.error,
-                            onRetry: { detailViewModel.retry() }
+                            onRetry: { detailViewModel.retry() },
+                            focus: $isReflectionFocused
                         )
                     } else {
                         if viewModel.records(historyVM: historyVM).count > 1 {
@@ -70,6 +73,15 @@ struct DailyTimelineView: View {
                 }
                 .padding(.horizontal)
             }
+            .scrollDismissesKeyboard(.interactively)
+            .gesture(
+                TapGesture().onEnded {
+                    if isReflectionFocused {
+                        isReflectionFocused = false
+                    }
+                },
+                including: .gesture
+            )
         }
         .simultaneousGesture(gestureHandler.backSwipeGesture())
         .navigationTitle(targetDate.formatted(.dateTime.weekday(.wide).month().day()))
@@ -328,6 +340,9 @@ struct DailyTimelineView: View {
         let isSaving: Bool
         let error: Error?
         let onRetry: () -> Void
+        let focus: FocusState<Bool>.Binding
+
+        @State private var keyboardBottomInset: CGFloat = 0
 
         private let placeholderText = "Capture insights, feelings, and next steps…"
 
@@ -339,6 +354,7 @@ struct DailyTimelineView: View {
 
                 ZStack(alignment: .topLeading) {
                     TextEditor(text: $text)
+                        .focused(focus)
                         .frame(minHeight: 160)
                         .padding(12)
                         .background(DesignTokens.WhiteColors.surface)
@@ -391,9 +407,36 @@ struct DailyTimelineView: View {
                 }
             }
             .padding(16)
+            .padding(.bottom, keyboardBottomInset)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(DesignTokens.CosmosColors.cardBackground)
             .cornerRadius(12)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Close") {
+                        focus.wrappedValue = false
+                    }
+                    .accessibilityIdentifier("reflection_keyboard_close")
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
+                guard let frame = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
+                let screenMaxY = UIScreen.main.bounds.maxY
+                let overlap = max(0, screenMaxY - frame.minY)
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    keyboardBottomInset = overlap
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    keyboardBottomInset = 0
+                }
+            }
+            .onDisappear {
+                focus.wrappedValue = false
+                keyboardBottomInset = 0
+            }
         }
     }
 
