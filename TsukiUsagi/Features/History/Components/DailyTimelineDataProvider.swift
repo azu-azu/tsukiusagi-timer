@@ -38,27 +38,27 @@ struct DailyTimelineDataProvider {
     /// アクティビティ別集計
     func byActivity(historyVM: HistoryViewModel, targetDate: Date) -> [LabelSummary] {
         let records = records(historyVM: historyVM, targetDate: targetDate)
-        let grouped = Dictionary(grouping: records) { $0.activity }
-        return grouped.map { activity, records in
+        let grouped = Dictionary(grouping: records) { $0.sessionName }
+        return grouped.map { sessionName, records in
             let totalSeconds = records.reduce(0) { total, rec in
                 total + durationSeconds(rec)
             }
             let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
-            return LabelSummary(label: activity, count: records.count, totalMinutes: totalMinutes)
+            return LabelSummary(label: sessionName, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }
 
     /// サブタイトル別集計
     func bySubtitle(historyVM: HistoryViewModel, targetDate: Date) -> [LabelSummary] {
         let records = records(historyVM: historyVM, targetDate: targetDate)
-        let grouped = Dictionary(grouping: records) { $0.subtitle ?? "" }
-        return grouped.compactMap { subtitle, records in
-            guard !subtitle.isEmpty else { return nil }
+        let grouped = Dictionary(grouping: records) { $0.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "" }
+        return grouped.compactMap { description, records in
+            guard !description.isEmpty else { return nil }
             let totalSeconds = records.reduce(0) { total, rec in
                 total + durationSeconds(rec)
             }
             let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
-            return LabelSummary(label: subtitle, count: records.count, totalMinutes: totalMinutes)
+            return LabelSummary(label: description, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }
 
@@ -68,5 +68,79 @@ struct DailyTimelineDataProvider {
             .filter { rec in
                 !(rec.memo?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
             }
+    }
+
+    func makeDaySummary(historyVM: HistoryViewModel, targetDate: Date) -> DaySummary {
+        let dayRecords = records(historyVM: historyVM, targetDate: targetDate)
+        guard !dayRecords.isEmpty else {
+            return DaySummary(total: 0, sessionName: nil, description: nil)
+        }
+
+        let totalDuration = dayRecords.reduce(0) { $0 + $1.duration }
+
+        let grouped = Dictionary(grouping: dayRecords, by: \.sessionName)
+
+        let dominantSessions = grouped.max { lhs, rhs in
+            let lhsDuration = lhs.value.totalDuration
+            let rhsDuration = rhs.value.totalDuration
+            if lhsDuration == rhsDuration {
+                return (lhs.value.latestEnd ?? .distantPast) < (rhs.value.latestEnd ?? .distantPast)
+            }
+            return lhsDuration < rhsDuration
+        }?.value ?? []
+
+        let dominantName = dominantSessions.first?.sessionName
+
+        let latestNonEmptyDescription = dominantSessions
+            .sorted { $0.end > $1.end }
+            .compactMap { ($0.description).trimmedNonEmpty }
+            .first
+
+        let mostFrequentDescription = dominantSessions
+            .compactMap { ($0.description).trimmedNonEmpty }
+            .mostFrequent()
+
+        let description = latestNonEmptyDescription ?? mostFrequentDescription
+
+        return DaySummary(
+            total: totalDuration,
+            sessionName: dominantName,
+            description: description
+        )
+    }
+}
+
+struct DaySummary {
+    let total: TimeInterval
+    let sessionName: String?
+    let description: String?
+}
+
+// MARK: - Helpers
+
+private extension Array where Element == SessionRecord {
+    var totalDuration: TimeInterval {
+        reduce(0) { $0 + $1.duration }
+    }
+
+    var latestEnd: Date? {
+        map(\.end).max()
+    }
+}
+
+private extension Optional where Wrapped == String {
+    var trimmedNonEmpty: String? {
+        guard let value = self?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else {
+            return nil
+        }
+        return value
+    }
+}
+
+private extension Sequence where Element: Hashable {
+    func mostFrequent() -> Element? {
+        Dictionary(grouping: self, by: { $0 })
+            .max { lhs, rhs in lhs.value.count < rhs.value.count }?
+            .key
     }
 }

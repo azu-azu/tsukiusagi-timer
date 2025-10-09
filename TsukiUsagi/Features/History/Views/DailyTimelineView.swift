@@ -7,6 +7,7 @@ struct DailyTimelineView: View {
 
     // 新しいViewModelとBuilder（既存コードと並行動作）
     @StateObject private var viewModel: DailyTimelineViewModel
+    @StateObject private var detailViewModel: HistoryDetailViewModel
     private let sectionBuilder = DailyTimelineSectionBuilder()
     private let gestureHandler = DailyTimelineGestureHandler()
     private let dataProvider = DailyTimelineDataProvider()
@@ -25,28 +26,40 @@ struct DailyTimelineView: View {
     init(targetDate: Date) {
         self.targetDate = targetDate
         self._viewModel = StateObject(wrappedValue: DailyTimelineViewModel(targetDate: targetDate))
+        self._detailViewModel = StateObject(wrappedValue: HistoryDetailViewModel(targetDate: targetDate))
+    }
+    private var inlineReflectionEnabled: Bool { FeatureFlags.historyInlineReflection }
+    private var memoSheetBinding: Binding<SessionRecord?> {
+        inlineReflectionEnabled ? .constant(nil) : $selectedRecordForMemoEdit
     }
     var body: some View {
         VStack(spacing: 0) {
-            // Total 表示（固定）
             TotalCard(text: TimeFormatters.totalTextWithSeconds(
                 dataProvider.totalSeconds(historyVM: historyVM, targetDate: targetDate)
             ))
             .padding(.horizontal)
 
-            // スクロール可能なコンテンツ
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    // 集計表示（レコードが複数ある場合のみ）
-                    if viewModel.records(historyVM: historyVM).count > 1 {
-                        sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
-                        sectionBuilder.subtitleSummarySection(summaries: viewModel.bySubtitle(historyVM: historyVM))
+                    if inlineReflectionEnabled {
+                        SummaryCardView(summary: detailViewModel.summary)
+                        InlineReflectionSection(
+                            text: $detailViewModel.reflectionText,
+                            isSaving: detailViewModel.isSaving,
+                            error: detailViewModel.error,
+                            onRetry: { detailViewModel.retry() }
+                        )
+                    } else {
+                        if viewModel.records(historyVM: historyVM).count > 1 {
+                            sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
+                            sectionBuilder.subtitleSummarySection(summaries: viewModel.bySubtitle(historyVM: historyVM))
+                        }
+                        memoSection()
                     }
-                    // メモ（Reflect）
-                    memoSection()
-                    // レコード詳細（時間別）
+
                     sectionBuilder.dayModeRecordsSection(
                         records: viewModel.records(historyVM: historyVM),
+                        showsMemoButton: !inlineReflectionEnabled,
                         onRestore: { record in
                             viewModel.restoreRecord(record, historyVM: historyVM, sessionManager: sessionManager)
                         },
@@ -68,17 +81,24 @@ struct DailyTimelineView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-        .sheet(item: $selectedRecordForMemoEdit) { record in
+        .sheet(item: memoSheetBinding) { record in
             MemoEditView(record: record, anchorDate: targetDate)
         }
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
         .onAppear {
+            if inlineReflectionEnabled {
+                detailViewModel.attach(historyViewModel: historyVM)
+                selectedRecordForMemoEdit = nil
+            }
             // View Details画面ではbackスワイプを有効化
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 enableBackSwipeGesture()
             }
         }
         .onDisappear {
+            if inlineReflectionEnabled {
+                detailViewModel.flush()
+            }
             // History画面に戻る際はbackスワイプを無効化
             disableBackSwipeGesture()
         }
@@ -94,8 +114,8 @@ struct DailyTimelineView: View {
     }
     @ViewBuilder
     private func recordRow(_ rec: SessionRecord) -> some View {
-        let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, activity: rec.activity)
-        let displayName = historyVM.displayActivity(sessionManager: sessionManager, activity: rec.activity)
+        let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, sessionName: rec.sessionName)
+        let displayName = historyVM.displaySessionName(sessionManager: sessionManager, sessionName: rec.sessionName)
         HStack(spacing: 0) {
             timeRangeView(rec)
             Spacer(minLength: 8)
@@ -134,7 +154,7 @@ struct DailyTimelineView: View {
     private func actionButtonView(rec: SessionRecord, isDeleted: Bool) -> some View {
         if isDeleted {
             restoreButton(rec: rec)
-        } else {
+        } else if !inlineReflectionEnabled {
             memoButton(rec: rec)
         }
     }
@@ -208,6 +228,120 @@ struct DailyTimelineView: View {
 
     private func recordsWithMemos() -> [SessionRecord] {
         return dataProvider.recordsWithMemos(historyVM: historyVM, targetDate: targetDate)
+    }
+
+    // MARK: - Inline Reflection Views
+
+    private struct SummaryCardView: View {
+        let summary: DaySummary
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(TimeFormatters.totalTextWithSeconds(Int(summary.total)))
+                    .font(DesignTokens.Fonts.title)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .monospacedDigit()
+
+                SummaryRow(label: "Session", value: summary.sessionName ?? "—")
+                SummaryRow(label: "Description", value: summary.description ?? "—")
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .cornerRadius(12)
+        }
+
+        private struct SummaryRow: View {
+            let label: String
+            let value: String
+
+            var body: some View {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(label)
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    Text(value)
+                        .font(DesignTokens.Fonts.labelBold)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+            }
+        }
+    }
+
+    private struct InlineReflectionSection: View {
+        @Binding var text: String
+        let isSaving: Bool
+        let error: Error?
+        let onRetry: () -> Void
+
+        private let placeholderJP = "気づき、学び、感情、次回の方針を書こう…"
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Reflection")
+                    .font(DesignTokens.Fonts.sectionTitle)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $text)
+                        .frame(minHeight: 160)
+                        .padding(12)
+                        .background(DesignTokens.WhiteColors.surface)
+                        .cornerRadius(8)
+                        .textEditorStyle(.plain)
+                        .scrollContentBackground(.hidden)
+                        .lineSpacing(4)
+                        .accessibilityIdentifier("history_detail_reflection_editor")
+
+                    if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text(placeholderJP)
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 18)
+                            .allowsHitTesting(false)
+                    }
+                }
+
+                if isSaving {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text("Saving…")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    }
+                }
+
+                if let error = error {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Failed to save. Try again?")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        Text(error.localizedDescription)
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        Button(action: onRetry) {
+                            Text("Retry")
+                                .font(DesignTokens.Fonts.labelBold)
+                                .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(DesignTokens.CosmosColors.cardBackground)
+                    .cornerRadius(8)
+                    .accessibilityIdentifier("banner_history_reflection_retry")
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .cornerRadius(12)
+        }
     }
 
     // MARK: - Back Swipe Control

@@ -59,8 +59,8 @@ extension HistoryViewModel {
         // ✅ sessionManagerパラメータを削除して、直接activityを使用
         let activities = Dictionary(grouping: daySessions) { record in
             // 既存のHistoryViewModelのdisplayActivityメソッドを使わず、
-            // record.activityを直接使用するか、簡易版を作成
-            String(describing: record.activity)
+            // record.sessionNameを直接使用するか、簡易版を作成
+            String(describing: record.sessionName)
         }.mapValues { sessions in
             let seconds = sessions.reduce(0) { total, record in
                 total + durationSeconds(record)
@@ -87,10 +87,10 @@ extension HistoryViewModel {
         let activeDays = values.filter { $0.hasRecords }.count
 
         // 全アクティビティを集計
-        var allActivities: [String: Int] = [:]
+        var allSessions: [String: Int] = [:]
         for daily in values {
-            for (activity, minutes) in daily.activities {
-                allActivities[activity, default: 0] += minutes
+            for (sessionName, minutes) in daily.activities {
+                allSessions[sessionName, default: 0] += minutes
             }
         }
 
@@ -99,7 +99,7 @@ extension HistoryViewModel {
             totalMinutes: totalMinutes,
             totalSessions: totalSessions,
             activeDays: activeDays,
-            topActivities: allActivities.sorted { $0.value > $1.value }.prefix(5).map(\.key)
+            topActivities: allSessions.sorted { $0.value > $1.value }.prefix(5).map(\.key)
         )
     }
 

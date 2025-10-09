@@ -23,12 +23,13 @@ struct DailyTimelineSectionBuilder {
     @ViewBuilder
     func dayModeRecordsSection(
         records: [SessionRecord],
+        showsMemoButton: Bool,
         onRestore: @escaping (SessionRecord) -> Void,
         onMemoEdit: @escaping (SessionRecord) -> Void
     ) -> some View {
         LazyVStack(spacing: dayModeCardSpacing) {
             ForEach(records, id: \.id) { rec in
-                recordRow(rec, onRestore: onRestore, onMemoEdit: onMemoEdit)
+                recordRow(rec, showsMemoButton: showsMemoButton, onRestore: onRestore, onMemoEdit: onMemoEdit)
             }
         }
     }
@@ -36,13 +37,13 @@ struct DailyTimelineSectionBuilder {
     /// アクティビティ集計セクション
     @ViewBuilder
     func activitySummarySection(summaries: [LabelSummary]) -> some View {
-        summarySection(title: "Activity Summary", summaries: summaries)
+        summarySection(title: "Session Summary", summaries: summaries)
     }
 
     /// サブタイトル集計セクション
     @ViewBuilder
     func subtitleSummarySection(summaries: [LabelSummary]) -> some View {
-        summarySection(title: "Subtitle Summary", summaries: summaries)
+        summarySection(title: "Description Summary", summaries: summaries)
     }
 
     /// メモセクション
@@ -64,14 +65,22 @@ extension DailyTimelineSectionBuilder {
     @ViewBuilder
     private func recordRow(
         _ rec: SessionRecord,
+        showsMemoButton: Bool,
         onRestore: @escaping (SessionRecord) -> Void,
         onMemoEdit: @escaping (SessionRecord) -> Void
     ) -> some View {
         HStack(spacing: 8) {
             timeRangeView(rec)
-            activityInfoView(displayName: rec.activity, rec: rec, isDeleted: false)
+            activityInfoView(displayName: rec.sessionName, rec: rec, isDeleted: false)
             Spacer()
             durationView(rec)
+            actionButtonView(
+                rec: rec,
+                isDeleted: false,
+                showsMemoButton: showsMemoButton,
+                onRestore: onRestore,
+                onMemoEdit: onMemoEdit
+            )
         }
         .frame(height: dayModeCardHeight)
         .padding(.horizontal, 12)
@@ -128,13 +137,14 @@ extension DailyTimelineSectionBuilder {
     private func actionButtonView(
         rec: SessionRecord,
         isDeleted: Bool,
+        showsMemoButton: Bool,
         onRestore: @escaping (SessionRecord) -> Void,
         onMemoEdit: @escaping (SessionRecord) -> Void
     ) -> some View {
         HStack(spacing: 8) {
             if isDeleted {
                 restoreButton(rec: rec, onRestore: onRestore)
-            } else {
+            } else if showsMemoButton {
                 memoButton(rec: rec, onMemoEdit: onMemoEdit)
             }
         }
@@ -202,7 +212,7 @@ extension DailyTimelineSectionBuilder {
     /// メモセクションヘッダー
     @ViewBuilder
     private func memoSectionHeader() -> some View {
-        Text("Reflect")
+        Text("Reflection")
             .font(.caption)
             .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
@@ -253,7 +263,7 @@ extension DailyTimelineSectionBuilder {
     @ViewBuilder
     private func memoTextContent(record: SessionRecord) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(record.activity)
+            Text(record.sessionName)
                 .font(.body)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
             Text(record.memo ?? "")
@@ -300,8 +310,8 @@ extension DailyTimelineSectionBuilder {
                         start: Date(),
                         end: Date(),
                         phase: .focus,
-                        activity: "New Reflection",
-                        subtitle: "",
+                        sessionName: "New Reflection",
+                        description: "",
                         memo: ""
                     )
                     onMemoEdit(dummyRecord)
@@ -325,8 +335,8 @@ extension DailyTimelineSectionBuilder {
                 start: Date(),
                 end: Date(),
                 phase: .focus,
-                activity: "New Reflection",
-                subtitle: "",
+                sessionName: "New Reflection",
+                description: "",
                 memo: ""
             )
             onMemoEdit(dummyRecord)

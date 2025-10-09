@@ -17,7 +17,7 @@ struct MemoEditView: View {
 
     // 新規追加かどうかを判定
     private var isNewRecord: Bool {
-        return record.activity == "New Reflection" && (record.memo?.isEmpty ?? true)
+        return record.sessionName == "New Reflection" && (record.memo?.isEmpty ?? true)
     }
 
     var body: some View {
@@ -111,8 +111,8 @@ struct MemoEditView: View {
         VStack(alignment: .leading, spacing: 8) {
             activityInfoRow()
 
-            if let subtitle = record.subtitle, !subtitle.isEmpty {
-                subtitleInfoRow(subtitle: subtitle)
+            if let description = record.description, !description.isEmpty {
+                subtitleInfoRow(description: description)
             }
 
             durationInfoRow()
@@ -126,24 +126,24 @@ struct MemoEditView: View {
     @ViewBuilder
     private func activityInfoRow() -> some View {
         HStack {
-            Text("Activity:")
+            Text("Session:")
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
-            Text(record.activity)
+            Text(record.sessionName)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
         }
     }
 
     @ViewBuilder
-    private func subtitleInfoRow(subtitle: String) -> some View {
+    private func subtitleInfoRow(description: String) -> some View {
         HStack {
             Text("Description:")
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
-            Text(subtitle)
+            Text(description)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
         }
@@ -181,7 +181,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func memoEditSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Memo")
+            Text("Reflection")
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -198,7 +198,7 @@ struct MemoEditView: View {
                         if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             HStack {
                                 VStack {
-                                    Text("Add a memo for this session...")
+                                    Text("Add a reflection for this session...")
                                         .font(DesignTokens.Fonts.label)
                                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                                     Spacer()
@@ -232,8 +232,8 @@ struct MemoEditView: View {
                     start: startOnTarget,
                     end: endOnTarget,
                     phase: .focus,
-                    activity: "Reflection",
-                    subtitle: "",
+                    sessionName: "Reflection",
+                    description: "",
                     memo: finalMemo
                 )
                 historyVM.addRecord(newRecord)
