@@ -26,7 +26,9 @@ extension ContentView {
                 onEdit: { params.showingEditRecord.wrappedValue = true }
             )
             // Final time の更新で確実に再構築させる（分表示も含めて）
-            .id("recorded-\(Int(params.endTime?.timeIntervalSince1970 ?? 0))-\(params.actualSessionMinutes)")
+            .id(
+                "recorded-\(Int(params.endTime?.timeIntervalSince1970 ?? 0))-\(params.actualSessionMinutes)"
+            )
             .sessionVisibility(isVisible: params.hasRecordedEndTime)
             .padding(.bottom, AppConstants.footerBarHeight +
                     params.safeAreaInsets.bottom + AppConstants.recordedTimesBottomSpacing)
