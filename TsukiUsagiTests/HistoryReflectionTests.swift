@@ -26,9 +26,36 @@ final class HistoryReflectionTests: XCTestCase {
         let end = calendar.date(from: DateComponents(year: 2024, month: 3, day: 3, hour: 14, minute: 0))!
 
         let legacyRecords = [
-            SessionRecord(id: "reflection-1", start: start, end: start.addingTimeInterval(600), phase: .focus, sessionName: "Reflection", description: "", memo: "First memo", completedSilently: nil),
-            SessionRecord(id: "reflection-2", start: mid, end: mid.addingTimeInterval(300), phase: .focus, sessionName: "Reflection", description: "", memo: "Second memo", completedSilently: nil),
-            SessionRecord(id: "work-1", start: end, end: end.addingTimeInterval(1800), phase: .focus, sessionName: "Work", description: "Deep work", memo: nil, completedSilently: nil)
+            SessionRecord(
+                id: "reflection-1",
+                start: start,
+                end: start.addingTimeInterval(600),
+                phase: .focus,
+                sessionName: "Reflection",
+                description: "",
+                memo: "First memo",
+                completedSilently: nil
+            ),
+            SessionRecord(
+                id: "reflection-2",
+                start: mid,
+                end: mid.addingTimeInterval(300),
+                phase: .focus,
+                sessionName: "Reflection",
+                description: "",
+                memo: "Second memo",
+                completedSilently: nil
+            ),
+            SessionRecord(
+                id: "work-1",
+                start: end,
+                end: end.addingTimeInterval(1800),
+                phase: .focus,
+                sessionName: "Work",
+                description: "Deep work",
+                memo: nil,
+                completedSilently: nil
+            )
         ]
 
         let legacyData = try encoder.encode(legacyRecords)
@@ -92,9 +119,42 @@ final class HistoryReflectionTests: XCTestCase {
         let workNoon = calendar.date(bySettingHour: 12, minute: 0, second: 0, of: baseDay)!
         let study = calendar.date(bySettingHour: 15, minute: 0, second: 0, of: baseDay)!
 
-        historyVM.addRecord(SessionRecord(id: "work-1", start: workMorning, end: workMorning.addingTimeInterval(3600), phase: .focus, sessionName: "Work", description: "Initial", memo: nil, completedSilently: nil))
-        historyVM.addRecord(SessionRecord(id: "work-2", start: workNoon, end: workNoon.addingTimeInterval(5400), phase: .focus, sessionName: "Work", description: "Latest", memo: nil, completedSilently: nil))
-        historyVM.addRecord(SessionRecord(id: "study-1", start: study, end: study.addingTimeInterval(1200), phase: .focus, sessionName: "Study", description: "Reading", memo: nil, completedSilently: nil))
+        historyVM.addRecord(
+            SessionRecord(
+                id: "work-1",
+                start: workMorning,
+                end: workMorning.addingTimeInterval(3600),
+                phase: .focus,
+                sessionName: "Work",
+                description: "Initial",
+                memo: nil,
+                completedSilently: nil
+            )
+        )
+        historyVM.addRecord(
+            SessionRecord(
+                id: "work-2",
+                start: workNoon,
+                end: workNoon.addingTimeInterval(5400),
+                phase: .focus,
+                sessionName: "Work",
+                description: "Latest",
+                memo: nil,
+                completedSilently: nil
+            )
+        )
+        historyVM.addRecord(
+            SessionRecord(
+                id: "study-1",
+                start: study,
+                end: study.addingTimeInterval(1200),
+                phase: .focus,
+                sessionName: "Study",
+                description: "Reading",
+                memo: nil,
+                completedSilently: nil
+            )
+        )
 
         let summary = provider.makeDaySummary(historyVM: historyVM, targetDate: baseDay)
         XCTAssertEqual(summary.sessionName, "Work")
@@ -180,4 +240,3 @@ final class HistoryReflectionTests: XCTestCase {
         XCTAssertEqual(reloaded.reflections[dayKey]?.text, "Persistent memo")
     }
 }
-
