@@ -99,60 +99,11 @@ private extension ContentView {
     @ViewBuilder
     func layoutLayers(for context: LayoutContext) -> some View {
         let safeAreaInsets = context.safeAreaInsets
-
         ZStack(alignment: .bottom) {
-            backgroundLayer(params: ContentView.BackgroundLayerParams(
-                size: context.size,
-                safeAreaInsets: safeAreaInsets,
-                staticStarCount: staticStarCount,
-                flowingStarCount: flowingStarCount,
-                isLowPowerMode: isLowPowerMode,
-                isSessionFinished: timerVM.isSessionFinished,
-                shouldAnimateStars: context.shouldAnimateStars,
-                isLandscape: context.isLandscape
-            ))
-
-            MainPanel(
-                size: context.size,
-                safeAreaInsets: safeAreaInsets,
-                isLandscape: context.isLandscape,
-                moonTitle: moonTitle,
-                landscapeMargin: landscapeMargin(),
-                moonPortraitYOffsetRatio: moonPortraitYOffsetRatio,
-                moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
-                isQuietMoonFocused: $isQuietMoonFocused,
-                showingEditRecord: $showingEditRecord,
-                isMoonAnimationActive: context.shouldAnimateStars
-            )
-
-            footerLayer(params: ContentView.FooterLayerParams(
-                safeAreaInsets: safeAreaInsets,
-                buttonHeight: buttonHeight,
-                buttonWidth: buttonWidth,
-                today: today,
-                isRunning: timerVM.isRunning,
-                isSessionFinished: timerVM.isSessionFinished,
-                showingSideMenu: $showingSideMenu,
-                onPause: { [weak timerVM] in timerVM?.pauseTimer() },
-                onStart: { [weak timerVM] in
-                    isQuietMoonFocused = false
-                    timerVM?.startTimer()
-                }
-            ))
-            .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
-
-            recordedTimesLayer(params: ContentView.RecordedTimesLayerParams(
-                isLandscape: context.isLandscape,
-                safeAreaInsets: safeAreaInsets,
-                hasRecordedEndTime: timerVM.hasRecordedEndTime,
-                isWorkSession: timerVM.isWorkSession,
-                startTime: timerVM.startTime,
-                endTime: timerVM.endTime,
-                actualSessionMinutes: timerVM.actualSessionMinutes,
-                showingEditRecord: $showingEditRecord
-            ))
-            .id("recorded-layer-\(recordedTimesNonce)")
-
+            backgroundLayer(params: backgroundParams(for: context, safeAreaInsets: safeAreaInsets))
+            mainPanel(for: context, safeAreaInsets: safeAreaInsets)
+            footerLayerView(for: context, safeAreaInsets: safeAreaInsets)
+            recordedTimesView(for: context, safeAreaInsets: safeAreaInsets)
             overlays(for: context, safeAreaInsets: safeAreaInsets)
         }
     }
@@ -323,10 +274,82 @@ private extension ContentView {
                 }
             }
     }
+
+    func backgroundParams(for context: LayoutContext, safeAreaInsets: EdgeInsets) -> ContentView.BackgroundLayerParams {
+        ContentView.BackgroundLayerParams(
+            size: context.size,
+            safeAreaInsets: safeAreaInsets,
+            staticStarCount: staticStarCount,
+            flowingStarCount: flowingStarCount,
+            isLowPowerMode: isLowPowerMode,
+            isSessionFinished: timerVM.isSessionFinished,
+            shouldAnimateStars: context.shouldAnimateStars,
+            isLandscape: context.isLandscape
+        )
+    }
+
+    @ViewBuilder
+    func mainPanel(for context: LayoutContext, safeAreaInsets: EdgeInsets) -> some View {
+        MainPanel(
+            size: context.size,
+            safeAreaInsets: safeAreaInsets,
+            isLandscape: context.isLandscape,
+            moonTitle: moonTitle,
+            landscapeMargin: landscapeMargin(),
+            moonPortraitYOffsetRatio: moonPortraitYOffsetRatio,
+            moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
+            isQuietMoonFocused: $isQuietMoonFocused,
+            showingEditRecord: $showingEditRecord,
+            isMoonAnimationActive: context.shouldAnimateStars
+        )
+    }
+
+    @ViewBuilder
+    func footerLayerView(for context: LayoutContext, safeAreaInsets: EdgeInsets) -> some View {
+        footerLayer(params: ContentView.FooterLayerParams(
+            safeAreaInsets: safeAreaInsets,
+            buttonHeight: buttonHeight,
+            buttonWidth: buttonWidth,
+            today: today,
+            isRunning: timerVM.isRunning,
+            isSessionFinished: timerVM.isSessionFinished,
+            showingSideMenu: $showingSideMenu,
+            onPause: { [weak timerVM] in timerVM?.pauseTimer() },
+            onStart: { [weak timerVM] in
+                isQuietMoonFocused = false
+                timerVM?.startTimer()
+            }
+        ))
+        .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
+    }
+
+    @ViewBuilder
+    func recordedTimesView(for context: LayoutContext, safeAreaInsets: EdgeInsets) -> some View {
+        recordedTimesLayer(params: ContentView.RecordedTimesLayerParams(
+            isLandscape: context.isLandscape,
+            safeAreaInsets: safeAreaInsets,
+            hasRecordedEndTime: timerVM.hasRecordedEndTime,
+            isWorkSession: timerVM.isWorkSession,
+            startTime: timerVM.startTime,
+            endTime: timerVM.endTime,
+            actualSessionMinutes: timerVM.actualSessionMinutes,
+            showingEditRecord: $showingEditRecord
+        ))
+        .id("recorded-layer-\(recordedTimesNonce)")
+    }
 }
 
 private extension ContentView {
     func applySceneHandlers<Content: View>(to view: Content, context: LayoutContext) -> some View {
+        let withSession = attachSessionHandlers(view, context: context)
+        let withLifecycle = attachLifecycleHandlers(withSession)
+        let withHistory = attachHistoryHandlers(withLifecycle)
+        return attachSideMenuHandler(withHistory, context: context)
+    }
+}
+
+private extension ContentView {
+    func attachSessionHandlers<Content: View>(_ view: Content, context: LayoutContext) -> some View {
         view
             .onReceive(timerVM.$flashStars.dropFirst()) { flashStars in
                 if flashStars {
@@ -348,6 +371,26 @@ private extension ContentView {
                     }
                 }
             }
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: Notification.Name("TimerSilentCompleted")
+                )
+            ) { _ in
+                silentCompleteWorkItem?.cancel()
+                withAnimation(.easeInOut(duration: 0.2)) { showSilentCompleteChip = true }
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showSilentCompleteChip = false }
+                }
+                silentCompleteWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: work)
+            }
+            .onChange(of: timerVM.endTime) { _, _ in
+                recordedTimesNonce = UUID()
+            }
+    }
+
+    func attachLifecycleHandlers<Content: View>(_ view: Content) -> some View {
+        view
             .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
                 isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
             }
@@ -363,6 +406,10 @@ private extension ContentView {
                 timerVM.appDidEnterBackground()
             }
             .onAppear { scheduleMidnightTick() }
+    }
+
+    func attachHistoryHandlers<Content: View>(_ view: Content) -> some View {
+        view
             .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
                 savedToastWorkItem?.cancel()
                 withAnimation(.easeInOut(duration: 0.2)) { showSavedToast = true }
@@ -401,22 +448,10 @@ private extension ContentView {
             .onReceive(NotificationCenter.default.publisher(for: Notification.Name("HistorySaveGaveUp"))) { _ in
                 withAnimation(.easeInOut(duration: 0.2)) { showHistorySaveBanner = true }
             }
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: Notification.Name("TimerSilentCompleted")
-                )
-            ) { _ in
-                silentCompleteWorkItem?.cancel()
-                withAnimation(.easeInOut(duration: 0.2)) { showSilentCompleteChip = true }
-                let work = DispatchWorkItem {
-                    withAnimation(.easeInOut(duration: 0.3)) { showSilentCompleteChip = false }
-                }
-                silentCompleteWorkItem = work
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: work)
-            }
-            .onChange(of: timerVM.endTime) { _, _ in
-                recordedTimesNonce = UUID()
-            }
+    }
+
+    func attachSideMenuHandler<Content: View>(_ view: Content, context: LayoutContext) -> some View {
+        view
             .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
                 if shouldOpen {
                     withAnimation(.easeInOut(duration: 0.3)) {
