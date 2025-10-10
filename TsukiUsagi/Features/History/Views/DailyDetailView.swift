@@ -19,7 +19,7 @@ struct DailyDetailView: View {
                 Spacer()
 
                 NavigationLink(destination: DailyTimelineView(targetDate: date)) {
-                    Text("View Details")
+                    Text(Copy.Reflection.openDaily)
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
