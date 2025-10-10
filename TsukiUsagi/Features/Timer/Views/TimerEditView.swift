@@ -184,10 +184,8 @@ struct TimerEditView: View {
                                 for: UIResponder.keyboardDidChangeFrameNotification
                             )
                         ) { notification in
-                            if
-                                let userInfo = notification.userInfo,
-                                let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
-                            {
+                            if let userInfo = notification.userInfo,
+                               let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
                                 keyboardEndFrame = frameValue.cgRectValue
                             }
                             guard isMemoFocused, let proxy = scrollProxy else { return }
