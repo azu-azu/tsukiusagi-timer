@@ -51,7 +51,6 @@ struct TimerEditView: View {
         return isCustomActivity && isActivityEmpty()
     }
 
-
     @MainActor private func closeKeyboard() {
         isActivityFocused = false
         isSubtitleFocused = false
