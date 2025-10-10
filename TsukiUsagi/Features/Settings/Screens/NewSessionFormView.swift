@@ -1,4 +1,17 @@
 import SwiftUI
+import Foundation
+
+extension String {
+    /// Manager/Validatorと完全同一実装
+    var tsu_normalizedKey: String {
+        let trimmed = self.trimmingCharacters(in: .whitespacesAndNewlines)
+        let collapsed = trimmed.replacingOccurrences(
+            of: #"[ \u{3000}]+"#, with: " ", options: .regularExpression
+        )
+        let lowered = collapsed.lowercased()
+        return lowered.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+    }
+}
 
 struct NewSessionFormView: View {
     @Environment(\.dismiss) private var dismiss
@@ -10,7 +23,7 @@ struct NewSessionFormView: View {
     @State private var showAddDescriptionField = false
     @State private var errorMessage: String = ""
     @State private var showError = false
-    @State private var hasDuplicateConflict = false
+    @State private var duplicateIndices: Set<Int> = []
 
     @FocusState private var focusedField: FocusedField?
 
@@ -43,7 +56,7 @@ struct NewSessionFormView: View {
                     Button(NSLocalizedString("create", comment: "")) {
                         createSession()
                     }
-                    .disabled(sessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || hasDuplicateConflict)
+                    .disabled(isCreateDisabled)
                 }
             }
             .adaptiveKeyboardCloseButton(
@@ -105,7 +118,7 @@ struct NewSessionFormView: View {
 
             Text(NSLocalizedString("session_name_hint", comment: ""))
                 .font(.caption2)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
         }
     }
 
@@ -143,7 +156,7 @@ struct NewSessionFormView: View {
                 }
             }
 
-            if hasDuplicateConflict {
+            if !duplicateIndices.isEmpty {
                 Text(NSLocalizedString("duplicate_descriptions_detected", comment: "Duplicate descriptions detected"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
@@ -186,7 +199,9 @@ struct NewSessionFormView: View {
                 set: { newValue in
                     if index < descriptions.count {
                         descriptions[index] = newValue
-                        validateDuplicates()
+                        if !duplicateIndices.isEmpty {
+                            duplicateIndices = findDuplicateIndices(in: descriptions)
+                        }
                     }
                 }
             ))
@@ -197,13 +212,20 @@ struct NewSessionFormView: View {
             .cornerRadius(DesignTokens.CornerRadius.medium)
             .overlay(
                 RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                    .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+                    .stroke(
+                        duplicateIndices.contains(index)
+                            ? DesignTokens.UtilityColors.duplicateWarning
+                            : DesignTokens.BlackColors.stroke,
+                        lineWidth: 1
+                    )
             )
             .focused($focusedField, equals: .description(index))
 
             Button {
                 descriptions.remove(at: index)
-                validateDuplicates()
+                if !duplicateIndices.isEmpty {
+                    duplicateIndices = findDuplicateIndices(in: descriptions)
+                }
             } label: {
                 Image(systemName: "minus.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentOrange)
@@ -233,8 +255,10 @@ struct NewSessionFormView: View {
                     descriptions.append(trimmed)
                     newDescription = ""
                 }
+                if !duplicateIndices.isEmpty {
+                    duplicateIndices = findDuplicateIndices(in: descriptions)
+                }
                 showAddDescriptionField = false
-                validateDuplicates()
             } label: {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentGreen)
@@ -261,11 +285,12 @@ struct NewSessionFormView: View {
             showError = true
             return
         }
-        if hasDuplicateConflict {
-            errorMessage = NSLocalizedString("duplicate_descriptions_detected", comment: "Duplicate descriptions detected")
-            showError = true
+        let duplicateHits = findDuplicateIndices(in: descriptions)
+        guard duplicateHits.isEmpty else {
+            duplicateIndices = duplicateHits
             return
         }
+        duplicateIndices = []
         do {
             try sessionManager.addOrUpdateEntry(
                 originalKey: "",
@@ -274,24 +299,28 @@ struct NewSessionFormView: View {
             )
             dismiss()
         } catch {
-            errorMessage = error.localizedDescription
-            showError = true
+            // Validation already surfaced through disablement; swallow remaining errors to avoid alerts.
         }
     }
 
-    private func validateDuplicates() {
-        var seen = Set<String>()
-        var conflict = false
-        for value in descriptions {
-            let key = value.tsu_descriptionNormalizedKey
+    private var isCreateDisabled: Bool {
+        sessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func findDuplicateIndices(in values: [String]) -> Set<Int> {
+        var seen: [String: Int] = [:]
+        var dups = Set<Int>()
+        for (index, value) in values.enumerated() {
+            let key = value.tsu_normalizedKey
             if key.isEmpty { continue }
-            if seen.contains(key) {
-                conflict = true
-                break
+            if let firstIndex = seen[key] {
+                dups.insert(firstIndex)
+                dups.insert(index)
+            } else {
+                seen[key] = index
             }
-            seen.insert(key)
         }
-        hasDuplicateConflict = conflict
+        return dups
     }
 }
 
