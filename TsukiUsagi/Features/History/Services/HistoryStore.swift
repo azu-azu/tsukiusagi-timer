@@ -6,6 +6,7 @@ struct HistorySnapshot {
     var reflections: [Date: DayReflection]
 }
 
+
 struct HistoryStore {
     private let file = "history.json"
 
@@ -147,7 +148,9 @@ private extension HistoryStore {
         return snapshot
     }
 
-    func splitReflectionRecords(from sessions: [SessionRecord]) -> (sessions: [SessionRecord], reflections: [Date: DayReflection]) {
+    func splitReflectionRecords(
+        from sessions: [SessionRecord]
+    ) -> (sessions: [SessionRecord], reflections: [Date: DayReflection]) {
         var filteredSessions: [SessionRecord] = []
         var textsByDay: [Date: [String]] = [:]
         var updatedAtByDay: [Date: Date] = [:]
@@ -221,4 +224,3 @@ private extension HistoryStore {
         }
     }
 }
-
