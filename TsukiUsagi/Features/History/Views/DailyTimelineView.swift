@@ -44,7 +44,18 @@ struct DailyTimelineView: View {
             ScrollView {
                 LazyVStack(spacing: 16) {
                     if inlineReflectionEnabled {
-                        SummaryCardView(summary: detailViewModel.summary)
+                        let sessionSummaries = dataProvider.daySessionSummaries(historyVM: historyVM, targetDate: targetDate)
+                        if !sessionSummaries.isEmpty {
+                            SummaryTreeView(
+                                sessions: sessionSummaries,
+                                displayName: { sessionName in
+                                    historyVM.displaySessionName(
+                                        sessionManager: sessionManager,
+                                        sessionName: sessionName
+                                    )
+                                }
+                            )
+                        }
                         InlineReflectionSection(
                             text: $detailViewModel.reflectionText,
                             isSaving: detailViewModel.isSaving,
@@ -246,58 +257,51 @@ struct DailyTimelineView: View {
 
     // MARK: - Inline Reflection Views
 
-    private struct SummaryCardView: View {
-        let summary: DaySummary
-        private let maxDescriptions = 5
+    private struct SummaryTreeView: View {
+        let sessions: [DaySessionSummary]
+        let displayName: (String) -> String
+        let maxDescriptionsPerSession: Int = 5
 
         var body: some View {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Session")
-                    .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-                HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    Text(summary.sessionName ?? "—")
-                        .font(DesignTokens.Fonts.labelBold)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        .lineLimit(1)
-                    Spacer()
-                    Text(sessionDurationText)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        .monospacedDigit()
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Description")
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-                    if summary.descriptions.isEmpty {
-                        Text("—")
-                            .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    } else {
-                        ForEach(Array(summary.descriptions.prefix(maxDescriptions)), id: \.title) { slice in
-                            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                                Text(slice.title)
-                                    .font(DesignTokens.Fonts.label)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                    .lineLimit(1)
-                                Spacer()
-                                Text(formattedDuration(slice.duration))
-                                    .font(DesignTokens.Fonts.caption)
-                                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                                    .monospacedDigit()
-                            }
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityLabel("\(slice.title) \(readableDuration(slice.duration))")
+                ForEach(sessions, id: \.self) { session in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(alignment: .firstTextBaseline, spacing: 12) {
+                            Text(displayName(session.sessionName))
+                                .font(DesignTokens.Fonts.labelBold)
+                                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                .lineLimit(1)
+                            Spacer(minLength: 12)
+                            Text(formattedDuration(session.total))
+                                .font(DesignTokens.Fonts.labelBold)
+                                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                .monospacedDigit()
                         }
 
-                        if summary.descriptions.count > maxDescriptions {
-                            Text("+ \(summary.descriptions.count - maxDescriptions) more")
-                                .font(DesignTokens.Fonts.caption)
-                                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        if !session.descriptions.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                ForEach(Array(session.descriptions.prefix(maxDescriptionsPerSession)), id: \.title) { slice in
+                                    HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                        Text(slice.title)
+                                            .font(DesignTokens.Fonts.label)
+                                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                            .lineLimit(1)
+                                            .padding(.leading, 12)
+                                        Spacer(minLength: 12)
+                                        Text(formattedDuration(slice.duration))
+                                            .font(DesignTokens.Fonts.caption)
+                                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                            .monospacedDigit()
+                                    }
+                                }
+
+                                if session.descriptions.count > maxDescriptionsPerSession {
+                                    Text("+ \(session.descriptions.count - maxDescriptionsPerSession) more")
+                                        .font(DesignTokens.Fonts.caption)
+                                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                        .padding(.leading, 12)
+                                }
+                            }
                         }
                     }
                 }
@@ -306,30 +310,6 @@ struct DailyTimelineView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(DesignTokens.CosmosColors.cardBackground)
             .cornerRadius(12)
-        }
-
-        private var sessionDurationText: String {
-            guard summary.sessionDuration > 0 else { return "—" }
-            return formattedDuration(summary.sessionDuration)
-        }
-
-        private func readableDuration(_ interval: TimeInterval) -> String {
-            let seconds = max(0, Int(interval.rounded()))
-            let hours = seconds / 3600
-            let minutes = (seconds % 3600) / 60
-            let secs = seconds % 60
-
-            var parts: [String] = []
-            if hours > 0 {
-                parts.append("\(hours) hours")
-            }
-            if minutes > 0 {
-                parts.append("\(minutes) minutes")
-            }
-            if secs > 0 || parts.isEmpty {
-                parts.append("\(secs) seconds")
-            }
-            return parts.joined(separator: " ")
         }
 
         private func formattedDuration(_ interval: TimeInterval) -> String {

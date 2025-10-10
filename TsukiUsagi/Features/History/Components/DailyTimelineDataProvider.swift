@@ -107,11 +107,50 @@ struct DailyTimelineDataProvider {
             descriptions: descriptions
         )
     }
+
+    func daySessionSummaries(historyVM: HistoryViewModel, targetDate: Date) -> [DaySessionSummary] {
+        let dayRecords = records(historyVM: historyVM, targetDate: targetDate)
+        return Self.makeDaySessionSummaries(for: dayRecords)
+    }
+
+    static func makeDaySessionSummaries(for records: [SessionRecord]) -> [DaySessionSummary] {
+        guard !records.isEmpty else { return [] }
+
+        let groupedBySession = Dictionary(grouping: records, by: \.sessionName)
+
+        let summaries = groupedBySession.map { sessionName, entries -> DaySessionSummary in
+            let totalDuration = entries.reduce(0) { $0 + $1.duration }
+
+            let descriptions = Dictionary(grouping: entries) {
+                $0.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            }
+            .compactMap { key, slice -> DescSlice? in
+                guard !key.isEmpty else { return nil }
+                let sliceDuration = slice.reduce(0) { $0 + $1.duration }
+                return DescSlice(title: key, duration: sliceDuration)
+            }
+            .sorted { $0.duration > $1.duration }
+
+            return DaySessionSummary(
+                sessionName: sessionName,
+                total: totalDuration,
+                descriptions: descriptions
+            )
+        }
+
+        return summaries.sorted { $0.total > $1.total }
+    }
 }
 
 struct DescSlice: Hashable {
     let title: String
     let duration: TimeInterval
+}
+
+struct DaySessionSummary: Hashable {
+    let sessionName: String
+    let total: TimeInterval
+    let descriptions: [DescSlice]
 }
 
 struct DaySummary {
