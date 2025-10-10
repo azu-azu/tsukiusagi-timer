@@ -12,6 +12,7 @@
 
 import SwiftUI
 import Foundation
+import UIKit
 
 /// Description編集専用のコンテンツView
 ///
@@ -29,6 +30,7 @@ struct DescriptionEditContent: View {
 
     @FocusState private var focusedField: UUID?
     @State private var duplicateIDs: Set<UUID> = []
+    @State private var duplicateDebouncer = Debouncer(delay: 0.15)
 
     init(
         sessionName: String,
@@ -76,7 +78,9 @@ struct DescriptionEditContent: View {
             }
         }
         .onChange(of: drafts) { _, _ in
-            validateDuplicates()
+            duplicateDebouncer.schedule {
+                validateDuplicates()
+            }
         }
         .onChange(of: focusedField) { _, newValue in
             isAnyFieldFocused = newValue != nil
@@ -151,11 +155,15 @@ struct DescriptionEditContent: View {
                         text: binding(for: draft.id)
                     )
                     .textFieldStyle(PlainTextFieldStyle())
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
                     .foregroundColor(
                         isDuplicate
-                            ? DesignTokens.MoonColors.accentOrange
+                            ? DesignTokens.UtilityColors.duplicateWarning
                             : DesignTokens.MoonColors.textPrimary
                     )
                     .background(DesignTokens.CosmosColors.cardBackground)
@@ -164,7 +172,7 @@ struct DescriptionEditContent: View {
                         RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
                             .stroke(
                                 isDuplicate
-                                    ? DesignTokens.MoonColors.accentOrange
+                                    ? DesignTokens.UtilityColors.duplicateWarning
                                     : DesignTokens.BlackColors.stroke,
                                 lineWidth: isDuplicate ? 2 : 1
                             )
@@ -174,20 +182,29 @@ struct DescriptionEditContent: View {
                     .onSubmit {
                         if let nextID = nextID(after: draft.id) {
                             focusedField = nextID
+                        } else {
+                            Keyboard.dismiss()
+                            focusedField = nil
                         }
                     }
 
                     if drafts.count > 1 {
+                        let index = drafts.firstIndex(where: { $0.id == draft.id }) ?? 0
                         Button(
-                            action: { removeDescription(with: draft.id) },
+                            action: {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                removeDescription(with: draft.id)
+                            },
                             label: {
                                 Image(systemName: "minus.circle.fill")
-                                    .font(.system(size: 20))
+                                    .imageScale(.large)
                                     .foregroundColor(DesignTokens.MoonColors.accentOrange)
                             }
                         )
                         .buttonStyle(.plain)
-                        .padding(.trailing, 4)
+                        .padding(.leading, 4)
+                        .contentShape(Rectangle())
+                        .accessibilityLabel("Remove description \(index + 1)")
                     }
                 }
                 .padding(.vertical, 4)
@@ -210,8 +227,10 @@ struct DescriptionEditContent: View {
             set: { newValue in
                 guard let index = drafts.firstIndex(where: { $0.id == id }) else { return }
                 drafts[index].text = newValue
-                validateDuplicates()
                 onDescriptionsChange(drafts)
+                duplicateDebouncer.schedule {
+                    validateDuplicates()
+                }
             }
         )
     }
@@ -219,8 +238,10 @@ struct DescriptionEditContent: View {
     private func addDescription() {
         let newDraft = SessionEditSheetBuilder.DescriptionDraft(text: "")
         drafts.append(newDraft)
-        validateDuplicates()
         onDescriptionsChange(drafts)
+        duplicateDebouncer.schedule {
+            validateDuplicates()
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             focusedField = newDraft.id
         }
@@ -229,8 +250,10 @@ struct DescriptionEditContent: View {
     private func removeDescription(with id: UUID) {
         guard drafts.count > 1, let index = drafts.firstIndex(where: { $0.id == id }) else { return }
         drafts.remove(at: index)
-        validateDuplicates()
         onDescriptionsChange(drafts)
+        duplicateDebouncer.schedule {
+            validateDuplicates()
+        }
 
         if focusedField == id {
             if let next = drafts[safe: min(index, drafts.count - 1)]?.id {
@@ -245,6 +268,8 @@ struct DescriptionEditContent: View {
         var seen: [String: UUID] = [:]
         var duplicates = Set<UUID>()
 
+        let hadConflict = !duplicateIDs.isEmpty
+
         for draft in drafts {
             let key = draft.text.tsu_descriptionNormalizedKey
             if key.isEmpty { continue }
@@ -257,6 +282,22 @@ struct DescriptionEditContent: View {
         }
         duplicateIDs = duplicates
         onDuplicateStateChange(!duplicates.isEmpty)
+
+        let hasConflict = !duplicates.isEmpty
+        if hadConflict != hasConflict {
+            let message = hasConflict
+                ?
+                NSLocalizedString(
+                    "duplicate_descriptions_detected",
+                    comment: "VoiceOver announcement when duplicates appear"
+                )
+                :
+                NSLocalizedString(
+                    "duplicate_descriptions_resolved",
+                    comment: "VoiceOver announcement when duplicates are resolved"
+                )
+            UIAccessibility.post(notification: .announcement, argument: message)
+        }
     }
 
     private var hasDuplicateConflict: Bool {

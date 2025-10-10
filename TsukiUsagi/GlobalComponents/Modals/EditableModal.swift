@@ -97,12 +97,8 @@ struct EditableModal<Content: View>: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save", action: onSave)
                         .fontWeight(.semibold)
-                        .foregroundColor(
-                            isSaveDisabled
-                                ? DesignTokens.MoonColors.textMuted
-                                : DesignTokens.MoonColors.accentBlue
-                        )
                         .disabled(isSaveDisabled)
+                        .allowsHitTesting(!isSaveDisabled)
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()

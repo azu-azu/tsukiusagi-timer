@@ -3,6 +3,14 @@ import SwiftUI
 /// Asset Catalog からカラーを参照し、Light/Dark モードに対応
 enum DesignTokens {
     // MARK: - Colors (意味別グルーピング)
+    enum UtilityColors {
+        /// 重複警告用の視認性高いアクセントカラー
+        static let duplicateWarning = SwiftUI.Color(red: 0.90, green: 0.38, blue: 0.00)
+        static let gray = SwiftUI.Color.gray
+        static let green = SwiftUI.Color.green
+        static let yellow = SwiftUI.Color.yellow
+        static let orange = SwiftUI.Color.orange
+    }
     /// 月の光をテーマにしたテキストカラー
     enum MoonColors {
         /// プライマリテキスト色（Light/Dark モード対応）
