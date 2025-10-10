@@ -52,14 +52,6 @@ struct DescriptionEditContent: View {
         self.onFocusChange = onFocusChange
     }
 
-    func clearFocus() {
-        withAnimation {
-            focusedField = nil
-        }
-        onClearFocus()
-        onFocusChange(nil)
-    }
-
     var body: some View {
         VStack(spacing: 24) {
             sessionCategorySection
@@ -90,10 +82,21 @@ struct DescriptionEditContent: View {
         // .keyboardAwareBottomPadding(baseBottomPadding: DesignTokens.Padding.medium)
     }
 
+}
+
+private extension DescriptionEditContent {
+    func clearFocus() {
+        withAnimation {
+            focusedField = nil
+        }
+        onClearFocus()
+        onFocusChange(nil)
+    }
+
     // MARK: - Private Views
 
     /// セッションカテゴリ表示部分（編集不可）
-    private var sessionCategorySection: some View {
+    var sessionCategorySection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Session Category")
                 .font(DesignTokens.Fonts.caption)
@@ -127,7 +130,7 @@ struct DescriptionEditContent: View {
     }
 
     /// Descriptions編集部分（複数対応）
-    private var descriptionsSection: some View {
+    var descriptionsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Descriptions")
@@ -229,7 +232,7 @@ struct DescriptionEditContent: View {
 
     // MARK: - Helper Methods
 
-    private func binding(for id: UUID) -> Binding<String> {
+    func binding(for id: UUID) -> Binding<String> {
         Binding(
             get: {
                 drafts.first(where: { $0.id == id })?.text ?? ""
@@ -245,7 +248,7 @@ struct DescriptionEditContent: View {
         )
     }
 
-    private func addDescription() {
+    func addDescription() {
         let newDraft = SessionEditSheetBuilder.DescriptionDraft(text: "")
         drafts.append(newDraft)
         onDescriptionsChange(drafts)
@@ -257,7 +260,7 @@ struct DescriptionEditContent: View {
         }
     }
 
-    private func removeDescription(with id: UUID) {
+    func removeDescription(with id: UUID) {
         guard drafts.count > 1, let index = drafts.firstIndex(where: { $0.id == id }) else { return }
         drafts.remove(at: index)
         onDescriptionsChange(drafts)
@@ -274,7 +277,7 @@ struct DescriptionEditContent: View {
         }
     }
 
-    private func validateDuplicates() {
+    func validateDuplicates() {
         var seen: [String: UUID] = [:]
         var duplicates = Set<UUID>()
 
@@ -310,11 +313,11 @@ struct DescriptionEditContent: View {
         }
     }
 
-    private var hasDuplicateConflict: Bool {
+    var hasDuplicateConflict: Bool {
         !duplicateIDs.isEmpty
     }
 
-    private func nextID(after id: UUID) -> UUID? {
+    func nextID(after id: UUID) -> UUID? {
         guard let index = drafts.firstIndex(where: { $0.id == id }) else { return nil }
         let nextIndex = drafts.index(after: index)
         return nextIndex < drafts.endIndex ? drafts[nextIndex].id : nil

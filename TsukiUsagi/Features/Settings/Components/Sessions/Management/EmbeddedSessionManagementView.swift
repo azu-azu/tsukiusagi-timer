@@ -87,10 +87,13 @@ struct EmbeddedSessionManagementView: View {
         .background(DesignTokens.CosmosColors.background)
     }
 
+}
+
+private extension EmbeddedSessionManagementView {
     // MARK: - Default Sessions Section
 
     @ViewBuilder
-    private func defaultSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
+    func defaultSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
         Button {
             presentEditSheet(for: session)
         } label: { defaultRowLabel(session: session) }
@@ -115,7 +118,7 @@ struct EmbeddedSessionManagementView: View {
     // MARK: - Custom Sessions Section
 
     @ViewBuilder
-    private func customSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
+    func customSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
         Button {
             presentEditSheet(for: session)
         } label: { customRowLabel(session: session) }
@@ -163,7 +166,7 @@ struct EmbeddedSessionManagementView: View {
     // MARK: - Row Labels (extracted)
 
     @ViewBuilder
-    private func defaultRowLabel(session: SessionEntry) -> some View {
+    func defaultRowLabel(session: SessionEntry) -> some View {
         HStack(spacing: DesignTokens.Spacing.large) {
             Image(systemName: session.iconName)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -200,68 +203,8 @@ struct EmbeddedSessionManagementView: View {
         .contentShape(Rectangle())
     }
 
-    // MARK: - Sheet Helpers
-
-    private func presentEditSheet(for session: SessionEntry, descriptionIndex: Int? = nil) {
-        selectedSession = session
-        tempSessionName = session.sessionName
-        tempDescriptions = session.descriptions
-        isAnyFieldFocused = false
-
-        let context: SessionEditContext
-
-        if session.isDefault {
-            context = SessionEditContext.descriptionEdit(
-                entryId: session.id,
-                sessionName: session.sessionName,
-                descriptions: session.descriptions,
-                isDefault: true,
-                descriptionIndex: descriptionIndex
-            )
-        } else {
-            context = SessionEditContext.fullSessionEdit(
-                entryId: session.id,
-                sessionName: session.sessionName,
-                descriptions: session.descriptions,
-                isDefault: false
-            )
-        }
-
-        activeSheet = .edit(context)
-    }
-
-    private func handleSessionSave(context: SessionEditContext) {
-        do {
-            if selectedSession?.isDefault ?? context.isDefaultSession {
-                try sessionManager.updateSessionDescriptions(
-                    sessionName: context.sessionName,
-                    newDescriptions: tempDescriptions
-                )
-            } else {
-                try sessionManager.addOrUpdateEntry(
-                    originalKey: context.sessionName.lowercased(),
-                    sessionName: tempSessionName,
-                    descriptions: tempDescriptions
-                )
-            }
-            dismissEditSheet()
-        } catch {
-            #if DEBUG
-            print("Error saving session: \(error)")
-            #endif
-        }
-    }
-
-    private func dismissEditSheet() {
-        activeSheet = nil
-        selectedSession = nil
-        isAnyFieldFocused = false
-        tempSessionName = ""
-        tempDescriptions = []
-    }
-
     @ViewBuilder
-    private func customRowLabel(session: SessionEntry) -> some View {
+    func customRowLabel(session: SessionEntry) -> some View {
         HStack(spacing: DesignTokens.Spacing.large) {
             Image(systemName: session.iconName)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -293,7 +236,89 @@ struct EmbeddedSessionManagementView: View {
     }
 
     @ViewBuilder
-    private func emptyCustomSessionsView() -> some View {
+    func defaultSessionsSection() -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(sessionManager.defaultEntries.enumerated()), id: \.element.id) { index, session in
+                defaultSessionRow(session, isLast: index == sessionManager.defaultEntries.count - 1)
+            }
+        }
+    }
+
+    @ViewBuilder
+    func customSessionsSection() -> some View {
+        VStack(spacing: 0) {
+            if sessionManager.customEntries.isEmpty {
+                emptyCustomSessionsView()
+            } else {
+                ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
+                    customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
+                }
+            }
+        }
+    }
+
+    // MARK: - Sheet Helpers
+
+    func presentEditSheet(for session: SessionEntry, descriptionIndex: Int? = nil) {
+        selectedSession = session
+        tempSessionName = session.sessionName
+        tempDescriptions = session.descriptions
+        isAnyFieldFocused = false
+
+        let context: SessionEditContext
+
+        if session.isDefault {
+            context = SessionEditContext.descriptionEdit(
+                entryId: session.id,
+                sessionName: session.sessionName,
+                descriptions: session.descriptions,
+                isDefault: true,
+                descriptionIndex: descriptionIndex
+            )
+        } else {
+            context = SessionEditContext.fullSessionEdit(
+                entryId: session.id,
+                sessionName: session.sessionName,
+                descriptions: session.descriptions,
+                isDefault: false
+            )
+        }
+
+        activeSheet = .edit(context)
+    }
+
+    func handleSessionSave(context: SessionEditContext) {
+        do {
+            if selectedSession?.isDefault ?? context.isDefaultSession {
+                try sessionManager.updateSessionDescriptions(
+                    sessionName: context.sessionName,
+                    newDescriptions: tempDescriptions
+                )
+            } else {
+                try sessionManager.addOrUpdateEntry(
+                    originalKey: context.sessionName.lowercased(),
+                    sessionName: tempSessionName,
+                    descriptions: tempDescriptions
+                )
+            }
+            dismissEditSheet()
+        } catch {
+            #if DEBUG
+            print("Error saving session: \(error)")
+            #endif
+        }
+    }
+
+    func dismissEditSheet() {
+        activeSheet = nil
+        selectedSession = nil
+        isAnyFieldFocused = false
+        tempSessionName = ""
+        tempDescriptions = []
+    }
+
+    @ViewBuilder
+    func emptyCustomSessionsView() -> some View {
         VStack(spacing: DesignTokens.Spacing.medium) {
             Image(systemName: "folder.badge.plus")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -315,7 +340,7 @@ struct EmbeddedSessionManagementView: View {
     // MARK: - Add Custom Session Button
 
     @ViewBuilder
-    private func addCustomSessionButton() -> some View {
+    func addCustomSessionButton() -> some View {
         Button {
             activeSheet = .create
         } label: {
@@ -326,38 +351,6 @@ struct EmbeddedSessionManagementView: View {
         }
         .buttonStyle(.borderedProminent)
     }
-}
-
-// MARK: - EmbeddedSessionManagementView extracted sections
-
-extension EmbeddedSessionManagementView {
-    @ViewBuilder
-    fileprivate func defaultSessionsSection() -> some View {
-        VStack(spacing: 0) {
-            ForEach(Array(sessionManager.defaultEntries.enumerated()), id: \.element.id) { index, session in
-                defaultSessionRow(session, isLast: index == sessionManager.defaultEntries.count - 1)
-            }
-        }
-    }
-
-    @ViewBuilder
-    fileprivate func customSessionsSection() -> some View {
-        VStack(spacing: 0) {
-            if sessionManager.customEntries.isEmpty {
-                emptyCustomSessionsView()
-            } else {
-                ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
-                    customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
-                }
-            }
-        }
-    }
-}
-
-// MARK: - EmbeddedSessionManagementView subviews
-
-extension EmbeddedSessionManagementView {
-    // Additional helpers can be added here to keep main type small
 }
 
 #if DEBUG
