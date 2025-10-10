@@ -128,6 +128,8 @@ class SessionManager: ObservableObject {
         let newKey = trimmedName.lowercased()
         let oldKey = originalKey.trimmingCharacters(in: .whitespacesAndNewlines)
 
+        let canonicalDescriptions = descriptions.map { $0.tsu_descriptionNormalizedValue }
+
         // バリデーション実行
         let validationContext = SessionValidationContext(
             isNewSession: sessionDatabase[newKey] == nil,
@@ -140,7 +142,7 @@ class SessionManager: ObservableObject {
 
         try SessionManagerValidator.validateSessionEntry(
             sessionName: trimmedName,
-            descriptions: descriptions,
+            descriptions: canonicalDescriptions,
             validationContext: validationContext
         )
 
@@ -148,7 +150,7 @@ class SessionManager: ObservableObject {
         let entry = SessionEntry(
             id: sessionDatabase[oldKey]?.id ?? UUID(),
             sessionName: trimmedName,
-            descriptions: descriptions,
+            descriptions: canonicalDescriptions,
             isDefault: isDefault
         )
 
@@ -190,11 +192,17 @@ class SessionManager: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: "allSessionEntriesV3"),
             let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
             sessionDatabase.removeAll()
+            var didSanitize = false
             for entry in decoded where !entry.sessionName.isEmpty {
                 let key = entry.sessionName
                     .lowercased()
                     .trimmingCharacters(in: .whitespacesAndNewlines)
-                sessionDatabase[key] = entry
+                let (sanitized, changed) = sanitizeEntry(entry)
+                sessionDatabase[key] = sanitized
+                if changed { didSanitize = true }
+            }
+            if didSanitize {
+                save()
             }
             return
         }
@@ -203,18 +211,46 @@ class SessionManager: ObservableObject {
         migrateLegacyData()
     }
 
+    private func sanitizeEntry(_ entry: SessionEntry) -> (SessionEntry, Bool) {
+        var seen = Set<String>()
+        var sanitized: [String] = []
+
+        for description in entry.descriptions {
+            let canonical = description.tsu_descriptionNormalizedValue
+            let key = canonical.tsu_descriptionNormalizedKey
+            if seen.contains(key) {
+                continue
+            }
+            seen.insert(key)
+            sanitized.append(canonical)
+        }
+
+        let changed = sanitized != entry.descriptions
+        let sanitizedEntry = SessionEntry(
+            id: entry.id,
+            sessionName: entry.sessionName,
+            descriptions: sanitized,
+            isDefault: entry.isDefault
+        )
+        return (sanitizedEntry, changed)
+    }
+
     /// 旧形式データのマイグレーション
     private func migrateLegacyData() {
         if let data = UserDefaults.standard.data(forKey: "customEntriesV2"),
             let decoded = try? JSONDecoder().decode([SessionEntry].self, from: data) {
+            var didSanitize = false
             for entry in decoded where !entry.sessionName.isEmpty {
                 let key = entry.sessionName
                     .lowercased()
                     .trimmingCharacters(in: .whitespacesAndNewlines)
-                sessionDatabase[key] = entry
+                let (sanitized, changed) = sanitizeEntry(entry)
+                sessionDatabase[key] = sanitized
+                if changed { didSanitize = true }
             }
-            // 移行後は新しいキーで保存
-            save()
+            if didSanitize {
+                save()
+            }
             // 古いデータを削除
             UserDefaults.standard.removeObject(forKey: "customEntriesV2")
         }

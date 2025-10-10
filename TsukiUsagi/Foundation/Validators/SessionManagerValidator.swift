@@ -1,5 +1,25 @@
 import Foundation
 
+extension String {
+    static let tsuDescriptionSpacePattern = #"[ \u{3000}]+"#
+
+    var tsu_descriptionNormalizedValue: String {
+        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.replacingOccurrences(
+            of: Self.tsuDescriptionSpacePattern,
+            with: " ",
+            options: .regularExpression
+        )
+    }
+
+    var tsu_descriptionNormalizedKey: String {
+        tsu_descriptionNormalizedValue.folding(
+            options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive],
+            locale: .current
+        )
+    }
+}
+
 /// バリデーション時に必要な文脈情報をまとめた構造体
 struct SessionValidationContext {
     let isNewSession: Bool
@@ -34,6 +54,7 @@ enum SessionValidationError: Error {
     case sessionNameTooLong
     case maxSessionCountExceeded
     case duplicateSessionName
+    case duplicateDescription(indices: [Int])
     case tooManyDescriptions
     case descriptionTooLong
     case sessionNotFound
@@ -49,6 +70,8 @@ enum SessionValidationError: Error {
             return "セッション数が上限に達しています（最大\(SessionManager.maxSessionCount)個）"
         case .duplicateSessionName:
             return "同じ名前のセッションが既に存在します"
+        case .duplicateDescription:
+            return "同じ説明が重複しています"
         case .tooManyDescriptions:
             return "説明が多すぎます（最大\(SessionManager.maxDescriptionCount)個）"
         case .descriptionTooLong:
@@ -142,11 +165,27 @@ class SessionManagerValidator {
             throw SessionValidationError.tooManyDescriptions
         }
 
-        // 各説明の文字数チェック
-        for description in descriptions {
-            guard description.count <= SessionManager.maxDescriptionLength else {
+        var firstIndexByKey: [String: Int] = [:]
+        var duplicateIndices = Set<Int>()
+
+        for (index, rawDescription) in descriptions.enumerated() {
+            let canonical = rawDescription.tsu_descriptionNormalizedValue
+
+            guard canonical.count <= SessionManager.maxDescriptionLength else {
                 throw SessionValidationError.descriptionTooLong
             }
+
+            let key = canonical.tsu_descriptionNormalizedKey
+            if let first = firstIndexByKey[key] {
+                duplicateIndices.insert(first)
+                duplicateIndices.insert(index)
+            } else {
+                firstIndexByKey[key] = index
+            }
+        }
+
+        if !duplicateIndices.isEmpty {
+            throw SessionValidationError.duplicateDescription(indices: duplicateIndices.sorted())
         }
     }
 
@@ -155,7 +194,8 @@ class SessionManagerValidator {
         guard entry.descriptions.count < SessionManager.maxDescriptionCount else {
             throw SessionValidationError.tooManyDescriptions
         }
-        guard newText.count <= SessionManager.maxDescriptionLength else {
+        let canonical = newText.tsu_descriptionNormalizedValue
+        guard canonical.count <= SessionManager.maxDescriptionLength else {
             throw SessionValidationError.descriptionTooLong
         }
     }
@@ -163,7 +203,8 @@ class SessionManagerValidator {
     /// Description更新用バリデーション
     static func validateUpdateDescription(_ entry: SessionEntry, index: Int, newText: String) throws {
         try validateIndex(index, for: entry.descriptions)
-        guard newText.count <= SessionManager.maxDescriptionLength else {
+        let canonical = newText.tsu_descriptionNormalizedValue
+        guard canonical.count <= SessionManager.maxDescriptionLength else {
             throw SessionValidationError.descriptionTooLong
         }
     }

@@ -72,10 +72,18 @@ struct EditableModal<Content: View>: View {
                 .onChange(of: focusedRowID) { _, newValue in
                     scrollToID(proxy, id: newValue)
                 }
-                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { _ in
+                .onReceive(
+                    NotificationCenter.default.publisher(
+                        for: UIResponder.keyboardWillChangeFrameNotification
+                    )
+                ) { _ in
                     scrollToID(proxy, id: focusedRowID)
                 }
-                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidChangeFrameNotification)) { _ in
+                .onReceive(
+                    NotificationCenter.default.publisher(
+                        for: UIResponder.keyboardDidChangeFrameNotification
+                    )
+                ) { _ in
                     scrollToID(proxy, id: focusedRowID, extraDelay: 0.08)
                 }
             }
