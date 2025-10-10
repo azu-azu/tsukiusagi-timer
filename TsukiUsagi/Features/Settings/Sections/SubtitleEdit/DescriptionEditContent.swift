@@ -87,7 +87,7 @@ struct DescriptionEditContent: View {
             onFocusChange(newValue)
         }
         // Manage Descriptions は余白リフトへ統一
-        //.keyboardAwareBottomPadding(baseBottomPadding: DesignTokens.Padding.medium)
+        // .keyboardAwareBottomPadding(baseBottomPadding: DesignTokens.Padding.medium)
     }
 
     // MARK: - Private Views
