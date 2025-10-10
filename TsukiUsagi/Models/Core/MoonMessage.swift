@@ -148,4 +148,8 @@ enum MoonMessage {
     static func random() -> MoonMessageEntry {
         messages.randomElement() ?? MoonMessageEntry(lines: [""])
     }
+
+    static func fallback() -> MoonMessageEntry {
+        messages.first ?? MoonMessageEntry(lines: [""])
+    }
 }

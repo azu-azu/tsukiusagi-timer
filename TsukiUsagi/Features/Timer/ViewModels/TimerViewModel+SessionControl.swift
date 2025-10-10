@@ -19,6 +19,7 @@ extension TimerViewModel {
         guard targetTime > 0 else { return }
 
         ensureWorkOnStart()
+        clearQuietMoonMessage()
 
         sessionManager.startSession(
             isWorkSession: isWorkSession,
@@ -106,6 +107,7 @@ extension TimerViewModel {
         stateManager.stopTimer()
         sessionManager.resetSession()
         notificationService.cancelSessionEndNotification()
+        clearQuietMoonMessage()
     }
 
     /// タイマーリセット
@@ -121,6 +123,7 @@ extension TimerViewModel {
             // セッション情報は保持
         } else {
             sessionManager.resetSession()
+            clearQuietMoonMessage()
         }
         animationController.resetAnimationState()
         notificationService.cancelSessionEndNotification()
@@ -129,6 +132,7 @@ extension TimerViewModel {
     /// セッション完了処理
     func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
         // debug log removed
+        let completedWasWorkSession = isWorkSession
         // 保存のSoT（真実）は endAt/セッション情報の endTime を優先
         sessionManager.handleExpiredSession(
             end: sessionInfo.endTime,
@@ -156,6 +160,8 @@ extension TimerViewModel {
             )
         }
 
+        updateQuietMoonMessage(forCompletedWorkSession: completedWasWorkSession)
+
         // それからフェーズをトグル
         if isWorkSession {
             stateManager.setWorkSession(false) // Work → Break
@@ -168,6 +174,8 @@ extension TimerViewModel {
     func forceFinish() {
         guard canForceFinish else { return }
         // debug log removed
+
+        let completedWasWorkSession = isWorkSession
 
         sessionManager.completeSession(
             isWorkSession: isWorkSession,
@@ -183,6 +191,8 @@ extension TimerViewModel {
 
         // スケジュール済みの通知をキャンセル
         notificationService.cancelSessionEndNotification()
+
+        updateQuietMoonMessage(forCompletedWorkSession: completedWasWorkSession)
     }
 
     /// セッション完了状態をリセット
@@ -216,6 +226,14 @@ extension TimerViewModel {
     private func ensureWorkOnStart() {
         if isSessionFinished || !isWorkSession {
             stateManager.setWorkSession(true)
+        }
+    }
+
+    private func updateQuietMoonMessage(forCompletedWorkSession completedWorkSession: Bool) {
+        if completedWorkSession {
+            assignQuietMoonMessageIfNeeded()
+        } else {
+            clearQuietMoonMessage()
         }
     }
 }
