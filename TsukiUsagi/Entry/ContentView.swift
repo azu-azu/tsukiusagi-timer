@@ -90,124 +90,10 @@ private extension ContentView {
     }
 
     func mainScene(for context: LayoutContext) -> some View {
-        layoutLayers(for: context)
+        let base = layoutLayers(for: context)
             .ignoresSafeArea()
             .gesture(sideMenuDragGesture(context: context))
-            .onReceive(timerVM.$flashStars.dropFirst()) { flashStars in
-                if flashStars {
-                    showDiamondStars = true
-                }
-            }
-            // シート提示は MainPanel へ移譲
-            .sheet(isPresented: $showingEditRecord) {
-                ZStack {
-                    DesignTokens.CosmosColors.background.ignoresSafeArea()
-                    TimerEditView()
-                        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-                }
-            }
-            .presentationBackground(DesignTokens.CosmosColors.background)
-            .onChange(of: timerVM.isSessionFinished) { _, newValue in
-                if newValue {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        isQuietMoonFocused = true
-                    }
-                }
-            }
-            // showingSideMenu の変更のみで十分（shouldAnimateStars が再評価される）
-            // 低電力モードの変更を監視
-            .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
-                isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
-            }
-            // フォアグラウンド復帰で日付を更新
-            .onReceive(
-                NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
-            ) { _ in
-                today = Date()
-                timerVM.appWillEnterForeground()
-            }
-            // バックグラウンド移行時の処理
-            .onReceive(
-                NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
-            ) { _ in
-                timerVM.appDidEnterBackground()
-            }
-            // 画面常駐時に0時を跨いだら日付を更新
-            .onAppear { scheduleMidnightTick() }
-            // 編集保存完了でHUDを表示
-            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
-                savedToastWorkItem?.cancel()
-                withAnimation(.easeInOut(duration: 0.2)) { showSavedToast = true }
-                recordedTimesNonce = UUID()
-                let work = DispatchWorkItem {
-                    withAnimation(.easeInOut(duration: 0.3)) { showSavedToast = false }
-                }
-                savedToastWorkItem = work
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
-            }
-            // History 保存失敗: 非ブロッキングトースト表示
-            .onReceive(
-                NotificationCenter.default.publisher(for: Notification.Name("HistorySaveFailed"))
-            ) { _ in
-                historyToastWorkItem?.cancel()
-                historyToastMessage = "Save failed. Retrying…"
-                withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
-                let work = DispatchWorkItem {
-                    withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
-                }
-                historyToastWorkItem = work
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
-            }
-            // History 保存リトライ: 次回リトライまでの秒数を表示
-            .onReceive(
-                NotificationCenter.default.publisher(for: Notification.Name("HistorySaveRetrying"))
-            ) { notif in
-                guard let delay = notif.object as? Double else { return }
-                historyToastWorkItem?.cancel()
-                historyToastMessage = String(format: "Retrying in %.0fs…", delay)
-                withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
-                let work = DispatchWorkItem {
-                    withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
-                }
-                historyToastWorkItem = work
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.3, execute: work)
-            }
-            // History 保存断念: CTA付きバナー表示
-            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("HistorySaveGaveUp"))) { _ in
-                withAnimation(.easeInOut(duration: 0.2)) { showHistorySaveBanner = true }
-            }
-            // 復帰直後の“静かな完了”を軽く表示（ワンショット）
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: Notification.Name("TimerSilentCompleted")
-                )
-            ) { _ in
-                silentCompleteWorkItem?.cancel()
-                withAnimation(.easeInOut(duration: 0.2)) { showSilentCompleteChip = true }
-                let work = DispatchWorkItem {
-                    withAnimation(.easeInOut(duration: 0.3)) { showSilentCompleteChip = false }
-                }
-                silentCompleteWorkItem = work
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: work)
-            }
-            // Final Time 変更でレイヤーを確実に再構築
-            .onChange(of: timerVM.endTime) { _, _ in
-                recordedTimesNonce = UUID()
-            }
-            // SessionManagerからのサイドメニュー開きリクエストを監視
-            .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
-                if shouldOpen {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        showingSideMenu = true
-                    }
-                    sessionManager.resetSideMenuRequest()
-                }
-            }
-            .animation(
-                .easeInOut(duration: 0.3)
-                    .delay(0.1),
-                value: context.isLandscape
-            )
+        return applySceneHandlers(to: base, context: context)
     }
 
     @ViewBuilder
@@ -267,14 +153,19 @@ private extension ContentView {
             ))
             .id("recorded-layer-\(recordedTimesNonce)")
 
-            diamondStarsOverlay()
-            SideMenuView(isPresented: $showingSideMenu)
-                .zIndex(2002)
-            savedToast(safeAreaInsets: safeAreaInsets)
-            historyToast(safeAreaInsets: safeAreaInsets)
-            historySaveBanner(safeAreaInsets: safeAreaInsets)
-            silentCompleteChip(safeAreaInsets: safeAreaInsets)
+            overlays(for: context, safeAreaInsets: safeAreaInsets)
         }
+    }
+
+    @ViewBuilder
+    func overlays(for context: LayoutContext, safeAreaInsets: EdgeInsets) -> some View {
+        diamondStarsOverlay()
+        SideMenuView(isPresented: $showingSideMenu)
+            .zIndex(2002)
+        savedToast(safeAreaInsets: safeAreaInsets)
+        historyToast(safeAreaInsets: safeAreaInsets)
+        historySaveBanner(safeAreaInsets: safeAreaInsets)
+        silentCompleteChip(safeAreaInsets: safeAreaInsets)
     }
 
     @ViewBuilder
@@ -431,6 +322,114 @@ private extension ContentView {
                     }
                 }
             }
+    }
+}
+
+private extension ContentView {
+    func applySceneHandlers<Content: View>(to view: Content, context: LayoutContext) -> some View {
+        view
+            .onReceive(timerVM.$flashStars.dropFirst()) { flashStars in
+                if flashStars {
+                    showDiamondStars = true
+                }
+            }
+            .sheet(isPresented: $showingEditRecord) {
+                ZStack {
+                    DesignTokens.CosmosColors.background.ignoresSafeArea()
+                    TimerEditView()
+                        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+                }
+            }
+            .presentationBackground(DesignTokens.CosmosColors.background)
+            .onChange(of: timerVM.isSessionFinished) { _, newValue in
+                if newValue {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        isQuietMoonFocused = true
+                    }
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
+                isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            ) { _ in
+                today = Date()
+                timerVM.appWillEnterForeground()
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+            ) { _ in
+                timerVM.appDidEnterBackground()
+            }
+            .onAppear { scheduleMidnightTick() }
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
+                savedToastWorkItem?.cancel()
+                withAnimation(.easeInOut(duration: 0.2)) { showSavedToast = true }
+                recordedTimesNonce = UUID()
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showSavedToast = false }
+                }
+                savedToastWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(for: Notification.Name("HistorySaveFailed"))
+            ) { _ in
+                historyToastWorkItem?.cancel()
+                historyToastMessage = "Save failed. Retrying…"
+                withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
+                }
+                historyToastWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(for: Notification.Name("HistorySaveRetrying"))
+            ) { notif in
+                guard let delay = notif.object as? Double else { return }
+                historyToastWorkItem?.cancel()
+                historyToastMessage = String(format: "Retrying in %.0fs…", delay)
+                withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
+                }
+                historyToastWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.3, execute: work)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("HistorySaveGaveUp"))) { _ in
+                withAnimation(.easeInOut(duration: 0.2)) { showHistorySaveBanner = true }
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: Notification.Name("TimerSilentCompleted")
+                )
+            ) { _ in
+                silentCompleteWorkItem?.cancel()
+                withAnimation(.easeInOut(duration: 0.2)) { showSilentCompleteChip = true }
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showSilentCompleteChip = false }
+                }
+                silentCompleteWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: work)
+            }
+            .onChange(of: timerVM.endTime) { _, _ in
+                recordedTimesNonce = UUID()
+            }
+            .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
+                if shouldOpen {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showingSideMenu = true
+                    }
+                    sessionManager.resetSideMenuRequest()
+                }
+            }
+            .animation(
+                .easeInOut(duration: 0.3)
+                    .delay(0.1),
+                value: context.isLandscape
+            )
     }
 }
 

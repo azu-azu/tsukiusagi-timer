@@ -47,7 +47,7 @@ struct DailyTimelineView: View {
                         let sessionSummaries = dataProvider
                             .daySessionSummaries(historyVM: historyVM, targetDate: targetDate)
                         if !sessionSummaries.isEmpty {
-                            SummaryTreeView(
+                            DailyTimelineSummaryTreeView(
                                 sessions: sessionSummaries,
                                 displayName: { sessionName in
                                     historyVM.displaySessionName(
@@ -57,7 +57,7 @@ struct DailyTimelineView: View {
                                 }
                             )
                         }
-                        InlineReflectionSection(
+                        DailyTimelineInlineReflectionSection(
                             text: $detailViewModel.reflectionText,
                             isSaving: detailViewModel.isSaving,
                             error: detailViewModel.error,
@@ -110,7 +110,7 @@ struct DailyTimelineView: View {
             MemoEditView(record: record, anchorDate: targetDate)
         }
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-        .modifier(ConditionalKeyboardAwareInset(isEnabled: !inlineReflectionEnabled))
+        .modifier(DailyTimelineKeyboardAwareInset(isEnabled: !inlineReflectionEnabled))
         .onAppear {
             if inlineReflectionEnabled {
                 detailViewModel.attach(historyViewModel: historyVM)
@@ -129,6 +129,170 @@ struct DailyTimelineView: View {
             disableBackSwipeGesture()
         }
     }
+}
+
+// MARK: - Subviews
+private struct DailyTimelineSummaryTreeView: View {
+    let sessions: [DaySessionSummary]
+    let displayName: (String) -> String
+    private let maxDescriptionsPerSession = 5
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(sessions, id: \.self) { session in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 12) {
+                        Text(displayName(session.sessionName))
+                            .font(DesignTokens.Fonts.labelBold)
+                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .lineLimit(1)
+                        Spacer(minLength: 12)
+                        Text(formattedDuration(session.total))
+                            .font(DesignTokens.Fonts.labelBold)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                            .monospacedDigit()
+                    }
+
+                    if !session.descriptions.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(
+                                Array(session.descriptions.prefix(maxDescriptionsPerSession)),
+                                id: \.title
+                            ) { slice in
+                                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                    Text(slice.title)
+                                        .font(DesignTokens.Fonts.label)
+                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                        .lineLimit(1)
+                                        .padding(.leading, 12)
+                                    Spacer(minLength: 12)
+                                    Text(formattedDuration(slice.duration))
+                                        .font(DesignTokens.Fonts.caption)
+                                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                        .monospacedDigit()
+                                }
+                            }
+
+                            if session.descriptions.count > maxDescriptionsPerSession {
+                                Text("+ \(session.descriptions.count - maxDescriptionsPerSession) more")
+                                    .font(DesignTokens.Fonts.caption)
+                                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                    .padding(.leading, 12)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DesignTokens.CosmosColors.cardBackground)
+        .cornerRadius(12)
+    }
+
+    private func formattedDuration(_ interval: TimeInterval) -> String {
+        TimeFormatters.totalTextWithSeconds(Int(interval.rounded()))
+    }
+}
+
+private struct DailyTimelineInlineReflectionSection: View {
+    @Binding var text: String
+    let isSaving: Bool
+    let error: Error?
+    let onRetry: () -> Void
+    let focus: FocusState<Bool>.Binding
+
+    private let placeholderText = Copy.Reflection.placeholder
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(Copy.Reflection.title)
+                .font(DesignTokens.Fonts.sectionTitle)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $text)
+                    .focused(focus)
+                    .frame(minHeight: 160)
+                    .padding(12)
+                    .background(DesignTokens.WhiteColors.surface)
+                    .cornerRadius(8)
+                    .textEditorStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .lineSpacing(4)
+                    .accessibilityIdentifier("history_detail_reflection_editor")
+
+                if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Text(placeholderText)
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 18)
+                        .allowsHitTesting(false)
+                }
+            }
+
+            if isSaving {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                    Text("Saving…")
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                }
+            }
+
+            if let error {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Failed to save. Try again?")
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    Text(error.localizedDescription)
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    Button(action: onRetry) {
+                        Text("Retry")
+                            .font(DesignTokens.Fonts.labelBold)
+                            .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(DesignTokens.CosmosColors.cardBackground)
+                .cornerRadius(8)
+                .accessibilityIdentifier("banner_history_reflection_retry")
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DesignTokens.CosmosColors.cardBackground)
+        .cornerRadius(12)
+        .keyboardAwareBottomPadding(baseBottomPadding: 16)
+        .keyboardCloseToolbar(labelStyle: .iconWithText("Close")) {
+            focus.wrappedValue = false
+            Keyboard.dismiss()
+        }
+        .onDisappear {
+            focus.wrappedValue = false
+        }
+    }
+}
+
+private struct DailyTimelineKeyboardAwareInset: ViewModifier {
+    let isEnabled: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.keyboardAwareInset()
+        } else {
+            content
+        }
+    }
+}
+
+private extension DailyTimelineView {
     // MARK: - Records Section
     @ViewBuilder
     private func dayModeRecordsSection() -> some View {
@@ -258,153 +422,6 @@ struct DailyTimelineView: View {
 
     // MARK: - Inline Reflection Views
 
-    private struct SummaryTreeView: View {
-        let sessions: [DaySessionSummary]
-        let displayName: (String) -> String
-        let maxDescriptionsPerSession: Int = 5
-
-        var body: some View {
-            VStack(alignment: .leading, spacing: 16) {
-                ForEach(sessions, id: \.self) { session in
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(alignment: .firstTextBaseline, spacing: 12) {
-                            Text(displayName(session.sessionName))
-                                .font(DesignTokens.Fonts.labelBold)
-                                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                .lineLimit(1)
-                            Spacer(minLength: 12)
-                            Text(formattedDuration(session.total))
-                                .font(DesignTokens.Fonts.labelBold)
-                                .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                                .monospacedDigit()
-                        }
-
-                        if !session.descriptions.isEmpty {
-                            VStack(alignment: .leading, spacing: 6) {
-                                ForEach(
-                                    Array(session.descriptions.prefix(maxDescriptionsPerSession)),
-                                    id: \.title
-                                ) { slice in
-                                    HStack(alignment: .firstTextBaseline, spacing: 12) {
-                                        Text(slice.title)
-                                            .font(DesignTokens.Fonts.label)
-                                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                            .lineLimit(1)
-                                            .padding(.leading, 12)
-                                        Spacer(minLength: 12)
-                                        Text(formattedDuration(slice.duration))
-                                            .font(DesignTokens.Fonts.caption)
-                                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                                            .monospacedDigit()
-                                    }
-                                }
-
-                                if session.descriptions.count > maxDescriptionsPerSession {
-                                    Text("+ \(session.descriptions.count - maxDescriptionsPerSession) more")
-                                        .font(DesignTokens.Fonts.caption)
-                                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                                        .padding(.leading, 12)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(DesignTokens.CosmosColors.cardBackground)
-            .cornerRadius(12)
-        }
-
-        private func formattedDuration(_ interval: TimeInterval) -> String {
-            TimeFormatters.totalTextWithSeconds(Int(interval.rounded()))
-        }
-    }
-
-    private struct InlineReflectionSection: View {
-        @Binding var text: String
-        let isSaving: Bool
-        let error: Error?
-        let onRetry: () -> Void
-        let focus: FocusState<Bool>.Binding
-
-        private let placeholderText = Copy.Reflection.placeholder
-
-        var body: some View {
-            VStack(alignment: .leading, spacing: 12) {
-                Text(Copy.Reflection.title)
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-
-                ZStack(alignment: .topLeading) {
-                    TextEditor(text: $text)
-                        .focused(focus)
-                        .frame(minHeight: 160)
-                        .padding(12)
-                        .background(DesignTokens.WhiteColors.surface)
-                        .cornerRadius(8)
-                        .textEditorStyle(.plain)
-                        .scrollContentBackground(.hidden)
-                        .lineSpacing(4)
-                        .accessibilityIdentifier("history_detail_reflection_editor")
-
-                    if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Text(placeholderText)
-                            .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.MoonColors.textMuted)
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 18)
-                            .allowsHitTesting(false)
-                    }
-                }
-
-                if isSaving {
-                    HStack(spacing: 8) {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                        Text("Saving…")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    }
-                }
-
-                if let error = error {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Failed to save. Try again?")
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                        Text(error.localizedDescription)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        Button(action: onRetry) {
-                            Text("Retry")
-                                .font(DesignTokens.Fonts.labelBold)
-                                .foregroundColor(DesignTokens.MoonColors.accentBlue)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(DesignTokens.CosmosColors.cardBackground)
-                    .cornerRadius(8)
-                    .accessibilityIdentifier("banner_history_reflection_retry")
-                }
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(DesignTokens.CosmosColors.cardBackground)
-            .cornerRadius(12)
-            .keyboardAwareBottomPadding(baseBottomPadding: 16)
-            .keyboardCloseToolbar(labelStyle: .iconWithText("Close")) {
-                focus.wrappedValue = false
-                Keyboard.dismiss()
-            }
-            .onDisappear {
-                focus.wrappedValue = false
-            }
-        }
-    }
-
     // MARK: - Back Swipe Control
     private func disableBackSwipeGesture() {
         DispatchQueue.main.async {
@@ -449,17 +466,4 @@ struct DailyTimelineView: View {
         selectedRecordForMemoEdit = record
     }
 
-    // MARK: - Modifiers
-    private struct ConditionalKeyboardAwareInset: ViewModifier {
-        let isEnabled: Bool
-
-        @ViewBuilder
-        func body(content: Content) -> some View {
-            if isEnabled {
-                content.keyboardAwareInset()
-            } else {
-                content
-            }
-        }
-    }
 }
