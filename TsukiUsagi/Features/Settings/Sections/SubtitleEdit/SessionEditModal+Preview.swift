@@ -21,18 +21,25 @@ struct SessionEditModal_Previews: PreviewProvider {
                 title: "Manage Descriptions",
                 onSave: { print("Save tapped") },
                 onCancel: { print("Cancel tapped") },
+                isSaveDisabled: false,
                 isKeyboardCloseVisible: false,
                 onKeyboardClose: {},
+                focusedRowID: .constant(nil),
                 content: {
                     DescriptionEditContent(
                         sessionName: "Work",
-                        descriptions: ["SwiftUI development", "Code review"],
-                        editingIndex: 0,
-                        onDescriptionsChange: { newDescriptions in
-                            print("Descriptions changed: \(newDescriptions)")
+                        descriptionDrafts: [
+                            SessionEditSheetBuilder.DescriptionDraft(text: "SwiftUI development"),
+                            SessionEditSheetBuilder.DescriptionDraft(text: "Code review")
+                        ],
+                        editingID: nil,
+                        onDescriptionsChange: { drafts in
+                            print("Descriptions changed: \(drafts.map(\.text))")
                         },
                         isAnyFieldFocused: .constant(false),
-                        onClearFocus: {}
+                        onClearFocus: {},
+                        onDuplicateStateChange: { _ in },
+                        onFocusChange: { _ in }
                     )
                 }
             )
@@ -44,20 +51,28 @@ struct SessionEditModal_Previews: PreviewProvider {
                 title: "Edit Session",
                 onSave: { print("Save tapped") },
                 onCancel: { print("Cancel tapped") },
+                isSaveDisabled: false,
                 isKeyboardCloseVisible: false,
                 onKeyboardClose: {},
+                focusedRowID: .constant(nil),
                 content: {
                     FullSessionEditContent(
                         sessionName: "My Custom Project",
-                        descriptions: ["Task 1", "Task 2", "Task 3"],
+                        descriptionDrafts: [
+                            SessionEditSheetBuilder.DescriptionDraft(text: "Task 1"),
+                            SessionEditSheetBuilder.DescriptionDraft(text: "Task 2"),
+                            SessionEditSheetBuilder.DescriptionDraft(text: "Task 3")
+                        ],
                         onSessionNameChange: { newName in
                             print("Session name changed: \(newName)")
                         },
-                        onDescriptionsChange: { newDescriptions in
-                            print("Descriptions changed: \(newDescriptions)")
+                        onDescriptionsChange: { drafts in
+                            print("Descriptions changed: \(drafts.map(\.text))")
                         },
                         isAnyFieldFocused: .constant(false),
-                        onClearFocus: {}
+                        onClearFocus: {},
+                        onDuplicateStateChange: { _ in },
+                        onFocusChange: { _ in }
                     )
                 }
             )
@@ -69,8 +84,10 @@ struct SessionEditModal_Previews: PreviewProvider {
                 title: "Sample Modal",
                 onSave: { print("Save tapped") },
                 onCancel: { print("Cancel tapped") },
+                isSaveDisabled: false,
                 isKeyboardCloseVisible: true,
                 onKeyboardClose: { print("Keyboard close tapped") },
+                focusedRowID: .constant(nil),
                 content: {
                     VStack {
                         Text("Sample Content")
