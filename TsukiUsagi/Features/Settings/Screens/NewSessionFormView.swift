@@ -10,6 +10,7 @@ struct NewSessionFormView: View {
     @State private var showAddDescriptionField = false
     @State private var errorMessage: String = ""
     @State private var showError = false
+    @State private var hasDuplicateConflict = false
 
     @FocusState private var focusedField: FocusedField?
 
@@ -42,7 +43,7 @@ struct NewSessionFormView: View {
                     Button(NSLocalizedString("create", comment: "")) {
                         createSession()
                     }
-                    .disabled(sessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(sessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || hasDuplicateConflict)
                 }
             }
             .adaptiveKeyboardCloseButton(
@@ -142,6 +143,12 @@ struct NewSessionFormView: View {
                 }
             }
 
+            if hasDuplicateConflict {
+                Text(NSLocalizedString("duplicate_descriptions_detected", comment: "Duplicate descriptions detected"))
+                    .font(DesignTokens.Fonts.caption)
+                    .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
+            }
+
             if showAddDescriptionField {
                 addDescriptionField()
             }
@@ -179,6 +186,7 @@ struct NewSessionFormView: View {
                 set: { newValue in
                     if index < descriptions.count {
                         descriptions[index] = newValue
+                        validateDuplicates()
                     }
                 }
             ))
@@ -195,6 +203,7 @@ struct NewSessionFormView: View {
 
             Button {
                 descriptions.remove(at: index)
+                validateDuplicates()
             } label: {
                 Image(systemName: "minus.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentOrange)
@@ -225,6 +234,7 @@ struct NewSessionFormView: View {
                     newDescription = ""
                 }
                 showAddDescriptionField = false
+                validateDuplicates()
             } label: {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentGreen)
@@ -251,6 +261,11 @@ struct NewSessionFormView: View {
             showError = true
             return
         }
+        if hasDuplicateConflict {
+            errorMessage = NSLocalizedString("duplicate_descriptions_detected", comment: "Duplicate descriptions detected")
+            showError = true
+            return
+        }
         do {
             try sessionManager.addOrUpdateEntry(
                 originalKey: "",
@@ -262,6 +277,21 @@ struct NewSessionFormView: View {
             errorMessage = error.localizedDescription
             showError = true
         }
+    }
+
+    private func validateDuplicates() {
+        var seen = Set<String>()
+        var conflict = false
+        for value in descriptions {
+            let key = value.tsu_descriptionNormalizedKey
+            if key.isEmpty { continue }
+            if seen.contains(key) {
+                conflict = true
+                break
+            }
+            seen.insert(key)
+        }
+        hasDuplicateConflict = conflict
     }
 }
 
