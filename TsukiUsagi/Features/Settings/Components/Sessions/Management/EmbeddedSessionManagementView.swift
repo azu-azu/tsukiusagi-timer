@@ -1,17 +1,21 @@
 import SwiftUI
+import Foundation
 
 struct EmbeddedSessionManagementView: View {
     @EnvironmentObject var sessionManager: SessionManager
     @State private var selectedSession: SessionEntry?
+    @State private var tempSessionName: String = ""
+    @State private var tempDescriptions: [String] = []
+    @State private var isAnyFieldFocused: Bool = false
 
     private enum ActiveSheet: Identifiable {
-        case edit(SessionEntry)
+        case edit(SessionEditContext)
         case create
 
         var id: String {
             switch self {
-            case .edit(let session):
-                return "edit-\(session.id.uuidString)"
+            case .edit(let context):
+                return "edit-\(context.entryId.uuidString)"
             case .create:
                 return "create"
             }
@@ -40,11 +44,22 @@ struct EmbeddedSessionManagementView: View {
         )
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
-            case .edit(let session):
+            case .edit(let context):
                 ZStack {
                     DesignTokens.CosmosColors.background.ignoresSafeArea()
-                    SessionEditView(session: session)
-                        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+                    SessionEditSheetBuilder(
+                        context: context,
+                        tempSessionName: $tempSessionName,
+                        tempDescriptions: $tempDescriptions,
+                        isAnyFieldFocused: $isAnyFieldFocused,
+                        onSave: {
+                            handleSessionSave(context: context)
+                        },
+                        onCancel: {
+                            dismissEditSheet()
+                        }
+                    )
+                    .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
                 }
                 .presentationBackground(DesignTokens.CosmosColors.background)
             case .create:
@@ -77,14 +92,12 @@ struct EmbeddedSessionManagementView: View {
     @ViewBuilder
     private func defaultSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
         Button {
-            selectedSession = session
-            activeSheet = .edit(session)
+            presentEditSheet(for: session)
         } label: { defaultRowLabel(session: session) }
         .buttonStyle(PlainButtonStyle())
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
-                selectedSession = session
-                activeSheet = .edit(session)
+                presentEditSheet(for: session)
             } label: { Label("Edit", systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
         }
@@ -104,14 +117,12 @@ struct EmbeddedSessionManagementView: View {
     @ViewBuilder
     private func customSessionRow(_ session: SessionEntry, isLast: Bool) -> some View {
         Button {
-            selectedSession = session
-            activeSheet = .edit(session)
+            presentEditSheet(for: session)
         } label: { customRowLabel(session: session) }
         .buttonStyle(PlainButtonStyle())
         .contextMenu {
             Button {
-                selectedSession = session
-                activeSheet = .edit(session)
+                presentEditSheet(for: session)
             } label: {
                 Label("Edit", systemImage: "pencil")
             }
@@ -126,8 +137,7 @@ struct EmbeddedSessionManagementView: View {
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
-                selectedSession = session
-                activeSheet = .edit(session)
+                presentEditSheet(for: session)
             } label: { Label("Edit", systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
             if !session.isDefault {
@@ -188,6 +198,66 @@ struct EmbeddedSessionManagementView: View {
         .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
         .padding(.vertical, DesignTokens.Padding.medium)
         .contentShape(Rectangle())
+    }
+
+    // MARK: - Sheet Helpers
+
+    private func presentEditSheet(for session: SessionEntry, descriptionIndex: Int? = nil) {
+        selectedSession = session
+        tempSessionName = session.sessionName
+        tempDescriptions = session.descriptions
+        isAnyFieldFocused = false
+
+        let context: SessionEditContext
+
+        if session.isDefault {
+            context = SessionEditContext.descriptionEdit(
+                entryId: session.id,
+                sessionName: session.sessionName,
+                descriptions: session.descriptions,
+                isDefault: true,
+                descriptionIndex: descriptionIndex
+            )
+        } else {
+            context = SessionEditContext.fullSessionEdit(
+                entryId: session.id,
+                sessionName: session.sessionName,
+                descriptions: session.descriptions,
+                isDefault: false
+            )
+        }
+
+        activeSheet = .edit(context)
+    }
+
+    private func handleSessionSave(context: SessionEditContext) {
+        do {
+            if selectedSession?.isDefault ?? context.isDefaultSession {
+                try sessionManager.updateSessionDescriptions(
+                    sessionName: context.sessionName,
+                    newDescriptions: tempDescriptions
+                )
+            } else {
+                try sessionManager.addOrUpdateEntry(
+                    originalKey: context.sessionName.lowercased(),
+                    sessionName: tempSessionName,
+                    descriptions: tempDescriptions
+                )
+            }
+            dismissEditSheet()
+        } catch {
+            #if DEBUG
+            print("Error saving session: \(error)")
+            #endif
+        }
+    }
+
+    private func dismissEditSheet() {
+        activeSheet = nil
+        selectedSession = nil
+        isAnyFieldFocused = false
+        tempSessionName = ""
+        tempDescriptions = []
     }
 
     @ViewBuilder

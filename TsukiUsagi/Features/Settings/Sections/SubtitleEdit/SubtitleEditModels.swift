@@ -22,6 +22,9 @@ struct SessionEditContext: Identifiable, Equatable {
     /// 現在のDescriptionリスト
     let descriptions: [String]
 
+    /// デフォルトセッションかどうか
+    let isDefaultSession: Bool
+
     /// 編集モードの種類
     let editMode: EditMode
 
@@ -41,12 +44,14 @@ struct SessionEditContext: Identifiable, Equatable {
         entryId: UUID,
         sessionName: String,
         descriptions: [String],
+        isDefault: Bool,
         descriptionIndex: Int? = nil
     ) -> SessionEditContext {
         SessionEditContext(
             entryId: entryId,
             sessionName: sessionName,
             descriptions: descriptions,
+            isDefaultSession: isDefault,
             editMode: .descriptionOnly(index: descriptionIndex)
         )
     }
@@ -59,20 +64,16 @@ struct SessionEditContext: Identifiable, Equatable {
     static func fullSessionEdit(
         entryId: UUID,
         sessionName: String,
-        descriptions: [String]
+        descriptions: [String],
+        isDefault: Bool
     ) -> SessionEditContext {
         SessionEditContext(
             entryId: entryId,
             sessionName: sessionName,
             descriptions: descriptions,
+            isDefaultSession: isDefault,
             editMode: .fullSession
         )
-    }
-
-    /// Default Sessionかどうかを判定
-    /// - Returns: Default Sessionの場合はtrue
-    var isDefaultSession: Bool {
-        ["Work", "Study", "Life", "Personal", "Health"].contains(sessionName)
     }
 
     /// 編集対象のDescriptionのインデックス（Description編集時のみ）
@@ -120,12 +121,14 @@ extension SessionEditContext {
         entryId: UUID(),
         sessionName: "Work",
         descriptions: ["SwiftUI development", "Code review"],
+        isDefault: true,
         descriptionIndex: 0
     )
 
     static let sampleFullSessionEdit = SessionEditContext.fullSessionEdit(
         entryId: UUID(),
         sessionName: "My Custom Project",
-        descriptions: ["Task 1", "Task 2", "Task 3"]
+        descriptions: ["Task 1", "Task 2", "Task 3"],
+        isDefault: false
     )
 }

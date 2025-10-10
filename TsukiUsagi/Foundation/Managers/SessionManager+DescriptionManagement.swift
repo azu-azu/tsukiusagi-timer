@@ -9,7 +9,7 @@ extension SessionManager {
     }
 
     private func normalizedDescription(_ text: String) -> String {
-        text.trimmingCharacters(in: .whitespacesAndNewlines)
+        text.tsu_descriptionNormalizedValue
     }
 
     /// セッションを取得し存在を保証した上で返す
@@ -23,12 +23,13 @@ extension SessionManager {
 
     func updateSessionDescriptions(sessionName: String, newDescriptions: [String]) throws {
         let entry = try getValidatedEntry(sessionName)
-        try SessionManagerValidator.validateDescriptions(newDescriptions)
+        let canonicalDescriptions = newDescriptions.map { normalizedDescription($0) }
+        try SessionManagerValidator.validateDescriptions(canonicalDescriptions)
 
         sessionDatabase[normalizedName(sessionName)] = SessionEntry(
             id: entry.id,
             sessionName: entry.sessionName,
-            descriptions: newDescriptions,
+            descriptions: canonicalDescriptions,
             isDefault: entry.isDefault
         )
         save()
