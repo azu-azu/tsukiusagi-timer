@@ -80,6 +80,7 @@ struct SessionEditSheetBuilder: View {
             isKeyboardCloseVisible: isAnyFieldFocused,
             onKeyboardClose: handleKeyboardClose,
             focusedRowID: $focusedRowID,
+            ensureVisibleMode: .bottomIfObscuredOnce,
             content: {
                 DescriptionEditContent(
                     sessionName: context.sessionName,
@@ -134,6 +135,7 @@ struct SessionEditSheetBuilder: View {
             isKeyboardCloseVisible: isAnyFieldFocused,
             onKeyboardClose: handleKeyboardClose,
             focusedRowID: $focusedRowID,
+            ensureVisibleMode: .centerAggressive,
             content: {
                 FullSessionEditContent(
                     sessionName: tempSessionName,

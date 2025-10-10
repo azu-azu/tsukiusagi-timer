@@ -18,6 +18,12 @@ import SwiftUI
 /// Generic Contentを受け取ることで、様々な編集機能で再利用可能
 /// 統一されたナビゲーション構造とボタン配置を提供
 struct EditableModal<Content: View>: View {
+    enum EnsureVisibleMode {
+        case none               // 強制スクロールしない
+        case centerAggressive   // 既存挙動：常にcenterへ寄せる
+        case bottomIfObscuredOnce // 推奨：必要時だけ一回.bottomへ
+    }
+
     let title: String
     let onSave: () -> Void
     let isSaveDisabled: Bool
@@ -26,6 +32,9 @@ struct EditableModal<Content: View>: View {
     let isKeyboardCloseVisible: Bool
     let onKeyboardClose: () -> Void
     @Binding var focusedRowID: UUID?
+    let ensureVisibleMode: EnsureVisibleMode
+
+    @State private var lastEnsureAt: Date = .distantPast
 
     /// EditableModalの初期化
     /// - Parameters:
@@ -43,6 +52,7 @@ struct EditableModal<Content: View>: View {
         isKeyboardCloseVisible: Bool,
         onKeyboardClose: @escaping () -> Void,
         focusedRowID: Binding<UUID?> = .constant(nil),
+        ensureVisibleMode: EnsureVisibleMode = .centerAggressive,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.title = title
@@ -53,6 +63,7 @@ struct EditableModal<Content: View>: View {
         self.onKeyboardClose = onKeyboardClose
         self.content = content
         self._focusedRowID = focusedRowID
+        self.ensureVisibleMode = ensureVisibleMode
     }
 
     var body: some View {
@@ -70,21 +81,42 @@ struct EditableModal<Content: View>: View {
                     onKeyboardClose()
                 }
                 .onChange(of: focusedRowID) { _, newValue in
-                    scrollToID(proxy, id: newValue)
+                    switch ensureVisibleMode {
+                    case .centerAggressive:
+                        scrollToID(proxy, id: newValue)
+                    case .bottomIfObscuredOnce:
+                        ensureVisibleOnceBottom(proxy, id: newValue)
+                    case .none:
+                        break
+                    }
                 }
                 .onReceive(
                     NotificationCenter.default.publisher(
                         for: UIResponder.keyboardWillChangeFrameNotification
                     )
                 ) { _ in
-                    scrollToID(proxy, id: focusedRowID)
+                    switch ensureVisibleMode {
+                    case .centerAggressive:
+                        scrollToID(proxy, id: focusedRowID)
+                    case .bottomIfObscuredOnce:
+                        ensureVisibleOnceBottom(proxy, id: focusedRowID)
+                    case .none:
+                        break
+                    }
                 }
                 .onReceive(
                     NotificationCenter.default.publisher(
                         for: UIResponder.keyboardDidChangeFrameNotification
                     )
                 ) { _ in
-                    scrollToID(proxy, id: focusedRowID, extraDelay: 0.08)
+                    switch ensureVisibleMode {
+                    case .centerAggressive:
+                        scrollToID(proxy, id: focusedRowID, extraDelay: 0.08)
+                    case .bottomIfObscuredOnce:
+                        ensureVisibleOnceBottom(proxy, id: focusedRowID)
+                    case .none:
+                        break
+                    }
                 }
             }
             .navigationTitle(title)
@@ -120,6 +152,19 @@ struct EditableModal<Content: View>: View {
 }
 
 private extension EditableModal {
+    func ensureVisibleOnceBottom(_ proxy: ScrollViewProxy, id: UUID?) {
+        guard let id else { return }
+        let now = Date()
+        guard now.timeIntervalSince(lastEnsureAt) > 0.2 else { return }
+
+        // 最小移動: 一度だけ .bottom へ寄せる
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                proxy.scrollTo(id, anchor: .bottom)
+            }
+            lastEnsureAt = Date()
+        }
+    }
     func scrollToID(_ proxy: ScrollViewProxy, id: UUID?, extraDelay: Double = 0) {
         guard let id else { return }
 
