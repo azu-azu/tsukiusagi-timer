@@ -16,10 +16,6 @@ struct TimerEditView: View {
     @State private var editedMemo = ""
     @State private var editedEnd = Date()
     @State private var minEnd = Date()
-    @State private var isKeyboardVisible: Bool = false
-    @State private var keyboardBottomInset: CGFloat = 0
-    @State private var isAutoScrolling: Bool = false
-
     @FocusState private var isSubtitleFocused: Bool
     @FocusState private var isMemoFocused: Bool
     // スクロール位置制御用の識別子（小さなアンカー用）
@@ -41,11 +37,6 @@ struct TimerEditView: View {
         return editViewModel.memoEditorMaxHeight
     }
 
-    // safeAreaInset用のボトム余白（新しいViewModelに委譲）
-    private var bottomInsetForSafeArea: CGFloat {
-        return editViewModel.bottomInsetForSafeArea
-    }
-
     // バリデーション関数（新しいViewModelに委譲）
     private func isActivityEmpty() -> Bool {
         return editViewModel.isActivityEmpty()
@@ -58,6 +49,14 @@ struct TimerEditView: View {
     // リアルタイムでエラー状態を計算
     private var currentShowEmptyError: Bool {
         return isCustomActivity && isActivityEmpty()
+    }
+
+
+    @MainActor private func closeKeyboard() {
+        isActivityFocused = false
+        isSubtitleFocused = false
+        isMemoFocused = false
+        Keyboard.dismiss()
     }
 
     var body: some View {
@@ -154,13 +153,10 @@ struct TimerEditView: View {
                         }
                         .scrollContentBackground(.hidden)
                         .scrollIndicators(.hidden) // スクロールインジケーター非表示
-                        .scrollDismissesKeyboard(.never) // 競合回避のため一旦無効化
+                        .scrollDismissesKeyboard(.interactively)
                         .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
-                        .safeAreaInset(edge: .bottom) {
-                            // セーフエリア外まで背景を広げているため、
-                            // 下端の余白は safeAreaInset で作るのが安定
-                            Color.clear.frame(height: bottomInsetForSafeArea)
-                        }
+                        .dismissKeyboardOnTap { closeKeyboard() }
+                        .keyboardAwareInset()
                     }
                 }
                 // 角丸クリップを外し、シートの下地色が見えないようにする
@@ -173,43 +169,11 @@ struct TimerEditView: View {
             .background(DesignTokens.CosmosColors.background) // 万一の透過対策
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
-            .modifier(DismissKeyboardOnTap(
-                isActivityFocused: $isActivityFocused,
-                isSubtitleFocused: $isSubtitleFocused,
-                isMemoFocused: $isMemoFocused,
-                isKeyboardVisible: $isKeyboardVisible
-            ))
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notif in
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    isKeyboardVisible = true
-                }
-                if let info = (notif as Notification).userInfo,
-                    let frame = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                    let screenMaxY = UIScreen.main.bounds.maxY
-                    let overlap = max(0, screenMaxY - frame.minY)
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        keyboardBottomInset = overlap
-                    }
-                }
+            .keyboardCloseToolbar(labelStyle: .iconWithText("Close")) {
+                closeKeyboard()
             }
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    isKeyboardVisible = false
-                    keyboardBottomInset = 0
-                }
-            }
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Close") {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isActivityFocused = false
-                            isSubtitleFocused = false
-                            isMemoFocused = false
-                            isKeyboardVisible = false
-                        }
-                    }
-                }
+            .onDisappear {
+                closeKeyboard()
             }
             .task {
                 // 編集対象は「最後に記録された履歴」なので、History から初期値を読み込む

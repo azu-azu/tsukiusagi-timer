@@ -80,8 +80,9 @@ struct SessionEditSheetBuilder: View {
     // MARK: - Helper Methods
 
     private func handleKeyboardClose() {
-        KeyboardManager.hideKeyboard {
-            isAnyFieldFocused = false
+        isAnyFieldFocused = false
+        Task { @MainActor in
+            Keyboard.dismiss()
         }
     }
 }
