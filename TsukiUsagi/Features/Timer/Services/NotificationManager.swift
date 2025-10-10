@@ -302,7 +302,9 @@ extension NotificationManager {
 
     private func makeNotificationIdentifier(for phase: PomodoroPhase, targetEndAt: Date) -> String {
         let prefix = id(for: phase)
-        return "\(prefix).\(Int(targetEndAt.timeIntervalSince1970)).\(UUID().uuidString.prefix(8))"
+        let timestamp = Int(targetEndAt.timeIntervalSince1970)
+        let suffix = UUID().uuidString.prefix(8)
+        return "\(prefix).\(timestamp).\(suffix)"
     }
 
     private func makeNotificationContent(for phase: PomodoroPhase, uniqueId: String, timeSensitive: Bool) -> UNMutableNotificationContent {

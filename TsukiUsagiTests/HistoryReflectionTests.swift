@@ -17,50 +17,14 @@ final class HistoryReflectionTests: XCTestCase {
         let tempDir = try makeTempDirectory()
         defer { removeTempDirectory(tempDir) }
 
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-
-        let calendar = Calendar(identifier: .gregorian)
-        let start = calendar.date(from: DateComponents(year: 2024, month: 3, day: 3, hour: 9, minute: 0))!
-        let mid = calendar.date(from: DateComponents(year: 2024, month: 3, day: 3, hour: 12, minute: 0))!
-        let end = calendar.date(from: DateComponents(year: 2024, month: 3, day: 3, hour: 14, minute: 0))!
-
-        let legacyRecords = [
-            SessionRecord(
-                id: "reflection-1",
-                start: start,
-                end: start.addingTimeInterval(600),
-                phase: .focus,
-                sessionName: "Reflection",
-                description: "",
-                memo: "First memo",
-                completedSilently: nil
-            ),
-            SessionRecord(
-                id: "reflection-2",
-                start: mid,
-                end: mid.addingTimeInterval(300),
-                phase: .focus,
-                sessionName: "Reflection",
-                description: "",
-                memo: "Second memo",
-                completedSilently: nil
-            ),
-            SessionRecord(
-                id: "work-1",
-                start: end,
-                end: end.addingTimeInterval(1800),
-                phase: .focus,
-                sessionName: "Work",
-                description: "Deep work",
-                memo: nil,
-                completedSilently: nil
-            )
-        ]
-
-        let legacyData = try encoder.encode(legacyRecords)
+        let legacyDates = makeLegacySessionDates()
         let legacyURL = tempDir.appendingPathComponent("history.json")
-        try legacyData.write(to: legacyURL)
+        try writeLegacyHistoryFile(
+            to: legacyURL,
+            start: legacyDates.start,
+            mid: legacyDates.mid,
+            end: legacyDates.end
+        )
 
         let store = HistoryStore(baseURL: tempDir)
 
@@ -69,7 +33,7 @@ final class HistoryReflectionTests: XCTestCase {
         XCTAssertEqual(snapshot.sessions.count, 1)
         XCTAssertEqual(snapshot.sessions.first?.sessionName, "Work")
 
-        let dayKey = HistoryDateKey.dayKey(for: start)
+        let dayKey = HistoryDateKey.dayKey(for: legacyDates.start)
         let reflection = snapshot.reflections[dayKey]
         XCTAssertEqual(reflection?.text, "First memo\n\nSecond memo")
         XCTAssertEqual(reflection?.isPendingSave, false)
@@ -111,50 +75,9 @@ final class HistoryReflectionTests: XCTestCase {
         let store = HistoryStore(baseURL: tempDir)
         let historyVM = HistoryViewModel(store: store)
         let provider = DailyTimelineDataProvider()
-
         let baseDay = Date()
-        let calendar = Calendar.current
 
-        let workMorning = calendar.date(bySettingHour: 9, minute: 0, second: 0, of: baseDay)!
-        let workNoon = calendar.date(bySettingHour: 12, minute: 0, second: 0, of: baseDay)!
-        let study = calendar.date(bySettingHour: 15, minute: 0, second: 0, of: baseDay)!
-
-        historyVM.addRecord(
-            SessionRecord(
-                id: "work-1",
-                start: workMorning,
-                end: workMorning.addingTimeInterval(3600),
-                phase: .focus,
-                sessionName: "Work",
-                description: "Initial",
-                memo: nil,
-                completedSilently: nil
-            )
-        )
-        historyVM.addRecord(
-            SessionRecord(
-                id: "work-2",
-                start: workNoon,
-                end: workNoon.addingTimeInterval(5400),
-                phase: .focus,
-                sessionName: "Work",
-                description: "Latest",
-                memo: nil,
-                completedSilently: nil
-            )
-        )
-        historyVM.addRecord(
-            SessionRecord(
-                id: "study-1",
-                start: study,
-                end: study.addingTimeInterval(1200),
-                phase: .focus,
-                sessionName: "Study",
-                description: "Reading",
-                memo: nil,
-                completedSilently: nil
-            )
-        )
+        seedWorkAndStudySessions(on: baseDay, into: historyVM)
 
         let summary = provider.makeDaySummary(historyVM: historyVM, targetDate: baseDay)
         XCTAssertEqual(summary.sessionName, "Work")
@@ -239,4 +162,105 @@ final class HistoryReflectionTests: XCTestCase {
 
         XCTAssertEqual(reloaded.reflections[dayKey]?.text, "Persistent memo")
     }
+}
+
+private extension HistoryReflectionTests {
+    func makeLegacySessionDates() -> LegacyDates {
+        let calendar = Calendar(identifier: .gregorian)
+        let start = calendar.date(from: DateComponents(year: 2024, month: 3, day: 3, hour: 9, minute: 0))!
+        let mid = calendar.date(from: DateComponents(year: 2024, month: 3, day: 3, hour: 12, minute: 0))!
+        let end = calendar.date(from: DateComponents(year: 2024, month: 3, day: 3, hour: 14, minute: 0))!
+        return LegacyDates(start: start, mid: mid, end: end)
+    }
+
+    func writeLegacyHistoryFile(to url: URL, start: Date, mid: Date, end: Date) throws {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let legacyRecords = legacyReflectionRecords(start: start, mid: mid, end: end)
+        let legacyData = try encoder.encode(legacyRecords)
+        try legacyData.write(to: url)
+    }
+
+    func legacyReflectionRecords(start: Date, mid: Date, end: Date) -> [SessionRecord] {
+        [
+            SessionRecord(
+                id: "reflection-1",
+                start: start,
+                end: start.addingTimeInterval(600),
+                phase: .focus,
+                sessionName: "Reflection",
+                description: "",
+                memo: "First memo",
+                completedSilently: nil
+            ),
+            SessionRecord(
+                id: "reflection-2",
+                start: mid,
+                end: mid.addingTimeInterval(300),
+                phase: .focus,
+                sessionName: "Reflection",
+                description: "",
+                memo: "Second memo",
+                completedSilently: nil
+            ),
+            SessionRecord(
+                id: "work-1",
+                start: end,
+                end: end.addingTimeInterval(1800),
+                phase: .focus,
+                sessionName: "Work",
+                description: "Deep work",
+                memo: nil,
+                completedSilently: nil
+            )
+        ]
+    }
+
+    func seedWorkAndStudySessions(on baseDay: Date, into historyVM: HistoryViewModel) {
+        let calendar = Calendar.current
+        let workMorning = calendar.date(bySettingHour: 9, minute: 0, second: 0, of: baseDay)!
+        let workNoon = calendar.date(bySettingHour: 12, minute: 0, second: 0, of: baseDay)!
+        let study = calendar.date(bySettingHour: 15, minute: 0, second: 0, of: baseDay)!
+
+        let sessions = [
+            SessionRecord(
+                id: "work-1",
+                start: workMorning,
+                end: workMorning.addingTimeInterval(3600),
+                phase: .focus,
+                sessionName: "Work",
+                description: "Initial",
+                memo: nil,
+                completedSilently: nil
+            ),
+            SessionRecord(
+                id: "work-2",
+                start: workNoon,
+                end: workNoon.addingTimeInterval(5400),
+                phase: .focus,
+                sessionName: "Work",
+                description: "Latest",
+                memo: nil,
+                completedSilently: nil
+            ),
+            SessionRecord(
+                id: "study-1",
+                start: study,
+                end: study.addingTimeInterval(1200),
+                phase: .focus,
+                sessionName: "Study",
+                description: "Reading",
+                memo: nil,
+                completedSilently: nil
+            )
+        ]
+
+        sessions.forEach { historyVM.addRecord($0) }
+    }
+}
+
+private struct LegacyDates {
+    let start: Date
+    let mid: Date
+    let end: Date
 }
