@@ -74,13 +74,14 @@ struct DailyTimelineView: View {
                 .padding(.horizontal)
             }
             .scrollDismissesKeyboard(.interactively)
-            .gesture(
+            .simultaneousGesture(
                 TapGesture().onEnded {
-                    if isReflectionFocused {
-                        isReflectionFocused = false
+                    guard isReflectionFocused else { return }
+                    isReflectionFocused = false
+                    Task { @MainActor in
+                        Keyboard.dismiss()
                     }
-                },
-                including: .gesture
+                }
             )
         }
         .simultaneousGesture(gestureHandler.backSwipeGesture())
@@ -97,6 +98,7 @@ struct DailyTimelineView: View {
             MemoEditView(record: record, anchorDate: targetDate)
         }
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+        .modifier(ConditionalKeyboardAwareInset(isEnabled: !inlineReflectionEnabled))
         .onAppear {
             if inlineReflectionEnabled {
                 detailViewModel.attach(historyViewModel: historyVM)
@@ -342,8 +344,6 @@ struct DailyTimelineView: View {
         let onRetry: () -> Void
         let focus: FocusState<Bool>.Binding
 
-        @State private var keyboardBottomInset: CGFloat = 0
-
         private let placeholderText = "Capture insights, feelings, and next steps…"
 
         var body: some View {
@@ -407,35 +407,16 @@ struct DailyTimelineView: View {
                 }
             }
             .padding(16)
-            .padding(.bottom, keyboardBottomInset)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(DesignTokens.CosmosColors.cardBackground)
             .cornerRadius(12)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Close") {
-                        focus.wrappedValue = false
-                    }
-                    .accessibilityIdentifier("reflection_keyboard_close")
-                }
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
-                guard let frame = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
-                let screenMaxY = UIScreen.main.bounds.maxY
-                let overlap = max(0, screenMaxY - frame.minY)
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    keyboardBottomInset = overlap
-                }
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    keyboardBottomInset = 0
-                }
+            .keyboardAwareBottomPadding(baseBottomPadding: 16)
+            .keyboardCloseToolbar(labelStyle: .iconWithText("Close")) {
+                focus.wrappedValue = false
+                Keyboard.dismiss()
             }
             .onDisappear {
                 focus.wrappedValue = false
-                keyboardBottomInset = 0
             }
         }
     }
@@ -482,5 +463,19 @@ struct DailyTimelineView: View {
     // MARK: - Memo Edit
     private func selectRecordForMemoEdit(_ record: SessionRecord) {
         selectedRecordForMemoEdit = record
+    }
+
+    // MARK: - Modifiers
+    private struct ConditionalKeyboardAwareInset: ViewModifier {
+        let isEnabled: Bool
+
+        @ViewBuilder
+        func body(content: Content) -> some View {
+            if isEnabled {
+                content.keyboardAwareInset()
+            } else {
+                content
+            }
+        }
     }
 }

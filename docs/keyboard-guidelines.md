@@ -26,6 +26,8 @@ It ensures consistency, accessibility, and predictable teardown across screens t
 ## 4. Insets & Layout Safety
 
 - Use the shared `keyboardAwareInset()` (or equivalent) driven by `keyboardWillChangeFrameNotification`; avoid ad-hoc bottom padding.
+- When a view already reserves fixed bottom padding (e.g., card gutters), call `keyboardAwareInset(baseBottomPadding:)` so the shared inset subtracts that spacing and prevents double margins.
+- Inline editors that need their own scroll offset can apply `keyboardAwareBottomPadding(baseBottomPadding:)` to the card/container so the keyboard delta is scoped locally without re-adding existing padding.
 - Apply inset changes on the main thread and consider disabling animations if layout jumps occur.
 - Keep these adjustments in the view layer—view models should remain unaware of keyboard height.
 - Never store keyboard height in a view model or observable object; treat it as a transient view concern only.
