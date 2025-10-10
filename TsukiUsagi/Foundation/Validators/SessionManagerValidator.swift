@@ -1,3 +1,13 @@
+/// SessionValidationError – design status
+/// - Purpose: Provide precise validation signals (incl. duplicate indices) for UI.
+/// - Current: Callers catch generic `Error`; no code switches on `SessionValidationError`,
+///            so `localizedDescription` never reaches UI.
+/// - Decision: Keep enum for richness, but require typed catch in callers
+///             (Settings/SessionManagementView, SessionEditView, NewSessionFormView).
+///             If not adopting now, encapsulate at SessionManager boundary.
+/// - Next: Implement typed catch + UI surfacing OR map to SessionManagerError; track in ADR-012.
+/// - Owner/Last-Reviewed: Azu / 2025-10-11
+
 import Foundation
 
 extension String {
