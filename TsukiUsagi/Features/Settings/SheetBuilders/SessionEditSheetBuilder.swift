@@ -102,6 +102,15 @@ struct SessionEditSheetBuilder: View {
                         focusedRowID = id
                     }
                 )
+                // フォーカス行の下端をモーダルへ伝える
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: FocusedRowBottomPrefKey.self,
+                            value: geo.frame(in: .global).maxY
+                        )
+                    }
+                )
             }
         )
         .presentationDetents([.large])

@@ -35,6 +35,9 @@ struct EditableModal<Content: View>: View {
     let ensureVisibleMode: EnsureVisibleMode
 
     @State private var lastEnsureAt: Date = .distantPast
+    @State private var bottomLift: CGFloat = 0
+    @State private var focusedBottomY: CGFloat = 0
+    @State private var keyboardEndFrame: CGRect = .zero
 
     /// EditableModalの初期化
     /// - Parameters:
@@ -76,9 +79,16 @@ struct EditableModal<Content: View>: View {
                     .padding()
                 }
                 .scrollDismissesKeyboard(.interactively)
-                .keyboardAwareInset(baseBottomPadding: 16)
+                .keyboardAwareInset(baseBottomPadding: ensureVisibleMode == .none ? 0 : 16)
                 .dismissKeyboardOnTap {
                     onKeyboardClose()
+                }
+                .onPreferenceChange(FocusedRowBottomPrefKey.self) { value in
+                    focusedBottomY = value
+                    recomputeBottomLift()
+                }
+                .safeAreaInset(edge: .bottom) {
+                    Color.clear.frame(height: bottomLift)
                 }
                 .onChange(of: focusedRowID) { _, newValue in
                     switch ensureVisibleMode {
@@ -87,35 +97,41 @@ struct EditableModal<Content: View>: View {
                     case .bottomIfObscuredOnce:
                         ensureVisibleOnceBottom(proxy, id: newValue)
                     case .none:
-                        break
+                        recomputeBottomLift()
                     }
                 }
                 .onReceive(
                     NotificationCenter.default.publisher(
                         for: UIResponder.keyboardWillChangeFrameNotification
                     )
-                ) { _ in
+                ) { notification in
+                    if let v = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+                        keyboardEndFrame = v.cgRectValue
+                    }
                     switch ensureVisibleMode {
                     case .centerAggressive:
                         scrollToID(proxy, id: focusedRowID)
                     case .bottomIfObscuredOnce:
                         ensureVisibleOnceBottom(proxy, id: focusedRowID)
                     case .none:
-                        break
+                        recomputeBottomLift()
                     }
                 }
                 .onReceive(
                     NotificationCenter.default.publisher(
                         for: UIResponder.keyboardDidChangeFrameNotification
                     )
-                ) { _ in
+                ) { notification in
+                    if let v = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+                        keyboardEndFrame = v.cgRectValue
+                    }
                     switch ensureVisibleMode {
                     case .centerAggressive:
                         scrollToID(proxy, id: focusedRowID, extraDelay: 0.08)
                     case .bottomIfObscuredOnce:
                         ensureVisibleOnceBottom(proxy, id: focusedRowID)
                     case .none:
-                        break
+                        recomputeBottomLift()
                     }
                 }
             }
@@ -152,6 +168,20 @@ struct EditableModal<Content: View>: View {
 }
 
 private extension EditableModal {
+    func recomputeBottomLift() {
+        let margin: CGFloat = 16
+        guard keyboardEndFrame.height > 0 else {
+            withAnimation(.easeInOut(duration: 0.18)) { bottomLift = 0 }
+            return
+        }
+        let keyboardTop = keyboardEndFrame.minY
+        let overlap = focusedBottomY - (keyboardTop - margin)
+        let needed = max(0, overlap)
+        withAnimation(.easeInOut(duration: 0.18)) {
+            bottomLift = min(needed, 260)
+        }
+    }
+
     func ensureVisibleOnceBottom(_ proxy: ScrollViewProxy, id: UUID?) {
         guard let id else { return }
         let now = Date()
@@ -180,4 +210,10 @@ private extension EditableModal {
             }
         }
     }
+}
+
+// Preference key for broadcasting the focused row's global bottom Y
+struct FocusedRowBottomPrefKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }

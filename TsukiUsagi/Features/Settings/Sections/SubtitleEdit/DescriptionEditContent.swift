@@ -86,7 +86,8 @@ struct DescriptionEditContent: View {
             isAnyFieldFocused = newValue != nil
             onFocusChange(newValue)
         }
-        .keyboardAwareBottomPadding(baseBottomPadding: DesignTokens.Padding.medium)
+        // Manage Descriptions は余白リフトへ統一
+        //.keyboardAwareBottomPadding(baseBottomPadding: DesignTokens.Padding.medium)
     }
 
     // MARK: - Private Views
