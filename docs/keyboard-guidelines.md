@@ -25,12 +25,24 @@ It ensures consistency, accessibility, and predictable teardown across screens t
 
 ## 4. Insets & Layout Safety
 
-- Use the shared `keyboardAwareInset()` (or equivalent) driven by `keyboardWillChangeFrameNotification`; avoid ad-hoc bottom padding.
+- Default: Use the shared `keyboardAwareInset()` (or equivalent) driven by `keyboardWillChangeFrameNotification`.
 - When a view already reserves fixed bottom padding (e.g., card gutters), call `keyboardAwareInset(baseBottomPadding:)` so the shared inset subtracts that spacing and prevents double margins.
 - Inline editors that need their own scroll offset can apply `keyboardAwareBottomPadding(baseBottomPadding:)` to the card/container so the keyboard delta is scoped locally without re-adding existing padding.
 - Apply inset changes on the main thread and consider disabling animations if layout jumps occur.
 - Keep these adjustments in the view layer—view models should remain unaware of keyboard height.
 - Never store keyboard height in a view model or observable object; treat it as a transient view concern only.
+
+### 4.1 Exception: Bottom Padding Lift (List Editors)
+
+For list-style editors where forced scroll-to-center causes “jumping” (e.g., Manage Descriptions), prefer a layout-based approach:
+
+- Use a named scroll coordinate space (e.g., `"DescScroll"`) and measure both:
+  - the focused row bottom Y in that named space, and
+  - the viewport height in the same named space.
+- Compute a dynamic bottom padding (or `safeAreaInset(edge:.bottom)`) as the exact deficit needed to keep the focused row above the keyboard with a small margin (e.g., 16–24pt), and clamp to a reasonable maximum (e.g., 260–320pt).
+- Disable forced scroll in `EditableModal` by setting `ensureVisibleMode: .none` for these screens to avoid aggressive re-centering.
+- Avoid double insets: set `keyboardAwareInset(baseBottomPadding: 0)` or remove it entirely on the same view that supplies the dynamic bottom padding.
+- Debounce re-computation (~60–100ms) on keyboard frame changes and orientation transitions to improve stability.
 
 ## 5. Accessibility
 
@@ -61,3 +73,4 @@ Following these rules keeps keyboard behaviour predictable for users and reduces
 |------|--------|---------|
 | 2025-10-09 | Azu | Initial formalization of keyboard behaviour rules |
 | 2025-10-10 | Fujiko | Clarified dismiss responsibilities and inset scope |
+| 2025-10-10 | Kazumi | Added "Bottom Padding Lift" exception for list editors and coordinate-space guidance |
