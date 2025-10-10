@@ -175,7 +175,12 @@ private extension HistoryStore {
         for (day, texts) in textsByDay {
             let combined = texts.joined(separator: "\n\n")
             let updatedAt = updatedAtByDay[day] ?? day
-            reflections[day] = DayReflection(date: day, text: combined, lastUpdatedAt: updatedAt, isPendingSave: false)
+            reflections[day] = DayReflection(
+                date: day,
+                text: combined,
+                lastUpdatedAt: updatedAt,
+                isPendingSave: false
+            )
         }
 
         return (filteredSessions, reflections)

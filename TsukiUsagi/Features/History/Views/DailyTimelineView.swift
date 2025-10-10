@@ -44,7 +44,8 @@ struct DailyTimelineView: View {
             ScrollView {
                 LazyVStack(spacing: 16) {
                     if inlineReflectionEnabled {
-                        let sessionSummaries = dataProvider.daySessionSummaries(historyVM: historyVM, targetDate: targetDate)
+                        let sessionSummaries = dataProvider
+                            .daySessionSummaries(historyVM: historyVM, targetDate: targetDate)
                         if !sessionSummaries.isEmpty {
                             SummaryTreeView(
                                 sessions: sessionSummaries,
@@ -280,7 +281,10 @@ struct DailyTimelineView: View {
 
                         if !session.descriptions.isEmpty {
                             VStack(alignment: .leading, spacing: 6) {
-                                ForEach(Array(session.descriptions.prefix(maxDescriptionsPerSession)), id: \.title) { slice in
+                                ForEach(
+                                    Array(session.descriptions.prefix(maxDescriptionsPerSession)),
+                                    id: \.title
+                                ) { slice in
                                     HStack(alignment: .firstTextBaseline, spacing: 12) {
                                         Text(slice.title)
                                             .font(DesignTokens.Fonts.label)

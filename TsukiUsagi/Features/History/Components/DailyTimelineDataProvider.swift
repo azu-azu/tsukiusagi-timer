@@ -51,7 +51,10 @@ struct DailyTimelineDataProvider {
     /// サブタイトル別集計
     func bySubtitle(historyVM: HistoryViewModel, targetDate: Date) -> [LabelSummary] {
         let records = records(historyVM: historyVM, targetDate: targetDate)
-        let grouped = Dictionary(grouping: records) { $0.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "" }
+        let grouped = Dictionary(grouping: records) { record in
+            record.description?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        }
         return grouped.compactMap { description, records in
             guard !description.isEmpty else { return nil }
             let totalSeconds = records.reduce(0) { total, rec in
