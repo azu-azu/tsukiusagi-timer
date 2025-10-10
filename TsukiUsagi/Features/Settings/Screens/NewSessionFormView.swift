@@ -76,10 +76,13 @@ struct NewSessionFormView: View {
         .ignoresSafeArea()
     }
 
+}
+
+private extension NewSessionFormView {
     // MARK: - Header
 
     @ViewBuilder
-    private func header() -> some View {
+    func header() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             Image(systemName: "folder.badge.plus")
                 .foregroundColor(DesignTokens.MoonColors.accentBlue)
@@ -98,7 +101,7 @@ struct NewSessionFormView: View {
     // MARK: - Session Name
 
     @ViewBuilder
-    private func sessionNameSection() -> some View {
+    func sessionNameSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
             Text(NSLocalizedString("session_name_required_label", comment: ""))
                 .font(DesignTokens.Fonts.label)
@@ -125,7 +128,7 @@ struct NewSessionFormView: View {
     // MARK: - Descriptions
 
     @ViewBuilder
-    private func descriptionsSection() -> some View {
+    func descriptionsSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             HStack {
                 Text(NSLocalizedString("descriptions_optional_label", comment: ""))
@@ -169,7 +172,7 @@ struct NewSessionFormView: View {
     }
 
     @ViewBuilder
-    private func emptyDescriptionsView() -> some View {
+    func emptyDescriptionsView() -> some View {
         VStack(spacing: DesignTokens.Spacing.medium) {
             Image(systemName: "text.bubble")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -192,7 +195,7 @@ struct NewSessionFormView: View {
     }
 
     @ViewBuilder
-    private func descriptionRow(description: String, index: Int) -> some View {
+    func descriptionRow(description: String, index: Int) -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
             TextField(NSLocalizedString("description_placeholder", comment: ""), text: Binding(
                 get: { descriptions[safe: index] ?? "" },
@@ -235,7 +238,7 @@ struct NewSessionFormView: View {
     }
 
     @ViewBuilder
-    private func addDescriptionField() -> some View {
+    func addDescriptionField() -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
             TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
                 .textFieldStyle(PlainTextFieldStyle())
@@ -278,7 +281,7 @@ struct NewSessionFormView: View {
 
     // MARK: - Create
 
-    private func createSession() {
+    func createSession() {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             errorMessage = NSLocalizedString("error_empty_session_name", comment: "Session name cannot be empty")
@@ -303,11 +306,11 @@ struct NewSessionFormView: View {
         }
     }
 
-    private var isCreateDisabled: Bool {
+    var isCreateDisabled: Bool {
         sessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    private func findDuplicateIndices(in values: [String]) -> Set<Int> {
+    func findDuplicateIndices(in values: [String]) -> Set<Int> {
         var seen: [String: Int] = [:]
         var dups = Set<Int>()
         for (index, value) in values.enumerated() {

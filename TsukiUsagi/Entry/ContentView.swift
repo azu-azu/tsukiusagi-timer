@@ -60,346 +60,378 @@ struct ContentView: View {
                     isRunning: timerVM.isRunning
                 )
 
-                if size.width > 0 && size.height > 0 {
-                    ZStack(alignment: .bottom) {
-                        // 背景レイヤ
-                        backgroundLayer(params: ContentView.BackgroundLayerParams(
-                            size: size,
-                            safeAreaInsets: safeAreaInsets,
-                            staticStarCount: staticStarCount,
-                            flowingStarCount: flowingStarCount,
-                            isLowPowerMode: isLowPowerMode,
-                            isSessionFinished: timerVM.isSessionFinished,
-                            shouldAnimateStars: shouldAnimate,
-                            isLandscape: isLandscape
-                        ))
+                let context = LayoutContext(
+                    size: size,
+                    safeAreaInsets: safeAreaInsets,
+                    isLandscape: isLandscape,
+                    shouldAnimateStars: shouldAnimate
+                )
 
-                        // Moon+Timerセット or QuietMoonView
-                        MainPanel(
-                            size: size,
-                            safeAreaInsets: safeAreaInsets,
-                            isLandscape: isLandscape,
-                            moonTitle: moonTitle,
-                            landscapeMargin: landscapeMargin(),
-                            moonPortraitYOffsetRatio: moonPortraitYOffsetRatio,
-                            moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
-                            isQuietMoonFocused: $isQuietMoonFocused,
-                            showingEditRecord: $showingEditRecord,
-                            isMoonAnimationActive: shouldAnimate
-                        )
-
-                        // フッターレイヤ
-                        footerLayer(params: ContentView.FooterLayerParams(
-                            safeAreaInsets: safeAreaInsets,
-                            buttonHeight: buttonHeight,
-                            buttonWidth: buttonWidth,
-                            today: today,
-                            isRunning: timerVM.isRunning,
-                            isSessionFinished: timerVM.isSessionFinished,
-                            showingSideMenu: $showingSideMenu,
-                            onPause: { [weak timerVM] in timerVM?.pauseTimer() },
-                            onStart: { [weak timerVM] in
-                                // QuietMoon の残留フォーカスを明示的に解除しておく
-                                isQuietMoonFocused = false
-                                timerVM?.startTimer()
-                            }
-                        ))
-                        .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
-
-                        // RecordedTimesViewレイヤ
-                        recordedTimesLayer(params: ContentView.RecordedTimesLayerParams(
-                            isLandscape: isLandscape,
-                            safeAreaInsets: safeAreaInsets,
-                            hasRecordedEndTime: timerVM.hasRecordedEndTime,
-                            isWorkSession: timerVM.isWorkSession,
-                            startTime: timerVM.startTime,
-                            endTime: timerVM.endTime,
-                            actualSessionMinutes: timerVM.actualSessionMinutes,
-                            showingEditRecord: $showingEditRecord
-                        ))
-                        .id("recorded-layer-\(recordedTimesNonce)")
-
-                        // ダイヤモンドスター
-                        if showDiamondStars {
-                            DiamondStarsOnceView {
-                                showDiamondStars = false
-                                // flashStarsをfalseに戻して、次回のアニメーション発火を可能にする
-                                timerVM.flashStars = false
-                            }
-                            .allowsHitTesting(false)
-                        }
-
-                        // サイドメニュー
-                        SideMenuView(isPresented: $showingSideMenu)
-                            .zIndex(2002) // 本当に最前面にする
-
-                        // 保存トースト（Quiet Moon 画面に戻った直後の軽量HUD）
-                        if showSavedToast {
-                            HStack(spacing: 8) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(DesignTokens.Fonts.symbolMedium)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                Text("Saved")
-                                    .font(DesignTokens.Fonts.label)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            }
-                            .accessibilityIdentifier("savedToast")
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(DesignTokens.CosmosColors.cardBackground)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(DesignTokens.WhiteColors.stroke)
-                            )
-                            .cornerRadius(12)
-                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
-                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
-                            .zIndex(3000)
-                            .allowsHitTesting(false)
-                        }
-
-                        // History 保存リトライ用の非ブロッキングトースト
-                        if showHistoryToast {
-                            HStack(spacing: 8) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .font(DesignTokens.Fonts.symbolMedium)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                Text(historyToastMessage)
-                                    .font(DesignTokens.Fonts.label)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            }
-                            .accessibilityIdentifier("historySaveToast")
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(DesignTokens.CosmosColors.cardBackground)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(DesignTokens.WhiteColors.stroke)
-                            )
-                            .cornerRadius(12)
-                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
-                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 64)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
-                            .zIndex(3001)
-                            .allowsHitTesting(false)
-                        }
-
-                        // History 保存あきらめバナー（CTAつき、非ブロッキング）
-                        if showHistorySaveBanner {
-                            HStack(spacing: 12) {
-                                Image(systemName: "icloud.slash")
-                                    .font(DesignTokens.Fonts.symbolMedium)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Couldn’t save history")
-                                        .font(DesignTokens.Fonts.label)
-                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                    Text("You can retry in background.")
-                                        .font(DesignTokens.Fonts.caption)
-                                        .foregroundColor(DesignTokens.MoonColors.textPrimary.opacity(0.8))
-                                }
-                                Spacer()
-                                Button("Retry") {
-                                    historyVM.retryPendingSave()
-                                }
-                                .accessibilityIdentifier("historySaveRetryButton")
-                                .buttonStyle(.bordered)
-                            }
-                            .accessibilityIdentifier("historySaveBanner")
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(DesignTokens.CosmosColors.cardBackground)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(DesignTokens.WhiteColors.stroke)
-                            )
-                            .cornerRadius(12)
-                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
-                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
-                            .zIndex(3002)
-                        }
-
-                        // 静かな完了チップ（通知OFFでも“終わってた”を軽く示す）
-                        if showSilentCompleteChip {
-                            HStack(spacing: 8) {
-                                Image(systemName: "checkmark.seal.fill")
-                                    .font(DesignTokens.Fonts.symbolMedium)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                Text("Completed")
-                                    .font(DesignTokens.Fonts.label)
-                                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(DesignTokens.CosmosColors.cardBackground)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(DesignTokens.WhiteColors.stroke)
-                            )
-                            .cornerRadius(12)
-                            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
-                            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
-                            .zIndex(3000)
-                            .allowsHitTesting(false)
-                        }
-                    }
-                    .ignoresSafeArea()
-                    .gesture(
-                        DragGesture()
-                            .onEnded { value in
-                                let horizontalAmount = value.translation.width
-                                let verticalAmount = abs(value.translation.height)
-                                let openThreshold = max(50, geo.size.width * 0.10)
-                                let closeThreshold = -openThreshold
-
-                                // 水平方向のスワイプが垂直方向より大きい場合のみ処理
-                                if abs(horizontalAmount) > verticalAmount {
-                                    if horizontalAmount > openThreshold && !showingSideMenu {
-                                        // 左端20pt内からの右向きスワイプでメニューを開く
-                                        if value.startLocation.x <= 20 {
-                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                showingSideMenu = true
-                                            }
-                                        }
-                                    } else if horizontalAmount < closeThreshold && showingSideMenu {
-                                        // 左向きスワイプでメニューを閉じる
-                                        withAnimation(.easeInOut(duration: 0.3)) {
-                                            showingSideMenu = false
-                                        }
-                                    }
-                                }
-                            }
-                    )
-                    .onReceive(timerVM.$flashStars.dropFirst()) { flashStars in
-                        if flashStars {
-                            showDiamondStars = true
-                        }
-                    }
-                    // シート提示は MainPanel へ移譲
-                    .sheet(isPresented: $showingEditRecord) {
-                        // 外側（器）と内側（中身）の両方で黒を明示
-                        ZStack {
-                            DesignTokens.CosmosColors.background.ignoresSafeArea()
-                            TimerEditView()
-                                .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-                        }
-                    }
-                    .presentationBackground(DesignTokens.CosmosColors.background)
-                    .onChange(of: timerVM.isSessionFinished) { _, newValue in
-                        if newValue {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                isQuietMoonFocused = true
-                            }
-                        }
-                    }
-                    // showingSideMenu の変更のみで十分（shouldAnimateStars が再評価される）
-                    // 低電力モードの変更を監視
-                    .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
-                        isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
-                    }
-                    // フォアグラウンド復帰で日付を更新
-                    .onReceive(
-                        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
-                    ) { _ in
-                        today = Date()
-                        timerVM.appWillEnterForeground()
-                    }
-                    // バックグラウンド移行時の処理
-                    .onReceive(
-                        NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
-                    ) { _ in
-                        timerVM.appDidEnterBackground()
-                    }
-                    // 画面常駐時に0時を跨いだら日付を更新
-                    .onAppear { scheduleMidnightTick() }
-                    // 編集保存完了でHUDを表示
-                    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
-                        // 既存の消去予約をキャンセルして、表示時間をリセット
-                        savedToastWorkItem?.cancel()
-                        withAnimation(.easeInOut(duration: 0.2)) { showSavedToast = true }
-                        // Quiet Moonの記録表示を確実に再構築
-                        recordedTimesNonce = UUID()
-                        let work = DispatchWorkItem {
-                            withAnimation(.easeInOut(duration: 0.3)) { showSavedToast = false }
-                        }
-                        savedToastWorkItem = work
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
-                    }
-                    // History 保存失敗: 非ブロッキングトースト表示
-                    .onReceive(
-                        NotificationCenter.default.publisher(for: Notification.Name("HistorySaveFailed"))
-                    ) { _ in
-                        historyToastWorkItem?.cancel()
-                        historyToastMessage = "Save failed. Retrying…"
-                        withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
-                        let work = DispatchWorkItem {
-                            withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
-                        }
-                        historyToastWorkItem = work
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
-                    }
-                    // History 保存リトライ: 次回リトライまでの秒数を表示
-                    .onReceive(
-                        NotificationCenter.default.publisher(for: Notification.Name("HistorySaveRetrying"))
-                    ) { notif in
-                        guard let delay = notif.object as? Double else { return }
-                        historyToastWorkItem?.cancel()
-                        historyToastMessage = String(format: "Retrying in %.0fs…", delay)
-                        withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
-                        let work = DispatchWorkItem {
-                            withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
-                        }
-                        historyToastWorkItem = work
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.3, execute: work)
-                    }
-                    // History 保存断念: CTA付きバナー表示
-                    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("HistorySaveGaveUp"))) { _ in
-                        withAnimation(.easeInOut(duration: 0.2)) { showHistorySaveBanner = true }
-                        // 自動では消さない（ユーザーがRetryまたはスクロール等で自然に消える運用でもOK）
-                    }
-                    // 復帰直後の“静かな完了”を軽く表示（ワンショット）
-                    .onReceive(
-                        NotificationCenter.default.publisher(
-                            for: Notification.Name("TimerSilentCompleted")
-                        )
-                    ) { _ in
-                        silentCompleteWorkItem?.cancel()
-                        withAnimation(.easeInOut(duration: 0.2)) { showSilentCompleteChip = true }
-                        let work = DispatchWorkItem {
-                            withAnimation(.easeInOut(duration: 0.3)) { showSilentCompleteChip = false }
-                        }
-                        silentCompleteWorkItem = work
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: work)
-                    }
-                    // Final Time 変更でレイヤーを確実に再構築
-                    .onChange(of: timerVM.endTime) { _, _ in
-                        recordedTimesNonce = UUID()
-                    }
-                    // SessionManagerからのサイドメニュー開きリクエストを監視
-                    .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
-                        if shouldOpen {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                showingSideMenu = true
-                            }
-                            sessionManager.resetSideMenuRequest()
-                        }
-                    }
-                    .animation(
-                        .easeInOut(duration: 0.3)
-                            .delay(0.1),
-                        value: isLandscape
-                    )
+                if context.hasValidSize {
+                    mainScene(for: context)
                 }
             }
         }
     }
 
-    // MARK: - Start / Pause Button
+}
 
-    // MARK: - Helper Methods
+// MARK: - Layout helpers
+private extension ContentView {
+    struct LayoutContext {
+        let size: CGSize
+        let safeAreaInsets: EdgeInsets
+        let isLandscape: Bool
+        let shouldAnimateStars: Bool
+
+        var hasValidSize: Bool {
+            size.width > 0 && size.height > 0
+        }
+    }
+
+    func mainScene(for context: LayoutContext) -> some View {
+        layoutLayers(for: context)
+            .ignoresSafeArea()
+            .gesture(sideMenuDragGesture(context: context))
+            .onReceive(timerVM.$flashStars.dropFirst()) { flashStars in
+                if flashStars {
+                    showDiamondStars = true
+                }
+            }
+            // シート提示は MainPanel へ移譲
+            .sheet(isPresented: $showingEditRecord) {
+                ZStack {
+                    DesignTokens.CosmosColors.background.ignoresSafeArea()
+                    TimerEditView()
+                        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+                }
+            }
+            .presentationBackground(DesignTokens.CosmosColors.background)
+            .onChange(of: timerVM.isSessionFinished) { _, newValue in
+                if newValue {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        isQuietMoonFocused = true
+                    }
+                }
+            }
+            // showingSideMenu の変更のみで十分（shouldAnimateStars が再評価される）
+            // 低電力モードの変更を監視
+            .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
+                isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+            }
+            // フォアグラウンド復帰で日付を更新
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            ) { _ in
+                today = Date()
+                timerVM.appWillEnterForeground()
+            }
+            // バックグラウンド移行時の処理
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+            ) { _ in
+                timerVM.appDidEnterBackground()
+            }
+            // 画面常駐時に0時を跨いだら日付を更新
+            .onAppear { scheduleMidnightTick() }
+            // 編集保存完了でHUDを表示
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TimerEditSaved"))) { _ in
+                savedToastWorkItem?.cancel()
+                withAnimation(.easeInOut(duration: 0.2)) { showSavedToast = true }
+                recordedTimesNonce = UUID()
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showSavedToast = false }
+                }
+                savedToastWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+            }
+            // History 保存失敗: 非ブロッキングトースト表示
+            .onReceive(
+                NotificationCenter.default.publisher(for: Notification.Name("HistorySaveFailed"))
+            ) { _ in
+                historyToastWorkItem?.cancel()
+                historyToastMessage = "Save failed. Retrying…"
+                withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
+                }
+                historyToastWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
+            }
+            // History 保存リトライ: 次回リトライまでの秒数を表示
+            .onReceive(
+                NotificationCenter.default.publisher(for: Notification.Name("HistorySaveRetrying"))
+            ) { notif in
+                guard let delay = notif.object as? Double else { return }
+                historyToastWorkItem?.cancel()
+                historyToastMessage = String(format: "Retrying in %.0fs…", delay)
+                withAnimation(.easeInOut(duration: 0.2)) { showHistoryToast = true }
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showHistoryToast = false }
+                }
+                historyToastWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.3, execute: work)
+            }
+            // History 保存断念: CTA付きバナー表示
+            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("HistorySaveGaveUp"))) { _ in
+                withAnimation(.easeInOut(duration: 0.2)) { showHistorySaveBanner = true }
+            }
+            // 復帰直後の“静かな完了”を軽く表示（ワンショット）
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: Notification.Name("TimerSilentCompleted")
+                )
+            ) { _ in
+                silentCompleteWorkItem?.cancel()
+                withAnimation(.easeInOut(duration: 0.2)) { showSilentCompleteChip = true }
+                let work = DispatchWorkItem {
+                    withAnimation(.easeInOut(duration: 0.3)) { showSilentCompleteChip = false }
+                }
+                silentCompleteWorkItem = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: work)
+            }
+            // Final Time 変更でレイヤーを確実に再構築
+            .onChange(of: timerVM.endTime) { _, _ in
+                recordedTimesNonce = UUID()
+            }
+            // SessionManagerからのサイドメニュー開きリクエストを監視
+            .onReceive(sessionManager.$shouldOpenSideMenuOnDismiss) { shouldOpen in
+                if shouldOpen {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showingSideMenu = true
+                    }
+                    sessionManager.resetSideMenuRequest()
+                }
+            }
+            .animation(
+                .easeInOut(duration: 0.3)
+                    .delay(0.1),
+                value: context.isLandscape
+            )
+    }
+
+    @ViewBuilder
+    func layoutLayers(for context: LayoutContext) -> some View {
+        let safeAreaInsets = context.safeAreaInsets
+
+        ZStack(alignment: .bottom) {
+            backgroundLayer(params: ContentView.BackgroundLayerParams(
+                size: context.size,
+                safeAreaInsets: safeAreaInsets,
+                staticStarCount: staticStarCount,
+                flowingStarCount: flowingStarCount,
+                isLowPowerMode: isLowPowerMode,
+                isSessionFinished: timerVM.isSessionFinished,
+                shouldAnimateStars: context.shouldAnimateStars,
+                isLandscape: context.isLandscape
+            ))
+
+            MainPanel(
+                size: context.size,
+                safeAreaInsets: safeAreaInsets,
+                isLandscape: context.isLandscape,
+                moonTitle: moonTitle,
+                landscapeMargin: landscapeMargin(),
+                moonPortraitYOffsetRatio: moonPortraitYOffsetRatio,
+                moonLandscapeYOffsetRatio: moonLandscapeYOffsetRatio,
+                isQuietMoonFocused: $isQuietMoonFocused,
+                showingEditRecord: $showingEditRecord,
+                isMoonAnimationActive: context.shouldAnimateStars
+            )
+
+            footerLayer(params: ContentView.FooterLayerParams(
+                safeAreaInsets: safeAreaInsets,
+                buttonHeight: buttonHeight,
+                buttonWidth: buttonWidth,
+                today: today,
+                isRunning: timerVM.isRunning,
+                isSessionFinished: timerVM.isSessionFinished,
+                showingSideMenu: $showingSideMenu,
+                onPause: { [weak timerVM] in timerVM?.pauseTimer() },
+                onStart: { [weak timerVM] in
+                    isQuietMoonFocused = false
+                    timerVM?.startTimer()
+                }
+            ))
+            .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
+
+            recordedTimesLayer(params: ContentView.RecordedTimesLayerParams(
+                isLandscape: context.isLandscape,
+                safeAreaInsets: safeAreaInsets,
+                hasRecordedEndTime: timerVM.hasRecordedEndTime,
+                isWorkSession: timerVM.isWorkSession,
+                startTime: timerVM.startTime,
+                endTime: timerVM.endTime,
+                actualSessionMinutes: timerVM.actualSessionMinutes,
+                showingEditRecord: $showingEditRecord
+            ))
+            .id("recorded-layer-\(recordedTimesNonce)")
+
+            diamondStarsOverlay()
+            SideMenuView(isPresented: $showingSideMenu)
+                .zIndex(2002)
+            savedToast(safeAreaInsets: safeAreaInsets)
+            historyToast(safeAreaInsets: safeAreaInsets)
+            historySaveBanner(safeAreaInsets: safeAreaInsets)
+            silentCompleteChip(safeAreaInsets: safeAreaInsets)
+        }
+    }
+
+    @ViewBuilder
+    func diamondStarsOverlay() -> some View {
+        if showDiamondStars {
+            DiamondStarsOnceView {
+                showDiamondStars = false
+                timerVM.flashStars = false
+            }
+            .allowsHitTesting(false)
+        }
+    }
+
+    @ViewBuilder
+    func savedToast(safeAreaInsets: EdgeInsets) -> some View {
+        if showSavedToast {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(DesignTokens.Fonts.symbolMedium)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                Text("Saved")
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+            }
+            .accessibilityIdentifier("savedToast")
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignTokens.WhiteColors.stroke)
+            )
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .zIndex(3000)
+            .allowsHitTesting(false)
+        }
+    }
+
+    @ViewBuilder
+    func historyToast(safeAreaInsets: EdgeInsets) -> some View {
+        if showHistoryToast {
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(DesignTokens.Fonts.symbolMedium)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                Text(historyToastMessage)
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+            }
+            .accessibilityIdentifier("historySaveToast")
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignTokens.WhiteColors.stroke)
+            )
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 64)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .zIndex(3001)
+            .allowsHitTesting(false)
+        }
+    }
+
+    @ViewBuilder
+    func historySaveBanner(safeAreaInsets: EdgeInsets) -> some View {
+        if showHistorySaveBanner {
+            HStack(spacing: 12) {
+                Image(systemName: "icloud.slash")
+                    .font(DesignTokens.Fonts.symbolMedium)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Couldn’t save history")
+                        .font(DesignTokens.Fonts.label)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    Text("You can retry in background.")
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary.opacity(0.8))
+                }
+                Spacer()
+                Button("Retry") {
+                    historyVM.retryPendingSave()
+                }
+                .accessibilityIdentifier("historySaveRetryButton")
+                .buttonStyle(.bordered)
+            }
+            .accessibilityIdentifier("historySaveBanner")
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignTokens.WhiteColors.stroke)
+            )
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .zIndex(3002)
+        }
+    }
+
+    @ViewBuilder
+    func silentCompleteChip(safeAreaInsets: EdgeInsets) -> some View {
+        if showSilentCompleteChip {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(DesignTokens.Fonts.symbolMedium)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                Text("Completed")
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignTokens.WhiteColors.stroke)
+            )
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+            .padding(.bottom, safeAreaInsets.bottom + AppConstants.footerBarHeight + 16)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .zIndex(3000)
+            .allowsHitTesting(false)
+        }
+    }
+
+    func sideMenuDragGesture(context: LayoutContext) -> some Gesture {
+        DragGesture()
+            .onEnded { value in
+                let horizontalAmount = value.translation.width
+                let verticalAmount = abs(value.translation.height)
+                let openThreshold = max(50, context.size.width * 0.10)
+                let closeThreshold = -openThreshold
+
+                if abs(horizontalAmount) > verticalAmount {
+                    if horizontalAmount > openThreshold && !showingSideMenu {
+                        if value.startLocation.x <= 20 {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                showingSideMenu = true
+                            }
+                        }
+                    } else if horizontalAmount < closeThreshold && showingSideMenu {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showingSideMenu = false
+                        }
+                    }
+                }
+            }
+    }
 }
 
 // MARK: - Midnight tick
