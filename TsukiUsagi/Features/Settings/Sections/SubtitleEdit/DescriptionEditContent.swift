@@ -209,6 +209,15 @@ struct DescriptionEditContent: View {
                     }
                 }
                 .padding(.vertical, 4)
+                .background(
+                    GeometryReader { geo in
+                        let isFocused = (focusedField == draft.id)
+                        Color.clear.preference(
+                            key: FocusedRowBottomPrefKey.self,
+                            value: isFocused ? geo.frame(in: .named("DescScroll")).maxY : 0
+                        )
+                    }
+                )
             }
 
             Text("Add descriptions for what you'll work on during this session")

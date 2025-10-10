@@ -38,6 +38,9 @@ struct EditableModal<Content: View>: View {
     @State private var bottomLift: CGFloat = 0
     @State private var focusedBottomY: CGFloat = 0
     @State private var keyboardEndFrame: CGRect = .zero
+    @State private var viewportHeight: CGFloat = 0
+    @State private var pendingWork: DispatchWorkItem?
+    private let descScrollSpace = "DescScroll"
 
     /// EditableModalの初期化
     /// - Parameters:
@@ -77,7 +80,16 @@ struct EditableModal<Content: View>: View {
                         content()
                     }
                     .padding()
+                    .background(
+                        GeometryReader { geo in
+                            Color.clear.preference(
+                                key: ViewportHeightPrefKey.self,
+                                value: geo.frame(in: .named(descScrollSpace)).height
+                            )
+                        }
+                    )
                 }
+                .coordinateSpace(name: descScrollSpace)
                 .scrollDismissesKeyboard(.interactively)
                 .keyboardAwareInset(baseBottomPadding: ensureVisibleMode == .none ? 0 : 16)
                 .dismissKeyboardOnTap {
@@ -85,6 +97,10 @@ struct EditableModal<Content: View>: View {
                 }
                 .onPreferenceChange(FocusedRowBottomPrefKey.self) { value in
                     focusedBottomY = value
+                    recomputeBottomLift()
+                }
+                .onPreferenceChange(ViewportHeightPrefKey.self) { value in
+                    viewportHeight = value
                     recomputeBottomLift()
                 }
                 .safeAreaInset(edge: .bottom) {
@@ -114,7 +130,7 @@ struct EditableModal<Content: View>: View {
                     case .bottomIfObscuredOnce:
                         ensureVisibleOnceBottom(proxy, id: focusedRowID)
                     case .none:
-                        recomputeBottomLift()
+                        recomputeBottomLift(debounce: true)
                     }
                 }
                 .onReceive(
@@ -131,7 +147,7 @@ struct EditableModal<Content: View>: View {
                     case .bottomIfObscuredOnce:
                         ensureVisibleOnceBottom(proxy, id: focusedRowID)
                     case .none:
-                        recomputeBottomLift()
+                        recomputeBottomLift(debounce: true)
                     }
                 }
             }
@@ -168,17 +184,28 @@ struct EditableModal<Content: View>: View {
 }
 
 private extension EditableModal {
-    func recomputeBottomLift() {
-        let margin: CGFloat = 16
-        guard keyboardEndFrame.height > 0 else {
-            withAnimation(.easeInOut(duration: 0.18)) { bottomLift = 0 }
-            return
+    func recomputeBottomLift(debounce: Bool = false) {
+        let run = {
+            let margin: CGFloat = 16
+            guard keyboardEndFrame.height > 0 else {
+                withAnimation(.easeInOut(duration: 0.18)) { bottomLift = 0 }
+                return
+            }
+            let keyboardHeight = keyboardEndFrame.height
+            let visibleBottom = max(0, viewportHeight - keyboardHeight - margin)
+            let needed = max(0, focusedBottomY - visibleBottom)
+            let clamped = min(needed, 280)
+            let target = (abs(clamped - bottomLift) < 1) ? bottomLift : clamped
+            withAnimation(.easeInOut(duration: 0.18)) { bottomLift = target }
         }
-        let keyboardTop = keyboardEndFrame.minY
-        let overlap = focusedBottomY - (keyboardTop - margin)
-        let needed = max(0, overlap)
-        withAnimation(.easeInOut(duration: 0.18)) {
-            bottomLift = min(needed, 260)
+
+        if debounce {
+            pendingWork?.cancel()
+            let work = DispatchWorkItem(block: run)
+            pendingWork = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06, execute: work)
+        } else {
+            run()
         }
     }
 
@@ -212,8 +239,14 @@ private extension EditableModal {
     }
 }
 
-// Preference key for broadcasting the focused row's global bottom Y
+// Preference key for broadcasting the focused row's bottom Y in the named scroll coordinate space
 struct FocusedRowBottomPrefKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+// Preference key for the viewport height inside the named scroll coordinate space
+struct ViewportHeightPrefKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
