@@ -52,6 +52,16 @@ final class TimerViewModel: ObservableObject {
     @Published private(set) var lastBackgroundDate: Date?
     @Published var shouldSuppressAnimation = false
     @Published var shouldSuppressSessionFinishedAnimation = false
+    @Published private(set) var quietMoonMessage: MoonMessageEntry?
+
+    func assignQuietMoonMessageIfNeeded() {
+        guard quietMoonMessage == nil else { return }
+        quietMoonMessage = MoonMessage.random()
+    }
+
+    func clearQuietMoonMessage() {
+        quietMoonMessage = nil
+    }
 
     // User-configurable
     @AppStorage("activityLabel") var activityLabel: String = "Work"

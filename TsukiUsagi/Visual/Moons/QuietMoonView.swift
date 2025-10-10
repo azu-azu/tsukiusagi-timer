@@ -3,13 +3,28 @@ import SwiftUI
 struct QuietMoonView: View {
     private let title = "Quiet Moon"
     private let paddingY: CGFloat = 60
-    private let bodyText = MoonMessage.random().lines.joined(separator: "\n")
+    private let message: MoonMessageEntry
 
     let size: CGSize
     let safeAreaInsets: EdgeInsets
     var isAnimationActive: Bool = true
 
+    init(
+        size: CGSize,
+        safeAreaInsets: EdgeInsets,
+        isAnimationActive: Bool = true,
+        message: MoonMessageEntry = MoonMessage.fallback()
+    ) {
+        self.size = size
+        self.safeAreaInsets = safeAreaInsets
+        self.isAnimationActive = isAnimationActive
+        self.message = message
+    }
+
     // MARK: - Computed Properties
+    private var bodyText: String {
+        message.lines.joined(separator: "\n")
+    }
 
     /// 動的高さ計算（ふじこ式）
     private var dynamicHeight: CGFloat { min(size.height * 0.5, 400) }

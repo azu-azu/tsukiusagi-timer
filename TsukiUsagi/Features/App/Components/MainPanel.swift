@@ -123,7 +123,8 @@ struct MainPanel: View {
                         QuietMoonView(
                             size: childSize,
                             safeAreaInsets: childInsets,
-                            isAnimationActive: isMoonAnimationActive
+                            isAnimationActive: isMoonAnimationActive,
+                            message: timerVM.quietMoonMessage ?? MoonMessage.fallback()
                         )
                         .frame(
                             width: max(1, max(effectiveW - safeMargin2, 0) * 0.5),
@@ -185,7 +186,8 @@ struct MainPanel: View {
                         QuietMoonView(
                             size: childSize,
                             safeAreaInsets: childInsets,
-                            isAnimationActive: isMoonAnimationActive
+                            isAnimationActive: isMoonAnimationActive,
+                            message: timerVM.quietMoonMessage ?? MoonMessage.fallback()
                         )
                         .accessibilityLabel("Quiet Moon Message")
                         .accessibilityHint(
