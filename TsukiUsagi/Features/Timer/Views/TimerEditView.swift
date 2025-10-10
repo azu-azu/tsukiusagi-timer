@@ -99,7 +99,7 @@ struct TimerEditView: View {
                             }
 
                             // Final Time
-                            sectionBuilder.section(title: "Final Time", isCompact: true) {
+                            sectionBuilder.section(title: "", isCompact: true) {
                                 DatePicker(
                                     "Final Time",
                                     selection: $editedEnd,
@@ -107,6 +107,7 @@ struct TimerEditView: View {
                                     displayedComponents: [.hourAndMinute]
                                 )
                                 .datePickerStyle(.compact)
+                                .padding(.horizontal, 8)
                                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 .colorScheme(.dark)
                             }
