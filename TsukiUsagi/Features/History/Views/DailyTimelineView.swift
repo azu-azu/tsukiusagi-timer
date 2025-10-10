@@ -328,11 +328,11 @@ struct DailyTimelineView: View {
         let onRetry: () -> Void
         let focus: FocusState<Bool>.Binding
 
-        private let placeholderText = "Capture insights, feelings, and next steps…"
+        private let placeholderText = Copy.Reflection.placeholder
 
         var body: some View {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Reflection")
+                Text(Copy.Reflection.title)
                     .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
