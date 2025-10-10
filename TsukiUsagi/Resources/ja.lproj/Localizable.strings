@@ -33,6 +33,8 @@
 "descriptions_optional_label" = "説明（任意）";
 "descriptions_help_text" = "このセッション内の活動を整理するために説明を追加しましょう";
 "tap_plus_to_add_description" = "+ をタップして最初の説明を追加";
+"duplicate_descriptions_detected" = "説明が重複しています";
+"duplicate_descriptions_resolved" = "説明の重複が解消されました";
 "error_title" = "エラー";
 "ok" = "OK";
 "error_empty_session_name" = "セッション名は空にできません";

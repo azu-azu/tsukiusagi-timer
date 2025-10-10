@@ -33,6 +33,8 @@
 "descriptions_optional_label" = "Descriptions (Optional)";
 "descriptions_help_text" = "Add descriptions to help organize different activities within this session";
 "tap_plus_to_add_description" = "Tap + to add your first description";
+"duplicate_descriptions_detected" = "Duplicate descriptions detected";
+"duplicate_descriptions_resolved" = "Duplicates resolved";
 "error_title" = "Error";
 "ok" = "OK";
 "error_empty_session_name" = "Session name cannot be empty";

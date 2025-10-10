@@ -12,6 +12,7 @@
 
 import SwiftUI
 import Foundation
+import UIKit
 
 /// Custom Session全体編集用のコンテンツView
 ///
@@ -20,6 +21,7 @@ struct FullSessionEditContent: View {
     @State private var sessionName: String
     @State private var drafts: [SessionEditSheetBuilder.DescriptionDraft]
     @State private var duplicateIDs: Set<UUID> = []
+    @State private var duplicateDebouncer = Debouncer(delay: 0.15)
     let onSessionNameChange: (String) -> Void
     let onDescriptionsChange: ([SessionEditSheetBuilder.DescriptionDraft]) -> Void
     @Binding var isAnyFieldFocused: Bool
@@ -82,7 +84,9 @@ struct FullSessionEditContent: View {
             }
         }
         .onChange(of: drafts) { _, _ in
-            validateDuplicates()
+            duplicateDebouncer.schedule {
+                validateDuplicates()
+            }
         }
         .onChange(of: focusedField) { _, newValue in
             isAnyFieldFocused = newValue != nil
@@ -150,51 +154,64 @@ struct FullSessionEditContent: View {
                 HStack(alignment: .center, spacing: 12) {
                     let isDuplicate = duplicateIDs.contains(draft.id)
 
-                    TextField(
-                        "Description",
-                        text: binding(for: draft.id)
-                    )
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
-                    .foregroundColor(
+            TextField(
+                "Description",
+                text: binding(for: draft.id)
+            )
+            .textFieldStyle(PlainTextFieldStyle())
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .textInputAutocapitalization(.never)
+            .disableAutocorrection(true)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .foregroundColor(
                         isDuplicate
-                            ? DesignTokens.MoonColors.accentOrange
+                            ? DesignTokens.UtilityColors.duplicateWarning
                             : DesignTokens.MoonColors.textPrimary
-                    )
-                    .background(DesignTokens.CosmosColors.cardBackground)
-                    .cornerRadius(DesignTokens.CornerRadius.medium)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                            .stroke(
+            )
+            .background(DesignTokens.CosmosColors.cardBackground)
+            .cornerRadius(DesignTokens.CornerRadius.medium)
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                    .stroke(
                                 isDuplicate
-                                    ? DesignTokens.MoonColors.accentOrange
+                                    ? DesignTokens.UtilityColors.duplicateWarning
                                     : DesignTokens.BlackColors.stroke,
-                                lineWidth: isDuplicate ? 2 : 1
-                            )
+                        lineWidth: isDuplicate ? 2 : 1
                     )
-                    .focused(self.$focusedField, equals: .description(draft.id))
-                    .submitLabel(draft.id == drafts.last?.id ? .done : .next)
-                    .onSubmit {
-                        if let nextID = nextID(after: draft.id) {
-                            self.focusedField = .description(nextID)
-                        }
-                    }
-
-                    if drafts.count > 1 {
-                        Button(
-                            action: { removeDescription(with: draft.id) },
-                            label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
-                            }
-                        )
-                        .buttonStyle(.plain)
-                        .padding(.trailing, 4)
-                    }
+            )
+            .focused(self.$focusedField, equals: .description(draft.id))
+            .submitLabel(draft.id == drafts.last?.id ? .done : .next)
+            .onSubmit {
+                if let nextID = nextID(after: draft.id) {
+                    self.focusedField = .description(nextID)
+                } else {
+                    Keyboard.dismiss()
+                    focusedField = nil
                 }
-                .padding(.vertical, 4)
+            }
+
+            if drafts.count > 1 {
+                let index = drafts.firstIndex(where: { $0.id == draft.id }) ?? 0
+                Button(
+                    action: {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        removeDescription(with: draft.id)
+                    },
+                    label: {
+                        Image(systemName: "minus.circle.fill")
+                            .imageScale(.large)
+                            .foregroundColor(DesignTokens.MoonColors.accentOrange)
+                    }
+                )
+                .buttonStyle(.plain)
+                .padding(.leading, 4)
+                .contentShape(Rectangle())
+                .accessibilityLabel("Remove description \(index + 1)")
+            }
+        }
+        .padding(.vertical, 4)
             }
 
             // 入力ヒント
@@ -215,8 +232,10 @@ struct FullSessionEditContent: View {
             set: { newValue in
                 guard let index = drafts.firstIndex(where: { $0.id == id }) else { return }
                 drafts[index].text = newValue
-                validateDuplicates()
                 onDescriptionsChange(drafts)
+                duplicateDebouncer.schedule {
+                    validateDuplicates()
+                }
             }
         )
     }
@@ -224,8 +243,10 @@ struct FullSessionEditContent: View {
     private func addDescription() {
         let newDraft = SessionEditSheetBuilder.DescriptionDraft(text: "")
         drafts.append(newDraft)
-        validateDuplicates()
         onDescriptionsChange(drafts)
+        duplicateDebouncer.schedule {
+            validateDuplicates()
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
             self.focusedField = .description(newDraft.id)
         }
@@ -234,8 +255,10 @@ struct FullSessionEditContent: View {
     private func removeDescription(with id: UUID) {
         guard drafts.count > 1, let index = drafts.firstIndex(where: { $0.id == id }) else { return }
         drafts.remove(at: index)
-        validateDuplicates()
         onDescriptionsChange(drafts)
+        duplicateDebouncer.schedule {
+            validateDuplicates()
+        }
 
         // フォーカス調整
         if case .description(let focusedID) = focusedField, focusedID == id {
@@ -251,6 +274,8 @@ struct FullSessionEditContent: View {
         var seen: [String: UUID] = [:]
         var duplicates = Set<UUID>()
 
+        let hadConflict = !duplicateIDs.isEmpty
+
         for draft in drafts {
             let key = draft.text.tsu_descriptionNormalizedKey
             if key.isEmpty { continue }
@@ -264,6 +289,21 @@ struct FullSessionEditContent: View {
 
         duplicateIDs = duplicates
         onDuplicateStateChange(!duplicates.isEmpty)
+
+        let hasConflict = !duplicates.isEmpty
+        if hadConflict != hasConflict {
+            let message = hasConflict
+                ?
+                NSLocalizedString(
+                    "duplicate_descriptions_detected",
+                    comment: "VoiceOver announcement when duplicates appear"
+                )
+                : NSLocalizedString(
+                    "duplicate_descriptions_resolved",
+                    comment: "VoiceOver announcement when duplicates are resolved"
+                )
+            UIAccessibility.post(notification: .announcement, argument: message)
+        }
     }
 
     private var hasDuplicateConflict: Bool {
