@@ -28,19 +28,27 @@ struct TimerEditSectionBuilder {
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: isCompact ? 5 : 10) {
-            HStack {
-                Text(title)
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .fontWeight(.semibold)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    .padding(.horizontal, 4)
-                Spacer()
-                if showDone, let action = doneAction {
-                    Button("Done") {
-                        action()
+            let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            let hasTitle = !trimmedTitle.isEmpty
+            let canShowHeader = hasTitle || (showDone && doneAction != nil)
+
+            if canShowHeader {
+                HStack {
+                    if hasTitle {
+                        Text(title)
+                            .font(DesignTokens.Fonts.sectionTitle)
+                            .fontWeight(.semibold)
+                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                            .padding(.horizontal, 4)
                     }
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    Spacer()
+                    if showDone, let action = doneAction {
+                        Button("Done") {
+                            action()
+                        }
+                        .font(DesignTokens.Fonts.sectionTitle)
+                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    }
                 }
             }
 
