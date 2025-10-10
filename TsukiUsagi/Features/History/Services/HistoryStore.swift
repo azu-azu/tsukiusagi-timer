@@ -6,7 +6,6 @@ struct HistorySnapshot {
     var reflections: [Date: DayReflection]
 }
 
-
 struct HistoryStore {
     private let file = "history.json"
 
