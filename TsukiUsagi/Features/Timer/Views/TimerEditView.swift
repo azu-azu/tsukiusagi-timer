@@ -21,6 +21,10 @@ struct TimerEditView: View {
     // スクロール位置制御用の識別子（小さなアンカー用）
     private enum SectionID: Hashable { case memoAnchor }
     @FocusState private var isActivityFocused: Bool
+    @State private var scrollProxy: ScrollViewProxy?
+    @State private var memoAnchorGlobalMaxY: CGFloat = 0
+    @State private var keyboardEndFrame: CGRect = .zero
+    @State private var bottomLiftPadding: CGFloat = 0
 
     // SettingsViewと同じ定数
     private let topPadding: CGFloat = 8
@@ -78,7 +82,7 @@ struct TimerEditView: View {
                     .zIndex(1)
 
                     // スクロール可能なコンテンツ
-                    ScrollViewReader { _ in
+                    ScrollViewReader { proxy in
                         ScrollView {
                             VStack(alignment: .leading, spacing: 24) {
                             // Session Label
@@ -142,12 +146,21 @@ struct TimerEditView: View {
                                 // TextEditor直下に小さなアンカーを置く
                                 Color.clear
                                     .frame(height: 1)
+                                    .background(
+                                        GeometryReader { geo in
+                                            Color.clear.preference(
+                                                key: MemoAnchorPreferenceKey.self,
+                                                value: geo.frame(in: .global).maxY
+                                            )
+                                        }
+                                    )
                                     .id(SectionID.memoAnchor)
                             }
 
-                            Spacer(minLength: 40)
+                            // 可変の下パディングでキーボード回避を行うため、固定Spacerは不要
                             }
                             .padding()
+                            .padding(.bottom, bottomLiftPadding)
                             // ScrollViewの中での下余白は最小限に留める（主にsafeAreaInsetで担保）
                         }
                         .scrollContentBackground(.hidden)
@@ -155,7 +168,34 @@ struct TimerEditView: View {
                         .scrollDismissesKeyboard(.interactively)
                         .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
                         .dismissKeyboardOnTap { closeKeyboard() }
-                        .keyboardAwareInset()
+                        .onAppear { scrollProxy = proxy }
+                        .onChange(of: isMemoFocused) { _, focused in
+                            if focused {
+                                guard keyboardEndFrame.height > 0, let proxy = scrollProxy else { return }
+                                ensureMemoVisibleOnce(using: proxy)
+                            } else {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    bottomLiftPadding = 0
+                                }
+                            }
+                        }
+                        .onReceive(
+                            NotificationCenter.default.publisher(
+                                for: UIResponder.keyboardDidChangeFrameNotification
+                            )
+                        ) { notification in
+                            if
+                                let userInfo = notification.userInfo,
+                                let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+                            {
+                                keyboardEndFrame = frameValue.cgRectValue
+                            }
+                            guard isMemoFocused, let proxy = scrollProxy else { return }
+                            ensureMemoVisibleOnce(using: proxy)
+                        }
+                        .onPreferenceChange(MemoAnchorPreferenceKey.self) { maxY in
+                            memoAnchorGlobalMaxY = maxY
+                        }
                     }
                 }
                 // 角丸クリップを外し、シートの下地色が見えないようにする
@@ -229,6 +269,33 @@ struct TimerEditView: View {
 
 // MARK: - Change detection
 private extension TimerEditView {
+    struct MemoAnchorPreferenceKey: PreferenceKey {
+        static var defaultValue: CGFloat = 0
+        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+            value = nextValue()
+        }
+    }
+
+    func ensureMemoVisibleOnce(using _: ScrollViewProxy) {
+        guard keyboardEndFrame.height > 0 else {
+            withAnimation(.easeInOut(duration: 0.2)) { bottomLiftPadding = 0 }
+            return
+        }
+
+        let keyboardTop = keyboardEndFrame.minY
+        guard keyboardTop > 0 else {
+            withAnimation(.easeInOut(duration: 0.2)) { bottomLiftPadding = 0 }
+            return
+        }
+
+        let overlap = memoAnchorGlobalMaxY - keyboardTop
+        let needed = max(0, overlap + 16)
+
+        withAnimation(.easeInOut(duration: 0.2)) {
+            bottomLiftPadding = needed
+        }
+    }
+
     var isNoChanges: Bool {
         // 比較元も履歴の最後のレコードを参照（なければVMの値でフォールバック）
         let originalActivity = historyVM.history.last?.sessionName
