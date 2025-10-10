@@ -15,4 +15,3 @@ enum HistoryDateKey {
         Calendar.app.startOfDay(for: date)
     }
 }
-
