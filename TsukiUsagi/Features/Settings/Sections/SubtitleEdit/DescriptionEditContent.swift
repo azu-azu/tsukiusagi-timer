@@ -11,6 +11,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 /// Description編集専用のコンテンツView
 ///
@@ -18,36 +19,35 @@ import SwiftUI
 /// 視覚的に「何が固定で何が編集可能か」を明確に示す
 struct DescriptionEditContent: View {
     let sessionName: String
-    @State private var descriptions: [String]  // 単一ではなく配列で管理
-    let editingIndex: Int?  // 編集中のインデックス（新規の場合はnil）
-    let onDescriptionsChange: ([String]) -> Void
+    @State private var drafts: [SessionEditSheetBuilder.DescriptionDraft]
+    let editingID: UUID?
+    let onDescriptionsChange: ([SessionEditSheetBuilder.DescriptionDraft]) -> Void
     @Binding var isAnyFieldFocused: Bool
     let onClearFocus: () -> Void
+    let onDuplicateStateChange: (Bool) -> Void
+    let onFocusChange: (UUID?) -> Void
 
-    @FocusState private var focusedField: Int?
+    @FocusState private var focusedField: UUID?
+    @State private var duplicateIDs: Set<UUID> = []
 
-    /// DescriptionEditContentの初期化
-    /// - Parameters:
-    ///   - sessionName: セッション名（編集不可・参考表示用）
-    ///   - descriptions: 全てのDescriptionリスト
-    ///   - editingIndex: 編集対象のインデックス（新規追加の場合はnil）
-    ///   - onDescriptionsChange: Descriptionリスト変更時のコールバック
-    ///   - isAnyFieldFocused: 外部から制御するフォーカス状態
-    ///   - onClearFocus: フォーカスクリア時のコールバック
     init(
         sessionName: String,
-        descriptions: [String],
-        editingIndex: Int? = nil,
-        onDescriptionsChange: @escaping ([String]) -> Void,
+        descriptionDrafts: [SessionEditSheetBuilder.DescriptionDraft],
+        editingID: UUID? = nil,
+        onDescriptionsChange: @escaping ([SessionEditSheetBuilder.DescriptionDraft]) -> Void,
         isAnyFieldFocused: Binding<Bool>,
-        onClearFocus: @escaping () -> Void
+        onClearFocus: @escaping () -> Void,
+        onDuplicateStateChange: @escaping (Bool) -> Void,
+        onFocusChange: @escaping (UUID?) -> Void
     ) {
         self.sessionName = sessionName
-        self.editingIndex = editingIndex
-        _descriptions = State(initialValue: descriptions)
+        self.editingID = editingID
+        _drafts = State(initialValue: descriptionDrafts)
         self.onDescriptionsChange = onDescriptionsChange
         self._isAnyFieldFocused = isAnyFieldFocused
         self.onClearFocus = onClearFocus
+        self.onDuplicateStateChange = onDuplicateStateChange
+        self.onFocusChange = onFocusChange
     }
 
     func clearFocus() {
@@ -55,6 +55,7 @@ struct DescriptionEditContent: View {
             focusedField = nil
         }
         onClearFocus()
+        onFocusChange(nil)
     }
 
     var body: some View {
@@ -63,17 +64,25 @@ struct DescriptionEditContent: View {
             descriptionsSection
         }
         .onAppear {
+            validateDuplicates()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                if let editingIndex {
-                    focusedField = editingIndex
-                } else if !descriptions.isEmpty {
-                    focusedField = descriptions.count - 1
+                if let editingID {
+                    focusedField = editingID
+                    onFocusChange(editingID)
+                } else if let lastID = drafts.last?.id {
+                    focusedField = lastID
+                    onFocusChange(lastID)
                 }
             }
         }
-        .onChange(of: focusedField) {
-            isAnyFieldFocused = focusedField != nil
+        .onChange(of: drafts) { _, _ in
+            validateDuplicates()
         }
+        .onChange(of: focusedField) { _, newValue in
+            isAnyFieldFocused = newValue != nil
+            onFocusChange(newValue)
+        }
+        .keyboardAwareBottomPadding(baseBottomPadding: DesignTokens.Padding.medium)
     }
 
     // MARK: - Private Views
@@ -130,41 +139,58 @@ struct DescriptionEditContent: View {
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
                 .accessibilityLabel("Add description")
+                .disabled(hasDuplicateConflict)
             }
 
-            ForEach(Array(descriptions.enumerated()), id: \.offset) { index, _ in
-                VStack(alignment: .leading) {
+            ForEach(drafts) { draft in
+                HStack(alignment: .center, spacing: 12) {
+                    let isDuplicate = duplicateIDs.contains(draft.id)
+
                     TextField(
-                        "Description \(index + 1)",
-                        text: binding(for: index)
+                        "Description",
+                        text: binding(for: draft.id)
                     )
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 10)
+                    .foregroundColor(
+                        isDuplicate
+                            ? DesignTokens.MoonColors.accentOrange
+                            : DesignTokens.MoonColors.textPrimary
+                    )
                     .background(DesignTokens.CosmosColors.cardBackground)
                     .cornerRadius(DesignTokens.CornerRadius.medium)
                     .overlay(
                         RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                            .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
+                            .stroke(
+                                isDuplicate
+                                    ? DesignTokens.MoonColors.accentOrange
+                                    : DesignTokens.BlackColors.stroke,
+                                lineWidth: isDuplicate ? 2 : 1
+                            )
                     )
-                    .focused($focusedField, equals: index)
-                    .submitLabel(index == descriptions.count - 1 ? .done : .next)
+                    .focused($focusedField, equals: draft.id)
+                    .submitLabel(draft.id == drafts.last?.id ? .done : .next)
                     .onSubmit {
-                        if index < descriptions.count - 1 {
-                            focusedField = index + 1
+                        if let nextID = nextID(after: draft.id) {
+                            focusedField = nextID
                         }
                     }
 
-                    if self.descriptions.count > 1 {
+                    if drafts.count > 1 {
                         Button(
-                            action: { self.removeDescription(at: index) },
+                            action: { removeDescription(with: draft.id) },
                             label: {
                                 Image(systemName: "minus.circle.fill")
+                                    .font(.system(size: 20))
                                     .foregroundColor(DesignTokens.MoonColors.accentOrange)
                             }
                         )
+                        .buttonStyle(.plain)
+                        .padding(.trailing, 4)
                     }
                 }
+                .padding(.vertical, 4)
             }
 
             Text("Add descriptions for what you'll work on during this session")
@@ -176,45 +202,70 @@ struct DescriptionEditContent: View {
 
     // MARK: - Helper Methods
 
-    private func binding(for index: Int) -> Binding<String> {
+    private func binding(for id: UUID) -> Binding<String> {
         Binding(
             get: {
-                if index < descriptions.count {
-                    return descriptions[index]
-                } else {
-                    return ""
-                }
+                drafts.first(where: { $0.id == id })?.text ?? ""
             },
             set: { newValue in
-                if index < descriptions.count {
-                    descriptions[index] = newValue
-                    onDescriptionsChange(descriptions)
-                }
+                guard let index = drafts.firstIndex(where: { $0.id == id }) else { return }
+                drafts[index].text = newValue
+                validateDuplicates()
+                onDescriptionsChange(drafts)
             }
         )
     }
 
     private func addDescription() {
-        descriptions.append("")
-        onDescriptionsChange(descriptions)
+        let newDraft = SessionEditSheetBuilder.DescriptionDraft(text: "")
+        drafts.append(newDraft)
+        validateDuplicates()
+        onDescriptionsChange(drafts)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            focusedField = descriptions.count - 1
+            focusedField = newDraft.id
         }
     }
 
-    private func removeDescription(at index: Int) {
-        guard descriptions.count > 1, index < descriptions.count else { return }
-        descriptions.remove(at: index)
-        onDescriptionsChange(descriptions)
+    private func removeDescription(with id: UUID) {
+        guard drafts.count > 1, let index = drafts.firstIndex(where: { $0.id == id }) else { return }
+        drafts.remove(at: index)
+        validateDuplicates()
+        onDescriptionsChange(drafts)
 
-        if focusedField == index {
-            if index > 0 {
-                focusedField = index - 1
-            } else if !descriptions.isEmpty {
-                focusedField = 0
+        if focusedField == id {
+            if let next = drafts[safe: min(index, drafts.count - 1)]?.id {
+                focusedField = next
+            } else {
+                focusedField = drafts.last?.id
             }
-        } else if let currentFocus = focusedField, currentFocus > index {
-            focusedField = currentFocus - 1
         }
+    }
+
+    private func validateDuplicates() {
+        var seen: [String: UUID] = [:]
+        var duplicates = Set<UUID>()
+
+        for draft in drafts {
+            let key = draft.text.tsu_descriptionNormalizedKey
+            if key.isEmpty { continue }
+            if let first = seen[key] {
+                duplicates.insert(first)
+                duplicates.insert(draft.id)
+            } else {
+                seen[key] = draft.id
+            }
+        }
+        duplicateIDs = duplicates
+        onDuplicateStateChange(!duplicates.isEmpty)
+    }
+
+    private var hasDuplicateConflict: Bool {
+        !duplicateIDs.isEmpty
+    }
+
+    private func nextID(after id: UUID) -> UUID? {
+        guard let index = drafts.firstIndex(where: { $0.id == id }) else { return nil }
+        let nextIndex = drafts.index(after: index)
+        return nextIndex < drafts.endIndex ? drafts[nextIndex].id : nil
     }
 }
