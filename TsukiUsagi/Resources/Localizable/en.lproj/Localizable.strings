@@ -66,9 +66,7 @@
 "history_memo_add_reflection_placeholder" = "Add a reflection for this session...";
 "history_memo_add_reflection" = "Add Reflection";
 "history_memo_edit_reflection" = "Edit Reflection";
-"history_timeline_reflection" = "Reflection";
-"history_timeline_add_reflection" = "Add reflection";
-"history_timeline_add_reflection_hint" = "Tap the pencil to add your thoughts";
+"history_memo_add_reflection_hint" = "Tap the pencil to add your thoughts";
 "history_detail_no_records" = "No records for this day";
 "history_detail_sessions" = "%d sessions";
 
