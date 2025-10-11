@@ -17,6 +17,7 @@ protocol PhaseNotificationServiceable: AnyObject {
     func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool)
     func sendPhaseChangeNotification(for phase: PomodoroPhase)
     func cancelSessionEndNotification()
+    func cancelSessionEndAll()
     func finalizeWorkPhase()
     func finalizeBreakPhase()
 
@@ -170,6 +171,10 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
                 completion(false)
             }
         }
+    }
+
+    func cancelSessionEndAll() {
+        notificationManager.cancelSessionEndAll()
     }
 }
 

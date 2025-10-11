@@ -445,4 +445,15 @@ extension NotificationManager {
             }
         }
     }
+
+    /// セッション終了通知をすべてキャンセル（前方一致で全削除）
+    func cancelSessionEndAll() {
+        Task { [weak self] in
+            guard let self else { return }
+            // Focus通知を削除
+            await self.removePendingForPrefix(NotificationID.focus)
+            // Rest通知を削除
+            await self.removePendingForPrefix(NotificationID.rest)
+        }
+    }
 }

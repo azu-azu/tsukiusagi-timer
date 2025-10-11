@@ -12,55 +12,7 @@ extension TimerViewModel {
 
     /// タイマー開始
     func startTimer() {
-        // debug log removed
-        // アイドル時は最新のworkMinutesを採用、進行/一時停止中は残り秒数を尊重
-        let targetTime: Int = (runState == .idle) ? workLengthMinutes * 60 : timeRemaining
-
-        guard targetTime > 0 else { return }
-
-        ensureWorkOnStart()
-        clearQuietMoonMessage()
-
-        sessionManager.startSession(
-            isWorkSession: isWorkSession,
-            activityLabel: activityLabel,
-            taskLabel: taskLabel
-        )
-
-        // 時間を設定してからstartTimerを呼ぶ
-        stateManager.timeRemaining = targetTime
-        // セッション完了状態をリセット
-        if isSessionFinished {
-            stateManager.resetSessionFinished() // セッション完了状態をリセット
-            isBackgroundCompleted = false // バックグラウンド完了フラグをリセット
-        }
-        stateManager.startTimer()
-        animationController.triggerStartAnimations()
-        notificationAndHapticManager.sendStartNotification()
-
-        // 終了時刻を設定し、次フェーズの通知を連鎖で予約
-        let endAt = dateProvider.now().addingTimeInterval(TimeInterval(targetTime))
-        sessionManager.setEndAt(endAt)
-        // 次のセッションの種類に応じて連鎖/冪等予約
-        if isWorkSession {
-            // Work→Rest と Rest→Focus を開始時点で連鎖予約
-            let workEndAt = endAt
-            let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
-            notificationService.scheduleChainedSessionEnds(
-                workEndAt: workEndAt,
-                breakEndAt: breakEndAt,
-                timeSensitive: true
-            )
-        } else {
-            // Break中開始（稀）: Focusのみ冪等予約
-            notificationService.ensureFocusAt(
-                breakEndAt: endAt,
-                timeSensitive: true
-            )
-        }
-
-        // Send start pulse
-        startPulse.send()
+        startTimerFromAnyState()
     }
 
     /// タイマー一時停止
@@ -219,6 +171,132 @@ extension TimerViewModel {
     /// 時間表示文字列を取得
     func formatTime(_ seconds: Int) -> String {
         return displayManager.timeDisplayString(for: seconds)
+    }
+
+    /// 完全な状態リセット（Quiet Moon状態からのSTART用）
+    func performCompleteStateReset() {
+        // 0) UI分岐を速攻で開放
+        isSessionFinished = false
+
+        // 1) 旧購読の全破棄
+        cancellables.removeAll()
+
+        // 2) エンジン停止・状態クリア
+        stateManager.stopTimer()
+        stateManager.resetSessionFinished()
+        runState = .idle
+        endTime = nil
+
+        // 3) 通知の掃除（prefix一致で全削除）
+        notificationService.cancelSessionEndAll()
+
+        // 4) アニメの状態クリア
+        animationController.resetAnimationState()
+
+        // 5) 新しいセッション識別子で世界を張る
+        sessionId = UUID()
+
+        // 6) セッションマネージャーのリセット
+        sessionManager.resetSession()
+    }
+
+    /// Quiet Moon状態からの専用開始処理
+    func startFromQuietMoon() {
+        performCompleteStateReset()
+
+        // Workセッションとして開始
+        ensureWorkOnStart()
+        clearQuietMoonMessage()
+
+        sessionManager.startSession(
+            isWorkSession: isWorkSession,
+            activityLabel: activityLabel,
+            taskLabel: taskLabel
+        )
+
+        // 時間を設定してからstartTimerを呼ぶ
+        stateManager.timeRemaining = workLengthMinutes * 60
+        stateManager.startTimer()
+        animationController.triggerStartAnimations()
+        notificationAndHapticManager.sendStartNotification()
+
+        // 終了時刻を設定し、次フェーズの通知を連鎖で予約
+        let endAt = dateProvider.now().addingTimeInterval(TimeInterval(workLengthMinutes * 60))
+        sessionManager.setEndAt(endAt)
+
+        // Work→Rest と Rest→Focus を開始時点で連鎖予約
+        let workEndAt = endAt
+        let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
+        notificationService.scheduleChainedSessionEnds(
+            workEndAt: workEndAt,
+            breakEndAt: breakEndAt,
+            timeSensitive: true
+        )
+
+        // Send start pulse
+        startPulse.send()
+    }
+
+    /// 状態に応じた分岐処理でタイマー開始（新しいエントリポイント）
+    func startTimerFromAnyState() {
+        if isSessionFinished {
+            startFromQuietMoon()
+            return
+        }
+        startTimerNormalFlow()
+    }
+
+    /// 通常のタイマー開始フロー（既存のstartTimer()の内容）
+    private func startTimerNormalFlow() {
+        // debug log removed
+        // アイドル時は最新のworkMinutesを採用、進行/一時停止中は残り秒数を尊重
+        let targetTime: Int = (runState == .idle) ? workLengthMinutes * 60 : timeRemaining
+
+        guard targetTime > 0 else { return }
+
+        ensureWorkOnStart()
+        clearQuietMoonMessage()
+
+        sessionManager.startSession(
+            isWorkSession: isWorkSession,
+            activityLabel: activityLabel,
+            taskLabel: taskLabel
+        )
+
+        // 時間を設定してからstartTimerを呼ぶ
+        stateManager.timeRemaining = targetTime
+        // セッション完了状態をリセット
+        if isSessionFinished {
+            stateManager.resetSessionFinished() // セッション完了状態をリセット
+            isBackgroundCompleted = false // バックグラウンド完了フラグをリセット
+        }
+        stateManager.startTimer()
+        animationController.triggerStartAnimations()
+        notificationAndHapticManager.sendStartNotification()
+
+        // 終了時刻を設定し、次フェーズの通知を連鎖で予約
+        let endAt = dateProvider.now().addingTimeInterval(TimeInterval(targetTime))
+        sessionManager.setEndAt(endAt)
+        // 次のセッションの種類に応じて連鎖/冪等予約
+        if isWorkSession {
+            // Work→Rest と Rest→Focus を開始時点で連鎖予約
+            let workEndAt = endAt
+            let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
+            notificationService.scheduleChainedSessionEnds(
+                workEndAt: workEndAt,
+                breakEndAt: breakEndAt,
+                timeSensitive: true
+            )
+        } else {
+            // Break中開始（稀）: Focusのみ冪等予約
+            notificationService.ensureFocusAt(
+                breakEndAt: endAt,
+                timeSensitive: true
+            )
+        }
+
+        // Send start pulse
+        startPulse.send()
     }
 
     // MARK: - Private Helpers
