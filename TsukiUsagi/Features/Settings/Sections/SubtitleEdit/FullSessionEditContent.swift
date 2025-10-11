@@ -210,14 +210,14 @@ private extension FullSessionEditContent {
                         .buttonStyle(.plain)
                         .padding(.leading, 4)
                         .contentShape(Rectangle())
-                        .accessibilityLabel("Remove description \(index + 1)")
+                        .accessibilityLabel("Remove task \(index + 1)")
                     }
                 }
                 .padding(.vertical, 4)
             }
 
             // 入力ヒント
-            Text("Add descriptions for what you'll work on during this session")
+            Text("Add tasks for what you'll work on during this session")
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .padding(.top, 4)
@@ -297,11 +297,11 @@ private extension FullSessionEditContent {
             let message = hasConflict
                 ?
                 NSLocalizedString(
-                    "duplicate_descriptions_detected",
+                    "duplicate_tasks_detected",
                     comment: "VoiceOver announcement when duplicates appear"
                 )
                 : NSLocalizedString(
-                    "duplicate_descriptions_resolved",
+                    "duplicate_tasks_resolved",
                     comment: "VoiceOver announcement when duplicates are resolved"
                 )
             UIAccessibility.post(notification: .announcement, argument: message)
