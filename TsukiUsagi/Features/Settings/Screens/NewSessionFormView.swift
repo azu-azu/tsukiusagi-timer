@@ -18,9 +18,9 @@ struct NewSessionFormView: View {
     @EnvironmentObject var sessionManager: SessionManager
 
     @State private var sessionName: String = ""
-    @State private var descriptions: [String] = []
-    @State private var newDescription: String = ""
-    @State private var showAddDescriptionField = false
+    @State private var tasks: [String] = []
+    @State private var newTask: String = ""
+    @State private var showAddTaskField = false
     @State private var errorMessage: String = ""
     @State private var showError = false
     @State private var duplicateIndices: Set<Int> = []
@@ -29,8 +29,8 @@ struct NewSessionFormView: View {
 
     private enum FocusedField: Hashable {
         case sessionName
-        case newDescription
-        case description(Int)
+        case newTask
+        case task(Int)
     }
 
     var body: some View {
@@ -39,7 +39,7 @@ struct NewSessionFormView: View {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
                     header()
                     sessionNameSection()
-                    descriptionsSection()
+                    tasksSection()
                     Spacer(minLength: 50)
                 }
                 .padding(DesignTokens.Padding.large)
@@ -128,7 +128,7 @@ private extension NewSessionFormView {
     // MARK: - Descriptions
 
     @ViewBuilder
-    func descriptionsSection() -> some View {
+    func tasksSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             HStack {
                 Text(NSLocalizedString("tasks_optional_label", comment: ""))
@@ -136,8 +136,8 @@ private extension NewSessionFormView {
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 Spacer()
                 Button {
-                    showAddDescriptionField = true
-                    newDescription = ""
+                    showAddTaskField = true
+                    newTask = ""
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
@@ -149,12 +149,12 @@ private extension NewSessionFormView {
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
-            if descriptions.isEmpty {
-                emptyDescriptionsView()
+            if tasks.isEmpty {
+                emptyTasksView()
             } else {
                 LazyVStack(spacing: DesignTokens.Spacing.medium) {
-                    ForEach(Array(descriptions.enumerated()), id: \.offset) { index, description in
-                        descriptionRow(description: description, index: index)
+                    ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
+                        taskRow(task: task, index: index)
                     }
                 }
             }
@@ -165,14 +165,14 @@ private extension NewSessionFormView {
                     .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
             }
 
-            if showAddDescriptionField {
-                addDescriptionField()
+            if showAddTaskField {
+                addTaskField()
             }
         }
     }
 
     @ViewBuilder
-    func emptyDescriptionsView() -> some View {
+    func emptyTasksView() -> some View {
         VStack(spacing: DesignTokens.Spacing.medium) {
             Image(systemName: "text.bubble")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -195,15 +195,15 @@ private extension NewSessionFormView {
     }
 
     @ViewBuilder
-    func descriptionRow(description: String, index: Int) -> some View {
+    func taskRow(task: String, index: Int) -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
             TextField(NSLocalizedString("task_placeholder", comment: ""), text: Binding(
-                get: { descriptions[safe: index] ?? "" },
+                get: { tasks[safe: index] ?? "" },
                 set: { newValue in
-                    if index < descriptions.count {
-                        descriptions[index] = newValue
+                    if index < tasks.count {
+                        tasks[index] = newValue
                         if !duplicateIndices.isEmpty {
-                            duplicateIndices = findDuplicateIndices(in: descriptions)
+                            duplicateIndices = findDuplicateIndices(in: tasks)
                         }
                     }
                 }
@@ -222,12 +222,12 @@ private extension NewSessionFormView {
                         lineWidth: 1
                     )
             )
-            .focused($focusedField, equals: .description(index))
+            .focused($focusedField, equals: .task(index))
 
             Button {
-                descriptions.remove(at: index)
+                tasks.remove(at: index)
                 if !duplicateIndices.isEmpty {
-                    duplicateIndices = findDuplicateIndices(in: descriptions)
+                    duplicateIndices = findDuplicateIndices(in: tasks)
                 }
             } label: {
                 Image(systemName: "minus.circle.fill")
@@ -238,9 +238,9 @@ private extension NewSessionFormView {
     }
 
     @ViewBuilder
-    func addDescriptionField() -> some View {
+    func addTaskField() -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newDescription)
+            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newTask)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -250,18 +250,18 @@ private extension NewSessionFormView {
                     RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
                         .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
                 )
-                .focused($focusedField, equals: .newDescription)
+                .focused($focusedField, equals: .newTask)
 
             Button {
-                let trimmed = newDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+                let trimmed = newTask.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !trimmed.isEmpty {
-                    descriptions.append(trimmed)
-                    newDescription = ""
+                    tasks.append(trimmed)
+                    newTask = ""
                 }
                 if !duplicateIndices.isEmpty {
-                    duplicateIndices = findDuplicateIndices(in: descriptions)
+                    duplicateIndices = findDuplicateIndices(in: tasks)
                 }
-                showAddDescriptionField = false
+                showAddTaskField = false
             } label: {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentGreen)
@@ -269,8 +269,8 @@ private extension NewSessionFormView {
             }
 
             Button {
-                showAddDescriptionField = false
-                newDescription = ""
+                showAddTaskField = false
+                newTask = ""
             } label: {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentOrange)
@@ -288,7 +288,7 @@ private extension NewSessionFormView {
             showError = true
             return
         }
-        let duplicateHits = findDuplicateIndices(in: descriptions)
+        let duplicateHits = findDuplicateIndices(in: tasks)
         guard duplicateHits.isEmpty else {
             duplicateIndices = duplicateHits
             return
@@ -298,7 +298,7 @@ private extension NewSessionFormView {
             try sessionManager.addOrUpdateEntry(
                 originalKey: "",
                 sessionName: trimmedName,
-                tasks: descriptions.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+                tasks: tasks.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
             )
             dismiss()
         } catch {
