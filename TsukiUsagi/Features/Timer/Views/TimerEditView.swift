@@ -86,7 +86,13 @@ struct TimerEditView: View {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 24) {
                             // Session Label
-                            sectionBuilder.section(title: "Session Label", isCompact: true) {
+                            sectionBuilder.section(
+                                title: NSLocalizedString(
+                                    "timer_edit_session_label_section_title",
+                                    comment: "Title for session label section"
+                                ),
+                                isCompact: true
+                            ) {
                                 SessionLabelSection(
                                     activity: $editedActivity,
                                     descriptionText: $editedSubtitle,
@@ -101,7 +107,10 @@ struct TimerEditView: View {
                             // Final Time
                             sectionBuilder.section(title: "", isCompact: true) {
                                 DatePicker(
-                                    "Final Time",
+                                    NSLocalizedString(
+                                        "timer_edit_final_time_title",
+                                        comment: "Label for the final time picker"
+                                    ),
                                     selection: $editedEnd,
                                     in: minEnd...,
                                     displayedComponents: [.hourAndMinute]
@@ -207,7 +216,14 @@ struct TimerEditView: View {
             .background(DesignTokens.CosmosColors.background) // 万一の透過対策
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
-            .keyboardCloseToolbar(labelStyle: .iconWithText("Close")) {
+            .keyboardCloseToolbar(
+                labelStyle: .iconWithText(
+                    NSLocalizedString(
+                        "keyboard_close_button",
+                        comment: "Toolbar button to close the keyboard"
+                    )
+                )
+            ) {
                 closeKeyboard()
             }
             .onDisappear {
@@ -238,7 +254,13 @@ struct TimerEditView: View {
                 // 微遅延で閉じる（0.1s）
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
                     dismiss()
-                    UIAccessibility.post(notification: .announcement, argument: "Saved")
+                    UIAccessibility.post(
+                        notification: .announcement,
+                        argument: NSLocalizedString(
+                            "timer_edit_saved_announcement",
+                            comment: "Announcement when timer edit is saved"
+                        )
+                    )
                 }
             }
             // Reset通知を受けて元の値に戻す（UIはWYSIWYGで即時反映）
@@ -258,7 +280,13 @@ struct TimerEditView: View {
                     editedSubtitle = timerVM.subtitleLabel
                     editedMemo = ""
                 }
-                UIAccessibility.post(notification: .announcement, argument: "Reset to original")
+                UIAccessibility.post(
+                    notification: .announcement,
+                    argument: NSLocalizedString(
+                        "timer_edit_reset_announcement",
+                        comment: "Announcement when timer edit resets to original values"
+                    )
+                )
             }
         }
     }

@@ -38,3 +38,21 @@
 "error_title" = "エラー";
 "ok" = "OK";
 "error_empty_session_name" = "セッション名は空にできません";
+
+// History
+"history_picker_label" = "履歴表示";
+"history_tab_daily" = "日別";
+"history_tab_monthly" = "月別";
+"history_summary_more_descriptions" = "＋%d 件";
+"history_inline_reflection_saving" = "保存中…";
+"history_inline_reflection_error_message" = "保存に失敗しました。もう一度試しますか？";
+"history_inline_reflection_retry_button" = "再試行";
+
+// Timer edit
+"timer_edit_session_label_section_title" = "セッションラベル";
+"timer_edit_final_time_title" = "終了時刻";
+"timer_edit_saved_announcement" = "保存しました";
+"timer_edit_reset_announcement" = "元の内容にリセットしました";
+
+// Shared UI
+"keyboard_close_button" = "閉じる";

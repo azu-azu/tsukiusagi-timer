@@ -38,3 +38,21 @@
 "error_title" = "Error";
 "ok" = "OK";
 "error_empty_session_name" = "Session name cannot be empty";
+
+// History
+"history_picker_label" = "History Mode";
+"history_tab_daily" = "Daily";
+"history_tab_monthly" = "Monthly";
+"history_summary_more_descriptions" = "+ %d more";
+"history_inline_reflection_saving" = "Saving…";
+"history_inline_reflection_error_message" = "Failed to save. Try again?";
+"history_inline_reflection_retry_button" = "Retry";
+
+// Timer edit
+"timer_edit_session_label_section_title" = "Session Label";
+"timer_edit_final_time_title" = "Final Time";
+"timer_edit_saved_announcement" = "Saved";
+"timer_edit_reset_announcement" = "Reset to original";
+
+// Shared UI
+"keyboard_close_button" = "Close";
