@@ -118,3 +118,6 @@ Temporary Items
 元.swift
 build.log
 lint_custom_rule.log
+
+# macOS
+.DS_Store
