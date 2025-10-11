@@ -44,7 +44,11 @@ struct MemoEditView: View {
                     Color.clear.frame(height: keyboardBottomInset)
                 }
             }
-            .navigationTitle(isNewRecord ? NSLocalizedString("history_memo_add_reflection", comment: "Add reflection title") : NSLocalizedString("history_memo_edit_reflection", comment: "Edit reflection title"))
+            .navigationTitle(
+                isNewRecord
+                ? NSLocalizedString("history_memo_add_reflection", comment: "Add reflection title")
+                : NSLocalizedString("history_memo_edit_reflection", comment: "Edit reflection title")
+            )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -198,7 +202,13 @@ struct MemoEditView: View {
                         if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             HStack {
                                 VStack {
-                                    Text(NSLocalizedString("history_memo_add_reflection_placeholder", comment: "Add reflection placeholder"))
+                                    Text(
+                                        NSLocalizedString(
+                                            "history_memo_add_reflection_placeholder",
+                                            comment: "Add reflection placeholder"
+                                        )
+                                    )
+                                        .lineLimit(nil)
                                         .font(DesignTokens.Fonts.label)
                                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                                     Spacer()

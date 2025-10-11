@@ -137,7 +137,7 @@ struct TimerEditView: View {
                                                 HStack {
                                                     VStack(alignment: .leading, spacing: 4) {
                                                         Text(NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder"))
-                                                            .font(DesignTokens.Fonts.caption)
+                                                            .font(DesignTokens.Fonts.label)
                                                             .foregroundColor(DesignTokens.MoonColors.textMuted)
                                                         Spacer()
                                                     }
