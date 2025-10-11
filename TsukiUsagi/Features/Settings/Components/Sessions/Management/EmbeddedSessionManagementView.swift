@@ -181,12 +181,18 @@ private extension EmbeddedSessionManagementView {
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(Text(session.tasks.first.flatMap { task in
             String.localizedStringWithFormat(
-                NSLocalizedString("settings_accessibility_session_with_task", comment: "Accessibility label for session with task"),
+                NSLocalizedString(
+                    "settings_accessibility_session_with_task",
+                    comment: "Accessibility label for session with task"
+                ),
                 session.sessionName,
                 task
             )
         } ?? session.sessionName))
-        .accessibilityHint(Text(NSLocalizedString("settings_accessibility_edit_actions", comment: "Accessibility hint for edit actions")))
+        .accessibilityHint(Text(NSLocalizedString(
+            "settings_accessibility_edit_actions",
+            comment: "Accessibility hint for edit actions"
+        )))
 
         if !isLast {
             Divider()

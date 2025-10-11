@@ -122,7 +122,10 @@ struct TimerEditView: View {
                             }
 
                             // Reflect
-                            sectionBuilder.section(title: NSLocalizedString("reflection_title", comment: "Reflection title"), isCompact: true) {
+                            sectionBuilder.section(
+                                title: NSLocalizedString("reflection_title", comment: "Reflection title"),
+                                isCompact: true
+                            ) {
                                 TextEditor(text: $editedMemo)
                                     .frame(minHeight: 220, maxHeight: memoEditorMaxHeight)
                                     .padding(8)
@@ -136,7 +139,10 @@ struct TimerEditView: View {
                                             if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                                 HStack {
                                                     VStack(alignment: .leading, spacing: 4) {
-                                                        Text(NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder"))
+                                                        Text(NSLocalizedString(
+                                                            "reflection_placeholder",
+                                                            comment: "Reflection placeholder"
+                                                        ))
                                                             .font(DesignTokens.Fonts.label)
                                                             .foregroundColor(DesignTokens.MoonColors.textMuted)
                                                         Spacer()
