@@ -41,6 +41,10 @@ All text in English, with a clean and simple visual aesthetic.
 - [PR Template](.github/PULL_REQUEST_TEMPLATE.md)
 - [Lint Refactor Issue Template](.github/ISSUE_TEMPLATE/lint_refactor.md)
 
+## Privacy Policy
+
+- [Privacy Policy](./docs/privacy.md) - English/日本語
+
 ## License
 
 MIT
