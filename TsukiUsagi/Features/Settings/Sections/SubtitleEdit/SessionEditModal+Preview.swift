@@ -90,11 +90,11 @@ struct SessionEditModal_Previews: PreviewProvider {
                 focusedRowID: .constant(nil),
                 content: {
                     VStack {
-                        Text("Sample Content")
+                        Text(NSLocalizedString("settings_sample_content", comment: "Sample content"))
                             .font(DesignTokens.Fonts.title)
                             .padding()
 
-                        Text("This is a demonstration of the reusable EditableModal component.")
+                        Text(NSLocalizedString("settings_demo_description", comment: "Demo description"))
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.MoonColors.textSecondary)
                             .multilineTextAlignment(.center)

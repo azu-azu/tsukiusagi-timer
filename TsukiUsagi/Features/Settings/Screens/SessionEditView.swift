@@ -114,7 +114,7 @@ extension SessionEditView {
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
                 if isDefaultSession {
-                    Text("READ-ONLY")
+                    Text(NSLocalizedString("settings_read_only", comment: "Read only label"))
                         .font(.caption2)
                         .fontWeight(.semibold)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)

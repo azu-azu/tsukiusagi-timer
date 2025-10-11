@@ -50,7 +50,7 @@ struct DurationSessionSettingsView: View {
                     // 保存完了メッセージ
                     if showSavedMessage {
                         VStack {
-                            Text("Saved...")
+                            Text(NSLocalizedString("settings_saved", comment: "Saved message"))
                                 .font(DesignTokens.Fonts.label)
                                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 .padding(.horizontal, 16)
@@ -145,7 +145,7 @@ struct DurationSessionSettingsView: View {
                         Image(systemName: isSessionNamesExpanded ? "chevron.down" : "chevron.right")
                             .font(DesignTokens.Fonts.caption)
                             .foregroundColor(DesignTokens.MoonColors.textMuted)
-                        Text("Manage session names")
+                        Text(NSLocalizedString("settings_manage_session_names", comment: "Manage session names label"))
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     }
@@ -280,7 +280,7 @@ struct DurationSessionSettingsView: View {
 struct DurationSessionSettingsView_Previews: PreviewProvider {
     static var previews: some View {
         // プレビューを簡素化してビルドエラーを回避
-        Text("Duration & Session Settings View")
+        Text(NSLocalizedString("settings_duration_session_settings", comment: "Duration session settings title"))
             .padding()
     }
 }
