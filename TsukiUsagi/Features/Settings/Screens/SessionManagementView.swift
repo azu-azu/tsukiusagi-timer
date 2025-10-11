@@ -63,7 +63,7 @@ struct SessionManagementView: View {
                     SessionEditSheetBuilder(
                         context: context,
                         tempSessionName: $tempSessionName,
-                        tempDescriptions: $tempDescriptions,
+                        tempTasks: $tempDescriptions,
                         isAnyFieldFocused: $isAnyFieldFocused,
                         onSave: {
                             handleSessionSave(context: context)
@@ -347,12 +347,12 @@ extension SessionManagementView {
         let context: SessionEditContext
 
         if session.isDefault {
-            context = SessionEditContext.descriptionEdit(
+            context = SessionEditContext.taskEdit(
                 entryId: session.id,
                 sessionName: session.sessionName,
                 tasks: session.tasks,
                 isDefault: true,
-                descriptionIndex: descriptionIndex
+                taskIndex: descriptionIndex
             )
         } else {
             context = SessionEditContext.fullSessionEdit(

@@ -5,7 +5,7 @@
 //  SessionEditModal関連コンポーネントのプレビュー定義
 //  責務：
 //    - EditableModalのプレビュー
-//    - DescriptionEditContentのプレビュー
+//    - TaskEditContentのプレビュー
 //    - FullSessionEditContentのプレビュー
 //    - デバッグ用サンプルデータ提供
 //
@@ -16,9 +16,9 @@ import SwiftUI
 struct SessionEditModal_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            // Description編集のプレビュー
+            // Task編集のプレビュー
             EditableModal(
-                title: "Manage Descriptions",
+                title: "Manage Tasks",
                 onSave: { print("Save tapped") },
                 onCancel: { print("Cancel tapped") },
                 isSaveDisabled: false,
@@ -26,15 +26,15 @@ struct SessionEditModal_Previews: PreviewProvider {
                 onKeyboardClose: {},
                 focusedRowID: .constant(nil),
                 content: {
-                    DescriptionEditContent(
+                    TaskEditContent(
                         sessionName: "Work",
-                        descriptionDrafts: [
-                            SessionEditSheetBuilder.DescriptionDraft(text: "SwiftUI development"),
-                            SessionEditSheetBuilder.DescriptionDraft(text: "Code review")
+                        taskDrafts: [
+                            SessionEditSheetBuilder.TaskDraft(text: "SwiftUI development"),
+                            SessionEditSheetBuilder.TaskDraft(text: "Code review")
                         ],
                         editingID: nil,
-                        onDescriptionsChange: { drafts in
-                            print("Descriptions changed: \(drafts.map(\.text))")
+                        onTasksChange: { drafts in
+                            print("Tasks changed: \(drafts.map(\.text))")
                         },
                         isAnyFieldFocused: .constant(false),
                         onClearFocus: {},
@@ -44,7 +44,7 @@ struct SessionEditModal_Previews: PreviewProvider {
                 }
             )
             .presentationDetents([.large])
-            .previewDisplayName("Description Edit")
+            .previewDisplayName("Task Edit")
 
             // Full Session編集のプレビュー
             EditableModal(
@@ -58,16 +58,16 @@ struct SessionEditModal_Previews: PreviewProvider {
                 content: {
                     FullSessionEditContent(
                         sessionName: "My Custom Project",
-                        descriptionDrafts: [
-                            SessionEditSheetBuilder.DescriptionDraft(text: "Task 1"),
-                            SessionEditSheetBuilder.DescriptionDraft(text: "Task 2"),
-                            SessionEditSheetBuilder.DescriptionDraft(text: "Task 3")
+                        taskDrafts: [
+                            SessionEditSheetBuilder.TaskDraft(text: "Task 1"),
+                            SessionEditSheetBuilder.TaskDraft(text: "Task 2"),
+                            SessionEditSheetBuilder.TaskDraft(text: "Task 3")
                         ],
                         onSessionNameChange: { newName in
                             print("Session name changed: \(newName)")
                         },
-                        onDescriptionsChange: { drafts in
-                            print("Descriptions changed: \(drafts.map(\.text))")
+                        onTasksChange: { drafts in
+                            print("Tasks changed: \(drafts.map(\.text))")
                         },
                         isAnyFieldFocused: .constant(false),
                         onClearFocus: {},
