@@ -45,7 +45,7 @@ struct SessionEditView: View {
             }
             .navigationTitle(
                 isDefaultSession
-                    ? NSLocalizedString("edit_descriptions_title", comment: "")
+                    ? NSLocalizedString("edit_tasks_title", comment: "")
                     : NSLocalizedString("edit_session_title", comment: "")
             )
             .navigationBarTitleDisplayMode(.inline)
@@ -174,7 +174,7 @@ extension SessionEditView {
     fileprivate func descriptionsSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(NSLocalizedString("descriptions_label", comment: ""))
+                Text(NSLocalizedString("tasks_label", comment: ""))
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -212,7 +212,7 @@ extension SessionEditView {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolLarge)
 
-            Text(NSLocalizedString("no_descriptions_title", comment: ""))
+            Text(NSLocalizedString("no_tasks_title", comment: ""))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -227,7 +227,7 @@ extension SessionEditView {
     @ViewBuilder
     fileprivate func descriptionRow(description: String, index: Int) -> some View {
         HStack(spacing: 8) {
-            TextField(NSLocalizedString("description_placeholder", comment: ""), text: Binding(
+            TextField(NSLocalizedString("task_placeholder", comment: ""), text: Binding(
                 get: { editedDescriptions[safe: index] ?? "" },
                 set: { newValue in
                     if index < editedDescriptions.count {
@@ -258,7 +258,7 @@ extension SessionEditView {
     @ViewBuilder
     fileprivate func addDescriptionField() -> some View {
         HStack(spacing: 8) {
-            TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
+            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newDescription)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)

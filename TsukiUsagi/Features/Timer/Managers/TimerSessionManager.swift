@@ -77,22 +77,6 @@ final class TimerSessionManager: ObservableObject {
             streakManager.recordTimerUsage()
         }
     }
-    @available(*, deprecated, message: "Use completeSession(isWorkSession:activityLabel:taskLabel:memo:completedSilently:) instead.")
-    func completeSession(
-        isWorkSession: Bool,
-        activityLabel: String,
-        subtitleLabel: String,
-        memo: String? = nil,
-        completedSilently: Bool = false
-    ) {
-        completeSession(
-            isWorkSession: isWorkSession,
-            activityLabel: activityLabel,
-            taskLabel: subtitleLabel,
-            memo: memo,
-            completedSilently: completedSilently
-        )
-    }
 
     /// セッション終了時刻（予約）を設定
     /// - Note: 通知・連鎖スケジュール用。UIは使用しない（UIのSSOTは endTime）。
