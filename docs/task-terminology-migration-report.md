@@ -273,30 +273,36 @@ This document summarizes the comprehensive migration from "description" terminol
   - Updated all references to use `tempTasks` instead of `tempDescriptions`
 - **Impact**: Session management view now uses task terminology throughout
 
-### ✅ COMPLETED: `TsukiUsagi/Features/Settings/Screens/SessionEditView.swift`
+### ✅ NO CHANGES NEEDED: `TsukiUsagi/Foundation/Managers/SessionManager.swift`
+- **Deprecated methods**: Contains deprecated methods that are intentionally left for backward compatibility
+- **Lines 21, 24**: `maxDescriptionCount` and `maxDescriptionLength` - These are deprecated aliases pointing to `maxTaskCount` and `maxTaskLength`
+- **Line 128**: `getDescriptions(for:)` - Deprecated method that calls `getTasks(for:)`
+- **Lines 180-182**: Deprecated `addOrUpdateEntry` method with `descriptions` parameter - This calls the new `tasks` version
+- **Reason**: These deprecated methods are intentionally kept for backward compatibility and will be removed in future releases
+
+### ✅ COMPLETED: `TsukiUsagi/Foundation/Managers/SessionManager+Preview.swift`
 - **Changes Made**:
-  - Updated state variables: `editedDescriptions` → `editedTasks`, `showAddDescriptionField` → `showAddTaskField`, `newDescription` → `newTask`
-  - Updated enum cases: `description(Int)` → `task(Int)`, `newDescription` → `newTask`
-  - Updated comments: "Descriptions Section" → "Tasks Section"
-  - Updated function names: `descriptionsSection()` → `tasksSection()`, `descriptionRow()` → `taskRow()`, `addDescriptionField()` → `addTaskField()`, `emptyDescriptionsView()` → `emptyTasksView()`
-  - Updated all variable references and function calls to use task terminology
-  - Updated focus state references and binding operations
-- **Impact**: Session edit view now uses task terminology throughout
+  - Updated preview data: `"Test description"` → `"Test task"`
+  - Updated session name: `"Multi Description Session"` → `"Multi Task Session"`
+  - Updated task array: `"First description"`, `"Second description"`, `"Third description"` → `"First task"`, `"Second task"`, `"Third task"`
+  - Updated session name: `"No Description Session"` → `"No Task Session"`
+  - Updated task text: `"Long description for testing purposes"` → `"Long task for testing purposes"`
+- **Impact**: Preview data now uses consistent task terminology throughout
 
 ---
 
 ## Summary Statistics
 
-- **Total Files Modified**: 37+ files
+- **Total Files Modified**: 38+ files
 - **Core Models**: 3 files
-- **Foundation Layer**: 5 files
+- **Foundation Layer**: 6 files (all completed)
 - **Settings Components**: 14 files (all completed)
 - **History Components**: 7 files
 - **Timer Components**: 6 files
 - **Cross-Feature UI**: 1 file
 - **Localization Files**: 4 files
 - **Test Files**: 1 file
-- **Files Requiring No Changes**: 3 files
+- **Files Requiring No Changes**: 4 files
 - **Files Still Needing Updates**: 0 files
 
 ## Migration Status
@@ -308,6 +314,8 @@ This document summarizes the comprehensive migration from "description" terminol
 ✅ **LOCALIZATION**: Both English and Japanese localization files updated consistently.
 
 ✅ **BACKWARD COMPATIBILITY**: Deprecated methods maintained for smooth transition.
+
+✅ **PREVIEW DATA**: All preview and test data updated to use task terminology.
 
 ---
 

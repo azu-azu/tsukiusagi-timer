@@ -14,7 +14,7 @@ extension SessionManager {
         let samples: [SessionEntry] = [
             SessionEntry(
                 sessionName: "Sample Session 1",
-                tasks: ["Test description"],
+                tasks: ["Test task"],
                 isDefault: false
             ),
             SessionEntry(
@@ -23,16 +23,16 @@ extension SessionManager {
                 isDefault: false
             ),
             SessionEntry(
-                sessionName: "Multi Description Session",
+                sessionName: "Multi Task Session",
                 tasks: [
-                    "First description",
-                    "Second description",
-                    "Third description"
+                    "First task",
+                    "Second task",
+                    "Third task"
                 ],
                 isDefault: false
             ),
             SessionEntry(
-                sessionName: "No Description Session",
+                sessionName: "No Task Session",
                 tasks: [],
                 isDefault: false
             ),
@@ -41,7 +41,7 @@ extension SessionManager {
                     "This is a very long session name to test how the UI handles overflow " +
                     "and wrapping in the list row",
                 tasks: [
-                    "Long description for testing purposes"
+                    "Long task for testing purposes"
                 ],
                 isDefault: false
             ),
