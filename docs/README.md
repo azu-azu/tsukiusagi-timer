@@ -18,7 +18,6 @@
 | `_guide-`    | 実行層（2番目） | 操作手順・実装ガイド・実務ノウハウ | `_guide-keyboard.md`, `_guide-font-installation.md` |
 | `structure-` | 設計構造層    | フォルダ構成・設計ルール・命名体系 | `structure-directory.md`, `structure-guidelines.md` |
 | `lint-`      | 例外・ルール層  | コード規約や例外設定        | `lint-exceptions.md`                                |
-| `plan-`      | 計画層      | 改修・リファクタ・TODO     | `plan-todo-refactor.md`                             |
 | `report-`    | 報告層      | 作業記録・移行レポート・結果報告  | `report-task-terminology-migration.md`              |
 | `trouble-`   | 対応層      | 不具合・検証・原因分析       | `trouble-cursor-swift.md`                           |
 | `README.md`  | 説明層（特例）  | フォルダ全体の概要         | `README.md`（プレフィックスなし）                              |
@@ -55,9 +54,6 @@
 ### ⚙️ 設定・例外・ルール
 - [`lint-exceptions.md`](./lint-exceptions.md) - SwiftLint例外設定
 
-### 📋 計画・改修
-- [`plan-todo-refactor.md`](./plan-todo-refactor.md) - TODO・リファクタリング計画
-
 ### 📊 報告・記録
 - [`report-task-terminology-migration.md`](./report-task-terminology-migration.md) - Task用語移行レポート
 
@@ -71,7 +67,6 @@
 - `_guide-*.md` - 実装手順・操作ガイド
 - `structure-*.md` - 構造・設計ルール
 - `lint-*.md` - コード規約・例外設定
-- `plan-*.md` - 計画・改修・TODO
 - `report-*.md` - 作業記録・移行レポート
 - `trouble-*.md` - トラブルシューティング
 - `README.md` - フォルダ概要（プレフィックスなし）
