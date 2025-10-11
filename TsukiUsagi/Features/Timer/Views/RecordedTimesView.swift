@@ -48,8 +48,14 @@ struct RecordedTimesView: View {
             HStack {
                 Spacer()
                 PencilButton(size: .title, action: onEdit)
-                    .accessibilityLabel(NSLocalizedString("timer_record_edit_session", comment: "Edit session accessibility label"))
-                    .accessibilityHint(NSLocalizedString("timer_record_edit_hint", comment: "Edit session accessibility hint"))
+                    .accessibilityLabel(NSLocalizedString(
+                        "timer_record_edit_session",
+                        comment: "Edit session accessibility label"
+                    ))
+                    .accessibilityHint(NSLocalizedString(
+                        "timer_record_edit_hint",
+                        comment: "Edit session accessibility hint"
+                    ))
             }
             .frame(maxWidth: 110)
         }
