@@ -5,8 +5,8 @@
 ## 概要
 このドキュメントは、TsukiUsagi のディレクトリ構造・命名規則・責務分離ルールを定義し、実リポジトリの現状に同期した方針を示します。
 
-- 参照: docs/ARCHITECTURE_GUIDELINES.md
-- 参照: docs/directory_structure.md（実ディレクトリ一覧）
+- 参照: docs/_arch-guidelines.md
+- 参照: docs/structure-directory.md（実ディレクトリ一覧）
 
 ## 状態サマリ（現状との整合）
 - Visual 配下の単複不一致は解消済み（Mois/Usagis/Stars の複数形統一）
@@ -81,4 +81,4 @@ Features/[FeatureName]/
   - `OptimizedStarBackground.swift` の配置
   - 時間フォーマットの分散
   - `AwakeEnablerView` の配置（現: `GlobalComponents/System/`）
-- ドキュメントの古い表記（例: `architecture/architecture_guidelines.md`）は `docs/ARCHITECTURE_GUIDELINES.md` に統一
+- ドキュメントの古い表記（例: `architecture/architecture_guidelines.md`）は `docs/_arch-guidelines.md` に統一

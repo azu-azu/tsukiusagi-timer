@@ -5,15 +5,15 @@ TsukiUsagi/
 ├── build/                                   # Xcode ビルド成果物（ローカル）
 ├── CLAUDE.md                                # リポジトリ作業ガイド
 ├── docs/                                    # プロジェクトドキュメント
-│   ├── ARCHITECTURE_GUIDELINES.md
-│   ├── cursor_swift_troubleshooting.md
-│   ├── directory_structure.md               # 本ファイル
-│   ├── font_guidelines.md
-│   ├── font_installation_guide.md
+│   ├── _arch-guidelines.md
+│   ├── trouble-cursor-swift.md
+│   ├── structure-directory.md               # 本ファイル
+│   ├── _guide-font.md
+│   ├── _guide-font-installation.md
 │   ├── lint_exceptions.md
 │   ├── README.md
 │   ├── structure-guidelines.md
-│   └── todo_refactor_plan.md
+│   └── plan-todo-refactor.md
 ├── README.md                                # ルート README
 ├── scripts/
 │   └── replace_fonts.sh
