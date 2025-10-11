@@ -1,4 +1,4 @@
-# Task Terminology Migration Report
+## Task Terminology Migration Report
 
 ## Overview
 This document summarizes the comprehensive migration from "description" terminology to "task" terminology across the TsukiUsagi codebase. The migration was completed systematically across models, UI components, localization files, and business logic.
@@ -9,11 +9,22 @@ This document summarizes the comprehensive migration from "description" terminol
 - **Definition**: "what you'll work on during this session" maintained as official definition
 - **Japanese**: Always use katakana (セッション・タスク), never translate to Japanese equivalents
 
+## Known Conventions
+
+### Japanese Terminology Rules
+- **Mandatory**: All Japanese UI text must use katakana (セッション・タスク)
+- **Prohibited**: Never use Japanese translations like "作業" (work) or "項目" (item)
+- **Consistency**: Existing "作業" terminology must be updated to "タスク" for uniformity
+- **Rationale**: Katakana terminology maintains consistency with English technical terms and avoids ambiguity
+- **Migration Note**: Existing documentation and comments containing "作業/項目" should be gradually updated to "タスク". This should be noted in release notes and translation documentation.
+
 ---
 
 ## Files Modified
 
 ### 1. Core Models and Data Structures
+
+**Data Migration**: On decode, if `tasks` is absent but `descriptions` exists, map to `tasks`, persist under the `tasks` key, then remove the legacy `descriptions` key. The operation is idempotent and safe to re-run.
 
 #### ✅ Modified: `TsukiUsagi/Models/Core/SessionEntry.swift`
 - **Changes**: Updated to use `tasks` property instead of `descriptions`
@@ -29,6 +40,11 @@ This document summarizes the comprehensive migration from "description" terminol
 
 ### 2. Foundation Layer
 
+#### ✅ Modified: `TsukiUsagi/Foundation/AccessibilityIDs.swift`
+- **Changes**: Updated accessibility identifiers from `descriptionField` to `taskField`
+- **Impact**: Accessibility identifiers consistent with task terminology
+- **Verification**: Use `grep -r "accessibilityIdentifier.*description"` to check for remaining instances
+
 #### ✅ Modified: `TsukiUsagi/Foundation/Managers/SessionManager.swift`
 - **Changes**:
   - Updated method names: `getDescriptions(for:)` → `getTasks(for:)`
@@ -41,8 +57,13 @@ This document summarizes the comprehensive migration from "description" terminol
 - **Impact**: File name reflects new task terminology
 
 #### ✅ Modified: `TsukiUsagi/Foundation/Validators/SessionManagerValidator.swift`
-- **Changes**: Updated validation error cases to use task terminology
-- **Impact**: Validation messages consistent with task terminology
+- **Changes**:
+  - Updated validation error cases to use task terminology
+  - Introduced new normalizer APIs: `tsu_taskNormalizedValue` and `tsu_taskNormalizedKey`
+  - Deprecated old normalizer APIs: `tsu_descriptionNormalizedValue` and `tsu_descriptionNormalizedKey` (kept as aliases)
+  - Updated validation methods to use task terminology throughout
+- **Impact**: Validation messages and normalizer APIs consistent with task terminology
+- **Deprecation Timeline**: `tsu_descriptionNormalized*` aliases emit warnings in Release N+1 and are removed in Release N+2
 
 #### ✅ Modified: `TsukiUsagi/Foundation/PreviewData.swift`
 - **Changes**: Updated preview data to use `tasks` parameter instead of `descriptions`
@@ -64,8 +85,17 @@ This document summarizes the comprehensive migration from "description" terminol
 - **Impact**: Session editing interface consistent with task terminology
 
 #### ✅ Modified: `TsukiUsagi/Features/Settings/Screens/SessionManagementView.swift`
-- **Changes**: Updated session management to use task terminology
-- **Impact**: Session management interface uses task terminology
+- **Changes**:
+  - Updated state variable: `tempDescriptions` → `tempTasks`
+  - Updated comment: "Description editing only" → "Task editing only"
+  - Updated parameter binding: `tempTasks: $tempDescriptions` → `tempTasks: $tempTasks`
+  - Updated localization key: `"descriptions_count"` → `"tasks_count"`
+  - Updated localization value: `"%d descriptions"` → `"%d tasks"`
+  - Updated comment: "Pluralized descriptions count" → "Pluralized tasks count"
+  - Updated variable names: `description` → `task`
+  - Updated function parameter: `descriptionIndex` → `taskIndex`
+  - Updated all references to use `tempTasks` instead of `tempDescriptions`
+- **Impact**: Session management interface uses task terminology throughout
 
 #### ✅ Modified: `TsukiUsagi/Features/Settings/Components/Sessions/Rows/SessionRowView.swift`
 - **Changes**: Updated focus state: `isSubtitleFocused` → `isTaskFocused`
@@ -125,7 +155,9 @@ This document summarizes the comprehensive migration from "description" terminol
   - Updated enum cases: `descriptionOnly` → `taskOnly`
   - Updated static functions: `descriptionEdit` → `taskEdit`
   - Updated computed properties: `descriptionIndex` → `taskIndex`
-- **Impact**: Edit models use task terminology
+  - Updated parameter documentation: `descriptionIndex` → `taskIndex` in comments
+  - Updated property documentation: `"編集対象のDescriptionのインデックス"` → `"編集対象のTaskのインデックス"`
+- **Impact**: Edit models use task terminology consistently
 
 #### ✅ Modified: `TsukiUsagi/Features/Settings/Sections/SubtitleEdit/FullSessionEditContent.swift`
 - **Changes**:
@@ -135,7 +167,11 @@ This document summarizes the comprehensive migration from "description" terminol
 - **Impact**: Full session edit content uses task terminology
 
 #### ✅ Modified: `TsukiUsagi/Features/Settings/Sections/SubtitleEdit/TaskEditContent.swift`
-- **Changes**: Renamed from `DescriptionEditContent.swift` and updated content
+- **Changes**:
+  - Renamed from `DescriptionEditContent.swift` and updated content
+  - Updated function name: `removeDescription(with:)` → `removeTask(with:)`
+  - Updated accessibility label: `"Remove description \(index + 1)"` → `"Remove task \(index + 1)"`
+  - Updated UI text: `"Add descriptions for what you'll work on during this session"` → `"Add tasks for what you'll work on during this session"`
 - **Impact**: Task edit content component created with proper terminology
 
 ### 5. History Feature Components
@@ -173,7 +209,9 @@ This document summarizes the comprehensive migration from "description" terminol
   - Updated to use `session.tasks` instead of `session.descriptions`
   - Updated localization key: `history_summary_more_descriptions` → `history_summary_more_tasks`
   - Renamed methods: `bySubtitle` → `byTask`, `subtitleSummarySection` → `taskSummarySection`
+  - Updated `maxDescriptionsPerSession` → `maxTasksPerSession`
 - **Impact**: Daily timeline view uses task terminology
+- **Note**: Contains `error.localizedDescription` (system property) which is correct and unchanged
 
 #### ✅ Modified: `TsukiUsagi/Features/History/Views/MemoEditView.swift`
 - **Changes**:
@@ -210,9 +248,20 @@ This document summarizes the comprehensive migration from "description" terminol
 
 ### 7. Cross-Feature UI Components
 
+#### ✅ Modified: `TsukiUsagi/CrossFeatureUI/Navigation/SideMenuDurationView.swift`
+- **Changes**: Updated to use SessionManager's `tasks` property in picker display
+- **Impact**: Side menu duration view reflects task terminology
+
+#### ✅ Modified: `TsukiUsagi/CrossFeatureUI/Navigation/SettingsMenuButton.swift`
+- **Changes**: Updated to use SessionManager's `tasks` property indirectly
+- **Impact**: Settings menu button consistent with task terminology
+
 #### ✅ Modified: `TsukiUsagi/CrossFeatureUI/Controls/SessionLabelSection.swift`
-- **Changes**: Updated comment to reference `tasks` instead of `descriptions`
-- **Impact**: Session label section documentation updated
+- **Changes**:
+  - Updated comment to reference `tasks` instead of `descriptions`
+  - Updated UI text: "Select description..." → "Select task...", "No descriptions available" → "No tasks available"
+  - Updated accessibility identifiers and labels
+- **Impact**: Session label section uses task terminology throughout UI and documentation
 
 ### 8. Localization Files
 
@@ -248,39 +297,91 @@ This document summarizes the comprehensive migration from "description" terminol
 
 ## Files Determined to Need No Changes
 
-### ✅ NO CHANGES NEEDED: `TsukiUsagi/Features/History/Views/DailyTimelineView.swift`
-- **Lines 269 and 388**: `error.localizedDescription` - This is correct (it's a system property)
+### Files Using "Description" for Different Concepts (No Migration Needed)
+
+13ファイル: セッションタスク用語とは異なる概念で"description"を使用
+カテゴリ:
+アチーブメントシステム: AchievementManager.swift, AchievementsView.swift
+システムプロパティ: error.localizedDescription (複数ファイル)
+XCTestフレームワーク: expectation(description:) (テストファイル)
+UIコメント: ステータス説明セクションなど
+テスト専用コード: 古い用語をテストする専用コード
+
+#### ✅ NO CHANGES NEEDED: `TsukiUsagi/Features/Streak/DevOnly/AchievementsView.swift`
+- **Lines 91-92**: `// Description` comment and `Text(achievement.description)` - Uses Achievement model's description property
+- **Lines 222, 229, 236**: Preview data with `description` parameter for achievements
+- **Reason**: These refer to achievement descriptions (what the achievement is about), not session task terminology
+
+#### ✅ NO CHANGES NEEDED: `TsukiUsagi/Features/Streak/DevOnly/AchievementManager.swift`
+- **Line 9**: `let description: String` - Achievement model property
+- **Lines 31, 40, 49, 58, 67**: Default achievement descriptions
+- **Lines 79, 86, 115**: Achievement description property usage
+- **Reason**: These define and use achievement descriptions (achievement explanations), which are completely separate from session task terminology
+
+#### ✅ NO CHANGES NEEDED: `TsukiUsagi/Features/Streak/DevOnly/SmartNotificationToggleView.swift`
+- **Line 34**: `// Status and description` - This is a comment referring to UI description section
+- **Reason**: This is a UI comment about status and description sections, not related to session task terminology
+
+#### ✅ NO CHANGES NEEDED: `TsukiUsagi/Features/Timer/Services/NotificationManager.swift`
+- **No "description" terminology found**
+- **Reason**: This file handles notification management and does not contain any session task-related terminology
+
+#### ✅ NO CHANGES NEEDED: `TsukiUsagi/Features/Streak/DevOnly/XPManager.swift`
+- **No "description" terminology found**
+- **Reason**: This file handles XP (experience points) management and does not contain any session task-related terminology
+
+#### ✅ NO CHANGES NEEDED: `TsukiUsagi/Foundation/Utilities/NotificationPermissionManager.swift`
+- **Line 54**: `error.localizedDescription` - This is correct (it's a system property)
 - **Reason**: `localizedDescription` is a standard Swift/Foundation property on the `Error` protocol, not related to our task terminology migration
 
-### ✅ NO CHANGES NEEDED: `TsukiUsagi/Features/History/ViewModels/HistoryViewModel.swift`
-- **Deprecated accessors**: Contains deprecated accessors for `subtitle` and `description` which still point to `task`
-- **Reason**: These are intentionally kept for backward compatibility and will be removed in future releases
+#### ✅ NO CHANGES NEEDED: `TsukiUsagiTests/FontTestView.swift`
+- **Line 218**: `errorDescription` variable using `error.localizedDescription`
+- **Reason**: This refers to system error description property, not session task terminology
 
-### ✅ NO CHANGES NEEDED: `TsukiUsagi/Features/History/ViewModels/DailyTimelineViewModel.swift`
-- **Deprecated methods**: Contains deprecated methods that are intentionally left for backward compatibility
-- **Reason**: These deprecated methods will be removed in future releases
+#### ✅ NO CHANGES NEEDED: `TsukiUsagiTests/FontTestHelpers.swift`
+- **Line 152**: `errorDescription` variable using `error.localizedDescription`
+- **Reason**: This refers to system error description property, not session task terminology
 
-### ✅ COMPLETED: `TsukiUsagi/Features/Settings/Screens/SessionManagementView.swift`
-- **Changes Made**:
-  - Updated state variable: `tempDescriptions` → `tempTasks`
-  - Updated comment: "Description editing only" → "Task editing only"
-  - Updated parameter binding: `tempTasks: $tempDescriptions` → `tempTasks: $tempTasks`
-  - Updated localization key: `"descriptions_count"` → `"tasks_count"`
-  - Updated localization value: `"%d descriptions"` → `"%d tasks"`
-  - Updated comment: "Pluralized descriptions count" → "Pluralized tasks count"
-  - Updated variable names: `description` → `task`
-  - Updated function parameter: `descriptionIndex` → `taskIndex`
-  - Updated all references to use `tempTasks` instead of `tempDescriptions`
-- **Impact**: Session management view now uses task terminology throughout
+#### ✅ NO CHANGES NEEDED: `TsukiUsagiTests/HistoryReflectionTests.swift`
+- **Line 71**: Function name `testSummaryCard_Heuristics_PicksDominantAndLatestDescription` - Test function name referring to UI behavior
+- **Lines 104, 124, 153**: `expectation(description:)` calls - XCTest framework API
+- **Lines 192, 202, 212, 232, 242, 252**: `description` parameters in `SessionRecord` initializers - Using deprecated property for test data
+- **Reason**: These are test-specific usages and XCTest framework calls, not session task terminology that needs migration
 
-### ✅ NO CHANGES NEEDED: `TsukiUsagi/Foundation/Managers/SessionManager.swift`
+#### ✅ NO CHANGES NEEDED: `TsukiUsagiTests/NotificationAndHistorySpiesTests.swift`
+- **Line 137**: `params.description` - Accessing deprecated property for test validation
+- **Reason**: This is test code validating the deprecated property behavior, not session task terminology that needs migration
+
+#### ✅ NO CHANGES NEEDED: `TsukiUsagiTests/SimpleSubtitleTest.swift`
+- **Line 5**: Struct name `DirectDescriptionEditTest` - Test struct name referring to old terminology
+- **Line 6**: Variable name `testDescriptions` - Test variable using old terminology
+- **Lines 12, 17, 41**: References to `testDescriptions` variable - Test variable usage
+- **Line 22**: Component name `DescriptionEditContent` - Using old component name for testing
+- **Lines 24, 26, 30**: `descriptions` parameter and `onDescriptionsChange` - Using old API for testing
+- **Line 81**: Preview struct name `DirectDescriptionEditTest_Previews` - Test preview name
+- **Reason**: This is test code specifically testing the old "description" terminology and components, not session task terminology that needs migration
+
+#### ✅ NO CHANGES NEEDED: `TsukiUsagiTests/TimerViewModelTests.swift`
+- **Line 14**: `expectation(description:)` call - XCTest framework API
+- **Reason**: This is XCTest framework call, not session task terminology that needs migration
+
+### Files with Deprecated APIs (Future Cleanup Required)
+
+8ファイル: 後方互換性のために意図的に保持された非推奨API
+カテゴリ:
+SessionManager系: SessionManager.swift, SessionManager+TaskManagement.swift
+Validator系: SessionManagerValidator.swift
+Core Models: SessionEntry.swift, SessionItem.swift
+History ViewModels: HistoryViewModel.swift, DailyTimelineViewModel.swift
+
+#### ⚠️ DEPRECATED APIs (Future Cleanup): `TsukiUsagi/Foundation/Managers/SessionManager.swift`
 - **Deprecated methods**: Contains deprecated methods that are intentionally left for backward compatibility
 - **Lines 21, 24**: `maxDescriptionCount` and `maxDescriptionLength` - These are deprecated aliases pointing to `maxTaskCount` and `maxTaskLength`
 - **Line 128**: `getDescriptions(for:)` - Deprecated method that calls `getTasks(for:)`
 - **Lines 180-182**: Deprecated `addOrUpdateEntry` method with `descriptions` parameter - This calls the new `tasks` version
 - **Reason**: These deprecated methods are intentionally kept for backward compatibility and will be removed in future releases
 
-### ✅ NO CHANGES NEEDED: `TsukiUsagi/Foundation/Managers/SessionManager+TaskManagement.swift`
+#### ⚠️ DEPRECATED APIs (Future Cleanup): `TsukiUsagi/Foundation/Managers/SessionManager+TaskManagement.swift`
 - **Deprecated methods**: Contains deprecated methods that are intentionally left for backward compatibility
 - **Lines 72-89**: Legacy API methods with `description` terminology - These are deprecated methods that call the new `task` methods
   - `updateSessionDescriptions` → calls `updateSessionTasks`
@@ -289,45 +390,52 @@ This document summarizes the comprehensive migration from "description" terminol
   - `removeDescription` → calls `removeTask`
 - **Reason**: These deprecated methods are intentionally kept for backward compatibility and will be removed in future releases
 
-### ✅ NO CHANGES NEEDED: `TsukiUsagi/Foundation/Utilities/NotificationPermissionManager.swift`
-- **Line 54**: `error.localizedDescription` - This is correct (it's a system property)
-- **Reason**: `localizedDescription` is a standard Swift/Foundation property on the `Error` protocol, not related to our task terminology migration
+#### ⚠️ DEPRECATED APIs (Future Cleanup): `TsukiUsagi/Foundation/Validators/SessionManagerValidator.swift`
+- **Lines 33, 36, 39**: Deprecated properties `tsu_descriptionNormalizedValue`, `tsu_descriptionNormalizedKey`, `tsuDescriptionSpacePattern`
+- **Lines 69, 72**: Deprecated static properties `descriptionLimitExceeded`, `descriptionTooLong`
+- **Lines 83, 86, 89**: Deprecated enum cases `duplicateDescription`, `tooManyDescriptions`, `descriptionTooLong`
+- **Lines 104, 106, 108**: Deprecated enum cases in `localizedDescription` switch cases
+- **Lines 135, 200, 257, 262**: Deprecated methods `validateSessionEntry(descriptions:)`, `validateDescriptions`, `validateAddDescription`, `validateUpdateDescription`
+- **Reason**: These are intentionally kept deprecated aliases for backward compatibility during the migration period
 
-### ✅ COMPLETED: `TsukiUsagi/Features/Settings/Sections/SubtitleEdit/TaskEditContent.swift`
-- **Changes Made**:
-  - Updated function name: `removeDescription(with:)` → `removeTask(with:)`
-  - Updated accessibility label: `"Remove description \(index + 1)"` → `"Remove task \(index + 1)"`
-  - Updated UI text: `"Add descriptions for what you'll work on during this session"` → `"Add tasks for what you'll work on during this session"`
-- **Impact**: Task editing interface now uses consistent task terminology
+#### ⚠️ DEPRECATED APIs (Future Cleanup): `TsukiUsagi/Models/Core/SessionEntry.swift`
+- **Lines 16-19**: Deprecated initializer with `descriptions` parameter
+- **Lines 21-25**: Deprecated `descriptions` property
+- **Line 32**: Legacy coding key `legacyDescriptions = "descriptions"`
+- **Line 42**: Legacy decoding fallback for `legacyDescriptions`
+- **Reason**: These are intentionally kept deprecated aliases for backward compatibility during the migration period
 
-### ✅ COMPLETED: `TsukiUsagi/Features/Settings/Sections/SubtitleEdit/SubtitleEditModels.swift`
-- **Changes Made**:
-  - Updated parameter documentation: `descriptionIndex` → `taskIndex` in comments
-  - Updated property documentation: `"編集対象のDescriptionのインデックス"` → `"編集対象のTaskのインデックス"`
-- **Impact**: Model documentation now reflects task terminology consistently
+#### ⚠️ DEPRECATED APIs (Future Cleanup): `TsukiUsagi/Models/Core/SessionItem.swift`
+- **Line 15**: Comment `// 説明（description）複数対応（将来拡張用）`
+- **Line 16**: Commented code `// var descriptions: [String] = []`
+- **Line 23**: Legacy coding key `legacyDescription = "description"`
+- **Line 45**: Legacy decoding fallback for `legacyDescription`
+- **Lines 60-64**: Deprecated `description` property
+- **Reason**: These are intentionally kept deprecated aliases and migration comments for backward compatibility
 
-### ✅ COMPLETED: `TsukiUsagi/Features/Settings/Sections/SubtitleEdit/FullSessionEditContent.swift`
-- **Changes Made**:
-  - Updated accessibility label: `"Remove description \(index + 1)"` → `"Remove task \(index + 1)"`
-  - Updated UI text: `"Add descriptions for what you'll work on during this session"` → `"Add tasks for what you'll work on during this session"`
-  - Updated localization keys: `"duplicate_descriptions_detected"` → `"duplicate_tasks_detected"`
-  - Updated localization keys: `"duplicate_descriptions_resolved"` → `"duplicate_tasks_resolved"`
-- **Impact**: Full session editing interface now uses consistent task terminology
+#### ⚠️ DEPRECATED APIs (Future Cleanup): `TsukiUsagi/Features/History/ViewModels/HistoryViewModel.swift`
+- **Deprecated accessors**: Contains deprecated accessors for `subtitle` and `description` which still point to `task`
+- **Reason**: These are intentionally kept for backward compatibility and will be removed in future releases
+
+#### ⚠️ DEPRECATED APIs (Future Cleanup): `TsukiUsagi/Features/History/ViewModels/DailyTimelineViewModel.swift`
+- **Deprecated methods**: Contains deprecated methods that are intentionally left for backward compatibility
+- **Reason**: These deprecated methods will be removed in future releases
 
 ---
 
 ## Summary Statistics
 
-- **Total Files Modified**: 41+ files
+- **Total Files Modified**: 49 files
 - **Core Models**: 3 files
-- **Foundation Layer**: 8 files (all completed)
-- **Settings Components**: 17 files (all completed)
+- **Foundation Layer**: 8 files
+- **Settings Components**: 17 files
 - **History Components**: 7 files
 - **Timer Components**: 6 files
-- **Cross-Feature UI**: 1 file
+- **Cross-Feature UI**: 3 files
 - **Localization Files**: 4 files
 - **Test Files**: 1 file
-- **Files Requiring No Changes**: 7 files
+- **Files Using Different "Description" Concepts**: 13 files (no migration needed)
+- **Files with Deprecated APIs**: 8 files (future cleanup required)
 - **Files Still Needing Updates**: 0 files
 
 ## Migration Status
@@ -350,6 +458,32 @@ This document summarizes the comprehensive migration from "description" terminol
 2. **Documentation**: Update any remaining documentation references
 3. **Deprecation Cleanup**: Remove deprecated methods in future releases
 4. **User Acceptance**: Verify UI changes meet user expectations
+
+## Deprecation Cleanup Plan
+
+### Phase 1: Current State (Release N)
+- ✅ **New APIs**: Fully implemented and functional
+- ⚠️ **Deprecated APIs**: Maintained for backward compatibility
+- 📝 **Migration**: Developers can gradually adopt new APIs
+
+### Phase 2: Warning Phase (Release N+1)
+- 🚨 **Build Warnings**: Deprecated APIs will cause build warnings
+- 📋 **Migration Guide**: Provide clear migration documentation
+- ⏰ **Timeline**: 3-6 months for developers to migrate
+
+### Phase 3: Removal Phase (Release N+2)
+- 🗑️ **Complete Removal**: All deprecated APIs physically removed
+- 🔧 **Build Breaking**: Projects using deprecated APIs will fail to build
+- ✅ **Clean Codebase**: Only new task terminology remains
+
+### Files Scheduled for Cleanup
+- `SessionManager.swift` - Remove deprecated methods and properties
+- `SessionManager+TaskManagement.swift` - Remove legacy API methods
+- `SessionManagerValidator.swift` - Remove deprecated normalizer APIs
+- `SessionEntry.swift` - Remove deprecated initializers and properties
+- `SessionItem.swift` - Remove deprecated properties and legacy coding keys
+- `HistoryViewModel.swift` - Remove deprecated accessors
+- `DailyTimelineViewModel.swift` - Remove deprecated methods
 
 ---
 
