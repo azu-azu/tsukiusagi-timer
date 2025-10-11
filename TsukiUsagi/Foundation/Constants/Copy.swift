@@ -4,6 +4,6 @@ enum Copy {
     enum Reflection {
         static let title = "Reflection"
         static let placeholder = "Write anything you feel"
-        static let openDaily = "View Details"
+        static let openDaily = "Open Daily Reflection"
     }
 }
