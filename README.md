@@ -16,8 +16,9 @@ TsukiUsagi reminds you: *Stay grounded, yet light.*
 - Gentle minimalist UI built with SwiftUI
 - Animated moon and usagi companion
 - Pomodoro-style focus & break rhythm
-- Optional poetic reflections (coming soon)
-- All text in English, designed for minimalists worldwide
+- Poetic reflections and session tracking
+- English & Japanese localization
+- Designed for minimalists worldwide
 
 ---
 
@@ -41,4 +42,4 @@ Copyright © 2025 TsukiUsagi
 ---
 
 ### ✨ App Store
-Coming soon 🌙
+Available on the App Store 🌙
