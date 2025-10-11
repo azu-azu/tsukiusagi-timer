@@ -122,7 +122,7 @@ struct TimerEditView: View {
                             }
 
                             // Reflect
-                            sectionBuilder.section(title: Copy.Reflection.title, isCompact: true) {
+                            sectionBuilder.section(title: NSLocalizedString("reflection_title", comment: "Reflection title"), isCompact: true) {
                                 TextEditor(text: $editedMemo)
                                     .frame(minHeight: 220, maxHeight: memoEditorMaxHeight)
                                     .padding(8)
@@ -136,7 +136,7 @@ struct TimerEditView: View {
                                             if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                                 HStack {
                                                     VStack(alignment: .leading, spacing: 4) {
-                                                        Text(Copy.Reflection.placeholder)
+                                                        Text(NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder"))
                                                             .font(DesignTokens.Fonts.caption)
                                                             .foregroundColor(DesignTokens.MoonColors.textMuted)
                                                         Spacer()
@@ -214,12 +214,7 @@ struct TimerEditView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
             .keyboardCloseToolbar(
-                labelStyle: .iconWithText(
-                    NSLocalizedString(
-                        "keyboard_close_button",
-                        comment: "Toolbar button to close the keyboard"
-                    )
-                )
+                labelStyle: .iconWithText(Copy.Button.close)
             ) {
                 closeKeyboard()
             }
@@ -254,7 +249,7 @@ struct TimerEditView: View {
                     UIAccessibility.post(
                         notification: .announcement,
                         argument: NSLocalizedString(
-                            "timer_edit_saved_announcement",
+                            Copy.Label.saved,
                             comment: "Announcement when timer edit is saved"
                         )
                     )

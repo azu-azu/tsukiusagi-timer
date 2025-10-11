@@ -9,8 +9,6 @@
 "add_custom_session" = "Add Custom Session";
 "edit_tasks_title" = "Edit Tasks";
 "edit_session_title" = "Edit Session";
-"cancel" = "Cancel";
-"save" = "Save";
 "delete_session_title" = "Delete Session";
 "delete_session_message" = "Are you sure you want to delete '%@'? This action cannot be undone.";
 "delete" = "Delete";
@@ -41,8 +39,6 @@
 
 // History
 "history_picker_label" = "History Mode";
-"history_tab_daily" = "Daily";
-"history_tab_monthly" = "Monthly";
 "history_summary_more_tasks" = "+ %d more";
 "history_inline_reflection_saving" = "Saving…";
 "history_inline_reflection_error_message" = "Failed to save. Try again?";
@@ -51,8 +47,41 @@
 // Timer edit
 "timer_edit_session_label_section_title" = "Session Label";
 "timer_edit_final_time_title" = "Final Time";
-"timer_edit_saved_announcement" = "Saved";
 "timer_edit_reset_announcement" = "Reset to original";
 
-// Shared UI
-"keyboard_close_button" = "Close";
+// Timer
+"timer_record_future" = "Future";
+"timer_record_edit_session" = "Edit session record";
+"timer_record_edit_hint" = "Tap to edit start time, end time, and session details";
+"timer_edit_record_title" = "Edit Record";
+"timer_edit_reset_a11y" = "Reset to original";
+"timer_edit_reset_hint" = "Restore the record to its original values";
+
+// History
+"history_memo_session_info" = "Session Info";
+"history_memo_session" = "Session:";
+"history_memo_task" = "Task:";
+"history_memo_duration" = "Duration:";
+"history_memo_reflection" = "Reflection";
+"history_memo_add_reflection_placeholder" = "Add a reflection for this session...";
+"history_memo_add_reflection" = "Add Reflection";
+"history_memo_edit_reflection" = "Edit Reflection";
+"history_timeline_reflection" = "Reflection";
+"history_timeline_add_reflection" = "Add reflection";
+"history_timeline_add_reflection_hint" = "Tap the pencil to add your thoughts";
+"history_detail_no_records" = "No records for this day";
+"history_detail_sessions" = "%d sessions";
+
+// Settings
+"settings_session_delete_confirm_title" = "Delete Session";
+"settings_session_delete_confirm_message" = "Are you sure you want to delete '%@'?";
+"settings_session_edit" = "Edit";
+"settings_session_delete" = "Delete";
+"settings_accessibility_tasks_count" = "%@, %d tasks";
+"settings_accessibility_edit_tasks" = "Tap to edit tasks";
+"settings_accessibility_session_with_task" = "%@: %@";
+"settings_accessibility_edit_actions" = "Tap to edit. Long-press for more actions.";
+
+// Reflection (from Copy.swift)
+"reflection_title" = "Reflection";
+"reflection_placeholder" = "Write anything you feel";
