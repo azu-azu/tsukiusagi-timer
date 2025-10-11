@@ -6,17 +6,17 @@ struct SessionEditView: View {
     @EnvironmentObject var sessionManager: SessionManager
 
     @State private var editedName: String = ""
-    @State private var editedDescriptions: [String] = []
+    @State private var editedTasks: [String] = []
     @State private var showDeleteAlert = false
-    @State private var showAddDescriptionField = false
-    @State private var newDescription = ""
+    @State private var showAddTaskField = false
+    @State private var newTask = ""
 
     @FocusState private var focusedField: FocusedField?
 
     private enum FocusedField: Hashable {
         case editedName
-        case newDescription
-        case description(Int)
+        case newTask
+        case task(Int)
     }
 
     private var isDefaultSession: Bool {
@@ -33,8 +33,8 @@ struct SessionEditView: View {
                     // Session Name Section
                     sessionNameSection()
 
-                    // Descriptions Section
-                    descriptionsSection()
+                    // Tasks Section
+                    tasksSection()
 
                     // Action Buttons (for custom sessions only)
                     if !isDefaultSession {
@@ -169,9 +169,9 @@ extension SessionEditView {
         }
     }
 
-    // MARK: - Descriptions Section
+    // MARK: - Tasks Section
     @ViewBuilder
-    fileprivate func descriptionsSection() -> some View {
+    fileprivate func tasksSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(NSLocalizedString("tasks_label", comment: ""))
@@ -181,32 +181,32 @@ extension SessionEditView {
                 Spacer()
 
                 Button {
-                    showAddDescriptionField = true
-                    newDescription = ""
+                    showAddTaskField = true
+                    newTask = ""
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
             }
 
-            if editedDescriptions.isEmpty {
-                emptyDescriptionsView()
+            if editedTasks.isEmpty {
+                emptyTasksView()
             } else {
                 LazyVStack(spacing: 8) {
-                    ForEach(Array(editedDescriptions.enumerated()), id: \.offset) { index, description in
-                        descriptionRow(description: description, index: index)
+                    ForEach(Array(editedTasks.enumerated()), id: \.offset) { index, task in
+                        taskRow(task: task, index: index)
                     }
                 }
             }
 
-            if showAddDescriptionField {
-                addDescriptionField()
+            if showAddTaskField {
+                addTaskField()
             }
         }
     }
 
     @ViewBuilder
-    fileprivate func emptyDescriptionsView() -> some View {
+    fileprivate func emptyTasksView() -> some View {
         VStack(spacing: 8) {
             Image(systemName: "text.bubble")
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -225,13 +225,13 @@ extension SessionEditView {
     }
 
     @ViewBuilder
-    fileprivate func descriptionRow(description: String, index: Int) -> some View {
+    fileprivate func taskRow(task: String, index: Int) -> some View {
         HStack(spacing: 8) {
             TextField(NSLocalizedString("task_placeholder", comment: ""), text: Binding(
-                get: { editedDescriptions[safe: index] ?? "" },
+                get: { editedTasks[safe: index] ?? "" },
                 set: { newValue in
-                    if index < editedDescriptions.count {
-                        editedDescriptions[index] = newValue
+                    if index < editedTasks.count {
+                        editedTasks[index] = newValue
                     }
                 }
             ))
@@ -244,10 +244,10 @@ extension SessionEditView {
                 RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
                     .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
             )
-            .focused($focusedField, equals: .description(index))
+            .focused($focusedField, equals: .task(index))
 
             Button {
-                editedDescriptions.remove(at: index)
+                editedTasks.remove(at: index)
             } label: {
                 Image(systemName: "minus.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentOrange)
@@ -256,9 +256,9 @@ extension SessionEditView {
     }
 
     @ViewBuilder
-    fileprivate func addDescriptionField() -> some View {
+    fileprivate func addTaskField() -> some View {
         HStack(spacing: 8) {
-            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newDescription)
+            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newTask)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -268,22 +268,22 @@ extension SessionEditView {
                     RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
                         .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
                 )
-                .focused($focusedField, equals: .newDescription)
+                .focused($focusedField, equals: .newTask)
 
             Button {
-                if !newDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    editedDescriptions.append(newDescription.trimmingCharacters(in: .whitespacesAndNewlines))
-                    newDescription = ""
+                if !newTask.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    editedTasks.append(newTask.trimmingCharacters(in: .whitespacesAndNewlines))
+                    newTask = ""
                 }
-                showAddDescriptionField = false
+                showAddTaskField = false
             } label: {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentGreen)
             }
 
             Button {
-                showAddDescriptionField = false
-                newDescription = ""
+                showAddTaskField = false
+                newTask = ""
             } label: {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundColor(DesignTokens.MoonColors.accentOrange)
@@ -307,9 +307,9 @@ extension SessionEditView {
     // MARK: - Helper Properties
     fileprivate var hasChanges: Bool {
         if isDefaultSession {
-            return editedDescriptions != session.tasks
+            return editedTasks != session.tasks
         } else {
-            return editedName != session.sessionName || editedDescriptions != session.tasks
+            return editedName != session.sessionName || editedTasks != session.tasks
         }
     }
 
@@ -323,7 +323,7 @@ extension SessionEditView {
     // MARK: - Helper Methods
     fileprivate func loadSessionData() {
         editedName = session.sessionName
-        editedDescriptions = session.tasks
+        editedTasks = session.tasks
     }
 
     fileprivate func saveChanges() {
@@ -331,13 +331,13 @@ extension SessionEditView {
             if isDefaultSession {
                 try sessionManager.updateSessionTasks(
                     sessionName: session.sessionName,
-                    newTasks: editedDescriptions
+                    newTasks: editedTasks
                 )
             } else {
                 try sessionManager.addOrUpdateEntry(
                     originalKey: session.sessionName.lowercased(),
                     sessionName: editedName,
-                    tasks: editedDescriptions
+                    tasks: editedTasks
                 )
             }
             dismiss()
