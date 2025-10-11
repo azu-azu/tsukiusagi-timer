@@ -132,7 +132,11 @@ final class TimerSessionManager: ObservableObject {
         }
     }
 
-    @available(*, deprecated, message: "Use handleExpiredSession(end:isWorkSession:activityLabel:taskLabel:completedSilently:) instead.")
+    @available(
+        *,
+        deprecated,
+        message: "Use handleExpiredSession(end:isWorkSession:activityLabel:taskLabel:completedSilently:) instead."
+    )
     func handleExpiredSession(
         end: Date,
         isWorkSession: Bool,
