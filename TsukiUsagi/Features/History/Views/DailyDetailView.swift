@@ -19,7 +19,7 @@ struct DailyDetailView: View {
                 Spacer()
 
                 NavigationLink(destination: DailyTimelineView(targetDate: date)) {
-                    Text(Copy.Reflection.openDaily)
+                    Text(Copy.Link.openDaily)
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
@@ -29,7 +29,7 @@ struct DailyDetailView: View {
             if let history = dailyHistory, history.hasRecords {
                 dailySummaryContent(history)
             } else {
-                Text("No records for this day")
+                Text(NSLocalizedString("history_detail_no_records", comment: "No records message"))
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
@@ -46,13 +46,16 @@ struct DailyDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             // 総時間とセッション数
             HStack {
-                Text("Total: \(TimeFormatters.totalText(history.totalMinutes))")
+                Text(String(format: Copy.Label.total, TimeFormatters.totalText(history.totalMinutes)))
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
                 Spacer()
 
-                Text("\(history.sessionCount) sessions")
+                Text(String.localizedStringWithFormat(
+                    NSLocalizedString("history_detail_sessions", comment: "Sessions count label"),
+                    history.sessionCount
+                ))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }

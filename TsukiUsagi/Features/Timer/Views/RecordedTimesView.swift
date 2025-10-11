@@ -11,9 +11,9 @@ struct RecordedTimesView: View {
             VStack(spacing: 4) {
                 // 上２行：中央
                 VStack(spacing: 4) {
-                    Text("Start 🌕 \(TimeFormatters.formatTime(date: startTime))")
+                    Text(String(format: Copy.Timer.startFormat, TimeFormatters.formatTime(date: startTime)))
                         .accessibilityIdentifier("startLabel")
-                    Text("Final 🌑 \(TimeFormatters.formatTime(date: endTime))")
+                    Text(String(format: Copy.Timer.finalFormat, TimeFormatters.formatTime(date: endTime)))
                         .accessibilityIdentifier("finalLabel")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -23,7 +23,7 @@ struct RecordedTimesView: View {
 
             // 未来Finalバッジ（endTime が未来の場合に表示）
             if let end = endTime, end > Date() {
-                Text("Future")
+                Text(NSLocalizedString("timer_record_future", comment: "Future badge label"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     .padding(.horizontal, 10)
@@ -48,8 +48,8 @@ struct RecordedTimesView: View {
             HStack {
                 Spacer()
                 PencilButton(size: .title, action: onEdit)
-                    .accessibilityLabel("Edit session record")
-                    .accessibilityHint("Tap to edit start time, end time, and session details")
+                    .accessibilityLabel(NSLocalizedString("timer_record_edit_session", comment: "Edit session accessibility label"))
+                    .accessibilityHint(NSLocalizedString("timer_record_edit_hint", comment: "Edit session accessibility hint"))
             }
             .frame(maxWidth: 110)
         }

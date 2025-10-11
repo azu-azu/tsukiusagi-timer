@@ -211,11 +211,11 @@ private struct DailyTimelineInlineReflectionSection: View {
     let onRetry: () -> Void
     let focus: FocusState<Bool>.Binding
 
-    private let placeholderText = Copy.Reflection.placeholder
+    private let placeholderText = NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder")
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(Copy.Reflection.title)
+            Text(NSLocalizedString("reflection_title", comment: "Reflection title"))
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -294,12 +294,7 @@ private struct DailyTimelineInlineReflectionSection: View {
         .cornerRadius(12)
         .keyboardAwareBottomPadding(baseBottomPadding: 16)
         .keyboardCloseToolbar(
-            labelStyle: .iconWithText(
-                NSLocalizedString(
-                    "keyboard_close_button",
-                    comment: "Toolbar button to close the keyboard"
-                )
-            )
+            labelStyle: .iconWithText(Copy.Button.close)
         ) {
             focus.wrappedValue = false
             Keyboard.dismiss()

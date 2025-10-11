@@ -9,8 +9,6 @@
 "add_custom_session" = "カスタムセッションを追加";
 "edit_tasks_title" = "タスクを編集";
 "edit_session_title" = "セッションを編集";
-"cancel" = "キャンセル";
-"save" = "保存";
 "delete_session_title" = "セッションを削除";
 "delete_session_message" = "'%@' を削除してもよろしいですか？この操作は取り消せません。";
 "delete" = "削除";
@@ -41,8 +39,6 @@
 
 // History
 "history_picker_label" = "履歴表示";
-"history_tab_daily" = "日別";
-"history_tab_monthly" = "月別";
 "history_summary_more_tasks" = "＋%d 件";
 "history_inline_reflection_saving" = "保存中…";
 "history_inline_reflection_error_message" = "保存に失敗しました。もう一度試しますか？";
@@ -51,8 +47,41 @@
 // Timer edit
 "timer_edit_session_label_section_title" = "セッションラベル";
 "timer_edit_final_time_title" = "終了時刻";
-"timer_edit_saved_announcement" = "保存しました";
 "timer_edit_reset_announcement" = "元の内容にリセットしました";
 
-// Shared UI
-"keyboard_close_button" = "閉じる";
+// Timer
+"timer_record_future" = "未来";
+"timer_record_edit_session" = "セッション記録を編集";
+"timer_record_edit_hint" = "開始時刻、終了時刻、セッション詳細を編集するにはタップ";
+"timer_edit_record_title" = "記録を編集";
+"timer_edit_reset_a11y" = "元の内容にリセット";
+"timer_edit_reset_hint" = "記録を元の値に復元";
+
+// History
+"history_memo_session_info" = "セッション情報";
+"history_memo_session" = "セッション:";
+"history_memo_task" = "タスク:";
+"history_memo_duration" = "時間:";
+"history_memo_reflection" = "振り返り";
+"history_memo_add_reflection_placeholder" = "このセッションの振り返りを追加...";
+"history_memo_add_reflection" = "振り返りを追加";
+"history_memo_edit_reflection" = "振り返りを編集";
+"history_timeline_reflection" = "振り返り";
+"history_timeline_add_reflection" = "振り返りを追加";
+"history_timeline_add_reflection_hint" = "鉛筆をタップして振り返りを追加";
+"history_detail_no_records" = "この日の記録はありません";
+"history_detail_sessions" = "%d セッション";
+
+// Settings
+"settings_session_delete_confirm_title" = "セッションを削除";
+"settings_session_delete_confirm_message" = "'%@' を削除してもよろしいですか？";
+"settings_session_edit" = "編集";
+"settings_session_delete" = "削除";
+"settings_accessibility_tasks_count" = "%@、%d タスク";
+"settings_accessibility_edit_tasks" = "タップしてタスクを編集";
+"settings_accessibility_session_with_task" = "%@: %@";
+"settings_accessibility_edit_actions" = "タップして編集。長押しでその他のアクション。";
+
+// Reflection (from Copy.swift)
+"reflection_title" = "振り返り";
+"reflection_placeholder" = "残しておきたい言葉を自由に";

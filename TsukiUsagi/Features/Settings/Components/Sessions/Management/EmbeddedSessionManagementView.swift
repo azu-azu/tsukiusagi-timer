@@ -72,16 +72,19 @@ struct EmbeddedSessionManagementView: View {
             }
         }
         .presentationBackground(DesignTokens.CosmosColors.background)
-        .alert("Delete Session", isPresented: $showDeleteConfirm) {
-            Button("Delete", role: .destructive) {
+        .alert(NSLocalizedString("settings_session_delete_confirm_title", comment: "Delete session alert title"), isPresented: $showDeleteConfirm) {
+            Button(NSLocalizedString("settings_session_delete", comment: "Delete button"), role: .destructive) {
                 if let session = selectedSession, !session.isDefault {
                     sessionManager.deleteEntry(id: session.id)
                 }
             }
-            Button("Cancel", role: .cancel) { }
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) { }
         } message: {
             if let session = selectedSession {
-                Text("Are you sure you want to delete '\(session.sessionName)'?")
+                Text(String.localizedStringWithFormat(
+                    NSLocalizedString("settings_session_delete_confirm_message", comment: "Delete session confirmation message"),
+                    session.sessionName
+                ))
             }
         }
         .background(DesignTokens.CosmosColors.background)
@@ -101,13 +104,17 @@ private extension EmbeddedSessionManagementView {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: { Label("Edit", systemImage: "pencil") }
+            } label: { Label(NSLocalizedString("settings_session_edit", comment: "Edit button"), systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel(Text("\(session.sessionName), \(session.tasks.count) tasks"))
-        .accessibilityHint(Text("Tap to edit tasks"))
+        .accessibilityLabel(Text(String.localizedStringWithFormat(
+            NSLocalizedString("settings_accessibility_tasks_count", comment: "Accessibility label for tasks count"),
+            session.sessionName,
+            session.tasks.count
+        )))
+        .accessibilityHint(Text(NSLocalizedString("settings_accessibility_edit_tasks", comment: "Accessibility hint for edit tasks")))
 
         if !isLast {
             Divider()
@@ -127,35 +134,41 @@ private extension EmbeddedSessionManagementView {
             Button {
                 presentEditSheet(for: session)
             } label: {
-                Label("Edit", systemImage: "pencil")
+                Label(NSLocalizedString("settings_session_edit", comment: "Edit button"), systemImage: "pencil")
             }
             if !session.isDefault {
                 Button(role: .destructive) {
                     selectedSession = session
                     showDeleteConfirm = true
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Label(NSLocalizedString("settings_session_delete", comment: "Delete button"), systemImage: "trash")
                 }
             }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: { Label("Edit", systemImage: "pencil") }
+            } label: { Label(NSLocalizedString("settings_session_edit", comment: "Edit button"), systemImage: "pencil") }
             .tint(DesignTokens.MoonColors.accentBlue)
             if !session.isDefault {
                 Button(role: .destructive) {
                     selectedSession = session
                     showDeleteConfirm = true
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Label(NSLocalizedString("settings_session_delete", comment: "Delete button"), systemImage: "trash")
                 }
             }
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel(Text("\(session.sessionName)" + (session.tasks.first.flatMap { ": \($0)" } ?? "")))
-        .accessibilityHint(Text("Tap to edit. Long-press for more actions."))
+        .accessibilityLabel(Text(session.tasks.first.flatMap { task in
+            String.localizedStringWithFormat(
+                NSLocalizedString("settings_accessibility_session_with_task", comment: "Accessibility label for session with task"),
+                session.sessionName,
+                task
+            )
+        } ?? session.sessionName))
+        .accessibilityHint(Text(NSLocalizedString("settings_accessibility_edit_actions", comment: "Accessibility hint for edit actions")))
 
         if !isLast {
             Divider()

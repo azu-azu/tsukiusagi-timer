@@ -44,18 +44,18 @@ struct MemoEditView: View {
                     Color.clear.frame(height: keyboardBottomInset)
                 }
             }
-            .navigationTitle(isNewRecord ? "Add Reflection" : "Edit Reflection")
+            .navigationTitle(isNewRecord ? NSLocalizedString("history_memo_add_reflection", comment: "Add reflection title") : NSLocalizedString("history_memo_edit_reflection", comment: "Edit reflection title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(Copy.Button.cancel) {
                         dismiss()
                     }
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button(Copy.Button.save) {
                         saveMemo()
                     }
                     .foregroundColor(DesignTokens.MoonColors.accentBlue)
@@ -98,7 +98,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func sessionInfoSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Session Info")
+            Text(NSLocalizedString("history_memo_session_info", comment: "Session info section title"))
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -126,7 +126,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func activityInfoRow() -> some View {
         HStack {
-            Text("Session:")
+            Text(NSLocalizedString("history_memo_session", comment: "Session label"))
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
@@ -139,7 +139,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func taskInfoRow(task: String) -> some View {
         HStack {
-            Text("Task:")
+            Text(NSLocalizedString("history_memo_task", comment: "Task label"))
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
@@ -152,7 +152,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func durationInfoRow() -> some View {
         HStack {
-            Text("Duration:")
+            Text(NSLocalizedString("history_memo_duration", comment: "Duration label"))
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
@@ -166,7 +166,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func timeInfoRow() -> some View {
         HStack {
-            Text("Time:")
+            Text(Copy.Label.time)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
@@ -181,7 +181,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func memoEditSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Reflection")
+            Text(NSLocalizedString("history_memo_reflection", comment: "Reflection section title"))
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -198,7 +198,7 @@ struct MemoEditView: View {
                         if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             HStack {
                                 VStack {
-                                    Text("Add a reflection for this session...")
+                                    Text(NSLocalizedString("history_memo_add_reflection_placeholder", comment: "Add reflection placeholder"))
                                         .font(DesignTokens.Fonts.label)
                                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                                     Spacer()

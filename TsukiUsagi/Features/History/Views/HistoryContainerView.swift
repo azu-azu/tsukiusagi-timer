@@ -13,8 +13,8 @@ struct HistoryContainerView: View {
         VStack(spacing: 6) {
             // Segmented control
             Picker(LocalizedStringKey("history_picker_label"), selection: $selectedTab) {
-                Text(LocalizedStringKey("history_tab_daily")).tag(Tab.daily)
-                Text(LocalizedStringKey("history_tab_monthly")).tag(Tab.monthly)
+                Text(Copy.Tab.daily).tag(Tab.daily)
+                Text(Copy.Tab.monthly).tag(Tab.monthly)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
