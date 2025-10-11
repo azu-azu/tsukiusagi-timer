@@ -197,7 +197,7 @@ private extension TaskEditContent {
                         Button(
                             action: {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                removeDescription(with: draft.id)
+                                removeTask(with: draft.id)
                             },
                             label: {
                                 Image(systemName: "minus.circle.fill")
@@ -208,7 +208,7 @@ private extension TaskEditContent {
                         .buttonStyle(.plain)
                         .padding(.leading, 4)
                         .contentShape(Rectangle())
-                        .accessibilityLabel("Remove description \(index + 1)")
+                        .accessibilityLabel("Remove task \(index + 1)")
                     }
                 }
                 .padding(.vertical, 4)
@@ -223,7 +223,7 @@ private extension TaskEditContent {
                 )
             }
 
-            Text("Add descriptions for what you'll work on during this session")
+            Text("Add tasks for what you'll work on during this session")
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .padding(.top, 4)
@@ -260,7 +260,7 @@ private extension TaskEditContent {
         }
     }
 
-    func removeDescription(with id: UUID) {
+    func removeTask(with id: UUID) {
         guard drafts.count > 1, let index = drafts.firstIndex(where: { $0.id == id }) else { return }
         drafts.remove(at: index)
         onTasksChange(drafts)

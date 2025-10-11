@@ -280,29 +280,54 @@ This document summarizes the comprehensive migration from "description" terminol
 - **Lines 180-182**: Deprecated `addOrUpdateEntry` method with `descriptions` parameter - This calls the new `tasks` version
 - **Reason**: These deprecated methods are intentionally kept for backward compatibility and will be removed in future releases
 
-### ✅ COMPLETED: `TsukiUsagi/Foundation/Managers/SessionManager+Preview.swift`
+### ✅ NO CHANGES NEEDED: `TsukiUsagi/Foundation/Managers/SessionManager+TaskManagement.swift`
+- **Deprecated methods**: Contains deprecated methods that are intentionally left for backward compatibility
+- **Lines 72-89**: Legacy API methods with `description` terminology - These are deprecated methods that call the new `task` methods
+  - `updateSessionDescriptions` → calls `updateSessionTasks`
+  - `addDescriptionToSession` → calls `addTaskToSession`
+  - `updateDescription` → calls `updateTask`
+  - `removeDescription` → calls `removeTask`
+- **Reason**: These deprecated methods are intentionally kept for backward compatibility and will be removed in future releases
+
+### ✅ NO CHANGES NEEDED: `TsukiUsagi/Foundation/Utilities/NotificationPermissionManager.swift`
+- **Line 54**: `error.localizedDescription` - This is correct (it's a system property)
+- **Reason**: `localizedDescription` is a standard Swift/Foundation property on the `Error` protocol, not related to our task terminology migration
+
+### ✅ COMPLETED: `TsukiUsagi/Features/Settings/Sections/SubtitleEdit/TaskEditContent.swift`
 - **Changes Made**:
-  - Updated preview data: `"Test description"` → `"Test task"`
-  - Updated session name: `"Multi Description Session"` → `"Multi Task Session"`
-  - Updated task array: `"First description"`, `"Second description"`, `"Third description"` → `"First task"`, `"Second task"`, `"Third task"`
-  - Updated session name: `"No Description Session"` → `"No Task Session"`
-  - Updated task text: `"Long description for testing purposes"` → `"Long task for testing purposes"`
-- **Impact**: Preview data now uses consistent task terminology throughout
+  - Updated function name: `removeDescription(with:)` → `removeTask(with:)`
+  - Updated accessibility label: `"Remove description \(index + 1)"` → `"Remove task \(index + 1)"`
+  - Updated UI text: `"Add descriptions for what you'll work on during this session"` → `"Add tasks for what you'll work on during this session"`
+- **Impact**: Task editing interface now uses consistent task terminology
+
+### ✅ COMPLETED: `TsukiUsagi/Features/Settings/Sections/SubtitleEdit/SubtitleEditModels.swift`
+- **Changes Made**:
+  - Updated parameter documentation: `descriptionIndex` → `taskIndex` in comments
+  - Updated property documentation: `"編集対象のDescriptionのインデックス"` → `"編集対象のTaskのインデックス"`
+- **Impact**: Model documentation now reflects task terminology consistently
+
+### ✅ COMPLETED: `TsukiUsagi/Features/Settings/Sections/SubtitleEdit/FullSessionEditContent.swift`
+- **Changes Made**:
+  - Updated accessibility label: `"Remove description \(index + 1)"` → `"Remove task \(index + 1)"`
+  - Updated UI text: `"Add descriptions for what you'll work on during this session"` → `"Add tasks for what you'll work on during this session"`
+  - Updated localization keys: `"duplicate_descriptions_detected"` → `"duplicate_tasks_detected"`
+  - Updated localization keys: `"duplicate_descriptions_resolved"` → `"duplicate_tasks_resolved"`
+- **Impact**: Full session editing interface now uses consistent task terminology
 
 ---
 
 ## Summary Statistics
 
-- **Total Files Modified**: 38+ files
+- **Total Files Modified**: 41+ files
 - **Core Models**: 3 files
-- **Foundation Layer**: 6 files (all completed)
-- **Settings Components**: 14 files (all completed)
+- **Foundation Layer**: 8 files (all completed)
+- **Settings Components**: 17 files (all completed)
 - **History Components**: 7 files
 - **Timer Components**: 6 files
 - **Cross-Feature UI**: 1 file
 - **Localization Files**: 4 files
 - **Test Files**: 1 file
-- **Files Requiring No Changes**: 4 files
+- **Files Requiring No Changes**: 7 files
 - **Files Still Needing Updates**: 0 files
 
 ## Migration Status

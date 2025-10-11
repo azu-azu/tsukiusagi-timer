@@ -61,7 +61,7 @@ struct SessionEditContext: Identifiable, Equatable {
     ///   - entryId: 編集対象のSessionEntryのID
     ///   - sessionName: セッション名（Default Sessionの場合は固定値）
     ///   - tasks: 現在のTaskリスト
-    ///   - descriptionIndex: 編集対象のTaskのインデックス（既存編集の場合）
+    ///   - taskIndex: 編集対象のTaskのインデックス（既存編集の場合）
     /// - Note: 非推奨。taskEditを使用してください。
     @available(*, deprecated, message: "Use taskEdit instead.")
     static func descriptionEdit(
@@ -102,7 +102,7 @@ struct SessionEditContext: Identifiable, Equatable {
         return nil
     }
 
-    /// 編集対象のDescriptionのインデックス（Description編集時のみ）
+    /// 編集対象のTaskのインデックス（Task編集時のみ）
     /// - Note: 非推奨。taskIndexを使用してください。
     @available(*, deprecated, message: "Use taskIndex instead.")
     var descriptionIndex: Int? { taskIndex }
