@@ -273,6 +273,7 @@ private class SideMenuPreviewDummyNotification: PhaseNotificationServiceable {
     func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
     func cancelSessionEndNotification() {}
+    func cancelSessionEndAll() {}
     func finalizeWorkPhase() {}
     func finalizeBreakPhase() {}
     func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }

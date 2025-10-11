@@ -42,17 +42,20 @@ final class TimerViewModel: ObservableObject {
     // MARK: - Published Properties (Delegated to Managers)
     @Published var timeRemaining: Int = 0
     @Published var isRunning: Bool = false
-    @Published private(set) var runState: TimerRunState = .idle
+    @Published var runState: TimerRunState = .idle
     @Published var isWorkSession: Bool = true
     @Published var isSessionFinished = false
     @Published var isBackgroundCompleted = false
     @Published private(set) var startTime: Date?
-    @Published private(set) var endTime: Date?
+    @Published var endTime: Date?
     @Published var flashStars = false
     @Published private(set) var lastBackgroundDate: Date?
     @Published var shouldSuppressAnimation = false
     @Published var shouldSuppressSessionFinishedAnimation = false
     @Published private(set) var quietMoonMessage: MoonMessageEntry?
+
+    // MARK: - Session Management
+    @Published var sessionId: UUID = UUID()
 
     func assignQuietMoonMessageIfNeeded() {
         guard quietMoonMessage == nil else { return }
@@ -79,7 +82,7 @@ final class TimerViewModel: ObservableObject {
     let startPulse = PassthroughSubject<Void, Never>()
 
     // MARK: - Private Properties
-    private var cancellables = Set<AnyCancellable>()
+    var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
     /// 編集・自然完了いずれでも、開始〜終了の分数を丸め規約に従って算出
