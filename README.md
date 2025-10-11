@@ -43,7 +43,8 @@ All text in English, with a clean and simple visual aesthetic.
 
 ## Privacy Policy
 
-- [Privacy Policy](./docs/privacy.md) - English/日本語
+- [Privacy Policy](./privacy.html) - English/日本語
+- [Privacy Policy (Markdown)](./privacy.md) - English/日本語
 
 ## License
 
