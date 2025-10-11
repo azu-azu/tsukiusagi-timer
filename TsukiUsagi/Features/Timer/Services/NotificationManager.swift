@@ -307,7 +307,11 @@ extension NotificationManager {
         return "\(prefix).\(timestamp).\(suffix)"
     }
 
-    private func makeNotificationContent(for phase: PomodoroPhase, uniqueId: String, timeSensitive: Bool) -> UNMutableNotificationContent {
+    private func makeNotificationContent(
+        for phase: PomodoroPhase,
+        uniqueId: String,
+        timeSensitive: Bool
+    ) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
         switch phase {
         case .focus:
