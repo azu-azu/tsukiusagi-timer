@@ -69,9 +69,15 @@ struct SessionEditContext: Identifiable, Equatable {
         sessionName: String,
         tasks: [String],
         isDefault: Bool,
-        descriptionIndex: Int? = nil
+        taskIndex: Int? = nil
     ) -> SessionEditContext {
-        taskEdit(entryId: entryId, sessionName: sessionName, tasks: tasks, isDefault: isDefault, taskIndex: descriptionIndex)
+        taskEdit(
+            entryId: entryId,
+            sessionName: sessionName,
+            tasks: tasks,
+            isDefault: isDefault,
+            taskIndex: taskIndex
+        )
     }
 
     /// Full Session編集用の初期化
