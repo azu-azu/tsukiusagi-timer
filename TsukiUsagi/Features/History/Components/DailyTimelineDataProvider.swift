@@ -48,20 +48,20 @@ struct DailyTimelineDataProvider {
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }
 
-    /// サブタイトル別集計
-    func bySubtitle(historyVM: HistoryViewModel, targetDate: Date) -> [LabelSummary] {
+    /// タスク別集計
+    func byTask(historyVM: HistoryViewModel, targetDate: Date) -> [LabelSummary] {
         let records = records(historyVM: historyVM, targetDate: targetDate)
         let grouped = Dictionary(grouping: records) { record in
             record.task?
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         }
-        return grouped.compactMap { description, records in
-            guard !description.isEmpty else { return nil }
+        return grouped.compactMap { task, records in
+            guard !task.isEmpty else { return nil }
             let totalSeconds = records.reduce(0) { total, rec in
                 total + durationSeconds(rec)
             }
             let totalMinutes = (totalSeconds + 59) / 60  // 表示用に切り上げ
-            return LabelSummary(label: description, count: records.count, totalMinutes: totalMinutes)
+            return LabelSummary(label: task, count: records.count, totalMinutes: totalMinutes)
         }.sorted { $0.totalMinutes > $1.totalMinutes }
     }
 
@@ -124,7 +124,7 @@ struct DailyTimelineDataProvider {
         let summaries = groupedBySession.map { sessionName, entries -> DaySessionSummary in
             let totalDuration = entries.reduce(0) { $0 + $1.duration }
 
-            let descriptions = Dictionary(grouping: entries) {
+            let tasks = Dictionary(grouping: entries) {
                 $0.task?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             }
             .compactMap { key, slice -> DescSlice? in
@@ -137,7 +137,7 @@ struct DailyTimelineDataProvider {
             return DaySessionSummary(
                 sessionName: sessionName,
                 total: totalDuration,
-                descriptions: descriptions
+                tasks: tasks
             )
         }
 
@@ -153,7 +153,7 @@ struct DescSlice: Hashable {
 struct DaySessionSummary: Hashable {
     let sessionName: String
     let total: TimeInterval
-    let descriptions: [DescSlice]
+    let tasks: [DescSlice]
 }
 
 struct DaySummary {

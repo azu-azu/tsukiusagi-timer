@@ -55,7 +55,7 @@ struct SessionEditContext: Identifiable, Equatable {
             editMode: .taskOnly(index: taskIndex)
         )
     }
-    
+
     /// Task編集用の初期化
     /// - Parameters:
     ///   - entryId: 編集対象のSessionEntryのID
@@ -101,7 +101,7 @@ struct SessionEditContext: Identifiable, Equatable {
         }
         return nil
     }
-    
+
     /// 編集対象のDescriptionのインデックス（Description編集時のみ）
     /// - Note: 非推奨。taskIndexを使用してください。
     @available(*, deprecated, message: "Use taskIndex instead.")
@@ -116,7 +116,7 @@ struct SessionEditContext: Identifiable, Equatable {
         }
         return nil
     }
-    
+
     /// 編集対象のTaskテキスト（特定のTask編集時のみ）
     /// - Note: 非推奨。currentTaskTextを使用してください。
     @available(*, deprecated, message: "Use currentTaskText instead.")
@@ -152,7 +152,7 @@ extension SessionEditContext {
         isDefault: true,
         taskIndex: 0
     )
-    
+
     /// テスト用のサンプルデータ
     /// - Note: 非推奨。sampleTaskEditを使用してください。
     @available(*, deprecated, message: "Use sampleTaskEdit instead.")

@@ -40,9 +40,9 @@ struct DailyTimelineSectionBuilder {
         summarySection(title: "Session Summary", summaries: summaries)
     }
 
-    /// サブタイトル集計セクション
+    /// タスク集計セクション
     @ViewBuilder
-    func subtitleSummarySection(summaries: [LabelSummary]) -> some View {
+    func taskSummarySection(summaries: [LabelSummary]) -> some View {
         summarySection(title: "Task Summary", summaries: summaries)
     }
 

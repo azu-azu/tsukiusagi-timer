@@ -8,7 +8,7 @@ struct SessionRowView: View {
     let session: SessionName
     @Binding var editingId: UUID?
     @Binding var editingName: String
-    @Binding var editingDescriptions: [String]
+    @Binding var editingTasks: [String]
     @Binding var showDeleteAlert: AlertID?
     let saveEdit: (UUID) async -> Void
     let deleteSession: (UUID) -> Void
@@ -22,7 +22,7 @@ struct SessionRowView: View {
             SessionRowEditingView(
                 session: session,
                 editingName: $editingName,
-                editingDescriptions: $editingDescriptions,
+                editingTasks: $editingTasks,
                 editingId: $editingId,
                 isCustomInputMode: $isCustomInputMode,
                 isNameFocused: $isNameFocused,
@@ -34,7 +34,7 @@ struct SessionRowView: View {
                 session: session,
                 editingId: $editingId,
                 editingName: $editingName,
-                editingDescriptions: $editingDescriptions,
+                editingTasks: $editingTasks,
                 showDeleteAlert: $showDeleteAlert,
 				isCustomInputMode: $isCustomInputMode, deleteSession: deleteSession
             )
@@ -49,7 +49,7 @@ struct SessionRowView_Previews: PreviewProvider {
             session: SessionName(name: "Test Session", tasks: [TaskItem(text: "Test Subtitle")]),
             editingId: .constant(nil),
             editingName: .constant(""),
-            editingDescriptions: .constant([""]),
+            editingTasks: .constant([""]),
             showDeleteAlert: .constant(nil),
             saveEdit: { _ in },
             deleteSession: { _ in }

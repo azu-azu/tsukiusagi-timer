@@ -2,19 +2,19 @@ import SwiftUI
 
 struct SessionDescriptionsView: View {
     @Binding var editingName: String
-    @Binding var editingDescriptions: [String]
+    @Binding var editingTasks: [String]
     @FocusState.Binding var isSubtitleFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            descriptionHeaderView
-            descriptionListView
-            addDescriptionButtonView
+            taskHeaderView
+            taskListView
+            addTaskButtonView
         }
     }
 
-    // Description ヘッダー
-    private var descriptionHeaderView: some View {
+    // Task ヘッダー
+    private var taskHeaderView: some View {
         HStack {
             Text("Tasks")
                 .font(DesignTokens.Fonts.caption)
@@ -28,17 +28,17 @@ struct SessionDescriptionsView: View {
         }
     }
 
-    // Description リスト
-    private var descriptionListView: some View {
+    // Task リスト
+    private var taskListView: some View {
         VStack(alignment: .leading, spacing: 4) {
-            ForEach(editingDescriptions.indices, id: \.self) { idx in
-                descriptionRowView(at: idx)
+            ForEach(editingTasks.indices, id: \.self) { idx in
+                taskRowView(at: idx)
             }
         }
     }
 
-    // Description 行
-    private func descriptionRowView(at idx: Int) -> some View {
+    // Task 行
+    private func taskRowView(at idx: Int) -> some View {
         HStack {
             // インデント表現
             Rectangle()
@@ -46,10 +46,10 @@ struct SessionDescriptionsView: View {
                 .frame(width: 16, height: 1)
 
             TextField("Task \(idx + 1)", text: Binding(
-                get: { editingDescriptions[safe: idx] ?? "" },
+                get: { editingTasks[safe: idx] ?? "" },
                 set: { newValue in
-                    if idx < editingDescriptions.count {
-                        editingDescriptions[idx] = newValue
+                    if idx < editingTasks.count {
+                        editingTasks[idx] = newValue
                     }
                 }
             ))
@@ -60,24 +60,24 @@ struct SessionDescriptionsView: View {
                 // Focus handling
             }
 
-            Button(action: { editingDescriptions.remove(at: idx) }, label: {
+            Button(action: { editingTasks.remove(at: idx) }, label: {
                 Image(systemName: "minus.circle")
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
             })
             .buttonStyle(.plain)
-            .disabled(editingDescriptions.count == 1)
+            .disabled(editingTasks.count == 1)
         }
     }
 
-    // Add Description ボタン
-    private var addDescriptionButtonView: some View {
+    // Add Task ボタン
+    private var addTaskButtonView: some View {
         HStack {
             // インデント表現
             Rectangle()
                 .fill(Color.clear)
                 .frame(width: 16, height: 1)
 
-            Button(action: { editingDescriptions.append("") }, label: {
+            Button(action: { editingTasks.append("") }, label: {
                 HStack(spacing: 4) {
                     Image(systemName: "plus.circle")
                     Text("Add Task")
@@ -89,7 +89,7 @@ struct SessionDescriptionsView: View {
             .disabled(
                 editingName.isEmpty ||
                 (
-                    editingDescriptions.first?
+                    editingTasks.first?
                         .trimmingCharacters(in: .whitespacesAndNewlines)
                         .isEmpty ?? true
                 )
