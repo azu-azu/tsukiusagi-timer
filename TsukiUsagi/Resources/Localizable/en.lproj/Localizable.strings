@@ -26,7 +26,7 @@
 "new_custom_session_title" = "New Custom Session";
 "create" = "Create";
 "create_custom_session_title" = "Create Custom Session";
-"create_custom_session_description" = "Custom sessions help you organize different contexts or projects.\nYou can fully customize them including name, tasks, and delete them anytime.";
+"create_custom_session_task" = "Custom sessions help you organize different contexts or projects.\nYou can fully customize them including name, tasks, and delete them anytime.";
 "session_name_required_label" = "Session Name *";
 "session_name_placeholder" = "e.g., Personal Project, Research";
 "session_name_hint" = "Choose a unique name for your session";

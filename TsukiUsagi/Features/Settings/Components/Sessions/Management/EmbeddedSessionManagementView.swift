@@ -5,7 +5,7 @@ struct EmbeddedSessionManagementView: View {
     @EnvironmentObject var sessionManager: SessionManager
     @State private var selectedSession: SessionEntry?
     @State private var tempSessionName: String = ""
-    @State private var tempDescriptions: [String] = []
+    @State private var tempTasks: [String] = []
     @State private var isAnyFieldFocused: Bool = false
 
     private enum ActiveSheet: Identifiable {
@@ -27,7 +27,7 @@ struct EmbeddedSessionManagementView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.extraLarge) {
-            // Default Sessions Section (Description editing only)
+            // Default Sessions Section (Task editing only)
             defaultSessionsSection()
 
             // Custom Sessions Section (Full CRUD)
@@ -50,7 +50,7 @@ struct EmbeddedSessionManagementView: View {
                     SessionEditSheetBuilder(
                         context: context,
                         tempSessionName: $tempSessionName,
-                        tempTasks: $tempDescriptions,
+                        tempTasks: $tempTasks,
                         isAnyFieldFocused: $isAnyFieldFocused,
                         onSave: {
                             handleSessionSave(context: context)
@@ -106,8 +106,8 @@ private extension EmbeddedSessionManagementView {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel(Text("\(session.sessionName), \(session.tasks.count) descriptions"))
-        .accessibilityHint(Text("Tap to edit descriptions"))
+        .accessibilityLabel(Text("\(session.sessionName), \(session.tasks.count) tasks"))
+        .accessibilityHint(Text("Tap to edit tasks"))
 
         if !isLast {
             Divider()
@@ -181,11 +181,11 @@ private extension EmbeddedSessionManagementView {
                 Text(
                     String.localizedStringWithFormat(
                         NSLocalizedString(
-                            "descriptions_count",
+                            "tasks_count",
                             tableName: nil,
                             bundle: .main,
-                            value: "%d descriptions",
-                            comment: "Pluralized descriptions count"
+                            value: "%d tasks",
+                            comment: "Pluralized tasks count"
                         ),
                         session.tasks.count
                     )
@@ -216,8 +216,8 @@ private extension EmbeddedSessionManagementView {
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                if let description = session.tasks.first, !description.isEmpty {
-                    Text(description)
+                if let task = session.tasks.first, !task.isEmpty {
+                    Text(task)
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                         .lineLimit(1)
@@ -259,10 +259,10 @@ private extension EmbeddedSessionManagementView {
 
     // MARK: - Sheet Helpers
 
-    func presentEditSheet(for session: SessionEntry, descriptionIndex: Int? = nil) {
+    func presentEditSheet(for session: SessionEntry, taskIndex: Int? = nil) {
         selectedSession = session
         tempSessionName = session.sessionName
-        tempDescriptions = session.tasks
+        tempTasks = session.tasks
         isAnyFieldFocused = false
 
         let context: SessionEditContext
@@ -273,7 +273,7 @@ private extension EmbeddedSessionManagementView {
                 sessionName: session.sessionName,
                 tasks: session.tasks,
                 isDefault: true,
-                taskIndex: descriptionIndex
+                taskIndex: taskIndex
             )
         } else {
             context = SessionEditContext.fullSessionEdit(
@@ -292,13 +292,13 @@ private extension EmbeddedSessionManagementView {
             if selectedSession?.isDefault ?? context.isDefaultSession {
                 try sessionManager.updateSessionTasks(
                     sessionName: context.sessionName,
-                    newTasks: tempDescriptions
+                    newTasks: tempTasks
                 )
             } else {
                 try sessionManager.addOrUpdateEntry(
                     originalKey: context.sessionName.lowercased(),
                     sessionName: tempSessionName,
-                    tasks: tempDescriptions
+                    tasks: tempTasks
                 )
             }
             dismissEditSheet()
@@ -314,7 +314,7 @@ private extension EmbeddedSessionManagementView {
         selectedSession = nil
         isAnyFieldFocused = false
         tempSessionName = ""
-        tempDescriptions = []
+        tempTasks = []
     }
 
     @ViewBuilder

@@ -1,9 +1,9 @@
 import SwiftUI
 
-struct SessionDescriptionsView: View {
+struct SessionTasksView: View {
     @Binding var editingName: String
     @Binding var editingTasks: [String]
-    @FocusState.Binding var isSubtitleFocused: Bool
+    @FocusState.Binding var isTaskFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -55,8 +55,8 @@ struct SessionDescriptionsView: View {
             ))
             .textFieldStyle(RoundedBorderTextFieldStyle())
             .accessibilityIdentifier(AccessibilityIDs.SessionManager.taskField)
-            .focused($isSubtitleFocused)
-            .onChange(of: isSubtitleFocused) {
+            .focused($isTaskFocused)
+            .onChange(of: isTaskFocused) {
                 // Focus handling
             }
 

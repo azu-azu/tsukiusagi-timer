@@ -26,7 +26,7 @@
 "new_custom_session_title" = "新規カスタムセッション";
 "create" = "作成";
 "create_custom_session_title" = "カスタムセッションを作成";
-"create_custom_session_description" = "カスタムセッションは、異なる文脈やプロジェクトを整理するのに役立ちます。\n名前やタスクを自由にカスタマイズでき、いつでも削除できます。";
+"create_custom_session_task" = "カスタムセッションは、異なる文脈やプロジェクトを整理するのに役立ちます。\n名前やタスクを自由にカスタマイズでき、いつでも削除できます。";
 "session_name_required_label" = "セッション名 *";
 "session_name_placeholder" = "例: 個人プロジェクト、リサーチ";
 "session_name_hint" = "セッション名は重複しないように設定してください";
