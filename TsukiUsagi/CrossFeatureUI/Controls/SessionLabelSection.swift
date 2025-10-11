@@ -153,11 +153,11 @@ struct SessionLabelSection: View {
 }
 
 // SessionManagerのエントリモデルも更新が必要
-// 以下のようにdescriptionsプロパティを追加する必要があります
+// 以下のようにtasksプロパティを追加する必要があります
 /*
 struct SessionEntry: Identifiable, Codable {
     let id = UUID()
     let sessionName: String
-    let descriptions: [String]? // 追加
+    let tasks: [String]? // 追加
 }
 */
