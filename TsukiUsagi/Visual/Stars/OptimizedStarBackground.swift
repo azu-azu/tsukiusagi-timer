@@ -187,7 +187,9 @@ extension View {
         .adaptiveStarBackground()
     }
     .padding()
+    #if DEBUG
     .previewColorSchemes()
     .previewEnvironment(PreviewData.PreviewEnv.normal)
     .previewEnvironment(PreviewData.PreviewEnv.accessibility)
+    #endif
 }
