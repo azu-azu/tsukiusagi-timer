@@ -4,7 +4,7 @@ struct SessionRowDisplayView: View {
     let session: SessionName
     @Binding var editingId: UUID?
     @Binding var editingName: String
-    @Binding var editingDescriptions: [String]
+    @Binding var editingTasks: [String]
     @Binding var showDeleteAlert: AlertID?
     @Binding var isCustomInputMode: Bool
     let deleteSession: (UUID) -> Void
@@ -39,7 +39,7 @@ struct SessionRowDisplayView: View {
             Button("Edit", action: {
                 editingId = session.id
                 editingName = session.name
-                editingDescriptions = session.tasks.map { $0.text }
+                editingTasks = session.tasks.map { $0.text }
                 isCustomInputMode = false  // 編集開始時は既存セッション選択モード
             })
             .font(DesignTokens.Fonts.caption)

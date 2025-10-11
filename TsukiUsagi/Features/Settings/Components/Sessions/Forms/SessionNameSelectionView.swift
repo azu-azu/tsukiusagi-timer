@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SessionNameSelectionView: View {
     @Binding var editingName: String
-    @Binding var editingDescriptions: [String]
+    @Binding var editingTasks: [String]
     @Binding var isCustomInputMode: Bool
     @EnvironmentObject private var sessionManager: SessionManager
 
@@ -29,7 +29,7 @@ struct SessionNameSelectionView: View {
             ForEach(sessionManager.defaultEntries) { entry in
                 Button {
                     editingName = entry.sessionName
-                    editingDescriptions = entry.tasks
+                    editingTasks = entry.tasks
                 } label: {
                     Text(entry.sessionName)
                         .font(DesignTokens.Fonts.label)
@@ -41,7 +41,7 @@ struct SessionNameSelectionView: View {
             ForEach(sessionManager.customEntries) { entry in
                 Button {
                     editingName = entry.sessionName
-                    editingDescriptions = entry.tasks
+                    editingTasks = entry.tasks
                 } label: {
                     Text(entry.sessionName)
                         .font(DesignTokens.Fonts.label)
@@ -52,7 +52,7 @@ struct SessionNameSelectionView: View {
             Button("Custom Input...") {
                 isCustomInputMode = true
                 editingName = ""
-                editingDescriptions = [""]
+                editingTasks = [""]
             }
             .foregroundColor(DesignTokens.MoonColors.textPrimary)
         }

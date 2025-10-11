@@ -67,7 +67,7 @@ struct DailyTimelineView: View {
                     } else {
                         if viewModel.records(historyVM: historyVM).count > 1 {
                             sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
-                            sectionBuilder.subtitleSummarySection(summaries: viewModel.bySubtitle(historyVM: historyVM))
+                            sectionBuilder.taskSummarySection(summaries: viewModel.byTask(historyVM: historyVM))
                         }
                         memoSection()
                     }
@@ -135,7 +135,7 @@ struct DailyTimelineView: View {
 private struct DailyTimelineSummaryTreeView: View {
     let sessions: [DaySessionSummary]
     let displayName: (String) -> String
-    private let maxDescriptionsPerSession = 5
+    private let maxTasksPerSession = 5
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -153,10 +153,10 @@ private struct DailyTimelineSummaryTreeView: View {
                             .monospacedDigit()
                     }
 
-                    if !session.descriptions.isEmpty {
+                    if !session.tasks.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
                             ForEach(
-                                Array(session.descriptions.prefix(maxDescriptionsPerSession)),
+                                Array(session.tasks.prefix(maxTasksPerSession)),
                                 id: \.title
                             ) { slice in
                                 HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -173,13 +173,13 @@ private struct DailyTimelineSummaryTreeView: View {
                                 }
                             }
 
-                            let extraCount = session.descriptions.count - maxDescriptionsPerSession
+                            let extraCount = session.tasks.count - maxTasksPerSession
                             if extraCount > 0 {
                                 Text(
                                     String.localizedStringWithFormat(
                                         NSLocalizedString(
-                                            "history_summary_more_descriptions",
-                                            comment: "Additional description count label"
+                                            "history_summary_more_tasks",
+                                            comment: "Additional task count label"
                                         ),
                                         extraCount
                                     )
@@ -421,17 +421,17 @@ private extension DailyTimelineView {
     private func byActivity() -> [LabelSummary] {
         return dataProvider.byActivity(historyVM: historyVM, targetDate: targetDate)
     }
-    private func bySubtitle() -> [LabelSummary] {
-        return dataProvider.bySubtitle(historyVM: historyVM, targetDate: targetDate)
+    private func byTask() -> [LabelSummary] {
+        return dataProvider.byTask(historyVM: historyVM, targetDate: targetDate)
     }
     @ViewBuilder
     private func activitySummarySection() -> some View {
         sectionBuilder.activitySummarySection(summaries: byActivity())
     }
     @ViewBuilder
-    private func subtitleSummarySection() -> some View {
-        if !bySubtitle().isEmpty {
-            sectionBuilder.subtitleSummarySection(summaries: bySubtitle())
+    private func taskSummarySection() -> some View {
+        if !byTask().isEmpty {
+            sectionBuilder.taskSummarySection(summaries: byTask())
         }
     }
 

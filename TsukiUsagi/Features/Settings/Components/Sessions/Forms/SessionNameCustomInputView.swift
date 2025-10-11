@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SessionNameCustomInputView: View {
     @Binding var editingName: String
-    @Binding var editingDescriptions: [String]
+    @Binding var editingTasks: [String]
     @Binding var isCustomInputMode: Bool
     @FocusState.Binding var isNameFocused: Bool
     @EnvironmentObject private var sessionManager: SessionManager
@@ -21,7 +21,7 @@ struct SessionNameCustomInputView: View {
                 Button("Select Existing") {
                     isCustomInputMode = false
                     editingName = sessionManager.defaultEntries.first?.sessionName ?? "Work"
-                    editingDescriptions = sessionManager.getTasks(for: editingName)
+                    editingTasks = sessionManager.getTasks(for: editingName)
                 }
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)

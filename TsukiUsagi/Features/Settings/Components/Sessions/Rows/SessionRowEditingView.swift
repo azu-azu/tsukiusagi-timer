@@ -3,7 +3,7 @@ import SwiftUI
 struct SessionRowEditingView: View {
     let session: SessionName
     @Binding var editingName: String
-    @Binding var editingDescriptions: [String]
+    @Binding var editingTasks: [String]
     @Binding var editingId: UUID?
     @Binding var isCustomInputMode: Bool
     @FocusState.Binding var isNameFocused: Bool
@@ -25,14 +25,14 @@ struct SessionRowEditingView: View {
             if isCustomInputMode {
                 SessionNameCustomInputView(
                     editingName: $editingName,
-                    editingDescriptions: $editingDescriptions,
+                    editingTasks: $editingTasks,
                     isCustomInputMode: $isCustomInputMode,
                     isNameFocused: $isNameFocused
                 )
             } else {
                 SessionNameSelectionView(
                     editingName: $editingName,
-                    editingDescriptions: $editingDescriptions,
+                    editingTasks: $editingTasks,
                     isCustomInputMode: $isCustomInputMode
                 )
             }
@@ -44,7 +44,7 @@ struct SessionRowEditingView: View {
         GroupBox("Descriptions") {
             SessionDescriptionsView(
                 editingName: $editingName,
-                editingDescriptions: $editingDescriptions,
+                editingTasks: $editingTasks,
                 isSubtitleFocused: $isSubtitleFocused
             )
         }
@@ -63,7 +63,7 @@ struct SessionRowEditingView: View {
             Button("Cancel", action: {
                 editingId = nil
                 editingName = ""
-                editingDescriptions = [""]
+                editingTasks = [""]
                 isCustomInputMode = false
             })
             .font(DesignTokens.Fonts.caption)
