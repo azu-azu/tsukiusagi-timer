@@ -55,9 +55,15 @@ struct SessionRowDisplayView: View {
             .accessibilityIdentifier(AccessibilityIDs.SessionManager.deleteButton)
             .alert(item: $showDeleteAlert, content: { alertID in
                 Alert(
-                    title: Text("Delete Session?"),
-                    message: Text("Are you sure you want to delete this session name?"),
-                    primaryButton: .destructive(Text("Delete"), action: {
+                    title: Text(
+                        NSLocalizedString("settings_delete_session_question", comment: "Delete session question")
+                    ),
+                    message: Text(
+                        NSLocalizedString("settings_delete_session_message", comment: "Delete session message")
+                    ),
+                    primaryButton: .destructive(
+                        Text(NSLocalizedString("settings_session_delete", comment: "Delete button")),
+                        action: {
                         deleteSession(alertID.id)
                     }),
                     secondaryButton: .cancel()

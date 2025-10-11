@@ -72,7 +72,10 @@ struct EmbeddedSessionManagementView: View {
             }
         }
         .presentationBackground(DesignTokens.CosmosColors.background)
-        .alert(NSLocalizedString("settings_session_delete_confirm_title", comment: "Delete session alert title"), isPresented: $showDeleteConfirm) {
+        .alert(
+            NSLocalizedString("settings_session_delete_confirm_title", comment: "Delete session alert title"),
+            isPresented: $showDeleteConfirm
+        ) {
             Button(NSLocalizedString("settings_session_delete", comment: "Delete button"), role: .destructive) {
                 if let session = selectedSession, !session.isDefault {
                     sessionManager.deleteEntry(id: session.id)
@@ -82,7 +85,10 @@ struct EmbeddedSessionManagementView: View {
         } message: {
             if let session = selectedSession {
                 Text(String.localizedStringWithFormat(
-                    NSLocalizedString("settings_session_delete_confirm_message", comment: "Delete session confirmation message"),
+                    NSLocalizedString(
+                        "settings_session_delete_confirm_message",
+                        comment: "Delete session confirmation message"
+                    ),
                     session.sessionName
                 ))
             }
@@ -104,7 +110,12 @@ private extension EmbeddedSessionManagementView {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: { Label(NSLocalizedString("settings_session_edit", comment: "Edit button"), systemImage: "pencil") }
+            } label: {
+                Label(
+                    NSLocalizedString("settings_session_edit", comment: "Edit button"),
+                    systemImage: "pencil"
+                )
+            }
             .tint(DesignTokens.MoonColors.accentBlue)
         }
         .accessibilityElement(children: .combine)
@@ -114,7 +125,9 @@ private extension EmbeddedSessionManagementView {
             session.sessionName,
             session.tasks.count
         )))
-        .accessibilityHint(Text(NSLocalizedString("settings_accessibility_edit_tasks", comment: "Accessibility hint for edit tasks")))
+        .accessibilityHint(
+            Text(NSLocalizedString("settings_accessibility_edit_tasks", comment: "Accessibility hint for edit tasks"))
+        )
 
         if !isLast {
             Divider()
@@ -148,7 +161,12 @@ private extension EmbeddedSessionManagementView {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: { Label(NSLocalizedString("settings_session_edit", comment: "Edit button"), systemImage: "pencil") }
+            } label: {
+                Label(
+                    NSLocalizedString("settings_session_edit", comment: "Edit button"),
+                    systemImage: "pencil"
+                )
+            }
             .tint(DesignTokens.MoonColors.accentBlue)
             if !session.isDefault {
                 Button(role: .destructive) {

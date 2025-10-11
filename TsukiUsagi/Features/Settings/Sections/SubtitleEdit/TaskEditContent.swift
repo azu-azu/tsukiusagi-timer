@@ -98,7 +98,7 @@ private extension TaskEditContent {
     /// セッションカテゴリ表示部分（編集不可）
     var sessionCategorySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Session Category")
+            Text(NSLocalizedString("settings_session_category", comment: "Session category label"))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .textCase(.uppercase)
@@ -133,7 +133,7 @@ private extension TaskEditContent {
     var tasksSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Tasks")
+                Text(NSLocalizedString("settings_tasks", comment: "Tasks label"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
@@ -223,7 +223,7 @@ private extension TaskEditContent {
                 )
             }
 
-            Text("Add tasks for what you'll work on during this session")
+            Text(NSLocalizedString("settings_add_tasks_description", comment: "Add tasks description"))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .padding(.top, 4)
