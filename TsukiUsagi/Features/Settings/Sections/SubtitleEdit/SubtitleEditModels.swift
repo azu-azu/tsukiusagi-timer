@@ -30,8 +30,8 @@ struct SessionEditContext: Identifiable, Equatable {
 
     /// 編集モードの定義
     enum EditMode: Equatable {
-        case descriptionOnly(index: Int?)  // Default Session: 特定のDescription編集 or 全Description管理
-        case fullSession                // Custom Session: Session名 + 全Description編集
+        case taskOnly(index: Int?)  // Default Session: 特定のTask編集 or 全Task管理
+        case fullSession                // Custom Session: Session名 + 全Task編集
     }
 
     /// Task編集用の初期化
@@ -39,7 +39,31 @@ struct SessionEditContext: Identifiable, Equatable {
     ///   - entryId: 編集対象のSessionEntryのID
     ///   - sessionName: セッション名（Default Sessionの場合は固定値）
     ///   - tasks: 現在のTaskリスト
+    ///   - taskIndex: 編集対象のTaskのインデックス（既存編集の場合）
+    static func taskEdit(
+        entryId: UUID,
+        sessionName: String,
+        tasks: [String],
+        isDefault: Bool,
+        taskIndex: Int? = nil
+    ) -> SessionEditContext {
+        SessionEditContext(
+            entryId: entryId,
+            sessionName: sessionName,
+            tasks: tasks,
+            isDefaultSession: isDefault,
+            editMode: .taskOnly(index: taskIndex)
+        )
+    }
+    
+    /// Task編集用の初期化
+    /// - Parameters:
+    ///   - entryId: 編集対象のSessionEntryのID
+    ///   - sessionName: セッション名（Default Sessionの場合は固定値）
+    ///   - tasks: 現在のTaskリスト
     ///   - descriptionIndex: 編集対象のTaskのインデックス（既存編集の場合）
+    /// - Note: 非推奨。taskEditを使用してください。
+    @available(*, deprecated, message: "Use taskEdit instead.")
     static func descriptionEdit(
         entryId: UUID,
         sessionName: String,
@@ -47,13 +71,7 @@ struct SessionEditContext: Identifiable, Equatable {
         isDefault: Bool,
         descriptionIndex: Int? = nil
     ) -> SessionEditContext {
-        SessionEditContext(
-            entryId: entryId,
-            sessionName: sessionName,
-            tasks: tasks,
-            isDefaultSession: isDefault,
-            editMode: .descriptionOnly(index: descriptionIndex)
-        )
+        taskEdit(entryId: entryId, sessionName: sessionName, tasks: tasks, isDefault: isDefault, taskIndex: descriptionIndex)
     }
 
     /// Full Session編集用の初期化
@@ -76,35 +94,45 @@ struct SessionEditContext: Identifiable, Equatable {
         )
     }
 
-    /// 編集対象のDescriptionのインデックス（Description編集時のみ）
-    var descriptionIndex: Int? {
-        if case .descriptionOnly(let index) = editMode {
+    /// 編集対象のTaskのインデックス（Task編集時のみ）
+    var taskIndex: Int? {
+        if case .taskOnly(let index) = editMode {
             return index
         }
         return nil
     }
+    
+    /// 編集対象のDescriptionのインデックス（Description編集時のみ）
+    /// - Note: 非推奨。taskIndexを使用してください。
+    @available(*, deprecated, message: "Use taskIndex instead.")
+    var descriptionIndex: Int? { taskIndex }
 
     /// 編集対象のTaskテキスト（特定のTask編集時のみ）
-    var currentDescriptionText: String? {
-        if case .descriptionOnly(let optionalIndex) = editMode,
+    var currentTaskText: String? {
+        if case .taskOnly(let optionalIndex) = editMode,
             let index = optionalIndex,
             index < tasks.count {
             return tasks[index]
         }
         return nil
     }
+    
+    /// 編集対象のTaskテキスト（特定のTask編集時のみ）
+    /// - Note: 非推奨。currentTaskTextを使用してください。
+    @available(*, deprecated, message: "Use currentTaskText instead.")
+    var currentDescriptionText: String? { currentTaskText }
 
     /// 編集コンテキストの説明文字列（デバッグ用）
     var debugDescription: String {
         switch editMode {
-        case .descriptionOnly(let index):
+        case .taskOnly(let index):
             if let index = index {
-                let descriptionText = tasks.indices.contains(index) ? tasks[index] : ""
+                let taskText = tasks.indices.contains(index) ? tasks[index] : ""
                 return "SessionEditContext(session: \(sessionName), " +
-                    "description[\(index)]: \"\(descriptionText)\")"
+                    "task[\(index)]: \"\(taskText)\")"
             } else {
                 return "SessionEditContext(session: \(sessionName), " +
-                    "descriptionManagement, tasks: \(tasks.count))"
+                    "taskManagement, tasks: \(tasks.count))"
             }
         case .fullSession:
             return "SessionEditContext(session: \(sessionName), " +
@@ -117,13 +145,18 @@ struct SessionEditContext: Identifiable, Equatable {
 
 extension SessionEditContext {
     /// テスト用のサンプルデータ
-    static let sampleDescriptionEdit = SessionEditContext.descriptionEdit(
+    static let sampleTaskEdit = SessionEditContext.taskEdit(
         entryId: UUID(),
         sessionName: "Work",
         tasks: ["SwiftUI development", "Code review"],
         isDefault: true,
-        descriptionIndex: 0
+        taskIndex: 0
     )
+    
+    /// テスト用のサンプルデータ
+    /// - Note: 非推奨。sampleTaskEditを使用してください。
+    @available(*, deprecated, message: "Use sampleTaskEdit instead.")
+    static let sampleDescriptionEdit = sampleTaskEdit
 
     static let sampleFullSessionEdit = SessionEditContext.fullSessionEdit(
         entryId: UUID(),

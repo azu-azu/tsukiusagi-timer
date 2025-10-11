@@ -5,9 +5,9 @@
 //  セッション全体編集用コンテンツView
 //  責務：
 //    - セッション名の編集機能
-//    - 複数Descriptionの編集機能
-//    - フォーカス状態管理（セッション名 + Description間）
-//    - Description追加・削除機能
+//    - 複数Taskの編集機能
+//    - フォーカス状態管理（セッション名 + Task間）
+//    - Task追加・削除機能
 //
 
 import SwiftUI
@@ -16,14 +16,14 @@ import UIKit
 
 /// Custom Session全体編集用のコンテンツView
 ///
-/// セッション名とすべてのDescriptionを編集可能にする
+/// セッション名とすべてのTaskを編集可能にする
 struct FullSessionEditContent: View {
     @State private var sessionName: String
-    @State private var drafts: [SessionEditSheetBuilder.DescriptionDraft]
+    @State private var drafts: [SessionEditSheetBuilder.TaskDraft]
     @State private var duplicateIDs: Set<UUID> = []
     @State private var duplicateDebouncer = Debouncer(delay: 0.15)
     let onSessionNameChange: (String) -> Void
-    let onDescriptionsChange: ([SessionEditSheetBuilder.DescriptionDraft]) -> Void
+    let onTasksChange: ([SessionEditSheetBuilder.TaskDraft]) -> Void
     @Binding var isAnyFieldFocused: Bool
     let onClearFocus: () -> Void
     let onDuplicateStateChange: (Bool) -> Void
@@ -33,31 +33,31 @@ struct FullSessionEditContent: View {
 
     private enum FocusedField: Hashable {
         case sessionName
-        case description(UUID)
+        case task(UUID)
     }
 
     /// FullSessionEditContentの初期化
     /// - Parameters:
     ///   - sessionName: 初期のセッション名
-    ///   - descriptionDrafts: 初期のDescriptionドラフト
+    ///   - taskDrafts: 初期のTaskドラフト
     ///   - onSessionNameChange: セッション名変更時のコールバック
-    ///   - onDescriptionsChange: Descriptionリスト変更時のコールバック
+    ///   - onTasksChange: Taskリスト変更時のコールバック
     ///   - isAnyFieldFocused: 外部から制御するフォーカス状態
     ///   - onClearFocus: フォーカスクリア時のコールバック
     init(
         sessionName: String,
-        descriptionDrafts: [SessionEditSheetBuilder.DescriptionDraft],
+        taskDrafts: [SessionEditSheetBuilder.TaskDraft],
         onSessionNameChange: @escaping (String) -> Void,
-        onDescriptionsChange: @escaping ([SessionEditSheetBuilder.DescriptionDraft]) -> Void,
+        onTasksChange: @escaping ([SessionEditSheetBuilder.TaskDraft]) -> Void,
         isAnyFieldFocused: Binding<Bool>,
         onClearFocus: @escaping () -> Void,
         onDuplicateStateChange: @escaping (Bool) -> Void,
         onFocusChange: @escaping (UUID?) -> Void
     ) {
         _sessionName = State(initialValue: sessionName)
-        _drafts = State(initialValue: descriptionDrafts)
+        _drafts = State(initialValue: taskDrafts)
         self.onSessionNameChange = onSessionNameChange
-        self.onDescriptionsChange = onDescriptionsChange
+        self.onTasksChange = onTasksChange
         self._isAnyFieldFocused = isAnyFieldFocused
         self.onClearFocus = onClearFocus
         self.onDuplicateStateChange = onDuplicateStateChange
@@ -67,7 +67,7 @@ struct FullSessionEditContent: View {
     var body: some View {
         VStack(spacing: 24) {
             sessionNameSection
-            descriptionsSection
+            tasksSection
         }
         .onAppear {
             validateDuplicates()
@@ -83,7 +83,7 @@ struct FullSessionEditContent: View {
         .onChange(of: focusedField) { _, newValue in
             isAnyFieldFocused = newValue != nil
             switch newValue {
-            case .description(let id):
+            case .task(let id):
                 onFocusChange(id)
             default:
                 onFocusChange(nil)
@@ -130,11 +130,11 @@ private extension FullSessionEditContent {
         }
     }
 
-    /// Descriptions編集部分
-    var descriptionsSection: some View {
+    /// Tasks編集部分
+    var tasksSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Descriptions")
+                Text("Tasks")
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
@@ -143,12 +143,12 @@ private extension FullSessionEditContent {
                 Spacer()
 
                 // 追加ボタン
-                Button(action: addDescription) {
+                Button(action: addTask) {
                     Image(systemName: "plus.circle.fill")
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
-                .accessibilityLabel("Add description")
+                .accessibilityLabel("Add task")
                 .disabled(hasDuplicateConflict)
             }
 
@@ -157,7 +157,7 @@ private extension FullSessionEditContent {
                     let isDuplicate = duplicateIDs.contains(draft.id)
 
                     TextField(
-                        "Description",
+                        "Task",
                         text: binding(for: draft.id)
                     )
                     .textFieldStyle(PlainTextFieldStyle())
@@ -183,11 +183,11 @@ private extension FullSessionEditContent {
                                 lineWidth: isDuplicate ? 2 : 1
                             )
                     )
-                    .focused(self.$focusedField, equals: .description(draft.id))
+                    .focused(self.$focusedField, equals: .task(draft.id))
                     .submitLabel(draft.id == drafts.last?.id ? .done : .next)
                     .onSubmit {
                         if let nextID = nextID(after: draft.id) {
-                            self.focusedField = .description(nextID)
+                            self.focusedField = .task(nextID)
                         } else {
                             Keyboard.dismiss()
                             focusedField = nil
@@ -199,7 +199,7 @@ private extension FullSessionEditContent {
                         Button(
                             action: {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                removeDescription(with: draft.id)
+                                removeTask(with: draft.id)
                             },
                             label: {
                                 Image(systemName: "minus.circle.fill")
@@ -234,7 +234,7 @@ private extension FullSessionEditContent {
             set: { newValue in
                 guard let index = drafts.firstIndex(where: { $0.id == id }) else { return }
                 drafts[index].text = newValue
-                onDescriptionsChange(drafts)
+                onTasksChange(drafts)
                 duplicateDebouncer.schedule {
                     validateDuplicates()
                 }
@@ -242,30 +242,30 @@ private extension FullSessionEditContent {
         )
     }
 
-    func addDescription() {
-        let newDraft = SessionEditSheetBuilder.DescriptionDraft(text: "")
+    func addTask() {
+        let newDraft = SessionEditSheetBuilder.TaskDraft(text: "")
         drafts.append(newDraft)
-        onDescriptionsChange(drafts)
+        onTasksChange(drafts)
         duplicateDebouncer.schedule {
             validateDuplicates()
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
-            self.focusedField = .description(newDraft.id)
+            self.focusedField = .task(newDraft.id)
         }
     }
 
-    func removeDescription(with id: UUID) {
+    func removeTask(with id: UUID) {
         guard drafts.count > 1, let index = drafts.firstIndex(where: { $0.id == id }) else { return }
         drafts.remove(at: index)
-        onDescriptionsChange(drafts)
+        onTasksChange(drafts)
         duplicateDebouncer.schedule {
             validateDuplicates()
         }
 
         // フォーカス調整
-        if case .description(let focusedID) = focusedField, focusedID == id {
+        if case .task(let focusedID) = focusedField, focusedID == id {
             if let replacement = drafts[safe: min(index, drafts.count - 1)]?.id {
-                focusedField = .description(replacement)
+                focusedField = .task(replacement)
             } else {
                 focusedField = .sessionName
             }

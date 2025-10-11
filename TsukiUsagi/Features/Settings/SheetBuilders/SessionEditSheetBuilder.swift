@@ -4,11 +4,11 @@ import Foundation
 /// セッション編集モーダル管理コンポーネント
 ///
 /// 責務：
-/// - Description編集とFull編集の切り替え
+/// - Task編集とFull編集の切り替え
 /// - キーボード表示状態の管理
 /// - 編集完了・キャンセル処理の委譲
 struct SessionEditSheetBuilder: View {
-    struct DescriptionDraft: Identifiable, Equatable {
+    struct TaskDraft: Identifiable, Equatable {
         let id: UUID
         var text: String
 
@@ -20,23 +20,23 @@ struct SessionEditSheetBuilder: View {
 
     let context: SessionEditContext
     @Binding var tempSessionName: String
-    @Binding var tempDescriptions: [String]
+    @Binding var tempTasks: [String]
     @Binding var isAnyFieldFocused: Bool
     let onSave: () -> Void
     let onCancel: () -> Void
 
     @State private var hasDuplicateConflict = false
-    @State private var descriptionDrafts: [DescriptionDraft] = []
+    @State private var taskDrafts: [TaskDraft] = []
     @State private var focusedRowID: UUID?
 
     private var initialSessionName: String { context.sessionName }
-    private var initialDescriptions: [String] { context.tasks }
+    private var initialTasks: [String] { context.tasks }
 
     private var hasChanges: Bool {
         if context.isDefaultSession {
-            return descriptionDrafts.map(\.text) != initialDescriptions
+            return taskDrafts.map(\.text) != initialTasks
         } else {
-            return tempSessionName != initialSessionName || descriptionDrafts.map(\.text) != initialDescriptions
+            return tempSessionName != initialSessionName || taskDrafts.map(\.text) != initialTasks
         }
     }
 
@@ -52,8 +52,8 @@ struct SessionEditSheetBuilder: View {
 
     var body: some View {
         switch context.editMode {
-        case .descriptionOnly:
-            descriptionEditModal
+        case .taskOnly:
+            taskEditModal
         case .fullSession:
             fullSessionEditModal
         }
@@ -61,9 +61,9 @@ struct SessionEditSheetBuilder: View {
 
     // MARK: - Private Views
 
-    private var descriptionEditModal: some View {
+    private var taskEditModal: some View {
         EditableModal(
-            title: "Manage Descriptions",
+            title: "Manage Tasks",
             onSave: {
                 if !isSaveDisabled {
                     focusedRowID = nil
@@ -82,14 +82,14 @@ struct SessionEditSheetBuilder: View {
             focusedRowID: $focusedRowID,
             ensureVisibleMode: .bottomIfObscuredOnce,
             content: {
-                DescriptionEditContent(
+                TaskEditContent(
                     sessionName: context.sessionName,
-                    descriptionDrafts: descriptionDrafts,
+                    taskDrafts: taskDrafts,
                     editingID: editingDraftID(),
-                    onDescriptionsChange: { drafts in
-                        descriptionDrafts = drafts
+                    onTasksChange: { drafts in
+                        taskDrafts = drafts
                         propagateDrafts()
-                        hasDuplicateConflict = containsDuplicateDescriptions(drafts.map(\.text))
+                        hasDuplicateConflict = containsDuplicateTasks(drafts.map(\.text))
                     },
                     isAnyFieldFocused: $isAnyFieldFocused,
                     onClearFocus: {
@@ -116,7 +116,7 @@ struct SessionEditSheetBuilder: View {
         .presentationDetents([.large])
         .onAppear {
             resetDrafts()
-            hasDuplicateConflict = containsDuplicateDescriptions(tempDescriptions)
+            hasDuplicateConflict = containsDuplicateTasks(tempTasks)
             if let editingID = editingDraftID() {
                 focusedRowID = editingID
             } else {
@@ -148,14 +148,14 @@ struct SessionEditSheetBuilder: View {
             content: {
                 FullSessionEditContent(
                     sessionName: tempSessionName,
-                    descriptionDrafts: descriptionDrafts,
+                    taskDrafts: taskDrafts,
                     onSessionNameChange: { newName in
                         tempSessionName = newName
                     },
-                    onDescriptionsChange: { drafts in
-                        descriptionDrafts = drafts
+                    onTasksChange: { drafts in
+                        taskDrafts = drafts
                         propagateDrafts()
-                        hasDuplicateConflict = containsDuplicateDescriptions(drafts.map(\.text))
+                        hasDuplicateConflict = containsDuplicateTasks(drafts.map(\.text))
                     },
                     isAnyFieldFocused: $isAnyFieldFocused,
                     onClearFocus: {
@@ -173,7 +173,7 @@ struct SessionEditSheetBuilder: View {
         .presentationDetents([.large])
         .onAppear {
             resetDrafts()
-            hasDuplicateConflict = containsDuplicateDescriptions(tempDescriptions)
+            hasDuplicateConflict = containsDuplicateTasks(tempTasks)
             focusedRowID = nil
         }
     }
@@ -188,9 +188,9 @@ struct SessionEditSheetBuilder: View {
         }
     }
 
-    private func containsDuplicateDescriptions(_ descriptions: [String]) -> Bool {
+    private func containsDuplicateTasks(_ tasks: [String]) -> Bool {
         var seen = Set<String>()
-        for value in descriptions {
+        for value in tasks {
             let key = value.tsu_taskNormalizedKey
             if key.isEmpty { continue }
             if seen.contains(key) {
@@ -202,19 +202,19 @@ struct SessionEditSheetBuilder: View {
     }
 
     private func resetDrafts() {
-        let existing = descriptionDrafts
-        descriptionDrafts = tempDescriptions.enumerated().map { index, text in
+        let existing = taskDrafts
+        taskDrafts = tempTasks.enumerated().map { index, text in
             if index < existing.count {
-                return DescriptionDraft(id: existing[index].id, text: text)
+                return TaskDraft(id: existing[index].id, text: text)
             } else {
-                return DescriptionDraft(text: text)
+                return TaskDraft(text: text)
             }
         }
         propagateDrafts()
     }
 
     private func propagateDrafts() {
-        tempDescriptions = descriptionDrafts.map(\.text)
+        tempTasks = taskDrafts.map(\.text)
     }
 
     private func commitDrafts() {
@@ -222,10 +222,10 @@ struct SessionEditSheetBuilder: View {
     }
 
     private func editingDraftID() -> UUID? {
-        guard let index = context.descriptionIndex,
-              index < descriptionDrafts.count else {
+        guard let index = context.taskIndex,
+              index < taskDrafts.count else {
             return nil
         }
-        return descriptionDrafts[index].id
+        return taskDrafts[index].id
     }
 }

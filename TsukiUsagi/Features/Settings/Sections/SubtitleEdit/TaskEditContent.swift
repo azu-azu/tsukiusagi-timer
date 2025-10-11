@@ -1,28 +1,28 @@
 //
-//  DescriptionEditContent.swift
+//  TaskEditContent.swift
 //  TsukiUsagi
 //
-//  Description編集専用コンテンツView
+//  Task編集専用コンテンツView
 //  責務：
 //    - セッション名の固定表示（編集不可）
-//    - 複数Descriptionの編集機能
+//    - 複数Taskの編集機能
 //    - フォーカス状態管理
-//    - Description追加・削除機能
+//    - Task追加・削除機能
 //
 
 import SwiftUI
 import Foundation
 import UIKit
 
-/// Description編集専用のコンテンツView
+/// Task編集専用のコンテンツView
 ///
-/// セッション名の固定表示とDescriptionの編集フィールドを提供
+/// セッション名の固定表示とTaskの編集フィールドを提供
 /// 視覚的に「何が固定で何が編集可能か」を明確に示す
-struct DescriptionEditContent: View {
+struct TaskEditContent: View {
     let sessionName: String
-    @State private var drafts: [SessionEditSheetBuilder.DescriptionDraft]
+    @State private var drafts: [SessionEditSheetBuilder.TaskDraft]
     let editingID: UUID?
-    let onDescriptionsChange: ([SessionEditSheetBuilder.DescriptionDraft]) -> Void
+    let onTasksChange: ([SessionEditSheetBuilder.TaskDraft]) -> Void
     @Binding var isAnyFieldFocused: Bool
     let onClearFocus: () -> Void
     let onDuplicateStateChange: (Bool) -> Void
@@ -34,9 +34,9 @@ struct DescriptionEditContent: View {
 
     init(
         sessionName: String,
-        descriptionDrafts: [SessionEditSheetBuilder.DescriptionDraft],
+        taskDrafts: [SessionEditSheetBuilder.TaskDraft],
         editingID: UUID? = nil,
-        onDescriptionsChange: @escaping ([SessionEditSheetBuilder.DescriptionDraft]) -> Void,
+        onTasksChange: @escaping ([SessionEditSheetBuilder.TaskDraft]) -> Void,
         isAnyFieldFocused: Binding<Bool>,
         onClearFocus: @escaping () -> Void,
         onDuplicateStateChange: @escaping (Bool) -> Void,
@@ -44,8 +44,8 @@ struct DescriptionEditContent: View {
     ) {
         self.sessionName = sessionName
         self.editingID = editingID
-        _drafts = State(initialValue: descriptionDrafts)
-        self.onDescriptionsChange = onDescriptionsChange
+        _drafts = State(initialValue: taskDrafts)
+        self.onTasksChange = onTasksChange
         self._isAnyFieldFocused = isAnyFieldFocused
         self.onClearFocus = onClearFocus
         self.onDuplicateStateChange = onDuplicateStateChange
@@ -55,7 +55,7 @@ struct DescriptionEditContent: View {
     var body: some View {
         VStack(spacing: 24) {
             sessionCategorySection
-            descriptionsSection
+            tasksSection
         }
         .onAppear {
             validateDuplicates()
@@ -78,13 +78,13 @@ struct DescriptionEditContent: View {
             isAnyFieldFocused = newValue != nil
             onFocusChange(newValue)
         }
-        // Manage Descriptions は余白リフトへ統一
+        // Manage Tasks は余白リフトへ統一
         // .keyboardAwareBottomPadding(baseBottomPadding: DesignTokens.Padding.medium)
     }
 
 }
 
-private extension DescriptionEditContent {
+private extension TaskEditContent {
     func clearFocus() {
         withAnimation {
             focusedField = nil
@@ -129,11 +129,11 @@ private extension DescriptionEditContent {
         }
     }
 
-    /// Descriptions編集部分（複数対応）
-    var descriptionsSection: some View {
+    /// Tasks編集部分（複数対応）
+    var tasksSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Descriptions")
+                Text("Tasks")
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
@@ -141,12 +141,12 @@ private extension DescriptionEditContent {
 
                 Spacer()
 
-                Button(action: addDescription) {
+                Button(action: addTask) {
                     Image(systemName: "plus.circle.fill")
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 }
-                .accessibilityLabel("Add description")
+                .accessibilityLabel("Add task")
                 .disabled(hasDuplicateConflict)
             }
 
@@ -155,7 +155,7 @@ private extension DescriptionEditContent {
                     let isDuplicate = duplicateIDs.contains(draft.id)
 
                     TextField(
-                        "Description",
+                        "Task",
                         text: binding(for: draft.id)
                     )
                     .textFieldStyle(PlainTextFieldStyle())
@@ -240,7 +240,7 @@ private extension DescriptionEditContent {
             set: { newValue in
                 guard let index = drafts.firstIndex(where: { $0.id == id }) else { return }
                 drafts[index].text = newValue
-                onDescriptionsChange(drafts)
+                onTasksChange(drafts)
                 duplicateDebouncer.schedule {
                     validateDuplicates()
                 }
@@ -248,10 +248,10 @@ private extension DescriptionEditContent {
         )
     }
 
-    func addDescription() {
-        let newDraft = SessionEditSheetBuilder.DescriptionDraft(text: "")
+    func addTask() {
+        let newDraft = SessionEditSheetBuilder.TaskDraft(text: "")
         drafts.append(newDraft)
-        onDescriptionsChange(drafts)
+        onTasksChange(drafts)
         duplicateDebouncer.schedule {
             validateDuplicates()
         }
@@ -263,7 +263,7 @@ private extension DescriptionEditContent {
     func removeDescription(with id: UUID) {
         guard drafts.count > 1, let index = drafts.firstIndex(where: { $0.id == id }) else { return }
         drafts.remove(at: index)
-        onDescriptionsChange(drafts)
+        onTasksChange(drafts)
         duplicateDebouncer.schedule {
             validateDuplicates()
         }
@@ -301,12 +301,12 @@ private extension DescriptionEditContent {
             let message = hasConflict
                 ?
                 NSLocalizedString(
-                    "duplicate_descriptions_detected",
+                    "duplicate_tasks_detected",
                     comment: "VoiceOver announcement when duplicates appear"
                 )
                 :
                 NSLocalizedString(
-                    "duplicate_descriptions_resolved",
+                    "duplicate_tasks_resolved",
                     comment: "VoiceOver announcement when duplicates are resolved"
                 )
             UIAccessibility.post(notification: .announcement, argument: message)
