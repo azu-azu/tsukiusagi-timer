@@ -173,8 +173,17 @@ private struct DailyTimelineSummaryTreeView: View {
                                 }
                             }
 
-                            if session.descriptions.count > maxDescriptionsPerSession {
-                                Text("+ \(session.descriptions.count - maxDescriptionsPerSession) more")
+                            let extraCount = session.descriptions.count - maxDescriptionsPerSession
+                            if extraCount > 0 {
+                                Text(
+                                    String.localizedStringWithFormat(
+                                        NSLocalizedString(
+                                            "history_summary_more_descriptions",
+                                            comment: "Additional description count label"
+                                        ),
+                                        extraCount
+                                    )
+                                )
                                     .font(DesignTokens.Fonts.caption)
                                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                                     .padding(.leading, 12)
@@ -236,7 +245,12 @@ private struct DailyTimelineInlineReflectionSection: View {
                 HStack(spacing: 8) {
                     ProgressView()
                         .progressViewStyle(.circular)
-                    Text("Saving…")
+                    Text(
+                        NSLocalizedString(
+                            "history_inline_reflection_saving",
+                            comment: "Label displayed while saving inline reflection"
+                        )
+                    )
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 }
@@ -244,14 +258,24 @@ private struct DailyTimelineInlineReflectionSection: View {
 
             if let error {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Failed to save. Try again?")
+                    Text(
+                        NSLocalizedString(
+                            "history_inline_reflection_error_message",
+                            comment: "Inline reflection error message"
+                        )
+                    )
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     Text(error.localizedDescription)
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     Button(action: onRetry) {
-                        Text("Retry")
+                        Text(
+                            NSLocalizedString(
+                                "history_inline_reflection_retry_button",
+                                comment: "Retry button label for inline reflection save"
+                            )
+                        )
                             .font(DesignTokens.Fonts.labelBold)
                             .foregroundColor(DesignTokens.MoonColors.accentBlue)
                     }
@@ -269,7 +293,14 @@ private struct DailyTimelineInlineReflectionSection: View {
         .background(DesignTokens.CosmosColors.cardBackground)
         .cornerRadius(12)
         .keyboardAwareBottomPadding(baseBottomPadding: 16)
-        .keyboardCloseToolbar(labelStyle: .iconWithText("Close")) {
+        .keyboardCloseToolbar(
+            labelStyle: .iconWithText(
+                NSLocalizedString(
+                    "keyboard_close_button",
+                    comment: "Toolbar button to close the keyboard"
+                )
+            )
+        ) {
             focus.wrappedValue = false
             Keyboard.dismiss()
         }
