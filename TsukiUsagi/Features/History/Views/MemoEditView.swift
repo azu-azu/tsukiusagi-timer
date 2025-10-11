@@ -112,7 +112,7 @@ struct MemoEditView: View {
             activityInfoRow()
 
         if let task = record.task, !task.isEmpty {
-            subtitleInfoRow(description: task)
+            taskInfoRow(task: task)
         }
 
             durationInfoRow()
@@ -137,13 +137,13 @@ struct MemoEditView: View {
     }
 
     @ViewBuilder
-    private func subtitleInfoRow(description: String) -> some View {
+    private func taskInfoRow(task: String) -> some View {
         HStack {
-            Text("Description:")
+            Text("Task:")
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
-            Text(description)
+            Text(task)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
         }
