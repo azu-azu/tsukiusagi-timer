@@ -163,5 +163,7 @@ extension View {
     }
     .padding()
     .background(DesignTokens.CosmosColors.background)
+    #if DEBUG
     .previewColorSchemes()
+    #endif
 }
