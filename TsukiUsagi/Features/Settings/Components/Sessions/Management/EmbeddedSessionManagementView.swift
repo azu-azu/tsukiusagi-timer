@@ -143,43 +143,59 @@ private extension EmbeddedSessionManagementView {
             presentEditSheet(for: session)
         } label: { customRowLabel(session: session) }
         .buttonStyle(PlainButtonStyle())
-        .contextMenu {
-            Button {
-                presentEditSheet(for: session)
-            } label: {
-                Label(NSLocalizedString("settings_session_edit", comment: "Edit button"), systemImage: "pencil")
-            }
-            if !session.isDefault {
-                Button(role: .destructive) {
-                    selectedSession = session
-                    showDeleteConfirm = true
-                } label: {
-                    Label(NSLocalizedString("settings_session_delete", comment: "Delete button"), systemImage: "trash")
-                }
-            }
-        }
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button {
-                presentEditSheet(for: session)
-            } label: {
-                Label(
-                    NSLocalizedString("settings_session_edit", comment: "Edit button"),
-                    systemImage: "pencil"
-                )
-            }
-            .tint(DesignTokens.MoonColors.accentBlue)
-            if !session.isDefault {
-                Button(role: .destructive) {
-                    selectedSession = session
-                    showDeleteConfirm = true
-                } label: {
-                    Label(NSLocalizedString("settings_session_delete", comment: "Delete button"), systemImage: "trash")
-                }
-            }
-        }
+        .contextMenu { contextMenuContent(for: session) }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) { swipeActionsContent(for: session) }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel(Text(session.tasks.first.flatMap { task in
+        .accessibilityLabel(accessibilityLabel(for: session))
+        .accessibilityHint(accessibilityHint())
+
+        if !isLast {
+            Divider()
+                .padding(.leading, DesignTokens.Padding.large + 20 + DesignTokens.Spacing.large)
+        }
+    }
+
+    @ViewBuilder
+    private func contextMenuContent(for session: SessionEntry) -> some View {
+        Button {
+            presentEditSheet(for: session)
+        } label: {
+            Label(NSLocalizedString("settings_session_edit", comment: "Edit button"), systemImage: "pencil")
+        }
+        if !session.isDefault {
+            Button(role: .destructive) {
+                selectedSession = session
+                showDeleteConfirm = true
+            } label: {
+                Label(NSLocalizedString("settings_session_delete", comment: "Delete button"), systemImage: "trash")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func swipeActionsContent(for session: SessionEntry) -> some View {
+        Button {
+            presentEditSheet(for: session)
+        } label: {
+            Label(
+                NSLocalizedString("settings_session_edit", comment: "Edit button"),
+                systemImage: "pencil"
+            )
+        }
+        .tint(DesignTokens.MoonColors.accentBlue)
+        if !session.isDefault {
+            Button(role: .destructive) {
+                selectedSession = session
+                showDeleteConfirm = true
+            } label: {
+                Label(NSLocalizedString("settings_session_delete", comment: "Delete button"), systemImage: "trash")
+            }
+        }
+    }
+
+    private func accessibilityLabel(for session: SessionEntry) -> Text {
+        Text(session.tasks.first.flatMap { task in
             String.localizedStringWithFormat(
                 NSLocalizedString(
                     "settings_accessibility_session_with_task",
@@ -188,16 +204,14 @@ private extension EmbeddedSessionManagementView {
                 session.sessionName,
                 task
             )
-        } ?? session.sessionName))
-        .accessibilityHint(Text(NSLocalizedString(
+        } ?? session.sessionName)
+    }
+
+    private func accessibilityHint() -> Text {
+        Text(NSLocalizedString(
             "settings_accessibility_edit_actions",
             comment: "Accessibility hint for edit actions"
-        )))
-
-        if !isLast {
-            Divider()
-                .padding(.leading, DesignTokens.Padding.large + 20 + DesignTokens.Spacing.large)
-        }
+        ))
     }
 
     // MARK: - Row Labels (extracted)
