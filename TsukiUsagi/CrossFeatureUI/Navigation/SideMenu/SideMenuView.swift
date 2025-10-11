@@ -142,8 +142,6 @@ struct SideMenuView: View {
                     Text("TsukiUsagi")
                         .titleStyle()
 
-                    Text("Focus Timer")
-                        .subtitleStyle()
                 }
 
                 Spacer()
