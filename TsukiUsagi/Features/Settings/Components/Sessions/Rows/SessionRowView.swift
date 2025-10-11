@@ -13,7 +13,7 @@ struct SessionRowView: View {
     let saveEdit: (UUID) async -> Void
     let deleteSession: (UUID) -> Void
     @FocusState private var isNameFocused: Bool
-    @FocusState private var isSubtitleFocused: Bool
+    @FocusState private var isTaskFocused: Bool
     @State private var isCustomInputMode: Bool = false
     @EnvironmentObject private var sessionManager: SessionManager
 
@@ -26,7 +26,7 @@ struct SessionRowView: View {
                 editingId: $editingId,
                 isCustomInputMode: $isCustomInputMode,
                 isNameFocused: $isNameFocused,
-                isSubtitleFocused: $isSubtitleFocused,
+                isTaskFocused: $isTaskFocused,
                 saveEdit: saveEdit
             )
         } else {

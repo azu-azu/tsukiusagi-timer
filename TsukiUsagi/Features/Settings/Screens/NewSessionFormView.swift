@@ -92,7 +92,7 @@ private extension NewSessionFormView {
                 .font(DesignTokens.Fonts.title)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-            Text(NSLocalizedString("create_custom_session_description", comment: ""))
+            Text(NSLocalizedString("create_custom_session_task", comment: ""))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -125,7 +125,7 @@ private extension NewSessionFormView {
         }
     }
 
-    // MARK: - Descriptions
+    // MARK: - Tasks
 
     @ViewBuilder
     func tasksSection() -> some View {

@@ -7,14 +7,14 @@ struct SessionRowEditingView: View {
     @Binding var editingId: UUID?
     @Binding var isCustomInputMode: Bool
     @FocusState.Binding var isNameFocused: Bool
-    @FocusState.Binding var isSubtitleFocused: Bool
+    @FocusState.Binding var isTaskFocused: Bool
     let saveEdit: (UUID) async -> Void
     @EnvironmentObject private var sessionManager: SessionManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             sessionNameSection
-            descriptionsSection
+            tasksSection
             actionsSection
         }
     }
@@ -39,13 +39,13 @@ struct SessionRowEditingView: View {
         }
     }
 
-    // Descriptions セクション
-    private var descriptionsSection: some View {
-        GroupBox("Descriptions") {
-            SessionDescriptionsView(
+    // Tasks セクション
+    private var tasksSection: some View {
+        GroupBox("Tasks") {
+            SessionTasksView(
                 editingName: $editingName,
                 editingTasks: $editingTasks,
-                isSubtitleFocused: $isSubtitleFocused
+                isTaskFocused: $isTaskFocused
             )
         }
     }
