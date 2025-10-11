@@ -61,7 +61,7 @@ final class DailyTimelineViewModel: ObservableObject {
     func bySubtitle(historyVM: HistoryViewModel) -> [LabelSummary] {
         let records = records(historyVM: historyVM)
         let grouped = Dictionary(grouping: records) { record in
-            record.description?
+            record.task?
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         }
         return grouped.compactMap { description, records in

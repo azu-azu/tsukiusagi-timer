@@ -14,17 +14,17 @@ extension SessionManager {
         let samples: [SessionEntry] = [
             SessionEntry(
                 sessionName: "Sample Session 1",
-                descriptions: ["Test description"],
+                tasks: ["Test description"],
                 isDefault: false
             ),
             SessionEntry(
                 sessionName: "Sample Session 2",
-                descriptions: [],
+                tasks: [],
                 isDefault: false
             ),
             SessionEntry(
                 sessionName: "Multi Description Session",
-                descriptions: [
+                tasks: [
                     "First description",
                     "Second description",
                     "Third description"
@@ -33,28 +33,28 @@ extension SessionManager {
             ),
             SessionEntry(
                 sessionName: "No Description Session",
-                descriptions: [],
+                tasks: [],
                 isDefault: false
             ),
             SessionEntry(
                 sessionName:
                     "This is a very long session name to test how the UI handles overflow " +
                     "and wrapping in the list row",
-                descriptions: [
+                tasks: [
                     "Long description for testing purposes"
                 ],
                 isDefault: false
             ),
             SessionEntry(
                 sessionName: "Special!@#¥%&*()_+{}|:<>? Session",
-                descriptions: ["Emoji 😊🚀✨", "Symbols #$%&"],
+                tasks: ["Emoji 😊🚀✨", "Symbols #$%&"],
                 isDefault: false
             ),
-            SessionEntry(sessionName: "Session 3", descriptions: [], isDefault: false),
-            SessionEntry(sessionName: "Session 4", descriptions: [], isDefault: false),
-            SessionEntry(sessionName: "Session 5", descriptions: [], isDefault: false),
-            SessionEntry(sessionName: "Session 6", descriptions: [], isDefault: false),
-            SessionEntry(sessionName: "Session 7", descriptions: [], isDefault: false)
+            SessionEntry(sessionName: "Session 3", tasks: [], isDefault: false),
+            SessionEntry(sessionName: "Session 4", tasks: [], isDefault: false),
+            SessionEntry(sessionName: "Session 5", tasks: [], isDefault: false),
+            SessionEntry(sessionName: "Session 6", tasks: [], isDefault: false),
+            SessionEntry(sessionName: "Session 7", tasks: [], isDefault: false)
         ]
 
         // サンプルデータをデータベースに追加

@@ -25,8 +25,8 @@ struct SessionRowDisplayView: View {
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-            ForEach(session.subtitles) { subtitle in
-                Text(subtitle.text)
+            ForEach(session.tasks) { task in
+                Text(task.text)
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
@@ -39,7 +39,7 @@ struct SessionRowDisplayView: View {
             Button("Edit", action: {
                 editingId = session.id
                 editingName = session.name
-                editingDescriptions = session.subtitles.map { $0.text }
+                editingDescriptions = session.tasks.map { $0.text }
                 isCustomInputMode = false  // 編集開始時は既存セッション選択モード
             })
             .font(DesignTokens.Fonts.caption)

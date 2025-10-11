@@ -15,7 +15,7 @@ final class TimerDisplayManager: ObservableObject {
     // MARK: - Published Properties
 
     @Published var activityLabel: String = ""
-    @Published var subtitleLabel: String = ""
+    @Published var taskLabel: String = ""
     @Published var workMinutes: Int = 25
     @Published var breakMinutes: Int = 5
 
@@ -41,9 +41,9 @@ final class TimerDisplayManager: ObservableObject {
         activityLabel = label
     }
 
-    /// サブタイトルラベルを設定
-    func setSubtitleLabel(_ label: String) {
-        subtitleLabel = label
+    /// タスクラベルを設定
+    func setTaskLabel(_ label: String) {
+        taskLabel = label
     }
 
     /// 作業時間を設定
@@ -59,8 +59,19 @@ final class TimerDisplayManager: ObservableObject {
     /// デフォルト値にリセット
     func resetToDefaults() {
         activityLabel = ""
-        subtitleLabel = ""
+        taskLabel = ""
         workMinutes = 25
         breakMinutes = 5
+    }
+
+    @available(*, deprecated, message: "Use taskLabel instead.")
+    var subtitleLabel: String {
+        get { taskLabel }
+        set { taskLabel = newValue }
+    }
+
+    @available(*, deprecated, message: "Use setTaskLabel(_:) instead.")
+    func setSubtitleLabel(_ label: String) {
+        setTaskLabel(label)
     }
 }

@@ -30,7 +30,7 @@ struct SessionEditSheetBuilder: View {
     @State private var focusedRowID: UUID?
 
     private var initialSessionName: String { context.sessionName }
-    private var initialDescriptions: [String] { context.descriptions }
+    private var initialDescriptions: [String] { context.tasks }
 
     private var hasChanges: Bool {
         if context.isDefaultSession {
@@ -191,7 +191,7 @@ struct SessionEditSheetBuilder: View {
     private func containsDuplicateDescriptions(_ descriptions: [String]) -> Bool {
         var seen = Set<String>()
         for value in descriptions {
-            let key = value.tsu_descriptionNormalizedKey
+            let key = value.tsu_taskNormalizedKey
             if key.isEmpty { continue }
             if seen.contains(key) {
                 return true

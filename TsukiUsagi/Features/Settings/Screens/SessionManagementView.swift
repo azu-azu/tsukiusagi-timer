@@ -288,7 +288,7 @@ extension SessionManagementView {
                             value: "%d descriptions",
                             comment: "Pluralized descriptions count"
                         ),
-                        session.descriptions.count
+                        session.tasks.count
                     )
                 )
                 .font(DesignTokens.Fonts.caption)
@@ -317,7 +317,7 @@ extension SessionManagementView {
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                if let description = session.descriptions.first, !description.isEmpty {
+                if let description = session.tasks.first, !description.isEmpty {
                     Text(description)
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -341,7 +341,7 @@ extension SessionManagementView {
     private func presentEditSheet(for session: SessionEntry, descriptionIndex: Int? = nil) {
         selectedSession = session
         tempSessionName = session.sessionName
-        tempDescriptions = session.descriptions
+        tempDescriptions = session.tasks
         isAnyFieldFocused = false
 
         let context: SessionEditContext
@@ -350,7 +350,7 @@ extension SessionManagementView {
             context = SessionEditContext.descriptionEdit(
                 entryId: session.id,
                 sessionName: session.sessionName,
-                descriptions: session.descriptions,
+                tasks: session.tasks,
                 isDefault: true,
                 descriptionIndex: descriptionIndex
             )
@@ -358,7 +358,7 @@ extension SessionManagementView {
             context = SessionEditContext.fullSessionEdit(
                 entryId: session.id,
                 sessionName: session.sessionName,
-                descriptions: session.descriptions,
+                tasks: session.tasks,
                 isDefault: false
             )
         }
@@ -369,15 +369,15 @@ extension SessionManagementView {
     private func handleSessionSave(context: SessionEditContext) {
         do {
             if selectedSession?.isDefault ?? context.isDefaultSession {
-                try sessionManager.updateSessionDescriptions(
+                try sessionManager.updateSessionTasks(
                     sessionName: context.sessionName,
-                    newDescriptions: tempDescriptions
+                    newTasks: tempDescriptions
                 )
             } else {
                 try sessionManager.addOrUpdateEntry(
                     originalKey: context.sessionName.lowercased(),
                     sessionName: tempSessionName,
-                    descriptions: tempDescriptions
+                    tasks: tempDescriptions
                 )
             }
             dismissEditSheet()

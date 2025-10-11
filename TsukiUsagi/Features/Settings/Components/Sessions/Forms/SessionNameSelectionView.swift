@@ -29,7 +29,7 @@ struct SessionNameSelectionView: View {
             ForEach(sessionManager.defaultEntries) { entry in
                 Button {
                     editingName = entry.sessionName
-                    editingDescriptions = entry.descriptions
+                    editingDescriptions = entry.tasks
                 } label: {
                     Text(entry.sessionName)
                         .font(DesignTokens.Fonts.label)
@@ -41,7 +41,7 @@ struct SessionNameSelectionView: View {
             ForEach(sessionManager.customEntries) { entry in
                 Button {
                     editingName = entry.sessionName
-                    editingDescriptions = entry.descriptions
+                    editingDescriptions = entry.tasks
                 } label: {
                     Text(entry.sessionName)
                         .font(DesignTokens.Fonts.label)

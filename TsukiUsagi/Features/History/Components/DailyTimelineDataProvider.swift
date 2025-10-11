@@ -52,7 +52,7 @@ struct DailyTimelineDataProvider {
     func bySubtitle(historyVM: HistoryViewModel, targetDate: Date) -> [LabelSummary] {
         let records = records(historyVM: historyVM, targetDate: targetDate)
         let grouped = Dictionary(grouping: records) { record in
-            record.description?
+            record.task?
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         }
         return grouped.compactMap { description, records in
@@ -95,7 +95,7 @@ struct DailyTimelineDataProvider {
         let dominantName = dominantSessions.first?.sessionName
         let sessionDuration = dominantSessions.totalDuration
 
-        let descriptions = Dictionary(grouping: dominantSessions) { ($0.description).trimmedNonEmpty ?? "" }
+        let descriptions = Dictionary(grouping: dominantSessions) { ($0.task).trimmedNonEmpty ?? "" }
             .compactMap { key, sessions -> DescSlice? in
                 guard !key.isEmpty else { return nil }
                 let duration = sessions.reduce(0) { $0 + $1.duration }
@@ -125,7 +125,7 @@ struct DailyTimelineDataProvider {
             let totalDuration = entries.reduce(0) { $0 + $1.duration }
 
             let descriptions = Dictionary(grouping: entries) {
-                $0.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                $0.task?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             }
             .compactMap { key, slice -> DescSlice? in
                 guard !key.isEmpty else { return nil }

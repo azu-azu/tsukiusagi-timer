@@ -46,7 +46,7 @@ struct SessionRowView: View {
 struct SessionRowView_Previews: PreviewProvider {
     static var previews: some View {
         SessionRowView(
-            session: SessionName(name: "Test Session", subtitles: [Subtitle(text: "Test Subtitle")]),
+            session: SessionName(name: "Test Session", tasks: [TaskItem(text: "Test Subtitle")]),
             editingId: .constant(nil),
             editingName: .constant(""),
             editingDescriptions: .constant([""]),

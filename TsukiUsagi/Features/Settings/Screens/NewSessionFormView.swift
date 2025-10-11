@@ -298,7 +298,7 @@ private extension NewSessionFormView {
             try sessionManager.addOrUpdateEntry(
                 originalKey: "",
                 sessionName: trimmedName,
-                descriptions: descriptions.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+                tasks: descriptions.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
             )
             dismiss()
         } catch {

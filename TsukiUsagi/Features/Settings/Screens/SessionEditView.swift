@@ -307,9 +307,9 @@ extension SessionEditView {
     // MARK: - Helper Properties
     fileprivate var hasChanges: Bool {
         if isDefaultSession {
-            return editedDescriptions != session.descriptions
+            return editedDescriptions != session.tasks
         } else {
-            return editedName != session.sessionName || editedDescriptions != session.descriptions
+            return editedName != session.sessionName || editedDescriptions != session.tasks
         }
     }
 
@@ -323,21 +323,21 @@ extension SessionEditView {
     // MARK: - Helper Methods
     fileprivate func loadSessionData() {
         editedName = session.sessionName
-        editedDescriptions = session.descriptions
+        editedDescriptions = session.tasks
     }
 
     fileprivate func saveChanges() {
         do {
             if isDefaultSession {
-                try sessionManager.updateSessionDescriptions(
+                try sessionManager.updateSessionTasks(
                     sessionName: session.sessionName,
-                    newDescriptions: editedDescriptions
+                    newTasks: editedDescriptions
                 )
             } else {
                 try sessionManager.addOrUpdateEntry(
                     originalKey: session.sessionName.lowercased(),
                     sessionName: editedName,
-                    descriptions: editedDescriptions
+                    tasks: editedDescriptions
                 )
             }
             dismiss()
@@ -361,7 +361,7 @@ struct SessionEditView_Previews: PreviewProvider {
     static var previews: some View {
         SessionEditView(session: SessionEntry(
             sessionName: "Work",
-            descriptions: ["Deep focus", "Meeting"],
+            tasks: ["Deep focus", "Meeting"],
             isDefault: true
         ))
         .environmentObject(SessionManager())

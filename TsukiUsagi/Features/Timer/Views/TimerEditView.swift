@@ -12,11 +12,11 @@ struct TimerEditView: View {
 
     // 既存のプロパティ（後方互換性のため保持）
     @State private var editedActivity = ""
-    @State private var editedSubtitle = ""
+    @State private var editedTask = ""
     @State private var editedMemo = ""
     @State private var editedEnd = Date()
     @State private var minEnd = Date()
-    @FocusState private var isSubtitleFocused: Bool
+    @FocusState private var isTaskFocused: Bool
     @FocusState private var isMemoFocused: Bool
     // スクロール位置制御用の識別子（小さなアンカー用）
     private enum SectionID: Hashable { case memoAnchor }
@@ -57,7 +57,7 @@ struct TimerEditView: View {
 
     @MainActor private func closeKeyboard() {
         isActivityFocused = false
-        isSubtitleFocused = false
+        isTaskFocused = false
         isMemoFocused = false
         Keyboard.dismiss()
     }
@@ -73,7 +73,7 @@ struct TimerEditView: View {
                     // ヘッダーを固定位置に配置（SettingsViewと同じ構造）
                     TimerEditHeaderView(
                         editedActivity: editedActivity,
-                        editedSubtitle: editedSubtitle,
+                        editedTask: editedTask,
                         editedMemo: editedMemo,
                         editedEnd: editedEnd,
                         isSaveDisabledExtra: isNoChanges
@@ -95,9 +95,9 @@ struct TimerEditView: View {
                             ) {
                                 SessionLabelSection(
                                     activity: $editedActivity,
-                                    descriptionText: $editedSubtitle,
+                                    taskText: $editedTask,
                                     isActivityFocused: $isActivityFocused,
-                                    isDescriptionFocused: $isSubtitleFocused,
+                                    isTaskFocused: $isTaskFocused,
                                     labelCornerRadius: labelCornerRadius,
                                     showEmptyError: .constant(currentShowEmptyError),
                                     onDone: nil
@@ -235,14 +235,14 @@ struct TimerEditView: View {
                     editedEnd = last.end
                     minEnd = last.start
                     editedActivity = last.sessionName
-                    editedSubtitle = last.description ?? ""
+                    editedTask = last.task ?? ""
                     editedMemo = last.memo ?? ""
                 } else {
                     // フォールバック（念のため）
                     editedEnd = timerVM.endTime ?? Date()
                     minEnd = timerVM.startTime ?? Date()
                     editedActivity = timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel
-                    editedSubtitle = timerVM.subtitleLabel
+                    editedTask = timerVM.taskLabel
                     editedMemo = ""
                 }
             }
@@ -271,13 +271,13 @@ struct TimerEditView: View {
                     editedEnd = last.end
                     minEnd = last.start
                     editedActivity = last.sessionName
-                    editedSubtitle = last.description ?? ""
+                    editedTask = last.task ?? ""
                     editedMemo = last.memo ?? ""
                 } else {
                     editedEnd = timerVM.endTime ?? Date()
                     minEnd = timerVM.startTime ?? Date()
                     editedActivity = timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel
-                    editedSubtitle = timerVM.subtitleLabel
+                    editedTask = timerVM.taskLabel
                     editedMemo = ""
                 }
                 UIAccessibility.post(
@@ -327,12 +327,12 @@ private extension TimerEditView {
         // 比較元も履歴の最後のレコードを参照（なければVMの値でフォールバック）
         let originalActivity = historyVM.history.last?.sessionName
             ?? (timerVM.activityLabel.isEmpty ? "Work" : timerVM.activityLabel)
-        let originalSubtitle = historyVM.history.last?.description
-            ?? timerVM.subtitleLabel
+        let originalTask = historyVM.history.last?.task
+            ?? timerVM.taskLabel
         let originalMemo = historyVM.history.last?.memo ?? ""
         let originalEnd = historyVM.history.last?.end ?? (timerVM.endTime ?? Date())
         let activitySame = editedActivity.trimmingCharacters(in: .whitespacesAndNewlines) == originalActivity
-        let subtitleSame = editedSubtitle.trimmingCharacters(in: .whitespacesAndNewlines) == originalSubtitle
+        let taskSame = editedTask.trimmingCharacters(in: .whitespacesAndNewlines) == originalTask
         // 分解能は分単位で比較（秒の僅差での誤判定を避ける）
         let cal = Calendar.current
         let comps1 = cal.dateComponents([.hour, .minute], from: editedEnd)
@@ -340,6 +340,6 @@ private extension TimerEditView {
         let endSame = comps1.hour == comps2.hour && comps1.minute == comps2.minute
         let memoSame = editedMemo.trimmingCharacters(in: .whitespacesAndNewlines)
             == originalMemo.trimmingCharacters(in: .whitespacesAndNewlines)
-        return activitySame && subtitleSame && endSame && memoSame
+        return activitySame && taskSame && endSame && memoSame
     }
 }

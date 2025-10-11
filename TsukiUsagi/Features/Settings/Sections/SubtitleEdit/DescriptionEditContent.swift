@@ -284,7 +284,7 @@ private extension DescriptionEditContent {
         let hadConflict = !duplicateIDs.isEmpty
 
         for draft in drafts {
-            let key = draft.text.tsu_descriptionNormalizedKey
+            let key = draft.text.tsu_taskNormalizedKey
             if key.isEmpty { continue }
             if let first = seen[key] {
                 duplicates.insert(first)
