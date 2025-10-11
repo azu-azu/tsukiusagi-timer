@@ -2,20 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>descriptions_count</key>
+	<key>tasks_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@descriptions@</string>
-		<key>descriptions</key>
+		<string>%#@tasks@</string>
+		<key>tasks</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%d description</string>
+			<string>%d task</string>
 			<key>other</key>
-			<string>%d descriptions</string>
+			<string>%d tasks</string>
 		</dict>
 	</dict>
 </dict>

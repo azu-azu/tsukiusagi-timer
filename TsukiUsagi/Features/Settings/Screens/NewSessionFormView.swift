@@ -131,7 +131,7 @@ private extension NewSessionFormView {
     func descriptionsSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             HStack {
-                Text(NSLocalizedString("descriptions_optional_label", comment: ""))
+                Text(NSLocalizedString("tasks_optional_label", comment: ""))
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 Spacer()
@@ -145,7 +145,7 @@ private extension NewSessionFormView {
                 }
             }
 
-            Text(NSLocalizedString("descriptions_help_text", comment: ""))
+            Text(NSLocalizedString("tasks_help_text", comment: ""))
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
@@ -160,7 +160,7 @@ private extension NewSessionFormView {
             }
 
             if !duplicateIndices.isEmpty {
-                Text(NSLocalizedString("duplicate_descriptions_detected", comment: "Duplicate descriptions detected"))
+                Text(NSLocalizedString("duplicate_tasks_detected", comment: "Duplicate tasks detected"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
             }
@@ -178,11 +178,11 @@ private extension NewSessionFormView {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolMedium)
 
-            Text(NSLocalizedString("no_descriptions_title", comment: ""))
+            Text(NSLocalizedString("no_tasks_title", comment: ""))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
-            Text(NSLocalizedString("tap_plus_to_add_description", comment: ""))
+            Text(NSLocalizedString("tap_plus_to_add_task", comment: ""))
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -197,7 +197,7 @@ private extension NewSessionFormView {
     @ViewBuilder
     func descriptionRow(description: String, index: Int) -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(NSLocalizedString("description_placeholder", comment: ""), text: Binding(
+            TextField(NSLocalizedString("task_placeholder", comment: ""), text: Binding(
                 get: { descriptions[safe: index] ?? "" },
                 set: { newValue in
                     if index < descriptions.count {
@@ -240,7 +240,7 @@ private extension NewSessionFormView {
     @ViewBuilder
     func addDescriptionField() -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(NSLocalizedString("new_description_placeholder", comment: ""), text: $newDescription)
+            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newDescription)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)

@@ -16,7 +16,7 @@ struct SessionDescriptionsView: View {
     // Description ヘッダー
     private var descriptionHeaderView: some View {
         HStack {
-            Text("Descriptions")
+            Text("Tasks")
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -45,7 +45,7 @@ struct SessionDescriptionsView: View {
                 .fill(Color.clear)
                 .frame(width: 16, height: 1)
 
-            TextField("Description \(idx + 1)", text: Binding(
+            TextField("Task \(idx + 1)", text: Binding(
                 get: { editingDescriptions[safe: idx] ?? "" },
                 set: { newValue in
                     if idx < editingDescriptions.count {
@@ -54,7 +54,7 @@ struct SessionDescriptionsView: View {
                 }
             ))
             .textFieldStyle(RoundedBorderTextFieldStyle())
-            .accessibilityIdentifier(AccessibilityIDs.SessionManager.descriptionField)
+            .accessibilityIdentifier(AccessibilityIDs.SessionManager.taskField)
             .focused($isSubtitleFocused)
             .onChange(of: isSubtitleFocused) {
                 // Focus handling
@@ -80,7 +80,7 @@ struct SessionDescriptionsView: View {
             Button(action: { editingDescriptions.append("") }, label: {
                 HStack(spacing: 4) {
                     Image(systemName: "plus.circle")
-                    Text("Add Subtitle")
+                    Text("Add Task")
                 }
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
             })

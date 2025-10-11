@@ -49,8 +49,8 @@ struct AccessibilityIDs {
         /// セッション名フィールド
         static let nameField = "sessionManager_nameField"
 
-        /// ディスクリプションフィールド
-        static let descriptionField = "sessionManager_descriptionField"
+        /// タスクフィールド
+        static let taskField = "sessionManager_taskField"
 
         /// 追加ボタン
         static let addButton = "sessionManager_addButton"

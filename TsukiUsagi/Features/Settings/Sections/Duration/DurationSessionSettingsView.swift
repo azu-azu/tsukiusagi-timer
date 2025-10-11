@@ -7,9 +7,9 @@ struct DurationSessionSettingsView: View {
 
     // Session Label 用の状態（ローカル変数として管理）
     @State private var activityLabel: String = ""
-    @State private var subtitleLabel: String = ""
+    @State private var taskLabel: String = ""
     @FocusState private var isActivityFocused: Bool
-    @FocusState private var isSubtitleFocused: Bool
+    @FocusState private var isTaskFocused: Bool
     @State private var currentShowEmptyError: Bool = false
 
     // 保存完了メッセージ用の状態
@@ -17,7 +17,7 @@ struct DurationSessionSettingsView: View {
 
     // 元の値を保持（破棄時に復元用）
     @State private var originalActivityLabel: String = ""
-    @State private var originalSubtitleLabel: String = ""
+    @State private var originalTaskLabel: String = ""
 
     // Session Names管理の展開状態
     @State private var isSessionNamesExpanded: Bool = false
@@ -102,15 +102,15 @@ struct DurationSessionSettingsView: View {
         VStack(alignment: .leading, spacing: 10) {
             SessionLabelSection(
                 activity: $activityLabel,
-                taskText: $subtitleLabel,
+                taskText: $taskLabel,
                 isActivityFocused: $isActivityFocused,
-                isTaskFocused: $isSubtitleFocused,
+                isTaskFocused: $isTaskFocused,
                 labelCornerRadius: labelCornerRadius,
                 showEmptyError: $currentShowEmptyError,
                 onDone: {
                     // フォーカスを外す
                     isActivityFocused = false
-                    isSubtitleFocused = false
+                    isTaskFocused = false
                 }
             )
         }
@@ -222,22 +222,22 @@ struct DurationSessionSettingsView: View {
     private func loadCurrentValues() {
         // UserDefaultsから現在の値を読み込み
         let currentActivity = UserDefaults.standard.string(forKey: "activityLabel") ?? "Work"
-        let currentSubtitle = UserDefaults.standard.string(forKey: "subtitleLabel") ?? ""
+        let currentTask = UserDefaults.standard.string(forKey: "taskLabel") ?? ""
 
         activityLabel = currentActivity
-        subtitleLabel = currentSubtitle
+        taskLabel = currentTask
         originalActivityLabel = currentActivity
-        originalSubtitleLabel = currentSubtitle
+        originalTaskLabel = currentTask
     }
 
     private func saveChanges() {
         // 変更があったかチェック
-        let hasChanges = activityLabel != originalActivityLabel || subtitleLabel != originalSubtitleLabel
+        let hasChanges = activityLabel != originalActivityLabel || taskLabel != originalTaskLabel
 
         if hasChanges {
             // UserDefaultsに保存
             UserDefaults.standard.set(activityLabel, forKey: "activityLabel")
-            UserDefaults.standard.set(subtitleLabel, forKey: "subtitleLabel")
+            UserDefaults.standard.set(taskLabel, forKey: "taskLabel")
 
             // タイマーシステムに反映
             timerVM.refreshAfterSettingsChange()
@@ -268,7 +268,7 @@ struct DurationSessionSettingsView: View {
     private func discardChanges() {
         // 元の値に戻す（破棄）
         activityLabel = originalActivityLabel
-        subtitleLabel = originalSubtitleLabel
+        taskLabel = originalTaskLabel
 
         // サイドメニューを開くリクエストを送る
         sessionManager.requestSideMenuOnDismiss()

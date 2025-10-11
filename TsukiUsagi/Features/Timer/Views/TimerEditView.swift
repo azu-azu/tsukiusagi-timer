@@ -124,7 +124,7 @@ struct TimerEditView: View {
                             // Reflect
                             sectionBuilder.section(title: Copy.Reflection.title, isCompact: true) {
                                 TextEditor(text: $editedMemo)
-                                    .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
+                                    .frame(minHeight: 220, maxHeight: memoEditorMaxHeight)
                                     .padding(8)
                                     .scrollContentBackground(.hidden)
                                     .background(DesignTokens.WhiteColors.surface)
@@ -136,9 +136,6 @@ struct TimerEditView: View {
                                             if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                                 HStack {
                                                     VStack(alignment: .leading, spacing: 4) {
-                                                        Text(Copy.Reflection.title)
-                                                            .font(DesignTokens.Fonts.label)
-                                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
                                                         Text(Copy.Reflection.placeholder)
                                                             .font(DesignTokens.Fonts.caption)
                                                             .foregroundColor(DesignTokens.MoonColors.textMuted)
