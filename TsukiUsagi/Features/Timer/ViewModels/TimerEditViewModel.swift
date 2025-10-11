@@ -15,7 +15,7 @@ final class TimerEditViewModel: ObservableObject {
     // MARK: - Published Properties
 
     @Published var editedActivity = ""
-    @Published var editedSubtitle = ""
+    @Published var editedTask = ""
     @Published var editedMemo = ""
     @Published var editedEnd = Date()
     @Published var minEnd = Date()
@@ -25,7 +25,7 @@ final class TimerEditViewModel: ObservableObject {
 
     // MARK: - FocusState Properties
 
-    @FocusState var isSubtitleFocused: Bool
+    @FocusState var isTaskFocused: Bool
     @FocusState var isMemoFocused: Bool
     @FocusState var isActivityFocused: Bool
 
@@ -85,9 +85,9 @@ final class TimerEditViewModel: ObservableObject {
     // MARK: - Public Methods
 
     /// 編集データを初期化
-    func initializeEditData(activity: String, subtitle: String, memo: String, end: Date) {
+    func initializeEditData(activity: String, task: String, memo: String, end: Date) {
         editedActivity = activity
-        editedSubtitle = subtitle
+        editedTask = task
         editedMemo = memo
         editedEnd = end
         minEnd = end

@@ -102,9 +102,9 @@ struct DurationSessionSettingsView: View {
         VStack(alignment: .leading, spacing: 10) {
             SessionLabelSection(
                 activity: $activityLabel,
-                descriptionText: $subtitleLabel,
+                taskText: $subtitleLabel,
                 isActivityFocused: $isActivityFocused,
-                isDescriptionFocused: $isSubtitleFocused,
+                isTaskFocused: $isSubtitleFocused,
                 labelCornerRadius: labelCornerRadius,
                 showEmptyError: $currentShowEmptyError,
                 onDone: {

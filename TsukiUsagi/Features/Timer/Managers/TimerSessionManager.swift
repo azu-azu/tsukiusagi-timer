@@ -39,16 +39,20 @@ final class TimerSessionManager: ObservableObject {
     // MARK: - Session Management
 
     /// セッション開始
-    func startSession(isWorkSession: Bool, activityLabel: String, subtitleLabel: String) {
+    func startSession(isWorkSession: Bool, activityLabel: String, taskLabel: String) {
         startTime = dateProvider.now()
         endTime = nil
+    }
+    @available(*, deprecated, message: "Use startSession(isWorkSession:activityLabel:taskLabel:) instead.")
+    func startSession(isWorkSession: Bool, activityLabel: String, subtitleLabel: String) {
+        startSession(isWorkSession: isWorkSession, activityLabel: activityLabel, taskLabel: subtitleLabel)
     }
 
     /// セッション完了
     func completeSession(
         isWorkSession: Bool,
         activityLabel: String,
-        subtitleLabel: String,
+        taskLabel: String,
         memo: String? = nil,
         completedSilently: Bool = false
     ) {
@@ -62,7 +66,7 @@ final class TimerSessionManager: ObservableObject {
             end: endTime!,
             phase: isWorkSession ? .focus : .breakTime,
             sessionName: activityLabel,
-            description: subtitleLabel,
+            task: taskLabel,
             memo: memo,
             completedSilently: completedSilently
         )
@@ -72,6 +76,22 @@ final class TimerSessionManager: ObservableObject {
         if isWorkSession {
             streakManager.recordTimerUsage()
         }
+    }
+    @available(*, deprecated, message: "Use completeSession(isWorkSession:activityLabel:taskLabel:memo:completedSilently:) instead.")
+    func completeSession(
+        isWorkSession: Bool,
+        activityLabel: String,
+        subtitleLabel: String,
+        memo: String? = nil,
+        completedSilently: Bool = false
+    ) {
+        completeSession(
+            isWorkSession: isWorkSession,
+            activityLabel: activityLabel,
+            taskLabel: subtitleLabel,
+            memo: memo,
+            completedSilently: completedSilently
+        )
     }
 
     /// セッション終了時刻（予約）を設定
@@ -105,7 +125,7 @@ final class TimerSessionManager: ObservableObject {
         end: Date,
         isWorkSession: Bool,
         activityLabel: String,
-        subtitleLabel: String,
+        taskLabel: String,
         completedSilently: Bool = false
     ) {
         endTime = end
@@ -116,7 +136,7 @@ final class TimerSessionManager: ObservableObject {
             end: end,
             phase: isWorkSession ? .focus : .breakTime,
             sessionName: activityLabel,
-            description: subtitleLabel,
+            task: taskLabel,
             memo: nil,
             completedSilently: completedSilently
         )
@@ -126,5 +146,22 @@ final class TimerSessionManager: ObservableObject {
         if isWorkSession {
             streakManager.recordTimerUsage()
         }
+    }
+
+    @available(*, deprecated, message: "Use handleExpiredSession(end:isWorkSession:activityLabel:taskLabel:completedSilently:) instead.")
+    func handleExpiredSession(
+        end: Date,
+        isWorkSession: Bool,
+        activityLabel: String,
+        subtitleLabel: String,
+        completedSilently: Bool = false
+    ) {
+        handleExpiredSession(
+            end: end,
+            isWorkSession: isWorkSession,
+            activityLabel: activityLabel,
+            taskLabel: subtitleLabel,
+            completedSilently: completedSilently
+        )
     }
 }

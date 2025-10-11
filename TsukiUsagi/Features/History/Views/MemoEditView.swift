@@ -111,9 +111,9 @@ struct MemoEditView: View {
         VStack(alignment: .leading, spacing: 8) {
             activityInfoRow()
 
-            if let description = record.description, !description.isEmpty {
-                subtitleInfoRow(description: description)
-            }
+        if let task = record.task, !task.isEmpty {
+            subtitleInfoRow(description: task)
+        }
 
             durationInfoRow()
             timeInfoRow()
@@ -233,8 +233,9 @@ struct MemoEditView: View {
                     end: endOnTarget,
                     phase: .focus,
                     sessionName: "Reflection",
-                    description: "",
-                    memo: finalMemo
+                    task: nil,
+                    memo: finalMemo,
+                    completedSilently: nil
                 )
                 historyVM.addRecord(newRecord)
             }

@@ -13,9 +13,15 @@ class SessionManager: ObservableObject {
     // MARK: - Constants
 
     static let maxSessionCount = 50
-    static let maxDescriptionCount = 50
+    static let maxTaskCount = 50
     static let maxNameLength = 30
-    static let maxDescriptionLength = 30
+    static let maxTaskLength = 30
+
+    @available(*, deprecated, message: "Use maxTaskCount instead.")
+    static var maxDescriptionCount: Int { maxTaskCount }
+
+    @available(*, deprecated, message: "Use maxTaskLength instead.")
+    static var maxDescriptionLength: Int { maxTaskLength }
 
     // デフォルトセッション名（順序保持）
     let defaultSessionNames: Set<String> = [
@@ -79,7 +85,7 @@ class SessionManager: ObservableObject {
                 let entry = SessionEntry(
                     id: UUID(),
                     sessionName: name,
-                    descriptions: [],
+                    tasks: [],
                     isDefault: true
                 )
                 sessionDatabase[key] = entry
@@ -89,7 +95,7 @@ class SessionManager: ObservableObject {
                 let correctedEntry = SessionEntry(
                     id: existingEntry.id,
                     sessionName: existingEntry.sessionName,
-                    descriptions: existingEntry.descriptions,
+                    tasks: existingEntry.tasks,
                     isDefault: true
                 )
                 sessionDatabase[key] = correctedEntry
@@ -112,23 +118,28 @@ class SessionManager: ObservableObject {
 
     // MARK: - Basic Operations
 
-    /// 指定されたセッション名のDescription一覧を取得
-    func getDescriptions(for sessionName: String) -> [String] {
+    /// 指定されたセッション名のタスク一覧を取得
+    func getTasks(for sessionName: String) -> [String] {
         let key = sessionName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        return sessionDatabase[key]?.descriptions ?? []
+        return sessionDatabase[key]?.tasks ?? []
+    }
+
+    @available(*, deprecated, message: "Use getTasks(for:) instead.")
+    func getDescriptions(for sessionName: String) -> [String] {
+        getTasks(for: sessionName)
     }
 
     /// セッションエントリの追加または更新
     func addOrUpdateEntry(
         originalKey: String,
         sessionName: String,
-        descriptions: [String]
+        tasks: [String]
     ) throws {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         let newKey = trimmedName.lowercased()
         let oldKey = originalKey.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let canonicalDescriptions = descriptions.map { $0.tsu_descriptionNormalizedValue }
+        let canonicalTasks = tasks.map { $0.tsu_taskNormalizedValue }
 
         // バリデーション実行
         let validationContext = SessionValidationContext(
@@ -142,7 +153,7 @@ class SessionManager: ObservableObject {
 
         try SessionManagerValidator.validateSessionEntry(
             sessionName: trimmedName,
-            descriptions: canonicalDescriptions,
+            tasks: canonicalTasks,
             validationContext: validationContext
         )
 
@@ -150,7 +161,7 @@ class SessionManager: ObservableObject {
         let entry = SessionEntry(
             id: sessionDatabase[oldKey]?.id ?? UUID(),
             sessionName: trimmedName,
-            descriptions: canonicalDescriptions,
+            tasks: canonicalTasks,
             isDefault: isDefault
         )
 
@@ -160,6 +171,15 @@ class SessionManager: ObservableObject {
         }
         sessionDatabase[newKey] = entry
         save()
+    }
+
+    @available(*, deprecated, message: "Use addOrUpdateEntry(originalKey:sessionName:tasks:) instead.")
+    func addOrUpdateEntry(
+        originalKey: String,
+        sessionName: String,
+        descriptions: [String]
+    ) throws {
+        try addOrUpdateEntry(originalKey: originalKey, sessionName: sessionName, tasks: descriptions)
     }
 
     /// セッションエントリの削除（デフォルトセッションは削除不可）
@@ -215,9 +235,9 @@ class SessionManager: ObservableObject {
         var seen = Set<String>()
         var sanitized: [String] = []
 
-        for description in entry.descriptions {
-            let canonical = description.tsu_descriptionNormalizedValue
-            let key = canonical.tsu_descriptionNormalizedKey
+        for task in entry.tasks {
+            let canonical = task.tsu_taskNormalizedValue
+            let key = canonical.tsu_taskNormalizedKey
             if seen.contains(key) {
                 continue
             }
@@ -225,11 +245,11 @@ class SessionManager: ObservableObject {
             sanitized.append(canonical)
         }
 
-        let changed = sanitized != entry.descriptions
+        let changed = sanitized != entry.tasks
         let sanitizedEntry = SessionEntry(
             id: entry.id,
             sessionName: entry.sessionName,
-            descriptions: sanitized,
+            tasks: sanitized,
             isDefault: entry.isDefault
         )
         return (sanitizedEntry, changed)

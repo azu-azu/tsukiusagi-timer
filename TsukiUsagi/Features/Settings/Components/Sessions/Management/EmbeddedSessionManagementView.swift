@@ -106,7 +106,7 @@ private extension EmbeddedSessionManagementView {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel(Text("\(session.sessionName), \(session.descriptions.count) descriptions"))
+        .accessibilityLabel(Text("\(session.sessionName), \(session.tasks.count) descriptions"))
         .accessibilityHint(Text("Tap to edit descriptions"))
 
         if !isLast {
@@ -154,7 +154,7 @@ private extension EmbeddedSessionManagementView {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel(Text("\(session.sessionName)" + (session.descriptions.first.flatMap { ": \($0)" } ?? "")))
+        .accessibilityLabel(Text("\(session.sessionName)" + (session.tasks.first.flatMap { ": \($0)" } ?? "")))
         .accessibilityHint(Text("Tap to edit. Long-press for more actions."))
 
         if !isLast {
@@ -187,7 +187,7 @@ private extension EmbeddedSessionManagementView {
                             value: "%d descriptions",
                             comment: "Pluralized descriptions count"
                         ),
-                        session.descriptions.count
+                        session.tasks.count
                     )
                 )
                 .font(DesignTokens.Fonts.caption)
@@ -216,7 +216,7 @@ private extension EmbeddedSessionManagementView {
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                if let description = session.descriptions.first, !description.isEmpty {
+                if let description = session.tasks.first, !description.isEmpty {
                     Text(description)
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -262,7 +262,7 @@ private extension EmbeddedSessionManagementView {
     func presentEditSheet(for session: SessionEntry, descriptionIndex: Int? = nil) {
         selectedSession = session
         tempSessionName = session.sessionName
-        tempDescriptions = session.descriptions
+        tempDescriptions = session.tasks
         isAnyFieldFocused = false
 
         let context: SessionEditContext
@@ -271,7 +271,7 @@ private extension EmbeddedSessionManagementView {
             context = SessionEditContext.descriptionEdit(
                 entryId: session.id,
                 sessionName: session.sessionName,
-                descriptions: session.descriptions,
+                tasks: session.tasks,
                 isDefault: true,
                 descriptionIndex: descriptionIndex
             )
@@ -279,7 +279,7 @@ private extension EmbeddedSessionManagementView {
             context = SessionEditContext.fullSessionEdit(
                 entryId: session.id,
                 sessionName: session.sessionName,
-                descriptions: session.descriptions,
+                tasks: session.tasks,
                 isDefault: false
             )
         }
@@ -290,15 +290,15 @@ private extension EmbeddedSessionManagementView {
     func handleSessionSave(context: SessionEditContext) {
         do {
             if selectedSession?.isDefault ?? context.isDefaultSession {
-                try sessionManager.updateSessionDescriptions(
+                try sessionManager.updateSessionTasks(
                     sessionName: context.sessionName,
-                    newDescriptions: tempDescriptions
+                    newTasks: tempDescriptions
                 )
             } else {
                 try sessionManager.addOrUpdateEntry(
                     originalKey: context.sessionName.lowercased(),
                     sessionName: tempSessionName,
-                    descriptions: tempDescriptions
+                    tasks: tempDescriptions
                 )
             }
             dismissEditSheet()

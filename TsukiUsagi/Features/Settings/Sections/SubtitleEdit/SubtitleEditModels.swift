@@ -19,8 +19,8 @@ struct SessionEditContext: Identifiable, Equatable {
     /// 現在のセッション名
     let sessionName: String
 
-    /// 現在のDescriptionリスト
-    let descriptions: [String]
+    /// 現在のTaskリスト
+    let tasks: [String]
 
     /// デフォルトセッションかどうか
     let isDefaultSession: Bool
@@ -34,23 +34,23 @@ struct SessionEditContext: Identifiable, Equatable {
         case fullSession                // Custom Session: Session名 + 全Description編集
     }
 
-    /// Description編集用の初期化
+    /// Task編集用の初期化
     /// - Parameters:
     ///   - entryId: 編集対象のSessionEntryのID
     ///   - sessionName: セッション名（Default Sessionの場合は固定値）
-    ///   - descriptions: 現在のDescriptionリスト
-    ///   - descriptionIndex: 編集対象のDescriptionのインデックス（既存編集の場合）
+    ///   - tasks: 現在のTaskリスト
+    ///   - descriptionIndex: 編集対象のTaskのインデックス（既存編集の場合）
     static func descriptionEdit(
         entryId: UUID,
         sessionName: String,
-        descriptions: [String],
+        tasks: [String],
         isDefault: Bool,
         descriptionIndex: Int? = nil
     ) -> SessionEditContext {
         SessionEditContext(
             entryId: entryId,
             sessionName: sessionName,
-            descriptions: descriptions,
+            tasks: tasks,
             isDefaultSession: isDefault,
             editMode: .descriptionOnly(index: descriptionIndex)
         )
@@ -60,17 +60,17 @@ struct SessionEditContext: Identifiable, Equatable {
     /// - Parameters:
     ///   - entryId: 編集対象のSessionEntryのID
     ///   - sessionName: 現在のセッション名
-    ///   - descriptions: 現在のDescriptionリスト
+    ///   - tasks: 現在のTaskリスト
     static func fullSessionEdit(
         entryId: UUID,
         sessionName: String,
-        descriptions: [String],
+        tasks: [String],
         isDefault: Bool
     ) -> SessionEditContext {
         SessionEditContext(
             entryId: entryId,
             sessionName: sessionName,
-            descriptions: descriptions,
+            tasks: tasks,
             isDefaultSession: isDefault,
             editMode: .fullSession
         )
@@ -84,12 +84,12 @@ struct SessionEditContext: Identifiable, Equatable {
         return nil
     }
 
-    /// 編集対象のDescriptionテキスト（特定のDescription編集時のみ）
+    /// 編集対象のTaskテキスト（特定のTask編集時のみ）
     var currentDescriptionText: String? {
         if case .descriptionOnly(let optionalIndex) = editMode,
             let index = optionalIndex,
-            index < descriptions.count {
-            return descriptions[index]
+            index < tasks.count {
+            return tasks[index]
         }
         return nil
     }
@@ -99,16 +99,16 @@ struct SessionEditContext: Identifiable, Equatable {
         switch editMode {
         case .descriptionOnly(let index):
             if let index = index {
-                let descriptionText = descriptions.indices.contains(index) ? descriptions[index] : ""
+                let descriptionText = tasks.indices.contains(index) ? tasks[index] : ""
                 return "SessionEditContext(session: \(sessionName), " +
                     "description[\(index)]: \"\(descriptionText)\")"
             } else {
                 return "SessionEditContext(session: \(sessionName), " +
-                    "descriptionManagement, descriptions: \(descriptions.count))"
+                    "descriptionManagement, tasks: \(tasks.count))"
             }
         case .fullSession:
             return "SessionEditContext(session: \(sessionName), " +
-                "fullEdit, descriptions: \(descriptions.count))"
+                "fullEdit, tasks: \(tasks.count))"
         }
     }
 }
@@ -120,7 +120,7 @@ extension SessionEditContext {
     static let sampleDescriptionEdit = SessionEditContext.descriptionEdit(
         entryId: UUID(),
         sessionName: "Work",
-        descriptions: ["SwiftUI development", "Code review"],
+        tasks: ["SwiftUI development", "Code review"],
         isDefault: true,
         descriptionIndex: 0
     )
@@ -128,7 +128,7 @@ extension SessionEditContext {
     static let sampleFullSessionEdit = SessionEditContext.fullSessionEdit(
         entryId: UUID(),
         sessionName: "My Custom Project",
-        descriptions: ["Task 1", "Task 2", "Task 3"],
+        tasks: ["Task 1", "Task 2", "Task 3"],
         isDefault: false
     )
 }

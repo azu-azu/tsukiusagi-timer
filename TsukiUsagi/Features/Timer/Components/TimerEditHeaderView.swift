@@ -8,7 +8,7 @@ struct TimerEditHeaderView: View {
 
     // TimerEditViewから渡される編集中の値
     let editedActivity: String
-    let editedSubtitle: String
+    let editedTask: String
     let editedMemo: String
     let editedEnd: Date
     let isSaveDisabledExtra: Bool
@@ -35,7 +35,7 @@ struct TimerEditHeaderView: View {
                     onSave: {
                         historyVM.updateLast(
                             sessionName: editedActivity,
-                            description: editedSubtitle,
+                            task: editedTask,
                             memo: editedMemo,
                             end: editedEnd
                         )
@@ -75,7 +75,7 @@ struct TimerEditHeaderView_Previews: PreviewProvider {
     static var previews: some View {
         TimerEditHeaderView(
             editedActivity: "Work",
-            editedSubtitle: "Test subtitle",
+            editedTask: "Test task",
             editedMemo: "Test memo",
             editedEnd: Date(),
             isSaveDisabledExtra: false
@@ -148,6 +148,6 @@ private class DummyFormatter: TimeFormatterUtilable {
 }
 
 private class DummyHistoryViewModel: ObservableObject {
-    func updateLast(sessionName: String, description: String, memo: String, end: Date) {}
+    func updateLast(sessionName: String, task: String, memo: String, end: Date) {}
 }
 #endif

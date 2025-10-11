@@ -14,12 +14,12 @@ struct PreviewData {
         try? manager.addOrUpdateEntry(
             originalKey: "",
             sessionName: "Preview Work",
-            descriptions: ["Sample session"]
+            tasks: ["Sample session"]
         )
         try? manager.addOrUpdateEntry(
             originalKey: "",
             sessionName: "Preview Study",
-            descriptions: ["Another sample"]
+            tasks: ["Another sample"]
         )
         return manager
     }()
@@ -33,7 +33,7 @@ struct PreviewData {
             end: Date(),
             phase: .focus,
             sessionName: "Preview Work",
-            description: "Sample session",
+            task: "Sample session",
             memo: "This is a preview memo",
             completedSilently: false
         )
@@ -44,7 +44,7 @@ struct PreviewData {
             end: Date().addingTimeInterval(-3600),
             phase: .focus,
             sessionName: "Preview Study",
-            description: "Another sample",
+            task: "Another sample",
             memo: nil,
             completedSilently: false
         )
@@ -160,49 +160,49 @@ struct PreviewData {
         SessionItem(
             id: UUID(),
             name: "Work",
-            description: "Professional tasks",
+            task: "Professional tasks",
             isFixed: true
         ),
         SessionItem(
             id: UUID(),
             name: "Study",
-            description: "Learning activities",
+            task: "Learning activities",
             isFixed: true
         ),
         SessionItem(
             id: UUID(),
             name: "Read",
-            description: "Reading time",
+            task: "Reading time",
             isFixed: true
         ),
         SessionItem(
             id: UUID(),
             name: "Exercise",
-            description: "Physical activity",
+            task: "Physical activity",
             isFixed: false
         ),
         SessionItem(
             id: UUID(),
             name: "Meditation",
-            description: "Mindfulness practice",
+            task: "Mindfulness practice",
             isFixed: false
         ),
         SessionItem(
             id: UUID(),
             name: "Creative Work",
-            description: "Art and design",
+            task: "Art and design",
             isFixed: false
         ),
         SessionItem(
             id: UUID(),
             name: "Planning",
-            description: "Strategy and planning",
+            task: "Strategy and planning",
             isFixed: false
         ),
         SessionItem(
             id: UUID(),
             name: "Review",
-            description: "Reflection time",
+            task: "Reflection time",
             isFixed: false
         )
     ]
@@ -217,8 +217,9 @@ struct PreviewData {
             end: Date(),
             phase: .focus,
             sessionName: "Work",
-            description: "Professional tasks",
-            memo: "Completed the main project milestone"
+            task: "Professional tasks",
+            memo: "Completed the main project milestone",
+            completedSilently: nil
         ),
         SessionRecord(
             id: "20250106_080000",
@@ -226,8 +227,9 @@ struct PreviewData {
             end: Date().addingTimeInterval(-3600),
             phase: .focus,
             sessionName: "Study",
-            description: "Learning activities",
-            memo: "Reviewed SwiftUI documentation"
+            task: "Learning activities",
+            memo: "Reviewed SwiftUI documentation",
+            completedSilently: nil
         ),
         SessionRecord(
             id: "20250106_070000",
@@ -235,8 +237,9 @@ struct PreviewData {
             end: Date().addingTimeInterval(-7200),
             phase: .focus,
             sessionName: "Read",
-            description: "Reading time",
-            memo: "Finished chapter 5 of the book"
+            task: "Reading time",
+            memo: "Finished chapter 5 of the book",
+            completedSilently: nil
         )
     ]
 

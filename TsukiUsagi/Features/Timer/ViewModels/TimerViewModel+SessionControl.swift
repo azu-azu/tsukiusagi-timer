@@ -24,7 +24,7 @@ extension TimerViewModel {
         sessionManager.startSession(
             isWorkSession: isWorkSession,
             activityLabel: activityLabel,
-            subtitleLabel: subtitleLabel
+            taskLabel: subtitleLabel
         )
 
         // 時間を設定してからstartTimerを呼ぶ
@@ -138,7 +138,7 @@ extension TimerViewModel {
             end: sessionInfo.endTime,
             isWorkSession: isWorkSession,
             activityLabel: activityLabel,
-            subtitleLabel: subtitleLabel,
+            taskLabel: subtitleLabel,
             completedSilently: sessionInfo.isSilent
         )
 
@@ -180,7 +180,7 @@ extension TimerViewModel {
         sessionManager.completeSession(
             isWorkSession: isWorkSession,
             activityLabel: activityLabel,
-            subtitleLabel: subtitleLabel
+            taskLabel: subtitleLabel
         )
 
         stateManager.stopTimer()

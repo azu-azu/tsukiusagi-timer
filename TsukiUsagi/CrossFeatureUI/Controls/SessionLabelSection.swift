@@ -2,9 +2,9 @@ import SwiftUI
 
 struct SessionLabelSection: View {
     @Binding var activity: String
-    @Binding var descriptionText: String
+    @Binding var taskText: String
     @FocusState.Binding var isActivityFocused: Bool
-    @FocusState.Binding var isDescriptionFocused: Bool
+    @FocusState.Binding var isTaskFocused: Bool
     let labelCornerRadius: CGFloat
     @Binding var showEmptyError: Bool
     let onDone: (() -> Void)?
@@ -17,18 +17,18 @@ struct SessionLabelSection: View {
     // ツールバー強制更新用
     @State private var toolbarID = UUID()
 
-    // 現在選択されているセッションに紐づくdescriptionsを取得
-    private func getCurrentSessionDescriptions() -> [String] {
+    // 現在選択されているセッションに紐づくタスクを取得
+    private func getCurrentSessionTasks() -> [String] {
         guard !activity.isEmpty else { return [] }
 
         // デフォルトセッションから検索
         if let entry = sessionManager.defaultEntries.first(where: { $0.sessionName == activity }) {
-            return entry.descriptions
+            return entry.tasks
         }
 
         // カスタムセッションから検索
         if let entry = sessionManager.customEntries.first(where: { $0.sessionName == activity }) {
-            return entry.descriptions
+            return entry.tasks
         }
 
         return []
@@ -42,7 +42,7 @@ struct SessionLabelSection: View {
                 ForEach(sessionManager.defaultEntries) { entry in
                     Button {
                         activity = entry.sessionName
-                        descriptionText = entry.descriptions.first ?? ""
+                        taskText = entry.tasks.first ?? ""
                     } label: {
                         Text(entry.sessionName)
                             .font(DesignTokens.Fonts.label)
@@ -55,7 +55,7 @@ struct SessionLabelSection: View {
                     ForEach(sessionManager.customEntries) { entry in
                         Button {
                             activity = entry.sessionName
-                            descriptionText = entry.descriptions.first ?? ""
+                            taskText = entry.tasks.first ?? ""
                         } label: {
                             Text(entry.sessionName)
                                 .font(DesignTokens.Fonts.label)
@@ -85,31 +85,35 @@ struct SessionLabelSection: View {
                 .cornerRadius(labelCornerRadius)
             }
 
-            // Description Selection Menu
-            let descriptions = getCurrentSessionDescriptions()
-            if !descriptions.isEmpty {
+            // Task Selection Menu
+            let tasks = getCurrentSessionTasks()
+            if !tasks.isEmpty {
                 Menu {
-                    ForEach(descriptions, id: \.self) { descriptionOption in
+                    ForEach(tasks, id: \.self) { taskOption in
                         Button {
-                            descriptionText = descriptionOption
+                            taskText = taskOption
                         } label: {
                             HStack {
-                                Text(descriptionOption)
-                                if descriptionText == descriptionOption {
+                                Text(taskOption)
+                                if taskText == taskOption {
                                     Image(systemName: "checkmark")
                                 }
                             }
                         }
                     }
                     Divider()
-                    Button("None") {
-                        descriptionText = ""
+                    Button(NSLocalizedString("session_task_none", comment: "")) {
+                        taskText = ""
                     }
                 } label: {
                     HStack {
-                        Text(descriptionText.isEmpty ? "Select description..." : descriptionText)
+                        Text(
+                            taskText.isEmpty
+                                ? NSLocalizedString("session_task_select", comment: "")
+                                : taskText
+                        )
                             .foregroundColor(
-                                descriptionText.isEmpty
+                                taskText.isEmpty
                                 ? DesignTokens.MoonColors.textMuted
                                 : DesignTokens.MoonColors.textPrimary
                             )
@@ -124,9 +128,9 @@ struct SessionLabelSection: View {
                     .cornerRadius(6)
                 }
             } else {
-                // セッションにdescriptionが設定されていない場合は空のプレースホルダー
+                // セッションにタスクが設定されていない場合は空のプレースホルダー
                 HStack {
-                    Text("No descriptions available")
+                    Text(NSLocalizedString("session_task_none_available", comment: ""))
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                         .font(DesignTokens.Fonts.label)
                     Spacer()
@@ -141,7 +145,7 @@ struct SessionLabelSection: View {
             // 初期状態でactivityが空の場合はデフォルトセッションを設定
             if activity.isEmpty {
                 activity = sessionManager.defaultEntries.first?.sessionName ?? "Work"
-                descriptionText = sessionManager.defaultEntries.first?.descriptions.first ?? ""
+                taskText = sessionManager.defaultEntries.first?.tasks.first ?? ""
             }
         }
         .debugSection(String(describing: Self.self), position: .topLeading)

@@ -21,7 +21,7 @@ struct SessionNameCustomInputView: View {
                 Button("Select Existing") {
                     isCustomInputMode = false
                     editingName = sessionManager.defaultEntries.first?.sessionName ?? "Work"
-                    editingDescriptions = sessionManager.getDescriptions(for: editingName)
+                    editingDescriptions = sessionManager.getTasks(for: editingName)
                 }
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)

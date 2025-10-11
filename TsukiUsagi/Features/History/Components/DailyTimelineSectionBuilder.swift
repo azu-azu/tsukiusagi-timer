@@ -311,8 +311,9 @@ extension DailyTimelineSectionBuilder {
                         end: Date(),
                         phase: .focus,
                         sessionName: "New Reflection",
-                        description: "",
-                        memo: ""
+                        task: nil,
+                        memo: "",
+                        completedSilently: nil
                     )
                     onMemoEdit(dummyRecord)
                 },
@@ -336,8 +337,9 @@ extension DailyTimelineSectionBuilder {
                 end: Date(),
                 phase: .focus,
                 sessionName: "New Reflection",
-                description: "",
-                memo: ""
+                task: nil,
+                memo: "",
+                completedSilently: nil
             )
             onMemoEdit(dummyRecord)
         }
