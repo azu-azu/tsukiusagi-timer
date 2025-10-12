@@ -9,8 +9,6 @@
 import Foundation
 
 enum Messages {
-    // このenumは非推奨です。新しい文字列はLocalizable.stringsに定義してください。
-    @available(*, deprecated, message: "Use NSLocalizedString with keys from Localizable.strings instead")
     enum Reflection {
         static let title = NSLocalizedString("reflection_title", comment: "Reflection title")
         static let placeholder = NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder")

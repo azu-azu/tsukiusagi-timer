@@ -95,10 +95,10 @@ private extension TaskEditContent {
 
     // MARK: - Private Views
 
-    /// セッションカテゴリ表示部分（編集不可）
+    /// セッション名表示部分（編集不可）
     var sessionCategorySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(NSLocalizedString("settings_session_category", comment: "Session category label"))
+            Text(NSLocalizedString("session_name_label", comment: "Session name label"))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .textCase(.uppercase)
@@ -133,7 +133,7 @@ private extension TaskEditContent {
     var tasksSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(NSLocalizedString("settings_tasks", comment: "Tasks label"))
+                Text(NSLocalizedString("tasks_label", comment: "Tasks label"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)

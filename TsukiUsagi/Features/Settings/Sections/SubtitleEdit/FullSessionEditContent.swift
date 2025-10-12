@@ -107,7 +107,7 @@ private extension FullSessionEditContent {
     /// セッション名編集部分
     var sessionNameSection: some View {
         VStack(alignment: .leading) {
-            Text(NSLocalizedString("settings_session_name", comment: "Session name label"))
+            Text(NSLocalizedString("session_name_label", comment: "Session name label"))
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
             TextField("Enter session name", text: Binding(
@@ -134,7 +134,7 @@ private extension FullSessionEditContent {
     var tasksSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(NSLocalizedString("settings_tasks", comment: "Tasks label"))
+                Text(NSLocalizedString("tasks_label", comment: "Tasks label"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
