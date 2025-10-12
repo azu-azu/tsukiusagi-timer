@@ -114,7 +114,3 @@ enum Copy {
 - `Label.saved = "Saved"` should be **Messages** if used as toast text. If used as badge/status short label (context-free, constant display) then **Copy** is also OK.
 - **Decide placement by usage** (whether displayed as "text" or "name tag")
 
----
-
-Ask the essential questions. Design the meaning.
-問いを立てよ。意味を設計せよ。

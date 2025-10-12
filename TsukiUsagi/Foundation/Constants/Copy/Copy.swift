@@ -12,6 +12,11 @@ enum Copy {
         static let save = "Save"
         static let close = "Close"
         static let reset = "Reset"
+        static let ok = "OK"
+        static let delete = NSLocalizedString("delete", comment: "Delete")
+        static let create = NSLocalizedString("create", comment: "Create")
+        static let retry = NSLocalizedString("history_inline_reflection_retry_button", comment: "Retry")
+        static let edit = NSLocalizedString("settings_session_edit", comment: "Edit")
     }
 
     // UI標準ラベル（英語圏の慣用表現）
@@ -30,6 +35,7 @@ enum Copy {
     // UI標準リンク（英語圏の慣用表現）
     enum Link {
         static let openDaily = "Open Daily Reflection"
+        static let addCustomSession = NSLocalizedString("add_custom_session", comment: "Add Custom Session")
     }
 
     // quiet moon

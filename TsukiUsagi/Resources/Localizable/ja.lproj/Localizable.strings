@@ -34,7 +34,6 @@
 "duplicate_tasks_detected" = "タスクが重複しています";
 "duplicate_tasks_resolved" = "タスクの重複が解消されました";
 "error_title" = "エラー";
-"ok" = "OK";
 "error_empty_session_name" = "セッション名は空にできません";
 
 // History
@@ -83,7 +82,7 @@
 // Settings - Additional
 "settings_add_tasks_description" = "このセッションで取り組むタスクを追加してください";
 "settings_saved" = "保存しました...";
-"settings_manage_session_names" = "セッション設定";
+"settings_manage_session_names" = "セッションの設定";
 "settings_duration_session_settings" = "時間とセッション設定";
 "settings_read_only" = "読み取り専用";
 "settings_delete_session_question" = "セッションを削除しますか？";
@@ -91,7 +90,7 @@
 "settings_sample_content" = "サンプルコンテンツ";
 "settings_demo_description" = "これは再利用可能なEditableModalコンポーネントのデモンストレーションです。";
 
-// Reflection (from Copy.swift)
+// Reflection
 "reflection_title" = "振り返り";
 "reflection_placeholder" = "残しておきたい言葉を自由に";
 
