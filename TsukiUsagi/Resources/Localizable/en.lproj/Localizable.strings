@@ -34,7 +34,6 @@
 "duplicate_tasks_detected" = "Duplicate tasks detected";
 "duplicate_tasks_resolved" = "Duplicates resolved";
 "error_title" = "Error";
-"ok" = "OK";
 "error_empty_session_name" = "Session name cannot be empty";
 
 // History

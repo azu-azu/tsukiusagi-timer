@@ -6,7 +6,6 @@ import Foundation
 
 enum Messages {
     enum Reflection {
-        static let title = NSLocalizedString("reflection_title", comment: "Reflection title")
         static let placeholder = NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder")
     }
 }
