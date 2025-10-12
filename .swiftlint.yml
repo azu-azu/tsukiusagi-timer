@@ -7,6 +7,12 @@ custom_rules:
       → See: /docs/lint_exceptions.md
       → Learn More: /docs/font_guidelines.md#why-forbidden
     severity: error
+  forbidden-debug-modifiers:
+    name: "Forbidden debug modifier usage"
+    regex: '\\.debug(Screen|Section|Component|Form|Dynamic|Module)'
+    message: |
+      Debug modifiers have been removed. Use .accessibilityIdentifier("ViewName") directly.
+    severity: error
   discouraged-font-usage:
     name: "Discouraged Font.system usage"
     regex: 'Font\.system'

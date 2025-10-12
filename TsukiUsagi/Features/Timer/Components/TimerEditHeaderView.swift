@@ -65,7 +65,7 @@ struct TimerEditHeaderView: View {
             }
             .padding(.horizontal)
         }
-        .debugComponent("TimerEditHeaderView", position: .topLeading)
+        .accessibilityIdentifier("TimerEditHeaderView")
     }
 }
 
