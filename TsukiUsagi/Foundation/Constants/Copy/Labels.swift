@@ -27,6 +27,8 @@ enum Labels {
             "settings_duration_session_settings",
             comment: "Duration & Session Settings View"
         )
+        static let addReflection = NSLocalizedString("history_memo_add_reflection", comment: "Add reflection title")
+        static let editReflection = NSLocalizedString("history_memo_edit_reflection", comment: "Edit reflection title")
     }
 
     enum InfoRow {
