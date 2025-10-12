@@ -83,7 +83,7 @@
 // Settings - Additional
 "settings_add_tasks_description" = "Add tasks for what you'll work on during this session";
 "settings_saved" = "Saved...";
-"settings_manage_session_names" = "Manage session names";
+"settings_manage_session_names" = "Manage sessions";
 "settings_duration_session_settings" = "Duration & Session Settings View";
 "settings_read_only" = "READ-ONLY";
 "settings_delete_session_question" = "Delete Session?";
@@ -91,7 +91,7 @@
 "settings_sample_content" = "Sample Content";
 "settings_demo_description" = "This is a demonstration of the reusable EditableModal component.";
 
-// Reflection (from Copy.swift)
+// Reflection
 "reflection_title" = "Reflection";
 "reflection_placeholder" = "Write anything you feel";
 
