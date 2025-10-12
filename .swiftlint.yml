@@ -31,13 +31,20 @@ custom_rules:
     included: ".*Labels\\.swift$"
     name: "Labels: No sentence-like text"
     regex: "[\\?\\!…]|\\w+\\.$"
-    message: "Labels には文体（?, !, …, 文末.）を入れないこと。Messagesへ。"
+    message: "Labels には文体（?, !, …, 文末.）を入れないこと。Messagesへ。詳細は docs/_guide-copy-classification.md を必ず参照すること。"
     severity: error
   copy_no_paragraph:
     included: ".*Copy\\.swift$"
     name: "Copy: No long sentence"
     regex: 'static let \w+ = "[^"]{41,}"'
-    message: "Copy に長文は不可。Messagesへ。"
+    message: "Copy に長文は不可。Messagesへ。詳細は docs/_guide-copy-classification.md を必ず参照すること。"
+    severity: error
+  forbid_direct_localized_string:
+    included: ".*\\.swift$"
+    excluded: ".*/(Labels|Copy|Messages)\\.swift$"
+    name: "Forbid direct NSLocalizedString"
+    regex: "NSLocalizedString\\s*\\("
+    message: "新規コードでは3層分類システムを使用すること。Labels/Copy/Messages経由でアクセス。詳細は docs/_guide-copy-classification.md を必ず参照すること。"
     severity: error
 
 excluded:
