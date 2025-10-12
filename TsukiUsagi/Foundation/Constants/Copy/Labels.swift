@@ -1,15 +1,12 @@
-// 見出し・セクションタイトル
-//
-// 【使用ルール】
-// - 文脈として英語が適切な文字列 → Labels.swift に定義
-//   (技術用語、ブランド名、固有名詞、英語圏の慣用表現など)
-// - 翻訳が必要な文字列 → NSLocalizedString を使用
-//   (ユーザー向けメッセージ、ボタンラベル、説明文など)
+// UIに表示される名称・見出し・項目名・状態名などの“名札”。短く、文にならないもの。
+// 何者かの名前・見出し・項目名・状態名（名詞/名詞句、コロン付き行ラベル含む）
+
+// 詳細： _guide-copy-classification.md 参照
 
 import Foundation
 
 enum Labels {
     enum Settings {
-        static let manageSessionNames = NSLocalizedString("settings_manage_session_names", comment: "Manage session names")
+        static let manageSessionNames = NSLocalizedString("settings_manage_session_names", comment: "Manage sessions")
     }
 }
