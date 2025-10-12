@@ -114,3 +114,23 @@ enum Copy {
 - `Label.saved = "Saved"` should be **Messages** if used as toast text. If used as badge/status short label (context-free, constant display) then **Copy** is also OK.
 - **Decide placement by usage** (whether displayed as "text" or "name tag")
 
+## Automated Guards
+
+### SwiftLint Rules (3 rules)
+- `labels_no_sentence`: Prevents sentence-like text (?, !, …, period endings) in Labels.swift
+- `copy_no_paragraph`: Prevents long text (>40 chars) in Copy.swift
+- `no_localized_in_labels_or_copy`: Prevents NSLocalizedString usage in Labels/Copy (only Messages calls localization)
+
+### Tests
+- `LabelsPresenceTests`: Verifies namespace separation (Sections.reflection vs InfoRow.reflection) and content rules with literal comparison
+- `MessagesLocalizationSmokeTests`: Verifies message content is properly classified
+
+### Naming Convention
+- Labels.State: Use `noRecordsToday` (short, memorable)
+- Reflection: Dual namespace (Sections.reflection for headings, InfoRow.reflection for row labels)
+
+### Key Principle
+Labels are non-localized name tags. Only Messages should call NSLocalizedString for localization.
+
+Run tests: `xcodebuild test -scheme TsukiUsagi -destination 'platform=iOS Simulator,name=iPhone 16'`
+
