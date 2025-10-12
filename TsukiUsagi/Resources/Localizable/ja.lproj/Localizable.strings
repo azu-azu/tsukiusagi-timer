@@ -94,3 +94,8 @@
 // Reflection (from Copy.swift)
 "reflection_title" = "振り返り";
 "reflection_placeholder" = "残しておきたい言葉を自由に";
+
+// Session Task Selection
+"session_task_select" = "タスクを選択...";
+"session_task_none" = "タスクなし";
+"session_task_none_available" = "タスクが設定されていません";
