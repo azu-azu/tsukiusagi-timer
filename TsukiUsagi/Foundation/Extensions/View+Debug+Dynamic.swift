@@ -11,7 +11,6 @@ import SwiftUI
 struct DynamicDebugScreenModifier: ViewModifier {
     let moduleName: String
     let position: Alignment
-    @State private var isVisible: Bool = DebugSettings.showModuleNames
 
     init(_ moduleName: String, position: Alignment = .topTrailing) {
         self.moduleName = moduleName
@@ -21,27 +20,6 @@ struct DynamicDebugScreenModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .accessibilityIdentifier(moduleName)
-            #if DEBUG
-            .overlay(
-                Group {
-                    if isVisible {
-                        Text(moduleName)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.PureColors.textWhite)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.blue.opacity(0.8))
-                            )
-                    }
-                },
-                alignment: position
-            )
-            #endif
-            .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
-                isVisible = DebugSettings.showModuleNames
-            }
     }
 }
 
@@ -49,7 +27,6 @@ struct DynamicDebugScreenModifier: ViewModifier {
 struct DynamicDebugSectionModifier: ViewModifier {
     let moduleName: String
     let position: Alignment
-    @State private var isVisible: Bool = DebugSettings.showModuleNames
 
     init(_ moduleName: String, position: Alignment = .topTrailing) {
         self.moduleName = moduleName
@@ -59,27 +36,6 @@ struct DynamicDebugSectionModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .accessibilityIdentifier(moduleName)
-            #if DEBUG
-            .overlay(
-                Group {
-                    if isVisible {
-                        Text(moduleName)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.PureColors.textWhite)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.green.opacity(0.8))
-                            )
-                    }
-                },
-                alignment: position
-            )
-            #endif
-            .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
-                isVisible = DebugSettings.showModuleNames
-            }
     }
 }
 
@@ -87,7 +43,6 @@ struct DynamicDebugSectionModifier: ViewModifier {
 struct DynamicDebugComponentModifier: ViewModifier {
     let moduleName: String
     let position: Alignment
-    @State private var isVisible: Bool = DebugSettings.showModuleNames
 
     init(_ moduleName: String, position: Alignment = .topTrailing) {
         self.moduleName = moduleName
@@ -97,27 +52,6 @@ struct DynamicDebugComponentModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .accessibilityIdentifier(moduleName)
-            #if DEBUG
-            .overlay(
-                Group {
-                    if isVisible {
-                        Text(moduleName)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.PureColors.textWhite)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(DesignTokens.MoonColors.errorBackground)
-                            )
-                    }
-                },
-                alignment: position
-            )
-            #endif
-            .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
-                isVisible = DebugSettings.showModuleNames
-            }
     }
 }
 
@@ -125,7 +59,6 @@ struct DynamicDebugComponentModifier: ViewModifier {
 struct DynamicDebugFormModifier: ViewModifier {
     let moduleName: String
     let position: Alignment
-    @State private var isVisible: Bool = DebugSettings.showModuleNames
 
     init(_ moduleName: String, position: Alignment = .topTrailing) {
         self.moduleName = moduleName
@@ -135,26 +68,5 @@ struct DynamicDebugFormModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .accessibilityIdentifier(moduleName)
-            #if DEBUG
-            .overlay(
-                Group {
-                    if isVisible {
-                        Text(moduleName)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.PureColors.textWhite)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.orange.opacity(0.8))
-                            )
-                    }
-                },
-                alignment: position
-            )
-            #endif
-            .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
-                isVisible = DebugSettings.showModuleNames
-            }
     }
 }
