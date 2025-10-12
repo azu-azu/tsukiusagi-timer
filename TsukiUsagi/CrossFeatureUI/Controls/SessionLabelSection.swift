@@ -148,7 +148,7 @@ struct SessionLabelSection: View {
                 taskText = sessionManager.defaultEntries.first?.tasks.first ?? ""
             }
         }
-        .debugSection(String(describing: Self.self), position: .topLeading)
+        .accessibilityIdentifier("SessionLabelSection")
     }
 }
 

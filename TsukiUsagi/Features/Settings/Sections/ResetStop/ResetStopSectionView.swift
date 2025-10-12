@@ -73,7 +73,7 @@ struct ResetStopSectionView: View {
             RoundedRectangle(cornerRadius: cardCornerRadius)
                 .fill(DesignTokens.CosmosColors.cardBackground)
         )
-        .debugSection(String(describing: Self.self), position: .topLeading)
+        .accessibilityIdentifier("ResetStopSectionView")
     }
 
 }
