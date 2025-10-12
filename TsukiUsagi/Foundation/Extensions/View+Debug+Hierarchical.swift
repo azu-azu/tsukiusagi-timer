@@ -11,29 +11,10 @@ import SwiftUI
 struct DebugScreenModifier: ViewModifier {
     let moduleName: String
     let position: Alignment
-    @AppStorage("DebugShowModuleNames") private var showModuleNames: Bool = true
 
     func body(content: Content) -> some View {
         content
             .accessibilityIdentifier(moduleName)
-            #if DEBUG
-            .overlay(
-                Group {
-                    if showModuleNames {
-                        Text(moduleName)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.PureColors.textWhite)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.blue.opacity(0.8))
-                            )
-                    }
-                },
-                alignment: position
-            )
-            #endif
     }
 }
 
@@ -45,29 +26,10 @@ struct DebugScreenModifier: ViewModifier {
 struct DebugSectionModifier: ViewModifier {
     let moduleName: String
     let position: Alignment
-    @AppStorage("DebugShowModuleNames") private var showModuleNames: Bool = true
 
     func body(content: Content) -> some View {
         content
             .accessibilityIdentifier(moduleName)
-            #if DEBUG
-            .overlay(
-                Group {
-                    if showModuleNames {
-                        Text(moduleName)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.PureColors.textWhite)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.green.opacity(0.8))
-                            )
-                    }
-                },
-                alignment: position
-            )
-            #endif
     }
 }
 
@@ -79,29 +41,10 @@ struct DebugSectionModifier: ViewModifier {
 struct DebugComponentModifier: ViewModifier {
     let moduleName: String
     let position: Alignment
-    @AppStorage("DebugShowModuleNames") private var showModuleNames: Bool = true
 
     func body(content: Content) -> some View {
         content
             .accessibilityIdentifier(moduleName)
-            #if DEBUG
-            .overlay(
-                Group {
-                    if showModuleNames {
-                        Text(moduleName)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.PureColors.textWhite)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(DesignTokens.MoonColors.errorBackground)
-                            )
-                    }
-                },
-                alignment: position
-            )
-            #endif
     }
 }
 
@@ -113,29 +56,10 @@ struct DebugComponentModifier: ViewModifier {
 struct DebugFormModifier: ViewModifier {
     let moduleName: String
     let position: Alignment
-    @AppStorage("DebugShowModuleNames") private var showModuleNames: Bool = true
 
     func body(content: Content) -> some View {
         content
             .accessibilityIdentifier(moduleName)
-            #if DEBUG
-            .overlay(
-                Group {
-                    if showModuleNames {
-                        Text(moduleName)
-                            .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.PureColors.textWhite)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.orange.opacity(0.8))
-                            )
-                    }
-                },
-                alignment: position
-            )
-            #endif
     }
 }
 
