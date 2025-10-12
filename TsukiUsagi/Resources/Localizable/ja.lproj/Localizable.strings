@@ -81,12 +81,9 @@
 "settings_accessibility_edit_actions" = "タップして編集。長押しでその他のアクション。";
 
 // Settings - Additional
-"settings_session_category" = "セッションカテゴリ";
-"settings_tasks" = "タスク";
 "settings_add_tasks_description" = "このセッションで取り組むタスクを追加してください";
-"settings_session_name" = "セッション名";
 "settings_saved" = "保存しました...";
-"settings_manage_session_names" = "セッション名を管理";
+"settings_manage_session_names" = "セッション名の設定";
 "settings_duration_session_settings" = "時間とセッション設定";
 "settings_read_only" = "読み取り専用";
 "settings_delete_session_question" = "セッションを削除しますか？";

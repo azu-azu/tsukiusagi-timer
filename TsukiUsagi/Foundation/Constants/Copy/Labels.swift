@@ -9,4 +9,7 @@
 import Foundation
 
 enum Labels {
+    enum Settings {
+        static let manageSessionNames = NSLocalizedString("settings_manage_session_names", comment: "Manage session names")
+    }
 }

@@ -145,7 +145,7 @@ struct DurationSessionSettingsView: View {
                         Image(systemName: isSessionNamesExpanded ? "chevron.down" : "chevron.right")
                             .font(DesignTokens.Fonts.caption)
                             .foregroundColor(DesignTokens.MoonColors.textMuted)
-                        Text(NSLocalizedString("settings_manage_session_names", comment: "Manage session names label"))
+                        Text(Labels.Settings.manageSessionNames)
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     }

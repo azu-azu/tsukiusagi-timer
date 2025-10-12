@@ -81,10 +81,7 @@
 "settings_accessibility_edit_actions" = "Tap to edit. Long-press for more actions.";
 
 // Settings - Additional
-"settings_session_category" = "Session Category";
-"settings_tasks" = "Tasks";
 "settings_add_tasks_description" = "Add tasks for what you'll work on during this session";
-"settings_session_name" = "Session Name";
 "settings_saved" = "Saved...";
 "settings_manage_session_names" = "Manage session names";
 "settings_duration_session_settings" = "Duration & Session Settings View";
