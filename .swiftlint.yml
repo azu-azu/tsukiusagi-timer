@@ -27,6 +27,24 @@ custom_rules:
     excluded_regex: '\\b(i|j|k|x|y|t|p)\\b'
     message: "Single-letter variable names are not allowed except for i, j, k, x, y, t, p."
     severity: error
+  labels_no_sentence:
+    included: ".*Labels\\.swift$"
+    name: "Labels: No sentence-like text"
+    regex: "[\\?\\!…]|\\w+\\.$"
+    message: "Labels には文体（?, !, …, 文末.）を入れないこと。Messagesへ。"
+    severity: error
+  copy_no_paragraph:
+    included: ".*Copy\\.swift$"
+    name: "Copy: No long sentence"
+    regex: ".{41,}"
+    message: "Copy に長文は不可。Messagesへ。"
+    severity: error
+  no_localized_in_labels_or_copy:
+    included: ".*(Labels|Copy)\\.swift$"
+    name: "Labels/Copy: No NSLocalizedString"
+    regex: "NSLocalizedString\\s*\\("
+    message: "Labels/Copy では NSLocalizedString を使用しないこと（Messages 経由に統一）。"
+    severity: error
 
 excluded:
   - tools/
