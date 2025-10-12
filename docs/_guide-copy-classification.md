@@ -94,8 +94,8 @@ This guide defines the 3-layer classification system for text content in TsukiUs
 ## Important Principles
 
 - **Translation necessity is NOT a classification criterion**
-- **If translation is needed, call `localize()` only from Messages.swift**
-- **Labels/Copy do NOT call `localize()`**
+- **All layers (Labels/Copy/Messages) can use NSLocalizedString for localization**
+- **Classification is based on content type, not localization method**
 
 ## Current Copy.swift Structure
 
@@ -116,13 +116,12 @@ enum Copy {
 
 ## Automated Guards
 
-### SwiftLint Rules (3 rules)
+### SwiftLint Rules (2 rules)
 - `labels_no_sentence`: Prevents sentence-like text (?, !, …, period endings) in Labels.swift
 - `copy_no_paragraph`: Prevents long text (>40 chars) in Copy.swift
-- `no_localized_in_labels_or_copy`: Prevents NSLocalizedString usage in Labels/Copy (only Messages calls localization)
 
 ### Tests
-- `LabelsPresenceTests`: Verifies namespace separation (Sections.reflection vs InfoRow.reflection) and content rules with literal comparison
+- `LabelsPresenceTests`: Verifies namespace separation (Sections.reflection vs InfoRow.reflection) and content rules with NSLocalizedString comparison
 - `MessagesLocalizationSmokeTests`: Verifies message content is properly classified
 
 ### Naming Convention
@@ -130,7 +129,7 @@ enum Copy {
 - Reflection: Dual namespace (Sections.reflection for headings, InfoRow.reflection for row labels)
 
 ### Key Principle
-Labels are non-localized name tags. Only Messages should call NSLocalizedString for localization.
+All layers can use NSLocalizedString. Classification is based on content type, not localization method.
 
 Run tests: `xcodebuild test -scheme TsukiUsagi -destination 'platform=iOS Simulator,name=iPhone 16'`
 
