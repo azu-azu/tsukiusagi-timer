@@ -94,3 +94,8 @@
 // Reflection (from Copy.swift)
 "reflection_title" = "Reflection";
 "reflection_placeholder" = "Write anything you feel";
+
+// Session Task Selection
+"session_task_select" = "Select task...";
+"session_task_none" = "No task";
+"session_task_none_available" = "No tasks configured";
