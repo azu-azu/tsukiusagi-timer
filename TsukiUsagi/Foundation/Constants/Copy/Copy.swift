@@ -34,4 +34,10 @@ enum Copy {
     enum Link {
         static let openDaily = "Open Daily Reflection"
     }
+
+    // quiet moon
+    enum Timer {
+        static let startFormat = "Start 🌕 %@"
+        static let finalFormat = "Final 🌑 %@"
+    }
 }

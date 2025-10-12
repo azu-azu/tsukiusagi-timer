@@ -11,9 +11,9 @@ struct RecordedTimesView: View {
             VStack(spacing: 4) {
                 // 上２行：中央
                 VStack(spacing: 4) {
-                    Text(String(format: Labels.Timer.startFormat, TimeFormatters.formatTime(date: startTime)))
+                    Text(String(format: Copy.Timer.startFormat, TimeFormatters.formatTime(date: startTime)))
                         .accessibilityIdentifier("startLabel")
-                    Text(String(format: Labels.Timer.finalFormat, TimeFormatters.formatTime(date: endTime)))
+                    Text(String(format: Copy.Timer.finalFormat, TimeFormatters.formatTime(date: endTime)))
                         .accessibilityIdentifier("finalLabel")
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
