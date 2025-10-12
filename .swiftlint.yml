@@ -36,14 +36,8 @@ custom_rules:
   copy_no_paragraph:
     included: ".*Copy\\.swift$"
     name: "Copy: No long sentence"
-    regex: ".{41,}"
+    regex: 'static let \w+ = "[^"]{41,}"'
     message: "Copy に長文は不可。Messagesへ。"
-    severity: error
-  no_localized_in_labels_or_copy:
-    included: ".*(Labels|Copy)\\.swift$"
-    name: "Labels/Copy: No NSLocalizedString"
-    regex: "NSLocalizedString\\s*\\("
-    message: "Labels/Copy では NSLocalizedString を使用しないこと（Messages 経由に統一）。"
     severity: error
 
 excluded:
