@@ -9,9 +9,4 @@
 import Foundation
 
 enum Labels {
-    // タイマー関連の見出し・フォーマット
-    enum Timer {
-        static let startFormat = "Start 🌕 %@"
-        static let finalFormat = "Final 🌑 %@"
-    }
 }
