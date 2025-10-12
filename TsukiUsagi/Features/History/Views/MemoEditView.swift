@@ -46,8 +46,8 @@ struct MemoEditView: View {
             }
             .navigationTitle(
                 isNewRecord
-                ? NSLocalizedString("history_memo_add_reflection", comment: "Add reflection title")
-                : NSLocalizedString("history_memo_edit_reflection", comment: "Edit reflection title")
+                ? Labels.Sections.addReflection
+                : Labels.Sections.editReflection
             )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -102,7 +102,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func sessionInfoSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(NSLocalizedString("history_memo_session_info", comment: "Session info section title"))
+            Text(Labels.Sections.sessionInfo)
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -130,7 +130,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func activityInfoRow() -> some View {
         HStack {
-            Text(NSLocalizedString("history_memo_session", comment: "Session label"))
+            Text(Labels.InfoRow.session)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
@@ -143,7 +143,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func taskInfoRow(task: String) -> some View {
         HStack {
-            Text(NSLocalizedString("history_memo_task", comment: "Task label"))
+            Text(Labels.InfoRow.task)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
@@ -156,7 +156,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func durationInfoRow() -> some View {
         HStack {
-            Text(NSLocalizedString("history_memo_duration", comment: "Duration label"))
+            Text(Labels.InfoRow.duration)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
             Spacer()
@@ -185,7 +185,7 @@ struct MemoEditView: View {
     @ViewBuilder
     private func memoEditSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(NSLocalizedString("history_memo_reflection", comment: "Reflection section title"))
+            Text(Labels.Sections.reflection)
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -202,12 +202,7 @@ struct MemoEditView: View {
                         if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             HStack {
                                 VStack {
-                                    Text(
-                                        NSLocalizedString(
-                                            "history_memo_add_reflection_placeholder",
-                                            comment: "Add reflection placeholder"
-                                        )
-                                    )
+                                    Text(Messages.Placeholders.addReflection)
                                         .lineLimit(nil)
                                         .font(DesignTokens.Fonts.label)
                                         .foregroundColor(DesignTokens.MoonColors.textMuted)

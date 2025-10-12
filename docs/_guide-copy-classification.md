@@ -80,7 +80,7 @@ This guide defines the 3-layer classification system for text content in TsukiUs
 - **Punctuation marks `? . ! …` included = Messages** (e.g., `"Delete Session?"` is treated as a message)
 - **Colon `:` terminated row prefix = Labels** (e.g., `"Session:"`, `"Time:"`)
 - **Verbs themselves (OK/Save/Delete/Retry) = Copy**
-- **Screen titles**: If **noun/noun phrase** then Labels (e.g., `"Edit Tasks"` as fixed screen heading → Labels). If you want to change per language in the future, choose **Messages with `localize()`** (unify by design policy)
+- **Screen titles**: If **noun/noun phrase** then Labels (e.g., `"Edit Tasks"` as fixed screen heading → Labels). If you want to change per language in the future, choose **Messages** (unify by design policy)
 - **Short state displays** (No XXX yet… etc.): If heading-like then **Labels**, if accompanied by explanation then **Messages**
 - **Format strings**: If **short and directly embedded in UI elements** then Copy (`"Total: %@"`, `"Start 🌕 %@"`). Long text templates or sentence construction → **Messages**
 
@@ -133,3 +133,106 @@ All layers can use NSLocalizedString. Classification is based on content type, n
 
 Run tests: `xcodebuild test -scheme TsukiUsagi -destination 'platform=iOS Simulator,name=iPhone 16'`
 
+-------------------------------------------------------------------------------------------------
+
+# 日本語版
+
+## 3層テキスト分類システムの設計レビュー（最終版）
+
+### 概要
+TsukiUsagiアプリのテキストを3層で分類する設計。
+
+### 設計原則
+
+#### 1. 分類基準
+- 翻訳の要否は分類基準ではない
+- 内容の性質（ラベル/マイクロコピー/メッセージ）で分類
+- 全層で `NSLocalizedString` を使用可能
+
+#### 2. 3層の役割分担
+
+**Labels.swift（名札）**
+- 目的: 名称・見出し・項目名・状態名
+- 例: `"Session Management"`, `"Session:"`, `"No task"`
+- 禁止: ボタンテキスト、説明文、疑問文、長文、プレースホルダ
+
+**Copy.swift（マイクロコピー）**
+- 目的: UI要素の定型短文
+- 例: `Cancel/Save`, `Daily/Monthly`, `Time:`, `Start 🌕 %@`
+- 禁止: 画面見出し、説明文、疑問文、可変長文
+
+**Messages.swift（文脈メッセージ）**
+- 目的: 説明文、アラート、プレースホルダ、トースト、疑問文
+- 例: `"Edit tasks for default sessions..."`, `"Are you sure...?"`, `"Enter session name"`
+- 禁止: 名札、固定ボタンテキスト
+
+### 境界ルール（判定ガード）
+
+#### 句読点ルール
+- `? . ! …` を含む → Messages
+- `:` で終わる行プレフィックス → Labels
+- 動詞（OK/Save/Delete/Retry）→ Copy
+
+#### 長さルール
+- 40文字超 → Messages
+- 短い固定フォーマット → Copy
+
+#### 用途ルール
+- 画面タイトル（名詞句）→ Labels
+- 状態表示（短い見出し）→ Labels
+- 説明付き状態表示 → Messages
+
+### 自動ガード
+
+#### SwiftLintルール（2つ）
+1. `labels_no_sentence`: Labels.swift の疑問符・感嘆符・文末ピリオドを検出
+2. `copy_no_paragraph`: Copy.swift の40文字超文字列リテラルを検出
+
+#### テスト
+1. `LabelsPresenceTests`: 名前空間分離と NSLocalizedString 比較
+2. `MessagesLocalizationSmokeTests`: メッセージ分類の確認
+
+### 設計の評価
+
+#### 良い点
+1. 分類基準が明確（内容の性質）
+2. 境界ルールが実用的（句読点・長さ・用途）
+3. 自動ガードで誤分類を防止
+4. 全層で `NSLocalizedString` を使用可能
+5. 名前空間で役割を分離
+6. ドキュメントと実装が一致
+
+#### 改善点
+1. 境界ルールの優先順位を明示
+2. 移行ガイドラインを追加
+
+### 実装との整合性
+
+#### 一致
+- 全層で `NSLocalizedString` を使用
+- 分類基準は内容の性質
+- 自動ガードは期待どおりに動作
+- ドキュメントは実装と一致
+
+#### 不一致
+- なし
+
+### 総合評価
+
+#### 設計品質: A
+- 明確な分類基準と境界ルール
+- 自動ガードで品質を担保
+- 実装と整合
+
+#### 実装品質: A
+- SwiftLintルールは適切
+- テストで検証
+- ドキュメントは実装と一致
+
+#### 保守性: A
+- 名前空間で役割を分離
+- 自動ガードで誤分類を防止
+- 移行・運用ガイドが明確
+
+### 結論
+3層分類システムは妥当で、自動ガードも機能している。設計と実装は一致し、運用可能な状態。

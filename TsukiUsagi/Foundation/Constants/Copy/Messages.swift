@@ -8,4 +8,8 @@ enum Messages {
     enum Reflection {
         static let placeholder = NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder")
     }
+
+    enum Placeholders {
+        static let addReflection = NSLocalizedString("history_memo_add_reflection_placeholder", comment: "Add reflection placeholder")
+    }
 }
