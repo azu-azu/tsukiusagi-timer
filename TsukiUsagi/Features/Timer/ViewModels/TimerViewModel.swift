@@ -106,7 +106,19 @@ final class TimerViewModel: ObservableObject {
     var workLengthMinutes: Int { workMinutes }
 
     var canForceFinish: Bool {
-        isWorkSession && startTime != nil
+        // quiet moon では「リセットできる」が正解
+        // 進行中の"強制終了"は従来通り Work のみ許可
+        isSessionFinished || (isWorkSession && startTime != nil && !isSessionFinished)
+    }
+
+    /// Reset Timerボタン用：quiet moon状態でも有効（新しいセッション開始のため）
+    var canResetNow: Bool {
+        isSessionFinished || startTime != nil
+    }
+
+    /// Stop (Save)ボタン用：進行中のみ有効（すでに完了済みでは意味がない）
+    var canStopNow: Bool {
+        startTime != nil && !isSessionFinished
     }
 
     // MARK: - Initialization

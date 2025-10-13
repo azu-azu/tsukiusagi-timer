@@ -124,6 +124,7 @@ extension TimerViewModel {
 
     /// 強制終了
     func forceFinish() {
+        guard startTime != nil && !isSessionFinished else { return }
         guard canForceFinish else { return }
         // debug log removed
 
