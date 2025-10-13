@@ -15,7 +15,7 @@ struct ResetStopSectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
                 // 🛑 Reset
-                if timerVM.canForceFinish {
+                if timerVM.canResetNow {
                     Button {
                         timerVM.resetTimer(to: timerVM.workMinutes * 60)
                         dismiss()
@@ -43,7 +43,7 @@ struct ResetStopSectionView: View {
                 Divider()
 
                 // 🛑 Stop
-                if timerVM.canForceFinish {
+                if timerVM.canStopNow {
                     Button {
                         timerVM.forceFinish()
                         dismiss()
