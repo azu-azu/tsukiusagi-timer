@@ -116,5 +116,4 @@ Temporary Items
 .cursor
 .cursorrules
 元.swift
-build.log
-lint_custom_rule.log
+logs/

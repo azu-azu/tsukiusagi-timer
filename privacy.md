@@ -1,6 +1,6 @@
 # Privacy Policy - TsukiUsagi Timer
 
-**Last updated**: 2025-01-11
+**Last updated**: 2025-10-11
 
 ## Data Collection
 This app **does not collect, store, or share** any personal data. It does not integrate third-party analytics or advertising SDKs.
@@ -18,7 +18,7 @@ If our practices change, we will update this page and App Store listing before r
 
 # プライバシーポリシー - TsukiUsagi Timer
 
-**最終更新日**: 2025-01-11
+**最終更新日**: 2025-10-11
 
 ## データ収集
 本アプリは**個人データを収集・保存・共有しません**。第三者の分析／広告SDKも使用しません。
