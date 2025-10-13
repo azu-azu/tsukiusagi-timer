@@ -1,130 +1,132 @@
-# CLAUDE.md
+## CLAUDE.md - AI Assistant Guide
+# Version: 1.0 (Synced with ENGINEERING_RULES.md v1.0)
+# Last Updated: 2025-10-13
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Commands
+## Project Overview
 
-### Build and Test
-```bash
-# Build for iPhone 16 simulator (required - other simulators may not be available)
-xcodebuild -project TsukiUsagi.xcodeproj -scheme TsukiUsagi -destination 'platform=iOS Simulator,name=iPhone 16' build
+**TsukiUsagi** is a SwiftUI-based Pomodoro timer app with a minimalist, moon-themed design. The architecture follows Clean Architecture principles with feature-based organization.
 
-# Run tests
-xcodebuild -project TsukiUsagi.xcodeproj -scheme TsukiUsagi -destination 'platform=iOS Simulator,name=iPhone 16' test
-```
+### Key Components
 
-### Lint and Code Quality
-```bash
-# Run SwiftLint (if configured)
-swiftlint
+- **Entry Point**: `TsukiUsagi/Entry/TsukiUsagiApp.swift`
+- **Design System**: `TsukiUsagi/Foundation/DesignTokens.swift` - Centralized design tokens
+- **Session Management**: `TsukiUsagi/Foundation/Managers/SessionManager.swift` - Core session data management
 
-# Custom font check script
-swift tools/swiftlint_ast_font_check.swift
-```
+### Architecture (See Core: ARCH-01, ARCH-02)
 
-## Architecture Overview
+**Clean Architecture** with unidirectional dependencies:
+- UI → Application(UseCases) → Domain
+- Domain layer has no external dependencies
+- All external elements abstracted via Protocols
 
-### App Structure
-This is a SwiftUI-based Pomodoro timer app with a minimalist, moon-themed design. The architecture follows a feature-based organization with clear separation of concerns.
-
-### Key Architectural Components
-
-**Entry Point**: `TsukiUsagi/Entry/TsukiUsagiApp.swift` - Main app entry
-**Design System**: `TsukiUsagi/Foundation/DesignTokens.swift` - Centralized design tokens and semantic color/font definitions
-**Session Management**: `TsukiUsagi/Foundation/Managers/SessionManager.swift` - Core session data management with CRUD operations
-
-### Feature Organization
+**Feature Organization** (See Core: STRUCT-01):
 ```
 TsukiUsagi/Features/
 ├── Timer/          # Core Pomodoro timer functionality
-├── Settings/       # Session configuration and preferences  
+├── Settings/       # Session configuration and preferences
 ├── History/        # Session history tracking
 └── Common/         # Shared feature components
 ```
 
-### Foundation Layer
+---
+
+## Development Commands (See Core: BUILD-01)
+
+Build and test commands are defined in `ENGINEERING_RULES.md` BUILD-01 section.
+
+---
+
+## AI Assistant Guidelines
+
+### How to Ask the Assistant
+
+**For Code Review**:
+- "Review this code for Clean Architecture compliance" (See Core: ARCH-01, ARCH-02)
+- "Check if this follows the 3-layer text classification system" (See Core: TXT-01)
+- "Verify this uses DesignTokens instead of direct font/color specs" (See Core: UI-01)
+
+**For Implementation**:
+- "Implement this feature following Clean Architecture principles" (See Core: ARCH-01, ARCH-02)
+- "Create a new session management feature with proper validation" (See Core: QUALITY-01)
+- "Add error handling with user-friendly messages" (See Core: QUALITY-01)
+
+**For Debugging**:
+- "Help debug this FocusState issue" (See Core: UI-02)
+- "Fix this ScrollView layout problem" (See Core: UI-02)
+- "Resolve this EnvironmentObject injection error" (See Core: QUALITY-01)
+
+### Code Generation Patterns
+
+**ViewModel Pattern** (See Core: ARCH-02):
+```swift
+@MainActor
+final class FeatureViewModel: ObservableObject {
+    private let useCase: SomeUseCase
+
+    init(useCase: SomeUseCase) {
+        self.useCase = useCase
+    }
+
+    func performAction() {
+        Task {
+            try? await useCase()
+        }
+    }
+}
 ```
-TsukiUsagi/Foundation/
-├── DesignTokens.swift      # Design system tokens
-├── Managers/               # Data management (SessionManager)
-├── Extensions/             # Swift/SwiftUI extensions
-├── Controllers/            # Animation and system controllers
-└── Utilities/              # Helper functions and formatters
+
+**View Pattern** (See Core: UI-01, UI-02):
+```swift
+struct FeatureView: View {
+    @StateObject private var viewModel: FeatureViewModel
+
+    var body: some View {
+        // UI implementation using DesignTokens
+    }
+}
 ```
 
-### Visual Components
-```
-TsukiUsagi/Visual/
-├── Backgrounds/    # Galaxy and gradient backgrounds
-├── Moons/         # Moon shape and animation components
-├── Stars/         # Various star animation views
-└── Usagis/        # Character animations
-```
+---
 
-## Code Structure Guidelines
+## Private Commands (See Core: TOOL-01)
 
-**CRITICAL: All code changes must follow the structural rules defined in `/docs/structure-guidelines.md`**
+### log.n
+Generate log file names for issue tracking.
 
-### Feature-Based Organization (MANDATORY)
-All features must follow this standard structure:
-```
-Features/[FeatureName]/
-├── Components/     # UI components and view modifiers
-├── Models/         # Data models and entities
-├── Services/       # Business logic, external integrations, data management
-├── ViewModels/     # Presentation layer logic
-├── Views/          # UI screen definitions
-└── Utilities/      # Feature-specific utilities
-```
+**Format**: `<YYYY-MM-DD>_log_title_in_snake_case.md`
 
-### Naming Conventions (STRICTLY ENFORCED)
-- **Directory names**: Use complete words (`Utilities`, not `Utils`)
-- **Pluralization**: Directories containing multiple items use plural form (`Moons/`, `Stars/`, `Usagis/`)
-- **Manager vs Store distinction**:
-  - **Manager**: System resource management, lifecycle management, external API coordination
-  - **Store**: Application state persistence, data storage, state change notifications
+**Usage**: "Generate `log.n` with format for focus state keyboard sync issue"
 
-### File Placement Rules
-- **Visual components**: All theme-specific visual elements go in `Visual/[Category]/`
-- **Reusable UI components**: Generic, reusable components go in `Components/[Category]/`
-- **Business logic**: All business logic, data management, and external services go in `Services/`
-- **Time formatting**: All time-related formatting consolidated in `Foundation/Formatters/`
 
-### Compliance Requirements
-- **Pre-implementation check**: Verify file placement follows structure guidelines before creating new files
-- **No exceptions**: Structure violations will be rejected - restructure to comply with guidelines
-- **Reference document**: Always consult `/docs/structure-guidelines.md` for detailed rules and rationale
+---
 
-## Development Guidelines
+## Reference Links
 
-### Design System Usage
-- **Always use semantic tokens** from `DesignTokens.swift` instead of direct font/color values
-- Font usage: Use `DesignTokens.Fonts.label`, `.labelBold`, `.title`, etc.
-- Color usage: Use `DesignTokens.MoonColors.textPrimary`, `.textSecondary`, etc.
-- **Never use direct font specifications** like `.font(.system(size: 17))` - this will fail lint checks
+- **Core Rules**: `ENGINEERING_RULES.md` (Single Source of Truth)
+- **Structure Guidelines**: `/docs/structure-guidelines.md`
+- **Lint Exceptions**: `/docs/lint_exceptions.md`
+- **Copy Classification Guide**: `/docs/_guide-copy-classification.md`
 
-### SwiftUI Best Practices
-- **iOS 17+ onChange syntax**: Use 2-argument closure format: `.onChange(of: value) { oldValue, newValue in }`
-- **Landscape handling**: Use `@Environment(\.horizontalSizeClass)` for orientation detection
-- **FocusState vs Binding**: Use `FocusState.Binding` for `.focused()`, regular `Binding<Bool>` for custom modifiers
-- **ScrollView implementation**: Always put actual content inside ScrollView, not as overlay
+---
 
-### Session Management
-- Use `SessionManager` for all session-related CRUD operations
-- Session names have a 30-character limit, descriptions have 50-item limit
-- Default sessions ("Work", "Study", "Read") cannot be deleted
-- All session operations include validation through `SessionManagerValidator`
+## Version Sync
 
-### Lint Exception Management
-- Lint suppressions require Issue numbers, reasons, and target dates
-- All suppressions must be documented in `/docs/lint_exceptions.md`
-- Format: `// swiftlint:disable:next rule_name // Issue #123: Reason (YYYY-MM target)`
+This file is synchronized with `ENGINEERING_RULES.md v1.0`. When core rules are updated, this file should be updated to reference the new version and any changed policy IDs.
 
-### Environment Object Injection
-- Ensure `SessionManager` is injected into all relevant views
-- Missing injection will cause crashes - particularly important for Settings views and previews
+---
 
-### Testing Requirements
-- Always use iPhone 16 simulator for builds and tests
-- Run build verification before any major changes
-- Test both light and dark mode appearances
+## Core Rules Quick Reference
+
+For detailed implementation guidelines, see the following sections in `ENGINEERING_RULES.md`:
+
+- **ARCH-01, ARCH-02**: Architecture principles and Clean Architecture implementation
+- **UI-01**: Design system usage (DesignTokens)
+- **UI-02**: SwiftUI best practices (onChange, FocusState, ScrollView)
+- **TXT-01, TXT-02**: Text classification system and localization rules
+- **BUILD-01**: Build and test standards (iPhone 16 simulator)
+- **TOOL-01**: Private commands (log.n)
+- **LOG-01**: Logging standards
+- **STRUCT-01**: File organization (feature-based)
+- **QUALITY-01**: Code quality standards and error handling

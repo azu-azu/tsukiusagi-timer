@@ -1,35 +1,101 @@
-## 📝 変更内容
-（このPRで何を変更したか簡潔に説明してください）
+# Pull Request Template
 
-## 🔍 変更理由
-（なぜこの変更が必要だったか説明してください）
+## Core Rules Compliance Check
 
-## ✅ チェックリスト
-- [ ] コードレビューを実施した
-- [ ] テストが通ることを確認した
-- [ ] ドキュメントの更新が必要な場合は更新した
-- [ ] 新しい依存関係を追加した場合は、その理由を説明した
+### Core Rules Updates
+- [ ] Core Rules touched? [ ] yes  [ ] no
+- [ ] Updated Sections: (List policy IDs, e.g., TXT-01, UI-02, ARCH-01)
+- [ ] Synced files: [ ] CLAUDE.md  [ ] .cursorrules
 
-## 🚨 このPRでSuppressしたLint違反と理由
+### Version Sync Verification
+- [ ] ENGINEERING_RULES.md version: `v1.0`
+- [ ] CLAUDE.md version: `v1.0` (Synced with Core)
+- [ ] .cursorrules version: `v1.0` (Synced with Core)
 
-- [ ] type_body_length（Issue #6: TimerViewModel分割リファクタ予定）
-- [ ] function_parameter_count（Issue #7: add関数の引数整理予定）
-- [ ] todo（Issue #5: TODO suppressのIssue化・将来リファクタ計画）
-- [ ] identifier_name（Issue #4: 一時変数用途Suppressの整理・命名ルール明確化）
-- [ ] discouraged-font-usage（Issue #3: セマンティック名の実体定義・フォールバック用途のSuppress整理）
-- [ ] その他（Issue # : 理由）
+---
 
-## 📊 影響範囲
-- [ ] View層の呼び出し箇所
-- [ ] ユニットテスト修正の有無
-- [ ] SwiftUI Previews
-- [ ] その他（あれば記載）
+## Changes Made
 
-## 📋 補足・備考
-（例：Suppress理由の詳細、今後のリファクタ方針など）
+### Summary
+Brief description of changes made.
 
-## 🧪 テスト
-（どのようなテストを追加・修正したか、またはテスト不要な理由）
+### Files Modified
+- List all modified files
+- Indicate if any new files were created
 
-## 📸 スクリーンショット
-（UI変更がある場合）
+### Core Rules Compliance
+- [ ] Follows Clean Architecture principles (ARCH-01, ARCH-02)
+- [ ] Uses DesignTokens instead of direct font/color specs (UI-01)
+- [ ] Implements 3-layer text classification for new code (TXT-01)
+- [ ] Follows feature-based file organization (STRUCT-01)
+- [ ] Uses iPhone 16 simulator for testing (BUILD-01)
+
+---
+
+## Testing
+
+### Build Verification
+- [ ] Built successfully on iPhone 16 simulator
+- [ ] Tests pass on iPhone 16 simulator
+- [ ] Tested in both light and dark mode
+
+### Code Quality
+- [ ] SwiftLint passes without new violations
+- [ ] No direct NSLocalizedString calls in new code
+- [ ] No direct font/color specifications in new code
+- [ ] Proper FocusState.Binding usage for .focused()
+
+---
+
+## Documentation Updates
+
+### Core Rules References
+If this PR updates core rules, list the specific policy IDs that were modified:
+- Policy ID: Description of change
+
+### Sync Requirements
+If core rules were updated, ensure:
+- [ ] CLAUDE.md references updated policy IDs
+- [ ] .cursorrules references updated policy IDs
+- [ ] Version numbers are synchronized across all files
+
+---
+
+## Review Checklist
+
+### Architecture Compliance
+- [ ] UI → Application → Domain dependency direction maintained
+- [ ] No direct external dependencies in Domain layer
+- [ ] UseCase follows single responsibility principle
+- [ ] View contains only rendering and input handling
+
+### SwiftUI Best Practices
+- [ ] iOS 17+ onChange syntax used correctly
+- [ ] FocusState.Binding used for .focused()
+- [ ] @State used for UI switching (not computed properties)
+- [ ] ScrollView content properly placed inside
+
+### Text System
+- [ ] New text uses 3-layer classification (Labels/Copy/Messages)
+- [ ] No direct NSLocalizedString calls in new code
+- [ ] Appropriate layer used based on content type
+
+### File Organization
+- [ ] Files placed according to feature-based structure
+- [ ] Naming conventions followed
+- [ ] Manager vs Store distinction respected
+
+---
+
+## Additional Notes
+
+Any additional context, concerns, or notes for reviewers.
+
+---
+
+## Core Rules Reference
+
+For detailed rules and guidelines, see:
+- **ENGINEERING_RULES.md** - Single Source of Truth for all engineering standards
+- **CLAUDE.md** - AI assistant guidance and project overview
+- **.cursorrules** - Editor-specific guidelines and lint rules
