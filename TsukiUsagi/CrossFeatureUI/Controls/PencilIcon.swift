@@ -16,8 +16,10 @@ struct PencilIcon: View {
 
     var body: some View {
         Image(systemName: "pencil")
+            .symbolRenderingMode(.monochrome)
+            .foregroundStyle(DesignTokens.IconColors.pencil)
             .font(font)
-            .foregroundColor(DesignTokens.MoonColors.accentBlue)
+            .accessibilityHidden(true)
     }
 
     private var font: Font {
@@ -44,6 +46,6 @@ struct PencilButton: View {
         Button(action: action) {
             PencilIcon(size: size)
         }
-        .accessibilityLabel("Edit")
+        .accessibilityLabel(Copy.Button.edit)
     }
 }

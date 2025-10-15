@@ -390,17 +390,17 @@ private extension DailyTimelineView {
     @ViewBuilder
     private func memoButton(rec: SessionRecord) -> some View {
         let hasMemo = rec.memo?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
-        let iconName = hasMemo ? "pencil" : "plus"
-        Button(
-            action: {
-                selectedRecordForMemoEdit = rec
-            },
-            label: {
-                Image(systemName: iconName)
+        Group {
+            if hasMemo {
+                EditIconButton(size: .small) {
+                    selectedRecordForMemoEdit = rec
+                }
+            } else {
+                Image(systemName: "plus")
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                    .foregroundStyle(DesignTokens.IconColors.pencil)
             }
-        )
+        }
     }
     // MARK: - Data Methods
     private func records() -> [SessionRecord] {
