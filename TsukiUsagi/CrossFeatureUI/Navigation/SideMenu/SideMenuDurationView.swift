@@ -4,7 +4,7 @@ struct SideMenuDurationView: View {
     @AppStorage("workMinutes") private var workMinutes: Int = 25
     @AppStorage("breakMinutes") private var breakMinutes: Int = 5
     @AppStorage("activityLabel") private var activityLabel: String = "Work"
-    @AppStorage("subtitleLabel") private var subtitleLabel: String = ""
+    @AppStorage("taskLabel") private var taskLabel: String = ""
 
     @EnvironmentObject private var timerVM: TimerViewModel
     @Binding var isPresented: Bool
@@ -62,8 +62,8 @@ struct SideMenuDurationView: View {
                             .lineLimit(1)
                             .truncationMode(.tail)
 
-                        if !subtitleLabel.isEmpty {
-                            Text(subtitleLabel)
+                        if !taskLabel.isEmpty {
+                            Text(taskLabel)
                                 .font(DesignTokens.Fonts.caption)
                                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                                 .lineLimit(1)
