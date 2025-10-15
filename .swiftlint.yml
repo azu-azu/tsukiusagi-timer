@@ -46,6 +46,18 @@ custom_rules:
     regex: "NSLocalizedString\\s*\\("
     message: "新規コードでは3層分類システムを使用すること。Labels/Copy/Messages経由でアクセス。詳細は docs/_guide-copy-classification.md を必ず参照すること。"
     severity: error
+  forbid_raw_pencil_image:
+    included: ".swift"
+    name: "No raw SF Pencil (Image)"
+    regex: 'Image\(\s*systemName:\s*"pencil"\s*\)'
+    message: "Use EditIconButton or PencilIcon with DesignTokens.IconColors.pencil"
+    severity: error
+  forbid_pencil_label_warning:
+    included: ".swift"
+    name: "Prefer EditIconLabel over raw Label pencil"
+    regex: 'Label\s*\([^\)]*,\s*systemImage:\s*"pencil"\s*\)'
+    message: "Use EditIconLabel for semantic unification"
+    severity: warning
 
 excluded:
   - tools/

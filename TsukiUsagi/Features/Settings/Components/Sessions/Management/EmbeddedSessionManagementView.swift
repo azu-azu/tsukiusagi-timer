@@ -112,7 +112,7 @@ private extension EmbeddedSessionManagementView {
                 presentEditSheet(for: session)
             } label: {
                 Label(
-                    NSLocalizedString("settings_session_edit", comment: "Edit button"),
+                    Copy.Button.edit,
                     systemImage: "pencil"
                 )
             }
@@ -161,7 +161,7 @@ private extension EmbeddedSessionManagementView {
         Button {
             presentEditSheet(for: session)
         } label: {
-            Label(NSLocalizedString("settings_session_edit", comment: "Edit button"), systemImage: "pencil")
+            Label(Copy.Button.edit, systemImage: "pencil")
         }
         if !session.isDefault {
             Button(role: .destructive) {
@@ -179,7 +179,7 @@ private extension EmbeddedSessionManagementView {
             presentEditSheet(for: session)
         } label: {
             Label(
-                NSLocalizedString("settings_session_edit", comment: "Edit button"),
+                Copy.Button.edit,
                 systemImage: "pencil"
             )
         }

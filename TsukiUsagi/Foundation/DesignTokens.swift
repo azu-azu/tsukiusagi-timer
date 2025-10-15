@@ -306,6 +306,15 @@ extension DesignTokens {
         }
     }
 }
+// MARK: - Icon Colors (Semantic)
+extension DesignTokens {
+    enum IconColors {
+        /// Edit系アイコン（鉛筆）用の標準色
+        static let pencil = MoonColors.accentBlue
+        /// 無効状態のアイコン色（視覚的に弱める）
+        static let pencilDisabled = MoonColors.textMuted
+    }
+}
 // MARK: - Color Extension for Semantic Shortcuts
 extension Color {
     // Pure Colors への直接アクセス
