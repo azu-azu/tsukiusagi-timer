@@ -276,17 +276,9 @@ extension DailyTimelineSectionBuilder {
     /// メモ編集ボタン
     @ViewBuilder
     private func memoEditButton(record: SessionRecord, onMemoEdit: @escaping (SessionRecord) -> Void) -> some View {
-        Button(
-            action: {
-                onMemoEdit(record)
-            },
-            label: {
-                Image(systemName: "pencil")
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                    .font(.title2)
-            }
-        )
-        .buttonStyle(PlainButtonStyle())
+        EditIconButton(size: .large) {
+            onMemoEdit(record)
+        }
     }
 
     /// 新規メモ追加ボタン（メモが登録されていない場合）
@@ -302,28 +294,20 @@ extension DailyTimelineSectionBuilder {
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
             }
             Spacer()
-            Button(
-                action: {
-                    // ダミーのSessionRecordを作成して新規追加をトリガー
-                    let dummyRecord = SessionRecord(
-                        id: UUID().uuidString,
-                        start: Date(),
-                        end: Date(),
-                        phase: .focus,
-                        sessionName: "New Reflection",
-                        task: nil,
-                        memo: "",
-                        completedSilently: nil
-                    )
-                    onMemoEdit(dummyRecord)
-                },
-                label: {
-                    Image(systemName: "pencil")
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                        .font(.title2)
-                }
-            )
-            .buttonStyle(PlainButtonStyle())
+            EditIconButton(size: .large) {
+                // ダミーのSessionRecordを作成して新規追加をトリガー
+                let dummyRecord = SessionRecord(
+                    id: UUID().uuidString,
+                    start: Date(),
+                    end: Date(),
+                    phase: .focus,
+                    sessionName: "New Reflection",
+                    task: nil,
+                    memo: "",
+                    completedSilently: nil
+                )
+                onMemoEdit(dummyRecord)
+            }
         }
         .frame(height: summaryCardHeight)
         .padding(.horizontal, 12)
