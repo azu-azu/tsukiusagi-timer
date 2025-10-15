@@ -10,6 +10,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        migrateSubtitleLabelIfNeeded()
         return true
     }
 
@@ -46,3 +47,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 }
 
 // debug helpers removed
+
+// MARK: - One-time Migration (subtitleLabel -> taskLabel)
+private func migrateSubtitleLabelIfNeeded() {
+    let defaults = UserDefaults.standard
+    let currentTask = defaults.string(forKey: "taskLabel") ?? ""
+    if currentTask.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+       let legacy = defaults.string(forKey: "subtitleLabel"),
+       !legacy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        defaults.set(legacy, forKey: "taskLabel")
+        // Keep legacy one more version; removal handled in a later cleanup
+    }
+}
