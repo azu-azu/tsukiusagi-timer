@@ -19,7 +19,8 @@ struct DailyTimelineDataProvider {
             .filter { rec in
                 Calendar.current.isDate(rec.start, inSameDayAs: targetDate)
             }
-            .sorted { $0.start < $1.start }
+            // Descending: latest time first
+            .sorted { $0.start > $1.start }
     }
 
     /// 総時間（秒）を計算
