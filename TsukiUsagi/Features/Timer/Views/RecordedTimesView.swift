@@ -23,7 +23,7 @@ struct RecordedTimesView: View {
 
             // 未来Finalバッジ（endTime が未来の場合に表示）
             if let end = endTime, end > Date() {
-                Text(NSLocalizedString("timer_record_future", comment: "Future badge label"))
+                Text(LocalizedStringKey("timer_record_future"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     .padding(.horizontal, 10)
