@@ -286,7 +286,7 @@ private extension TimerEditView {
                     isMemoFocused = false
                     showMemoSheet = true
                 } label: {
-                    Label("Expand", systemImage: "arrow.up.left.and.arrow.down.right")
+                    Label(Copy.Button.expand, systemImage: "arrow.up.left.and.arrow.down.right")
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("open_memo_sheet_button")
