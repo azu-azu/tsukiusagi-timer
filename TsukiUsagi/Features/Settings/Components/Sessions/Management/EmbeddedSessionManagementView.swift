@@ -81,7 +81,7 @@ struct EmbeddedSessionManagementView: View {
                     sessionManager.deleteEntry(id: session.id)
                 }
             }
-            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) { }
+            Button(Copy.Button.cancel, role: .cancel) { }
         } message: {
             if let session = selectedSession {
                 Text(String.localizedStringWithFormat(

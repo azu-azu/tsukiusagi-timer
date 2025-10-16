@@ -48,7 +48,7 @@ struct NewSessionFormView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("cancel", comment: "")) {
+                    Button(Copy.Button.cancel) {
                         dismiss()
                     }
                 }
