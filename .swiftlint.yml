@@ -58,6 +58,12 @@ custom_rules:
     regex: 'Label\s*\([^\)]*,\s*systemImage:\s*"pencil"\s*\)'
     message: "Use EditIconLabel for semantic unification"
     severity: warning
+  forbid_subtitle_label_usage:
+    included: ".swift"
+    name: "Use taskLabel instead of subtitleLabel"
+    regex: '\\bsubtitleLabel\\b'
+    message: "Use taskLabel (storage key and API). subtitleLabel is removed."
+    severity: error
 
 excluded:
   - tools/

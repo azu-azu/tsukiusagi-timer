@@ -43,10 +43,7 @@ final class TimerSessionManager: ObservableObject {
         startTime = dateProvider.now()
         endTime = nil
     }
-    @available(*, deprecated, message: "Use startSession(isWorkSession:activityLabel:taskLabel:) instead.")
-    func startSession(isWorkSession: Bool, activityLabel: String, subtitleLabel: String) {
-        startSession(isWorkSession: isWorkSession, activityLabel: activityLabel, taskLabel: subtitleLabel)
-    }
+    // subtitleLabel overload removed; use taskLabel API only
 
     /// セッション完了
     func completeSession(
@@ -132,24 +129,5 @@ final class TimerSessionManager: ObservableObject {
         }
     }
 
-    @available(
-        *,
-        deprecated,
-        message: "Use handleExpiredSession(end:isWorkSession:activityLabel:taskLabel:completedSilently:) instead."
-    )
-    func handleExpiredSession(
-        end: Date,
-        isWorkSession: Bool,
-        activityLabel: String,
-        subtitleLabel: String,
-        completedSilently: Bool = false
-    ) {
-        handleExpiredSession(
-            end: end,
-            isWorkSession: isWorkSession,
-            activityLabel: activityLabel,
-            taskLabel: subtitleLabel,
-            completedSilently: completedSilently
-        )
-    }
+    // subtitleLabel overload removed; use taskLabel API only
 }
