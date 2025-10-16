@@ -44,6 +44,4 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         completionHandler()
     }
 }
-
 // debug helpers removed
-
