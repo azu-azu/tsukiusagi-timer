@@ -147,7 +147,7 @@ extension SessionManagementView {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: { Label(Copy.Button.edit, systemImage: "pencil") }
+            } label: { EditIconLabel() }
             .tint(DesignTokens.IconColors.pencil)
         }
 
@@ -215,7 +215,7 @@ extension SessionManagementView {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: { Label(Copy.Button.edit, systemImage: "pencil") }
+            } label: { EditIconLabel() }
             .tint(DesignTokens.IconColors.pencil)
 
             if !session.isDefault {

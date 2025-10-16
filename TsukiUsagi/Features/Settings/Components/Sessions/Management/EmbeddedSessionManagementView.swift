@@ -110,12 +110,9 @@ private extension EmbeddedSessionManagementView {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: {
-                Label(
-                    Copy.Button.edit,
-                    systemImage: "pencil"
-                )
-            }
+        } label: {
+            EditIconLabel()
+        }
             .tint(DesignTokens.MoonColors.accentBlue)
         }
         .accessibilityElement(children: .combine)
@@ -161,7 +158,7 @@ private extension EmbeddedSessionManagementView {
         Button {
             presentEditSheet(for: session)
         } label: {
-            Label(Copy.Button.edit, systemImage: "pencil")
+            EditIconLabel()
         }
         if !session.isDefault {
             Button(role: .destructive) {
@@ -178,10 +175,7 @@ private extension EmbeddedSessionManagementView {
         Button {
             presentEditSheet(for: session)
         } label: {
-            Label(
-                Copy.Button.edit,
-                systemImage: "pencil"
-            )
+            EditIconLabel()
         }
         .tint(DesignTokens.MoonColors.accentBlue)
         if !session.isDefault {
