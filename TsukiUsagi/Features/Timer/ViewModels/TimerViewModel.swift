@@ -19,7 +19,6 @@ enum TimerRunState: String {
 /// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
 @MainActor
 final class TimerViewModel: ObservableObject {
-
     // MARK: - Dependencies
     let engine: TimerEngineable
     let notificationService: PhaseNotificationServiceable
