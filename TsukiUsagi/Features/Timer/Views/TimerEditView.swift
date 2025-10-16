@@ -251,9 +251,20 @@ private extension TimerEditView {
     @ViewBuilder
     var reflectionSection: some View {
         sectionBuilder.section(
-            title: Labels.Sections.reflection,
+            title: "",
             isCompact: true
         ) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text(Labels.Sections.reflection)
+                    .font(DesignTokens.Fonts.sectionTitle)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                Spacer()
+                ExpandIconButton(accessibilityIdentifier: "open_memo_sheet_button") {
+                    isMemoFocused = false
+                    showMemoSheet = true
+                }
+            }
+
             TextEditor(text: $editedMemo)
                 .frame(minHeight: 220, maxHeight: memoEditorMaxHeight)
                 .padding(8)
@@ -279,18 +290,6 @@ private extension TimerEditView {
                         }
                     }
                 )
-
-            HStack {
-                Spacer()
-                Button {
-                    isMemoFocused = false
-                    showMemoSheet = true
-                } label: {
-                    Label(Copy.Button.expand, systemImage: "arrow.up.left.and.arrow.down.right")
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("open_memo_sheet_button")
-            }
 
             Color.clear
                 .frame(height: 1)

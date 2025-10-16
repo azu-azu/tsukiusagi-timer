@@ -204,13 +204,7 @@ private struct DailyTimelineInlineReflectionSection: View {
                     .font(DesignTokens.Fonts.sectionTitle)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 Spacer()
-                Button(action: onExpand) {
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
-                        .accessibilityIdentifier("open_reflection_sheet_button")
-                }
-                .buttonStyle(.plain)
+                ExpandIconButton(accessibilityIdentifier: "open_reflection_sheet_button", action: onExpand)
             }
 
             ZStack(alignment: .topLeading) {
