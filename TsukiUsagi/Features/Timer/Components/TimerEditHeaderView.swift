@@ -33,14 +33,8 @@ struct TimerEditHeaderView: View {
                     title: Labels.Sections.editRecord,
                     dismiss: dismiss,
                     onSave: {
-                        // Persist day-level Reflection (single per day), appending to existing text
-                        let newLine = editedMemo.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if !newLine.isEmpty {
-                            let existing = historyVM.reflectionText(for: editedEnd)
-                                .trimmingCharacters(in: .whitespacesAndNewlines)
-                            let combined: String = existing.isEmpty ? newLine : existing + "\n\n" + newLine
-                            historyVM.updateReflection(for: editedEnd, text: combined)
-                        }
+                        // Persist day-level Reflection via append convenience
+                        historyVM.appendToReflection(for: editedEnd, newLine: editedMemo)
                         // Clear per-record memo to avoid split-view inconsistency
                         historyVM.updateLast(
                             sessionName: editedActivity,
