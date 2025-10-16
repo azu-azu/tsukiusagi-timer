@@ -30,7 +30,7 @@ struct TimerEditHeaderView: View {
         VStack(spacing: 8) {
             CommonHeaderView(
                 configuration: .cancelSave(
-                    title: NSLocalizedString("timer_edit_record_title", comment: "Edit record title"),
+                    title: Labels.Sections.editRecord,
                     dismiss: dismiss,
                     onSave: {
                         historyVM.updateLast(
@@ -60,8 +60,8 @@ struct TimerEditHeaderView: View {
                 .buttonStyle(.bordered)
                 .tint(.gray)
                 .accessibilityIdentifier("resetEditedRecordButton")
-                .accessibilityLabel(NSLocalizedString("timer_edit_reset_a11y", comment: "Reset accessibility label"))
-                .accessibilityHint(NSLocalizedString("timer_edit_reset_hint", comment: "Reset accessibility hint"))
+                .accessibilityLabel(LocalizedStringKey("timer_edit_reset_a11y"))
+                .accessibilityHint(LocalizedStringKey("timer_edit_reset_hint"))
             }
             .padding(.horizontal)
         }
