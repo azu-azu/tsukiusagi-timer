@@ -175,15 +175,7 @@ private struct DailyTimelineSummaryTreeView: View {
 
                             let extraCount = session.tasks.count - maxTasksPerSession
                             if extraCount > 0 {
-                                Text(
-                                    String.localizedStringWithFormat(
-                                        NSLocalizedString(
-                                            "history_summary_more_tasks",
-                                            comment: "Additional task count label"
-                                        ),
-                                        extraCount
-                                    )
-                                )
+                                Text("history_summary_more_tasks \(extraCount)")
                                     .font(DesignTokens.Fonts.caption)
                                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                                     .padding(.leading, 12)
@@ -211,11 +203,11 @@ private struct DailyTimelineInlineReflectionSection: View {
     let onRetry: () -> Void
     let focus: FocusState<Bool>.Binding
 
-    private let placeholderText = NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder")
+    private let placeholderTextKey: LocalizedStringKey = "reflection_placeholder"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(NSLocalizedString("reflection_title", comment: "Reflection title"))
+            Text(Labels.Sections.reflection)
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -232,7 +224,7 @@ private struct DailyTimelineInlineReflectionSection: View {
                     .accessibilityIdentifier("history_detail_reflection_editor")
 
                 if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text(placeholderText)
+                    Text(placeholderTextKey)
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                         .padding(.horizontal, 18)
@@ -245,12 +237,7 @@ private struct DailyTimelineInlineReflectionSection: View {
                 HStack(spacing: 8) {
                     ProgressView()
                         .progressViewStyle(.circular)
-                    Text(
-                        NSLocalizedString(
-                            "history_inline_reflection_saving",
-                            comment: "Label displayed while saving inline reflection"
-                        )
-                    )
+                    Text("history_inline_reflection_saving")
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 }
@@ -258,24 +245,14 @@ private struct DailyTimelineInlineReflectionSection: View {
 
             if let error {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(
-                        NSLocalizedString(
-                            "history_inline_reflection_error_message",
-                            comment: "Inline reflection error message"
-                        )
-                    )
+                    Text("history_inline_reflection_error_message")
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     Text(error.localizedDescription)
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     Button(action: onRetry) {
-                        Text(
-                            NSLocalizedString(
-                                "history_inline_reflection_retry_button",
-                                comment: "Retry button label for inline reflection save"
-                            )
-                        )
+                        Text(Copy.Button.retry)
                             .font(DesignTokens.Fonts.labelBold)
                             .foregroundColor(DesignTokens.MoonColors.accentBlue)
                     }
