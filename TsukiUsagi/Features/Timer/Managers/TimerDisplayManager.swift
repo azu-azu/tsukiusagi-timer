@@ -64,14 +64,5 @@ final class TimerDisplayManager: ObservableObject {
         breakMinutes = 5
     }
 
-    @available(*, deprecated, message: "Use taskLabel instead.")
-    var subtitleLabel: String {
-        get { taskLabel }
-        set { taskLabel = newValue }
-    }
-
-    @available(*, deprecated, message: "Use setTaskLabel(_:) instead.")
-    func setSubtitleLabel(_ label: String) {
-        setTaskLabel(label)
-    }
+    // subtitleLabel removed; use taskLabel APIs only
 }

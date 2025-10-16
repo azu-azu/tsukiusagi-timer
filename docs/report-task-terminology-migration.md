@@ -293,6 +293,10 @@ This document summarizes the comprehensive migration from "description" terminol
 - **Changes**: Updated test assertions to use `summary.tasks` instead of `summary.descriptions`
 - **Impact**: Tests use task terminology
 
+#### ✅ Modified: `TsukiUsagiTests/NotificationAndHistorySpiesTests.swift`
+- **Changes**: Updated assertions to use `vm.taskLabel` in place of `vm.subtitleLabel`
+- **Impact**: Tests rely exclusively on `taskLabel` API (no subtitle fallback)
+
 ---
 
 ## Files Determined to Need No Changes
@@ -348,9 +352,7 @@ UIコメント: ステータス説明セクションなど
 - **Lines 192, 202, 212, 232, 242, 252**: `description` parameters in `SessionRecord` initializers - Using deprecated property for test data
 - **Reason**: These are test-specific usages and XCTest framework calls, not session task terminology that needs migration
 
-#### ✅ NO CHANGES NEEDED: `TsukiUsagiTests/NotificationAndHistorySpiesTests.swift`
-- **Line 137**: `params.description` - Accessing deprecated property for test validation
-- **Reason**: This is test code validating the deprecated property behavior, not session task terminology that needs migration
+
 
 #### ✅ NO CHANGES NEEDED: `TsukiUsagiTests/SimpleSubtitleTest.swift`
 - **Line 5**: Struct name `DirectDescriptionEditTest` - Test struct name referring to old terminology
@@ -446,7 +448,7 @@ History ViewModels: HistoryViewModel.swift, DailyTimelineViewModel.swift
 
 ✅ **LOCALIZATION**: Both English and Japanese localization files updated consistently.
 
-✅ **BACKWARD COMPATIBILITY**: Deprecated methods maintained for smooth transition.
+✅ **BACKWARD COMPATIBILITY（Revised）**: subtitleLabel 関連の互換 API は削除済み。その他の description→task の互換APIは段階的削除方針を維持。
 
 ✅ **PREVIEW DATA**: All preview and test data updated to use task terminology.
 
