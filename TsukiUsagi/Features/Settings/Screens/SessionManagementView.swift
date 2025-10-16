@@ -30,7 +30,7 @@ struct SessionManagementView: View {
             LazyVStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
                 // Header
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
-                    Text(NSLocalizedString("session_management_title", comment: ""))
+                    Text(Labels.Sections.sessionManagement)
                         .font(DesignTokens.Fonts.title)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
@@ -124,7 +124,7 @@ extension SessionManagementView {
 
     @ViewBuilder
     fileprivate func defaultSessionsHeader() -> some View {
-        Text(NSLocalizedString("default_sessions_title", comment: ""))
+        Text(Labels.Sections.defaultSessions)
             .font(DesignTokens.Fonts.sectionTitle)
             .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
@@ -175,7 +175,7 @@ extension SessionManagementView {
     @ViewBuilder
     fileprivate func customSessionsHeader() -> some View {
         HStack {
-            Text(NSLocalizedString("custom_sessions_title", comment: ""))
+            Text(Labels.Sections.customSessions)
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -241,7 +241,7 @@ extension SessionManagementView {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolLarge)
 
-            Text(NSLocalizedString("empty_custom_sessions_title", comment: ""))
+            Text(Labels.State.noCustomSessionsYet)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
@@ -259,7 +259,7 @@ extension SessionManagementView {
         Button {
             activeSheet = .create
         } label: {
-            Label(NSLocalizedString("add_custom_session", comment: ""), systemImage: "plus")
+            Label(Copy.Link.addCustomSession, systemImage: "plus")
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)

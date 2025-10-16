@@ -29,7 +29,7 @@ struct DailyDetailView: View {
             if let history = dailyHistory, history.hasRecords {
                 dailySummaryContent(history)
             } else {
-                Text(NSLocalizedString("history_detail_no_records", comment: "No records message"))
+                Text(Labels.State.noRecordsForThisDay)
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }

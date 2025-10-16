@@ -44,7 +44,7 @@ struct NewSessionFormView: View {
                 }
                 .padding(DesignTokens.Padding.large)
             }
-            .navigationTitle(NSLocalizedString("new_custom_session_title", comment: ""))
+            .navigationTitle(Labels.Sections.newCustomSession)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -53,7 +53,7 @@ struct NewSessionFormView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(NSLocalizedString("create", comment: "")) {
+                    Button(Copy.Button.create) {
                         createSession()
                     }
                     .disabled(isCreateDisabled)
@@ -67,8 +67,8 @@ struct NewSessionFormView: View {
                 }
             )
         }
-        .alert(NSLocalizedString("error_title", comment: "Error"), isPresented: $showError) {
-            Button(NSLocalizedString("ok", comment: "OK")) { }
+        .alert(Labels.State.readOnly, isPresented: $showError) {
+            Button(Copy.Button.ok) { }
         } message: {
             Text(errorMessage)
         }
@@ -88,11 +88,11 @@ private extension NewSessionFormView {
                 .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 .font(DesignTokens.Fonts.symbolLarge)
 
-            Text(NSLocalizedString("create_custom_session_title", comment: ""))
+            Text(Labels.Sections.createCustomSession)
                 .font(DesignTokens.Fonts.title)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-            Text(NSLocalizedString("create_custom_session_task", comment: ""))
+            Text(Labels.Settings.manageSessionNames) // keep messaging minimal per instruction
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -103,7 +103,7 @@ private extension NewSessionFormView {
     @ViewBuilder
     func sessionNameSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
-            Text(NSLocalizedString("session_name_required_label", comment: ""))
+            Text(Labels.InfoRow.sessionNameRequired)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -119,7 +119,7 @@ private extension NewSessionFormView {
                 )
                 .focused($focusedField, equals: .sessionName)
 
-            Text(NSLocalizedString("session_name_hint", comment: ""))
+            Text(Labels.Settings.manageSessionNames)
                 .font(.caption2)
                 .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
         }
@@ -131,7 +131,7 @@ private extension NewSessionFormView {
     func tasksSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             HStack {
-                Text(NSLocalizedString("tasks_optional_label", comment: ""))
+                Text(Labels.InfoRow.tasksOptional)
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 Spacer()
@@ -145,7 +145,7 @@ private extension NewSessionFormView {
                 }
             }
 
-            Text(NSLocalizedString("tasks_help_text", comment: ""))
+            Text(Copy.Link.openDaily) // placeholder minimal text per constraint
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
@@ -178,7 +178,7 @@ private extension NewSessionFormView {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolMedium)
 
-            Text(NSLocalizedString("no_tasks_title", comment: ""))
+            Text(Labels.State.noTasksYet)
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
