@@ -107,7 +107,7 @@ private extension NewSessionFormView {
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
-            TextField(NSLocalizedString("session_name_placeholder", comment: ""), text: $sessionName)
+            TextField(LocalizedStringKey("session_name_placeholder"), text: $sessionName)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -160,7 +160,7 @@ private extension NewSessionFormView {
             }
 
             if !duplicateIndices.isEmpty {
-                Text(NSLocalizedString("duplicate_tasks_detected", comment: "Duplicate tasks detected"))
+                Text(LocalizedStringKey("duplicate_tasks_detected"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
             }
@@ -182,7 +182,7 @@ private extension NewSessionFormView {
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
-            Text(NSLocalizedString("tap_plus_to_add_task", comment: ""))
+            Text(LocalizedStringKey("tap_plus_to_add_task"))
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -197,7 +197,7 @@ private extension NewSessionFormView {
     @ViewBuilder
     func taskRow(task: String, index: Int) -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(NSLocalizedString("task_placeholder", comment: ""), text: Binding(
+            TextField(LocalizedStringKey("task_placeholder"), text: Binding(
                 get: { tasks[safe: index] ?? "" },
                 set: { newValue in
                     if index < tasks.count {
@@ -240,7 +240,7 @@ private extension NewSessionFormView {
     @ViewBuilder
     func addTaskField() -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newTask)
+            TextField(LocalizedStringKey("new_task_placeholder"), text: $newTask)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
