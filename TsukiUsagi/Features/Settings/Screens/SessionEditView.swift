@@ -51,7 +51,7 @@ struct SessionEditView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("cancel", comment: "")) {
+                    Button(Copy.Button.cancel) {
                         dismiss()
                     }
                 }
@@ -78,7 +78,7 @@ struct SessionEditView: View {
             Button(NSLocalizedString("delete", comment: ""), role: .destructive) {
                 deleteSession()
             }
-            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) { }
+            Button(Copy.Button.cancel, role: .cancel) { }
         } message: {
             Text(String(format: NSLocalizedString("delete_session_message", comment: ""), session.sessionName))
         }
