@@ -134,6 +134,6 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         XCTAssertEqual(params.phase, .focus)
         XCTAssertGreaterThan(params.end, params.start)
         XCTAssertEqual(params.activity, vm.activityLabel)
-        XCTAssertEqual(params.description ?? "", vm.subtitleLabel)
+        XCTAssertEqual(params.description ?? "", vm.taskLabel)
     }
 }

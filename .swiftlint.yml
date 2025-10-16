@@ -62,8 +62,8 @@ custom_rules:
     included: ".swift"
     name: "Use taskLabel instead of subtitleLabel"
     regex: '\\bsubtitleLabel\\b'
-    message: "Use taskLabel (storage key and API). Keep only shims until removal."
-    severity: warning
+    message: "Use taskLabel (storage key and API). subtitleLabel is removed."
+    severity: error
 
 excluded:
   - tools/
