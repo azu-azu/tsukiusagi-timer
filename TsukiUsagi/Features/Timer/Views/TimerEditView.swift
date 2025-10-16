@@ -71,171 +71,13 @@ struct TimerEditView: View {
 
                 // SettingsViewと同じ構造に統一
                 VStack(spacing: 0) {
-                    // ヘッダーを固定位置に配置（SettingsViewと同じ構造）
-                    TimerEditHeaderView(
-                        editedActivity: editedActivity,
-                        editedTask: editedTask,
-                        editedMemo: editedMemo,
-                        editedEnd: editedEnd,
-                        isSaveDisabledExtra: isNoChanges
-                    )
-                    .background(DesignTokens.CosmosColors.background)
-                    .zIndex(1)
-
-                    // スクロール可能なコンテンツ
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 24) {
-                            // Session Label
-                            sectionBuilder.section(
-                                title: Labels.Sections.sessionLabel,
-                                isCompact: true
-                            ) {
-                                SessionLabelSection(
-                                    activity: $editedActivity,
-                                    taskText: $editedTask,
-                                    isActivityFocused: $isActivityFocused,
-                                    isTaskFocused: $isTaskFocused,
-                                    labelCornerRadius: labelCornerRadius,
-                                    showEmptyError: .constant(currentShowEmptyError),
-                                    onDone: nil
-                                )
-                            }
-
-                            // Final Time
-                            sectionBuilder.section(title: "", isCompact: true) {
-                                DatePicker(
-                                    Labels.Sections.finalTime,
-                                    selection: $editedEnd,
-                                    in: minEnd...,
-                                    displayedComponents: [.hourAndMinute]
-                                )
-                                .datePickerStyle(.compact)
-                                .padding(.horizontal, 8)
-                                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                                .colorScheme(.dark)
-                            }
-
-                            // Reflect
-                            sectionBuilder.section(
-                                title: Labels.Sections.reflection,
-                                isCompact: true
-                            ) {
-                                TextEditor(text: $editedMemo)
-                                    .frame(minHeight: 220, maxHeight: memoEditorMaxHeight)
-                                    .padding(8)
-                                    .scrollContentBackground(.hidden)
-                                    .background(DesignTokens.WhiteColors.surface)
-                                    .cornerRadius(6)
-                                    .focused($isMemoFocused)
-                                    .overlay(
-                                        // プレースホルダー
-                                        Group {
-                                            if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                                HStack {
-                                                    VStack(alignment: .leading, spacing: 4) {
-                                                        Text(LocalizedStringKey("reflection_placeholder"))
-                                                            .font(DesignTokens.Fonts.label)
-                                                            .foregroundColor(DesignTokens.MoonColors.textMuted)
-                                                        Spacer()
-                                                    }
-                                                    Spacer()
-                                                }
-                                                .padding(.horizontal, 12)
-                                                .padding(.vertical, 12)
-                                                .allowsHitTesting(false)
-                                            }
-                                        }
-                                    )
-
-                                HStack {
-                                    Spacer()
-                                    Button {
-                                        isMemoFocused = false
-                                        showMemoSheet = true
-                                    } label: {
-                                        Label(Copy.Button.expand, systemImage: "arrow.up.left.and.arrow.down.right")
-                                    }
-                                    .buttonStyle(.plain)
-                                    .accessibilityIdentifier("open_memo_sheet_button")
-                                }
-
-                                // TextEditor直下に小さなアンカーを置く
-                                Color.clear
-                                    .frame(height: 1)
-                                    .background(
-                                        GeometryReader { geo in
-                                            Color.clear.preference(
-                                                key: MemoAnchorPreferenceKey.self,
-                                                value: geo.frame(in: .global).maxY
-                                            )
-                                        }
-                                    )
-                                    .id(SectionID.memoAnchor)
-                            }
-
-                            // 可変の下パディングでキーボード回避を行うため、固定Spacerは不要
-                            }
-                            .padding()
-                            .padding(.bottom, bottomLiftPadding)
-                            // ScrollViewの中での下余白は最小限に留める（主にsafeAreaInsetで担保）
-                        }
-                        .scrollContentBackground(.hidden)
-                        .scrollIndicators(.hidden) // スクロールインジケーター非表示
-                        .scrollDismissesKeyboard(.interactively)
-                        .scrollBounceBehavior(.basedOnSize) // バウンス動作を制御
-                        .dismissKeyboardOnTap { closeKeyboard() }
-                        .onAppear { scrollProxy = proxy }
-                        .onChange(of: isMemoFocused) { _, focused in
-                            if focused {
-                                guard keyboardEndFrame.height > 0, let proxy = scrollProxy else { return }
-                                ensureMemoVisibleOnce(using: proxy)
-                            } else {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    bottomLiftPadding = 0
-                                }
-                            }
-                        }
-                        .onReceive(
-                            NotificationCenter.default.publisher(
-                                for: UIResponder.keyboardDidChangeFrameNotification
-                            )
-                        ) { notification in
-                            if let userInfo = notification.userInfo,
-                               let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-                                keyboardEndFrame = frameValue.cgRectValue
-                            }
-                            guard isMemoFocused, let proxy = scrollProxy else { return }
-                            ensureMemoVisibleOnce(using: proxy)
-                        }
-                        .onPreferenceChange(MemoAnchorPreferenceKey.self) { maxY in
-                            memoAnchorGlobalMaxY = maxY
-                        }
-                    }
+                    headerView
+                    scrollContainer
                 }
                 // 角丸クリップを外し、シートの下地色が見えないようにする
                 .presentationDetents([.large])
                 // Bottom reset control in safe area inset to avoid mis-tap near Save
-                .safeAreaInset(edge: .bottom) {
-                    HStack {
-                        Spacer()
-                        Button {
-                            NotificationCenter.default.post(name: Notification.Name("TimerEditReset"), object: nil)
-                        } label: {
-                            Label(Copy.Button.reset, systemImage: "arrow.uturn.left")
-                                .labelStyle(.titleAndIcon)
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.gray)
-                        .accessibilityIdentifier("resetEditedRecordButton")
-                        .accessibilityLabel(LocalizedStringKey("timer_edit_reset_a11y"))
-                        .accessibilityHint(LocalizedStringKey("timer_edit_reset_hint"))
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(DesignTokens.CosmosColors.background.opacity(0.95))
-                }
+                .safeAreaInset(edge: .bottom) { resetBar }
             }
             .navigationBarHidden(true) // NavigationBarを非表示
             // システムのセーフエリア調整を使う（競合を避けるためキーボード無視は外す）
@@ -252,14 +94,7 @@ struct TimerEditView: View {
             .onDisappear {
                 closeKeyboard()
             }
-            .sheet(isPresented: $showMemoSheet) {
-                LargeTextEditorSheet(
-                    text: $editedMemo,
-                    title: Labels.Sections.reflection,
-                    placeholder: LocalizedStringKey("reflection_placeholder"),
-                    onClose: { showMemoSheet = false }
-                )
-            }
+            .sheet(isPresented: $showMemoSheet) { memoSheetView }
             .task {
                 // 編集対象は「最後に記録された履歴」なので、History から初期値を読み込む
                 if let last = historyVM.history.last {
@@ -321,6 +156,186 @@ struct TimerEditView: View {
 
 // MARK: - Change detection
 private extension TimerEditView {
+    @ViewBuilder
+    var headerView: some View {
+        TimerEditHeaderView(
+            editedActivity: editedActivity,
+            editedTask: editedTask,
+            editedMemo: editedMemo,
+            editedEnd: editedEnd,
+            isSaveDisabledExtra: isNoChanges
+        )
+        .background(DesignTokens.CosmosColors.background)
+        .zIndex(1)
+    }
+
+    @ViewBuilder
+    var scrollContainer: some View {
+        ScrollViewReader { proxy in
+            ScrollView { scrollContent }
+                .scrollContentBackground(.hidden)
+                .scrollIndicators(.hidden)
+                .scrollDismissesKeyboard(.interactively)
+                .scrollBounceBehavior(.basedOnSize)
+                .dismissKeyboardOnTap { closeKeyboard() }
+                .onAppear { scrollProxy = proxy }
+                .onChange(of: isMemoFocused) { _, focused in
+                    if focused {
+                        guard keyboardEndFrame.height > 0, let proxy = scrollProxy else { return }
+                        ensureMemoVisibleOnce(using: proxy)
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.2)) { bottomLiftPadding = 0 }
+                    }
+                }
+                .onReceive(
+                    NotificationCenter.default.publisher(for: UIResponder.keyboardDidChangeFrameNotification)
+                ) { notification in
+                    if let userInfo = notification.userInfo,
+                       let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+                        keyboardEndFrame = frameValue.cgRectValue
+                    }
+                    guard isMemoFocused, let proxy = scrollProxy else { return }
+                    ensureMemoVisibleOnce(using: proxy)
+                }
+                .onPreferenceChange(MemoAnchorPreferenceKey.self) { maxY in
+                    memoAnchorGlobalMaxY = maxY
+                }
+        }
+    }
+
+    @ViewBuilder
+    var scrollContent: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            sessionLabelSection
+            finalTimeSection
+            reflectionSection
+        }
+        .padding()
+        .padding(.bottom, bottomLiftPadding)
+    }
+
+    @ViewBuilder
+    var sessionLabelSection: some View {
+        sectionBuilder.section(
+            title: Labels.Sections.sessionLabel,
+            isCompact: true
+        ) {
+            SessionLabelSection(
+                activity: $editedActivity,
+                taskText: $editedTask,
+                isActivityFocused: $isActivityFocused,
+                isTaskFocused: $isTaskFocused,
+                labelCornerRadius: labelCornerRadius,
+                showEmptyError: .constant(currentShowEmptyError),
+                onDone: nil
+            )
+        }
+    }
+
+    @ViewBuilder
+    var finalTimeSection: some View {
+        sectionBuilder.section(title: "", isCompact: true) {
+            DatePicker(
+                Labels.Sections.finalTime,
+                selection: $editedEnd,
+                in: minEnd...,
+                displayedComponents: [.hourAndMinute]
+            )
+            .datePickerStyle(.compact)
+            .padding(.horizontal, 8)
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+            .colorScheme(.dark)
+        }
+    }
+
+    @ViewBuilder
+    var reflectionSection: some View {
+        sectionBuilder.section(
+            title: Labels.Sections.reflection,
+            isCompact: true
+        ) {
+            TextEditor(text: $editedMemo)
+                .frame(minHeight: 220, maxHeight: memoEditorMaxHeight)
+                .padding(8)
+                .scrollContentBackground(.hidden)
+                .background(DesignTokens.WhiteColors.surface)
+                .cornerRadius(6)
+                .focused($isMemoFocused)
+                .overlay(
+                    Group {
+                        if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(LocalizedStringKey("reflection_placeholder"))
+                                        .font(DesignTokens.Fonts.label)
+                                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                    Spacer()
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 12)
+                            .allowsHitTesting(false)
+                        }
+                    }
+                )
+
+            HStack {
+                Spacer()
+                Button {
+                    isMemoFocused = false
+                    showMemoSheet = true
+                } label: {
+                    Label("Expand", systemImage: "arrow.up.left.and.arrow.down.right")
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("open_memo_sheet_button")
+            }
+
+            Color.clear
+                .frame(height: 1)
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: MemoAnchorPreferenceKey.self,
+                            value: geo.frame(in: .global).maxY
+                        )
+                    }
+                )
+                .id(SectionID.memoAnchor)
+        }
+    }
+    @ViewBuilder
+    var resetBar: some View {
+        HStack {
+            Spacer()
+            Button {
+                NotificationCenter.default.post(name: Notification.Name("TimerEditReset"), object: nil)
+            } label: {
+                Label(Copy.Button.reset, systemImage: "arrow.uturn.left")
+                    .labelStyle(.titleAndIcon)
+            }
+            .buttonStyle(.bordered)
+            .tint(.gray)
+            .accessibilityIdentifier("resetEditedRecordButton")
+            .accessibilityLabel(LocalizedStringKey("timer_edit_reset_a11y"))
+            .accessibilityHint(LocalizedStringKey("timer_edit_reset_hint"))
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(DesignTokens.CosmosColors.background.opacity(0.95))
+    }
+
+    @ViewBuilder
+    var memoSheetView: some View {
+        LargeTextEditorSheet(
+            text: $editedMemo,
+            title: Labels.Sections.reflection,
+            placeholder: LocalizedStringKey("reflection_placeholder"),
+            onClose: { showMemoSheet = false }
+        )
+    }
     struct MemoAnchorPreferenceKey: PreferenceKey {
         static var defaultValue: CGFloat = 0
         static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {

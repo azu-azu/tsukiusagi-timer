@@ -2,7 +2,7 @@ import SwiftUI
 
 struct LargeTextEditorSheet: View {
     @Binding var text: String
-    let title: LocalizedStringKey
+    let title: String
     let placeholder: LocalizedStringKey
     let onClose: () -> Void
 
@@ -24,7 +24,7 @@ struct LargeTextEditorSheet: View {
                     .accessibilityIdentifier("large_text_editor_sheet_editor")
                     .padding()
             }
-            .navigationTitle(title)
+            .navigationTitle(Text(title))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -56,5 +56,3 @@ struct LargeTextEditorSheet: View {
         }
     }
 }
-
-

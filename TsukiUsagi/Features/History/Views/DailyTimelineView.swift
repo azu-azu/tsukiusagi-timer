@@ -58,13 +58,12 @@ struct DailyTimelineView: View {
                         isSaving: detailViewModel.isSaving,
                         error: detailViewModel.error,
                         onRetry: { detailViewModel.retry() },
-                        focus: $isReflectionFocused
+                        focus: $isReflectionFocused,
+                        onExpand: {
+                            isReflectionFocused = false
+                            showReflectionSheet = true
+                        }
                     )
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        isReflectionFocused = false
-                        showReflectionSheet = true
-                    }
 
                     sectionBuilder.dayModeRecordsSection(
                         records: viewModel.records(historyVM: historyVM),
@@ -194,14 +193,25 @@ private struct DailyTimelineInlineReflectionSection: View {
     let error: Error?
     let onRetry: () -> Void
     let focus: FocusState<Bool>.Binding
+    let onExpand: () -> Void
 
     private let placeholderTextKey: LocalizedStringKey = "reflection_placeholder"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(Labels.Sections.reflection)
-                .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            HStack(alignment: .firstTextBaseline) {
+                Text(Labels.Sections.reflection)
+                    .font(DesignTokens.Fonts.sectionTitle)
+                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                Spacer()
+                Button(action: onExpand) {
+                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                        .font(DesignTokens.Fonts.caption)
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                        .accessibilityIdentifier("open_reflection_sheet_button")
+                }
+                .buttonStyle(.plain)
+            }
 
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $text)
@@ -326,5 +336,4 @@ private extension DailyTimelineView {
         }
         return nil
     }
-
 }
