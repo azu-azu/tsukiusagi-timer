@@ -57,22 +57,7 @@ struct TimerEditHeaderView: View {
                 )
             )
 
-            // 明示的な Reset アクション（自動スクロール/自動戻しは廃止）
-            HStack {
-                Spacer()
-                Button {
-                    NotificationCenter.default.post(name: Notification.Name("TimerEditReset"), object: nil)
-                } label: {
-                    Label(Copy.Button.reset, systemImage: "arrow.uturn.left")
-                        .labelStyle(.titleAndIcon)
-                }
-                .buttonStyle(.bordered)
-                .tint(.gray)
-                .accessibilityIdentifier("resetEditedRecordButton")
-                .accessibilityLabel(LocalizedStringKey("timer_edit_reset_a11y"))
-                .accessibilityHint(LocalizedStringKey("timer_edit_reset_hint"))
-            }
-            .padding(.horizontal)
+            // Reset button moved to bottom safe area inset (TimerEditView)
         }
         .accessibilityIdentifier("TimerEditHeaderView")
     }

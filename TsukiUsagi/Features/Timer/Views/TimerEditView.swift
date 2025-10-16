@@ -202,6 +202,27 @@ struct TimerEditView: View {
                 }
                 // 角丸クリップを外し、シートの下地色が見えないようにする
                 .presentationDetents([.large])
+                // Bottom reset control in safe area inset to avoid mis-tap near Save
+                .safeAreaInset(edge: .bottom) {
+                    HStack {
+                        Spacer()
+                        Button {
+                            NotificationCenter.default.post(name: Notification.Name("TimerEditReset"), object: nil)
+                        } label: {
+                            Label(Copy.Button.reset, systemImage: "arrow.uturn.left")
+                                .labelStyle(.titleAndIcon)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.gray)
+                        .accessibilityIdentifier("resetEditedRecordButton")
+                        .accessibilityLabel(LocalizedStringKey("timer_edit_reset_a11y"))
+                        .accessibilityHint(LocalizedStringKey("timer_edit_reset_hint"))
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(DesignTokens.CosmosColors.background.opacity(0.95))
+                }
             }
             .navigationBarHidden(true) // NavigationBarを非表示
             // システムのセーフエリア調整を使う（競合を避けるためキーボード無視は外す）
