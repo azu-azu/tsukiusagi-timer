@@ -98,7 +98,7 @@ private extension TaskEditContent {
     /// セッション名表示部分（編集不可）
     var sessionCategorySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(NSLocalizedString("session_name_label", comment: "Session name label"))
+            Text(Labels.InfoRow.sessionName)
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .textCase(.uppercase)
@@ -133,7 +133,7 @@ private extension TaskEditContent {
     var tasksSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(NSLocalizedString("tasks_label", comment: "Tasks label"))
+                Text(Labels.InfoRow.tasks)
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
@@ -223,7 +223,7 @@ private extension TaskEditContent {
                 )
             }
 
-            Text(NSLocalizedString("settings_add_tasks_description", comment: "Add tasks description"))
+            Text(LocalizedStringKey("settings_add_tasks_description"))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .padding(.top, 4)
@@ -299,16 +299,8 @@ private extension TaskEditContent {
         let hasConflict = !duplicates.isEmpty
         if hadConflict != hasConflict {
             let message = hasConflict
-                ?
-                NSLocalizedString(
-                    "duplicate_tasks_detected",
-                    comment: "VoiceOver announcement when duplicates appear"
-                )
-                :
-                NSLocalizedString(
-                    "duplicate_tasks_resolved",
-                    comment: "VoiceOver announcement when duplicates are resolved"
-                )
+                ? LocalizedStringKey("duplicate_tasks_detected")
+                : LocalizedStringKey("duplicate_tasks_resolved")
             UIAccessibility.post(notification: .announcement, argument: message)
         }
     }
