@@ -72,11 +72,6 @@ final class TimerViewModel: ObservableObject {
     @AppStorage("workMinutes") var workMinutes: Int = 25
     @AppStorage("breakMinutes") var breakMinutes: Int = 5
 
-    @available(*, deprecated, message: "Use taskLabel instead.")
-    var subtitleLabel: String {
-        get { taskLabel }
-        set { taskLabel = newValue }
-    }
 
     // 🔔 START アニメ用トリガー
     let startPulse = PassthroughSubject<Void, Never>()
