@@ -25,6 +25,23 @@ Define non-negotiable rules so the Daily Reflection feature remains stable, simp
 - File: `TsukiUsagi/Features/History/Views/DailyTimelineView.swift`
 - The Daily Timeline always shows a single inline editor for the day’s Reflection. There is no alternate “memo-per-record” UI.
 - Never create or display dummy “Reflection/New Reflection” `SessionRecord` rows in the history UI.
+
+### Expand Affordance (Sheet Editor Trigger)
+- Location: Right-aligned icon in the section header
+  - History: Reflection section header (DailyTimelineView)
+  - Edit Record: Reflection/memo section header (TimerEditView)
+- Visual: icon-only (no text)
+  - System symbol: `arrow.up.left.and.arrow.down.right`
+  - Style: `DesignTokens.Fonts.caption`, `DesignTokens.MoonColors.accentBlue`, `.buttonStyle(.plain)`
+- Copy/A11y:
+  - VoiceOver label must be `Copy.Button.expand`
+  - Stable identifiers: `open_reflection_sheet_button`, `open_memo_sheet_button`
+- Behavior:
+  - On tap: dismiss inline focus/keyboard, then present `LargeTextEditorSheet`
+  - Avoid wrapping the button in tap gestures that consume the event (e.g., global keyboard-dismiss taps)
+- Do not:
+  - Render a text label next to the icon
+  - Place the button near primary Save actions; keep it in the header to avoid mis-taps
 - Placeholder/copy must use the 3-layer classification (TXT-01) and design tokens (UI-01). No direct `NSLocalizedString` or system fonts.
 
 ## API Contracts (UseCases/ViewModels)
