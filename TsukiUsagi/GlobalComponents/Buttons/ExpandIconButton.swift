@@ -15,7 +15,7 @@ public struct ExpandIconButton: View {
     public var body: some View {
         Button(action: action) {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                .font(DesignTokens.Fonts.caption)
+                .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.accentBlue)
         }
         .buttonStyle(.plain)
