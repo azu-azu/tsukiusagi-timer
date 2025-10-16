@@ -201,18 +201,7 @@ private extension EmbeddedSessionManagementView {
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                Text(
-                    String.localizedStringWithFormat(
-                        NSLocalizedString(
-                            "tasks_count",
-                            tableName: nil,
-                            bundle: .main,
-                            value: "%d tasks",
-                            comment: "Pluralized tasks count"
-                        ),
-                        session.tasks.count
-                    )
-                )
+                Text("\(session.tasks.count) tasks")
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
             }
