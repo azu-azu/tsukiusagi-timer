@@ -245,7 +245,7 @@ extension SessionManagementView {
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
-            Text(NSLocalizedString("empty_custom_sessions_subtitle", comment: ""))
+            Text(LocalizedStringKey("empty_custom_sessions_subtitle"))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .multilineTextAlignment(.center)

@@ -284,7 +284,7 @@ private extension NewSessionFormView {
     func createSession() {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
-            errorMessage = NSLocalizedString("error_empty_session_name", comment: "Session name cannot be empty")
+            errorMessage = String(localized: LocalizedStringKey("error_empty_session_name"))
             showError = true
             return
         }
