@@ -90,11 +90,11 @@ struct SessionEditModal_Previews: PreviewProvider {
                 focusedRowID: .constant(nil),
                 content: {
                     VStack {
-                        Text(NSLocalizedString("settings_sample_content", comment: "Sample content"))
+                        Text(LocalizedStringKey("settings_sample_content"))
                             .font(DesignTokens.Fonts.title)
                             .padding()
 
-                        Text(NSLocalizedString("settings_demo_description", comment: "Demo description"))
+                        Text(LocalizedStringKey("settings_demo_description"))
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.MoonColors.textSecondary)
                             .multilineTextAlignment(.center)

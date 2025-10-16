@@ -52,12 +52,18 @@ custom_rules:
     regex: 'Image\(\s*systemName:\s*"pencil"\s*\)'
     message: "Use EditIconButton or PencilIcon with DesignTokens.IconColors.pencil"
     severity: error
+    excluded:
+      - ".*CrossFeatureUI/Controls/EditIconLabel\\.swift$"
+      - ".*CrossFeatureUI/Controls/PencilIcon\\.swift$"
   forbid_pencil_label_warning:
     included: ".swift"
     name: "Prefer EditIconLabel over raw Label pencil"
     regex: 'Label\s*\([^\)]*,\s*systemImage:\s*"pencil"\s*\)'
     message: "Use EditIconLabel for semantic unification"
     severity: warning
+    excluded:
+      - ".*CrossFeatureUI/Controls/EditIconLabel\\.swift$"
+      - ".*CrossFeatureUI/Controls/PencilIcon\\.swift$"
   forbid_subtitle_label_usage:
     included: ".swift"
     name: "Use taskLabel instead of subtitleLabel"

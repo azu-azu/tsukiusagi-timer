@@ -45,19 +45,19 @@ struct SessionEditView: View {
             }
             .navigationTitle(
                 isDefaultSession
-                    ? NSLocalizedString("edit_tasks_title", comment: "")
-                    : NSLocalizedString("edit_session_title", comment: "")
+                    ? Labels.Sections.editTasks
+                    : Labels.Sections.editSession
             )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("cancel", comment: "")) {
+                    Button(Copy.Button.cancel) {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(NSLocalizedString("save", comment: "")) {
+                    Button(Copy.Button.save) {
                         saveChanges()
                     }
                     .disabled(!isSaveEnabled)
@@ -74,13 +74,13 @@ struct SessionEditView: View {
         .onAppear {
             loadSessionData()
         }
-        .alert(NSLocalizedString("delete_session_title", comment: ""), isPresented: $showDeleteAlert) {
-            Button(NSLocalizedString("delete", comment: ""), role: .destructive) {
+        .alert(Labels.Sections.deleteSession, isPresented: $showDeleteAlert) {
+            Button(Copy.Button.delete, role: .destructive) {
                 deleteSession()
             }
-            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) { }
+            Button(Copy.Button.cancel, role: .cancel) { }
         } message: {
-            Text(String(format: NSLocalizedString("delete_session_message", comment: ""), session.sessionName))
+            Text(LocalizedStringKey("delete_session_message \(session.sessionName)"))
         }
         .background(DesignTokens.CosmosColors.background)
         .ignoresSafeArea()
@@ -98,8 +98,8 @@ extension SessionEditView {
         VStack(alignment: .leading, spacing: 8) {
             Text(
                 isDefaultSession
-                    ? NSLocalizedString("default_session_label", comment: "")
-                    : NSLocalizedString("custom_session_label", comment: "")
+                    ? Labels.InfoRow.defaultSession
+                    : Labels.InfoRow.customSession
             )
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
@@ -114,7 +114,7 @@ extension SessionEditView {
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
                 if isDefaultSession {
-                    Text(NSLocalizedString("settings_read_only", comment: "Read only label"))
+                    Text(Labels.State.readOnly)
                         .font(.caption2)
                         .fontWeight(.semibold)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
@@ -133,7 +133,7 @@ extension SessionEditView {
     @ViewBuilder
     fileprivate func sessionNameSection() -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(NSLocalizedString("session_name_label", comment: ""))
+            Text(Labels.InfoRow.sessionName)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -149,12 +149,12 @@ extension SessionEditView {
                     )
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
 
-                Text(NSLocalizedString("default_session_name_readonly_hint", comment: ""))
+                Text(LocalizedStringKey("default_session_name_readonly_hint"))
                     .font(.caption2)
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
                     .italic()
             } else {
-                TextField(NSLocalizedString("enter_session_name_placeholder", comment: ""), text: $editedName)
+                TextField(LocalizedStringKey("enter_session_name_placeholder"), text: $editedName)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -174,7 +174,7 @@ extension SessionEditView {
     fileprivate func tasksSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(NSLocalizedString("tasks_label", comment: ""))
+                Text(Labels.InfoRow.tasks)
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -212,7 +212,7 @@ extension SessionEditView {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolLarge)
 
-            Text(NSLocalizedString("no_tasks_title", comment: ""))
+            Text(Labels.State.noTasksYet)
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -227,7 +227,7 @@ extension SessionEditView {
     @ViewBuilder
     fileprivate func taskRow(task: String, index: Int) -> some View {
         HStack(spacing: 8) {
-            TextField(NSLocalizedString("task_placeholder", comment: ""), text: Binding(
+            TextField(LocalizedStringKey("task_placeholder"), text: Binding(
                 get: { editedTasks[safe: index] ?? "" },
                 set: { newValue in
                     if index < editedTasks.count {
@@ -258,7 +258,7 @@ extension SessionEditView {
     @ViewBuilder
     fileprivate func addTaskField() -> some View {
         HStack(spacing: 8) {
-            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newTask)
+            TextField(LocalizedStringKey("new_task_placeholder"), text: $newTask)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)

@@ -23,7 +23,7 @@ struct RecordedTimesView: View {
 
             // 未来Finalバッジ（endTime が未来の場合に表示）
             if let end = endTime, end > Date() {
-                Text(NSLocalizedString("timer_record_future", comment: "Future badge label"))
+                Text(LocalizedStringKey("timer_record_future"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
                     .padding(.horizontal, 10)
@@ -48,13 +48,11 @@ struct RecordedTimesView: View {
             HStack {
                 Spacer()
                 PencilButton(size: .title, action: onEdit)
-                    .accessibilityLabel(NSLocalizedString(
-                        "timer_record_edit_session",
-                        comment: "Edit session accessibility label"
+                    .accessibilityLabel(LocalizedStringKey(
+                        "timer_record_edit_session"
                     ))
-                    .accessibilityHint(NSLocalizedString(
-                        "timer_record_edit_hint",
-                        comment: "Edit session accessibility hint"
+                    .accessibilityHint(LocalizedStringKey(
+                        "timer_record_edit_hint"
                     ))
             }
             .frame(maxWidth: 110)

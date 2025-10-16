@@ -19,7 +19,6 @@ enum TimerRunState: String {
 /// Pomodoro ロジックと履歴保存、通知送信を司る ViewModel
 @MainActor
 final class TimerViewModel: ObservableObject {
-
     // MARK: - Dependencies
     let engine: TimerEngineable
     let notificationService: PhaseNotificationServiceable
@@ -71,7 +70,6 @@ final class TimerViewModel: ObservableObject {
     @AppStorage("taskLabel") var taskLabel: String = ""
     @AppStorage("workMinutes") var workMinutes: Int = 25
     @AppStorage("breakMinutes") var breakMinutes: Int = 5
-
 
     // 🔔 START アニメ用トリガー
     let startPulse = PassthroughSubject<Void, Never>()

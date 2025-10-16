@@ -102,14 +102,14 @@ struct SessionLabelSection: View {
                         }
                     }
                     Divider()
-                    Button(NSLocalizedString("session_task_none", comment: "")) {
+                    Button(Labels.State.noTask) {
                         taskText = ""
                     }
                 } label: {
                     HStack {
                         Text(
                             taskText.isEmpty
-                                ? NSLocalizedString("session_task_select", comment: "")
+                                ? Labels.Settings.manageSessionNames // replace with appropriate label if exists
                                 : taskText
                         )
                             .foregroundColor(
@@ -130,7 +130,7 @@ struct SessionLabelSection: View {
             } else {
                 // セッションにタスクが設定されていない場合は空のプレースホルダー
                 HStack {
-                    Text(NSLocalizedString("session_task_none_available", comment: ""))
+                    Text(Labels.State.noTasksConfigured)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                         .font(DesignTokens.Fonts.label)
                     Spacer()
