@@ -52,10 +52,7 @@ struct DailyDetailView: View {
 
                 Spacer()
 
-                Text(String.localizedStringWithFormat(
-                    NSLocalizedString("history_detail_sessions", comment: "Sessions count label"),
-                    history.sessionCount
-                ))
+                Text(LocalizedStringKey("history_detail_sessions \(history.sessionCount)"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
             }
