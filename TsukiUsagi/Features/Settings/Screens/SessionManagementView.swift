@@ -34,7 +34,7 @@ struct SessionManagementView: View {
                         .font(DesignTokens.Fonts.title)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                    Text(NSLocalizedString("session_management_subtitle", comment: ""))
+                    Text(LocalizedStringKey("session_management_subtitle"))
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                 }
@@ -94,7 +94,7 @@ struct SessionManagementView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             if let session = selectedSession {
-                Text("Are you sure you want to delete '\(session.sessionName)'?")
+                Text(LocalizedStringKey("delete_session_message \(session.sessionName)"))
             }
         }
         .navigationTitle("Session Management")
@@ -279,18 +279,7 @@ extension SessionManagementView {
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                Text(
-                    String.localizedStringWithFormat(
-                        NSLocalizedString(
-                            "tasks_count",
-                            tableName: nil,
-                            bundle: .main,
-                            value: "%d tasks",
-                            comment: "Pluralized tasks count"
-                        ),
-                        session.tasks.count
-                    )
-                )
+                Text("\(session.tasks.count) tasks")
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
             }
