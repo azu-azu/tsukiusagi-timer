@@ -73,10 +73,10 @@ struct EmbeddedSessionManagementView: View {
         }
         .presentationBackground(DesignTokens.CosmosColors.background)
         .alert(
-            NSLocalizedString("settings_session_delete_confirm_title", comment: "Delete session alert title"),
+            Labels.Sections.deleteSession,
             isPresented: $showDeleteConfirm
         ) {
-            Button(NSLocalizedString("settings_session_delete", comment: "Delete button"), role: .destructive) {
+            Button(Labels.Sections.deleteSession, role: .destructive) {
                 if let session = selectedSession, !session.isDefault {
                     sessionManager.deleteEntry(id: session.id)
                 }
@@ -84,13 +84,7 @@ struct EmbeddedSessionManagementView: View {
             Button(Copy.Button.cancel, role: .cancel) { }
         } message: {
             if let session = selectedSession {
-                Text(String.localizedStringWithFormat(
-                    NSLocalizedString(
-                        "settings_session_delete_confirm_message",
-                        comment: "Delete session confirmation message"
-                    ),
-                    session.sessionName
-                ))
+                Text("settings_session_delete_confirm_message \(session.sessionName)")
             }
         }
         .background(DesignTokens.CosmosColors.background)
@@ -117,14 +111,8 @@ private extension EmbeddedSessionManagementView {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel(Text(String.localizedStringWithFormat(
-            NSLocalizedString("settings_accessibility_tasks_count", comment: "Accessibility label for tasks count"),
-            session.sessionName,
-            session.tasks.count
-        )))
-        .accessibilityHint(
-            Text(NSLocalizedString("settings_accessibility_edit_tasks", comment: "Accessibility hint for edit tasks"))
-        )
+        .accessibilityLabel(Text("\(session.sessionName), \(session.tasks.count) tasks"))
+        .accessibilityHint(Text(LocalizedStringKey("settings_accessibility_edit_tasks")))
 
         if !isLast {
             Divider()
@@ -165,7 +153,7 @@ private extension EmbeddedSessionManagementView {
                 selectedSession = session
                 showDeleteConfirm = true
             } label: {
-                Label(NSLocalizedString("settings_session_delete", comment: "Delete button"), systemImage: "trash")
+                Label(Labels.Sections.deleteSession, systemImage: "trash")
             }
         }
     }
@@ -183,29 +171,19 @@ private extension EmbeddedSessionManagementView {
                 selectedSession = session
                 showDeleteConfirm = true
             } label: {
-                Label(NSLocalizedString("settings_session_delete", comment: "Delete button"), systemImage: "trash")
+                Label(Labels.Sections.deleteSession, systemImage: "trash")
             }
         }
     }
 
     private func accessibilityLabel(for session: SessionEntry) -> Text {
         Text(session.tasks.first.flatMap { task in
-            String.localizedStringWithFormat(
-                NSLocalizedString(
-                    "settings_accessibility_session_with_task",
-                    comment: "Accessibility label for session with task"
-                ),
-                session.sessionName,
-                task
-            )
-        } ?? session.sessionName)
+            LocalizedStringKey("\(session.sessionName): \(task)")
+        } ?? LocalizedStringKey(session.sessionName))
     }
 
     private func accessibilityHint() -> Text {
-        Text(NSLocalizedString(
-            "settings_accessibility_edit_actions",
-            comment: "Accessibility hint for edit actions"
-        ))
+        Text(LocalizedStringKey("settings_accessibility_edit_actions"))
     }
 
     // MARK: - Row Labels (extracted)
@@ -369,11 +347,11 @@ private extension EmbeddedSessionManagementView {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolLarge)
 
-            Text(NSLocalizedString("empty_custom_sessions_title", comment: ""))
+            Text(Labels.State.noCustomSessionsYet)
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
-            Text(NSLocalizedString("empty_custom_sessions_subtitle", comment: ""))
+            Text(LocalizedStringKey("empty_custom_sessions_subtitle"))
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .multilineTextAlignment(.center)
@@ -389,7 +367,7 @@ private extension EmbeddedSessionManagementView {
         Button {
             activeSheet = .create
         } label: {
-            Label(NSLocalizedString("add_custom_session", comment: ""), systemImage: "plus")
+            Label(Copy.Link.addCustomSession, systemImage: "plus")
                 .font(DesignTokens.Fonts.caption)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, DesignTokens.Padding.small)
