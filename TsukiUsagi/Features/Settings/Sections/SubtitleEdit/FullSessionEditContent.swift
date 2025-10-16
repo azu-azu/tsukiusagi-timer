@@ -107,10 +107,10 @@ private extension FullSessionEditContent {
     /// セッション名編集部分
     var sessionNameSection: some View {
         VStack(alignment: .leading) {
-            Text(NSLocalizedString("session_name_label", comment: "Session name label"))
+            Text(Labels.InfoRow.sessionName)
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
-            TextField("Enter session name", text: Binding(
+            TextField(LocalizedStringKey("enter_session_name_placeholder"), text: Binding(
                 get: { [self] in self.sessionName },
                 set: { [self] newValue in
                     self.sessionName = newValue
@@ -134,7 +134,7 @@ private extension FullSessionEditContent {
     var tasksSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(NSLocalizedString("tasks_label", comment: "Tasks label"))
+                Text(Labels.InfoRow.tasks)
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
@@ -157,7 +157,7 @@ private extension FullSessionEditContent {
                     let isDuplicate = duplicateIDs.contains(draft.id)
 
                     TextField(
-                        "Task",
+                        LocalizedStringKey("task_placeholder"),
                         text: binding(for: draft.id)
                     )
                     .textFieldStyle(PlainTextFieldStyle())
@@ -217,7 +217,7 @@ private extension FullSessionEditContent {
             }
 
             // 入力ヒント
-            Text(NSLocalizedString("settings_add_tasks_description", comment: "Add tasks description"))
+            Text(LocalizedStringKey("settings_add_tasks_description"))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 .padding(.top, 4)
@@ -295,14 +295,11 @@ private extension FullSessionEditContent {
         let hasConflict = !duplicates.isEmpty
         if hadConflict != hasConflict {
             let message = hasConflict
-                ?
-                NSLocalizedString(
-                    "duplicate_tasks_detected",
-                    comment: "VoiceOver announcement when duplicates appear"
+                ? LocalizedStringKey(
+                    "duplicate_tasks_detected"
                 )
-                : NSLocalizedString(
-                    "duplicate_tasks_resolved",
-                    comment: "VoiceOver announcement when duplicates are resolved"
+                : LocalizedStringKey(
+                    "duplicate_tasks_resolved"
                 )
             UIAccessibility.post(notification: .announcement, argument: message)
         }

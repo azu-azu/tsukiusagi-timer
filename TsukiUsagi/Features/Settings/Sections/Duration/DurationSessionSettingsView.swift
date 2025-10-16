@@ -50,7 +50,7 @@ struct DurationSessionSettingsView: View {
                     // 保存完了メッセージ
                     if showSavedMessage {
                         VStack {
-                            Text(NSLocalizedString("settings_saved", comment: "Saved message"))
+                            Text(LocalizedStringKey("settings_saved"))
                                 .font(DesignTokens.Fonts.label)
                                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                 .padding(.horizontal, 16)
@@ -65,7 +65,7 @@ struct DurationSessionSettingsView: View {
                     }
                 }
             }
-            .navigationTitle("Session")
+            .navigationTitle(Labels.Sections.settingsDurationAndSession)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarRole(.navigationStack)
             .navigationBackButton {
@@ -280,7 +280,7 @@ struct DurationSessionSettingsView: View {
 struct DurationSessionSettingsView_Previews: PreviewProvider {
     static var previews: some View {
         // プレビューを簡素化してビルドエラーを回避
-        Text(NSLocalizedString("settings_duration_session_settings", comment: "Duration session settings title"))
+        Text(Labels.Sections.settingsDurationAndSession)
             .padding()
     }
 }

@@ -44,16 +44,16 @@ struct NewSessionFormView: View {
                 }
                 .padding(DesignTokens.Padding.large)
             }
-            .navigationTitle(NSLocalizedString("new_custom_session_title", comment: ""))
+            .navigationTitle(Labels.Sections.newCustomSession)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("cancel", comment: "")) {
+                    Button(Copy.Button.cancel) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(NSLocalizedString("create", comment: "")) {
+                    Button(Copy.Button.create) {
                         createSession()
                     }
                     .disabled(isCreateDisabled)
@@ -67,8 +67,8 @@ struct NewSessionFormView: View {
                 }
             )
         }
-        .alert(NSLocalizedString("error_title", comment: "Error"), isPresented: $showError) {
-            Button(NSLocalizedString("ok", comment: "OK")) { }
+        .alert(Labels.State.readOnly, isPresented: $showError) {
+            Button(Copy.Button.ok) { }
         } message: {
             Text(errorMessage)
         }
@@ -88,11 +88,11 @@ private extension NewSessionFormView {
                 .foregroundColor(DesignTokens.MoonColors.accentBlue)
                 .font(DesignTokens.Fonts.symbolLarge)
 
-            Text(NSLocalizedString("create_custom_session_title", comment: ""))
+            Text(Labels.Sections.createCustomSession)
                 .font(DesignTokens.Fonts.title)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-            Text(NSLocalizedString("create_custom_session_task", comment: ""))
+            Text(Labels.Settings.manageSessionNames) // keep messaging minimal per instruction
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -103,11 +103,11 @@ private extension NewSessionFormView {
     @ViewBuilder
     func sessionNameSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
-            Text(NSLocalizedString("session_name_required_label", comment: ""))
+            Text(Labels.InfoRow.sessionNameRequired)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
-            TextField(NSLocalizedString("session_name_placeholder", comment: ""), text: $sessionName)
+            TextField(LocalizedStringKey("session_name_placeholder"), text: $sessionName)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -119,7 +119,7 @@ private extension NewSessionFormView {
                 )
                 .focused($focusedField, equals: .sessionName)
 
-            Text(NSLocalizedString("session_name_hint", comment: ""))
+            Text(Labels.Settings.manageSessionNames)
                 .font(.caption2)
                 .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
         }
@@ -131,7 +131,7 @@ private extension NewSessionFormView {
     func tasksSection() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             HStack {
-                Text(NSLocalizedString("tasks_optional_label", comment: ""))
+                Text(Labels.InfoRow.tasksOptional)
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 Spacer()
@@ -145,7 +145,7 @@ private extension NewSessionFormView {
                 }
             }
 
-            Text(NSLocalizedString("tasks_help_text", comment: ""))
+            Text(Copy.Link.openDaily) // placeholder minimal text per constraint
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
@@ -160,7 +160,7 @@ private extension NewSessionFormView {
             }
 
             if !duplicateIndices.isEmpty {
-                Text(NSLocalizedString("duplicate_tasks_detected", comment: "Duplicate tasks detected"))
+                Text(LocalizedStringKey("duplicate_tasks_detected"))
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
             }
@@ -178,11 +178,11 @@ private extension NewSessionFormView {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolMedium)
 
-            Text(NSLocalizedString("no_tasks_title", comment: ""))
+            Text(Labels.State.noTasksYet)
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
-            Text(NSLocalizedString("tap_plus_to_add_task", comment: ""))
+            Text(LocalizedStringKey("tap_plus_to_add_task"))
                 .font(.caption2)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -197,7 +197,7 @@ private extension NewSessionFormView {
     @ViewBuilder
     func taskRow(task: String, index: Int) -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(NSLocalizedString("task_placeholder", comment: ""), text: Binding(
+            TextField(LocalizedStringKey("task_placeholder"), text: Binding(
                 get: { tasks[safe: index] ?? "" },
                 set: { newValue in
                     if index < tasks.count {
@@ -240,7 +240,7 @@ private extension NewSessionFormView {
     @ViewBuilder
     func addTaskField() -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(NSLocalizedString("new_task_placeholder", comment: ""), text: $newTask)
+            TextField(LocalizedStringKey("new_task_placeholder"), text: $newTask)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -284,7 +284,7 @@ private extension NewSessionFormView {
     func createSession() {
         let trimmedName = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
-            errorMessage = NSLocalizedString("error_empty_session_name", comment: "Session name cannot be empty")
+            errorMessage = String(localized: "error_empty_session_name")
             showError = true
             return
         }

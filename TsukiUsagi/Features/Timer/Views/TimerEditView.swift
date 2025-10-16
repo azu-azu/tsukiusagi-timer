@@ -87,10 +87,7 @@ struct TimerEditView: View {
                             VStack(alignment: .leading, spacing: 24) {
                             // Session Label
                             sectionBuilder.section(
-                                title: NSLocalizedString(
-                                    "timer_edit_session_label_section_title",
-                                    comment: "Title for session label section"
-                                ),
+                                title: Labels.Sections.sessionLabel,
                                 isCompact: true
                             ) {
                                 SessionLabelSection(
@@ -107,10 +104,7 @@ struct TimerEditView: View {
                             // Final Time
                             sectionBuilder.section(title: "", isCompact: true) {
                                 DatePicker(
-                                    NSLocalizedString(
-                                        "timer_edit_final_time_title",
-                                        comment: "Label for the final time picker"
-                                    ),
+                                    Labels.Sections.finalTime,
                                     selection: $editedEnd,
                                     in: minEnd...,
                                     displayedComponents: [.hourAndMinute]
@@ -123,7 +117,7 @@ struct TimerEditView: View {
 
                             // Reflect
                             sectionBuilder.section(
-                                title: NSLocalizedString("reflection_title", comment: "Reflection title"),
+                                title: Labels.Sections.reflection,
                                 isCompact: true
                             ) {
                                 TextEditor(text: $editedMemo)
@@ -139,10 +133,7 @@ struct TimerEditView: View {
                                             if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                                 HStack {
                                                     VStack(alignment: .leading, spacing: 4) {
-                                                        Text(NSLocalizedString(
-                                                            "reflection_placeholder",
-                                                            comment: "Reflection placeholder"
-                                                        ))
+                                                        Text(LocalizedStringKey("reflection_placeholder"))
                                                             .font(DesignTokens.Fonts.label)
                                                             .foregroundColor(DesignTokens.MoonColors.textMuted)
                                                         Spacer()
@@ -254,10 +245,7 @@ struct TimerEditView: View {
                     dismiss()
                     UIAccessibility.post(
                         notification: .announcement,
-                        argument: NSLocalizedString(
-                            Copy.Label.saved,
-                            comment: "Announcement when timer edit is saved"
-                        )
+                        argument: Copy.Label.saved
                     )
                 }
             }
@@ -280,10 +268,7 @@ struct TimerEditView: View {
                 }
                 UIAccessibility.post(
                     notification: .announcement,
-                    argument: NSLocalizedString(
-                        "timer_edit_reset_announcement",
-                        comment: "Announcement when timer edit resets to original values"
-                    )
+                    argument: LocalizedStringKey("timer_edit_reset_announcement")
                 )
             }
         }

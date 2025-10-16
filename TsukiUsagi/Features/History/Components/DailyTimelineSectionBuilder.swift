@@ -212,7 +212,7 @@ extension DailyTimelineSectionBuilder {
     /// メモセクションヘッダー
     @ViewBuilder
     private func memoSectionHeader() -> some View {
-        Text(NSLocalizedString("history_memo_reflection", comment: "Reflection section title"))
+        Text(Labels.Sections.reflection)
             .font(.caption)
             .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
@@ -286,10 +286,10 @@ extension DailyTimelineSectionBuilder {
     private func addMemoButton(onMemoEdit: @escaping (SessionRecord) -> Void) -> some View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(NSLocalizedString("history_memo_add_reflection", comment: "Add reflection button text"))
+                Text(Labels.Sections.addReflection)
                     .font(.body)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
-                Text(NSLocalizedString("history_memo_add_reflection_hint", comment: "Add reflection hint text"))
+                Text(LocalizedStringKey("history_memo_add_reflection_hint"))
                     .font(.caption)
                     .foregroundColor(DesignTokens.MoonColors.textMuted)
             }

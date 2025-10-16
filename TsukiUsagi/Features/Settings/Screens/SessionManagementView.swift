@@ -30,11 +30,11 @@ struct SessionManagementView: View {
             LazyVStack(alignment: .leading, spacing: DesignTokens.Spacing.section) {
                 // Header
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
-                    Text(NSLocalizedString("session_management_title", comment: ""))
+                    Text(Labels.Sections.sessionManagement)
                         .font(DesignTokens.Fonts.title)
                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                    Text(NSLocalizedString("session_management_subtitle", comment: ""))
+                    Text(LocalizedStringKey("session_management_subtitle"))
                         .font(DesignTokens.Fonts.caption)
                         .foregroundColor(DesignTokens.MoonColors.textMuted)
                 }
@@ -94,7 +94,7 @@ struct SessionManagementView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             if let session = selectedSession {
-                Text("Are you sure you want to delete '\(session.sessionName)'?")
+                Text(LocalizedStringKey("delete_session_message \(session.sessionName)"))
             }
         }
         .navigationTitle("Session Management")
@@ -124,7 +124,7 @@ extension SessionManagementView {
 
     @ViewBuilder
     fileprivate func defaultSessionsHeader() -> some View {
-        Text(NSLocalizedString("default_sessions_title", comment: ""))
+        Text(Labels.Sections.defaultSessions)
             .font(DesignTokens.Fonts.sectionTitle)
             .foregroundColor(DesignTokens.MoonColors.textSecondary)
     }
@@ -147,7 +147,7 @@ extension SessionManagementView {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: { Label(Copy.Button.edit, systemImage: "pencil") }
+            } label: { EditIconLabel() }
             .tint(DesignTokens.IconColors.pencil)
         }
 
@@ -175,7 +175,7 @@ extension SessionManagementView {
     @ViewBuilder
     fileprivate func customSessionsHeader() -> some View {
         HStack {
-            Text(NSLocalizedString("custom_sessions_title", comment: ""))
+            Text(Labels.Sections.customSessions)
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -215,7 +215,7 @@ extension SessionManagementView {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 presentEditSheet(for: session)
-            } label: { Label(Copy.Button.edit, systemImage: "pencil") }
+            } label: { EditIconLabel() }
             .tint(DesignTokens.IconColors.pencil)
 
             if !session.isDefault {
@@ -241,11 +241,11 @@ extension SessionManagementView {
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .font(DesignTokens.Fonts.symbolLarge)
 
-            Text(NSLocalizedString("empty_custom_sessions_title", comment: ""))
+            Text(Labels.State.noCustomSessionsYet)
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
 
-            Text(NSLocalizedString("empty_custom_sessions_subtitle", comment: ""))
+            Text(LocalizedStringKey("empty_custom_sessions_subtitle"))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                 .multilineTextAlignment(.center)
@@ -259,7 +259,7 @@ extension SessionManagementView {
         Button {
             activeSheet = .create
         } label: {
-            Label(NSLocalizedString("add_custom_session", comment: ""), systemImage: "plus")
+            Label(Copy.Link.addCustomSession, systemImage: "plus")
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
@@ -279,18 +279,7 @@ extension SessionManagementView {
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-                Text(
-                    String.localizedStringWithFormat(
-                        NSLocalizedString(
-                            "tasks_count",
-                            tableName: nil,
-                            bundle: .main,
-                            value: "%d tasks",
-                            comment: "Pluralized tasks count"
-                        ),
-                        session.tasks.count
-                    )
-                )
+                Text("\(session.tasks.count) tasks")
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
             }

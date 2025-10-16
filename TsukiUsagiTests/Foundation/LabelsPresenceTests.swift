@@ -4,8 +4,8 @@ import XCTest
 final class LabelsPresenceTests: XCTestCase {
     func testReflectionLabelsExist() {
         // Verify namespace separation (NSLocalizedString comparison)
-        XCTAssertEqual(Labels.Sections.reflection, NSLocalizedString("reflection_title", comment: ""))
-        XCTAssertEqual(Labels.InfoRow.reflection, NSLocalizedString("history_memo_reflection", comment: ""))
+        XCTAssertEqual(Labels.Sections.reflection, String(localized: LocalizedStringKey("reflection_title")))
+        XCTAssertEqual(Labels.InfoRow.reflection, String(localized: LocalizedStringKey("history_memo_reflection")))
     }
 
     func testNoQuestionMarksInLabels() {
