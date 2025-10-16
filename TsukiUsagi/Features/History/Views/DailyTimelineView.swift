@@ -13,6 +13,7 @@ struct DailyTimelineView: View {
     private let gestureHandler = DailyTimelineGestureHandler()
     private let dataProvider = DailyTimelineDataProvider()
     @FocusState private var isReflectionFocused: Bool
+    @State private var showReflectionSheet = false
 
     // 既存のプロパティ（後方互換性のため保持）
     @State private var restoreError: String?
@@ -59,6 +60,11 @@ struct DailyTimelineView: View {
                         onRetry: { detailViewModel.retry() },
                         focus: $isReflectionFocused
                     )
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        isReflectionFocused = false
+                        showReflectionSheet = true
+                    }
 
                     sectionBuilder.dayModeRecordsSection(
                         records: viewModel.records(historyVM: historyVM),
@@ -94,6 +100,14 @@ struct DailyTimelineView: View {
         }
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
         .modifier(DailyTimelineKeyboardAwareInset(isEnabled: false))
+        .sheet(isPresented: $showReflectionSheet) {
+            LargeTextEditorSheet(
+                text: $detailViewModel.reflectionText,
+                title: Labels.Sections.reflection,
+                placeholder: LocalizedStringKey("reflection_placeholder"),
+                onClose: { showReflectionSheet = false }
+            )
+        }
         .onAppear {
             detailViewModel.attach(historyViewModel: historyVM)
             // View Details画面ではbackスワイプを有効化

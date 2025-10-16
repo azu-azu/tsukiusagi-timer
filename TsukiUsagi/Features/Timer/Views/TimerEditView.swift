@@ -25,6 +25,7 @@ struct TimerEditView: View {
     @State private var memoAnchorGlobalMaxY: CGFloat = 0
     @State private var keyboardEndFrame: CGRect = .zero
     @State private var bottomLiftPadding: CGFloat = 0
+    @State private var showMemoSheet: Bool = false
 
     // SettingsViewと同じ定数
     private let topPadding: CGFloat = 8
@@ -147,6 +148,18 @@ struct TimerEditView: View {
                                         }
                                     )
 
+                                HStack {
+                                    Spacer()
+                                    Button {
+                                        isMemoFocused = false
+                                        showMemoSheet = true
+                                    } label: {
+                                        Label(Copy.Button.expand, systemImage: "arrow.up.left.and.arrow.down.right")
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityIdentifier("open_memo_sheet_button")
+                                }
+
                                 // TextEditor直下に小さなアンカーを置く
                                 Color.clear
                                     .frame(height: 1)
@@ -238,6 +251,14 @@ struct TimerEditView: View {
             }
             .onDisappear {
                 closeKeyboard()
+            }
+            .sheet(isPresented: $showMemoSheet) {
+                LargeTextEditorSheet(
+                    text: $editedMemo,
+                    title: Labels.Sections.reflection,
+                    placeholder: LocalizedStringKey("reflection_placeholder"),
+                    onClose: { showMemoSheet = false }
+                )
             }
             .task {
                 // 編集対象は「最後に記録された履歴」なので、History から初期値を読み込む
