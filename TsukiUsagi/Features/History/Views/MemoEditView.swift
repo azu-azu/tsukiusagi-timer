@@ -17,7 +17,7 @@ struct MemoEditView: View {
 
     // 新規追加かどうかを判定
     private var isNewRecord: Bool {
-        return record.sessionName == "New Reflection" && (record.memo?.isEmpty ?? true)
+        return false // legacy path removed
     }
 
     var body: some View {
@@ -44,11 +44,7 @@ struct MemoEditView: View {
                     Color.clear.frame(height: keyboardBottomInset)
                 }
             }
-            .navigationTitle(
-                isNewRecord
-                ? Labels.Sections.addReflection
-                : Labels.Sections.editReflection
-            )
+            .navigationTitle(Labels.Sections.editReflection)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -225,29 +221,8 @@ struct MemoEditView: View {
         let trimmedMemo = editedMemo.trimmingCharacters(in: .whitespacesAndNewlines)
         let finalMemo = trimmedMemo.isEmpty ? nil : trimmedMemo
 
-        if isNewRecord {
-            // 新規追加の場合
-            if let finalMemo = finalMemo {
-                // 新規反映は詳細画面の対象日に紐付ける
-                let now = Date()
-                let startOnTarget = anchoredDateTime(baseDay: anchorDate ?? record.start, timeOf: now)
-                let endOnTarget = startOnTarget.addingTimeInterval(60) // 1分幅でソート上の視認性を確保
-                let newRecord = SessionRecord(
-                    id: UUID().uuidString,
-                    start: startOnTarget,
-                    end: endOnTarget,
-                    phase: .focus,
-                    sessionName: "Reflection",
-                    task: nil,
-                    memo: finalMemo,
-                    completedSilently: nil
-                )
-                historyVM.addRecord(newRecord)
-            }
-        } else {
-            // 既存レコードの更新
-            historyVM.updateMemo(for: record.id, newMemo: finalMemo)
-        }
+        // 既存レコードの更新のみサポート（legacy new-record path removed)
+        historyVM.updateMemo(for: record.id, newMemo: finalMemo)
 
         dismiss()
     }
