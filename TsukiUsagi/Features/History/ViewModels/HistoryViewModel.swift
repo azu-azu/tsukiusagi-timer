@@ -177,6 +177,18 @@ class HistoryViewModel: ObservableObject {
         saveHistory()
     }
 
+    // MARK: - Reflection Append Convenience
+
+    /// Append a new reflection line to the day's reflection using normalization and short-window dedupe.
+    func appendToReflection(for date: Date, newLine raw: String) {
+        let newLine = normalize(raw)
+        guard !newLine.isEmpty else { return }
+        let existing = reflectionText(for: date).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard dedupeAllow(day: HistoryDateKey.dayKey(for: date), text: newLine) else { return }
+        let combined = existing.isEmpty ? newLine : existing + "\n\n" + newLine
+        updateReflection(for: date, text: normalize(combined))
+    }
+
     // MARK: - isDeleted判定
 
     func isDeleted(sessionManager: SessionManager, sessionName: String) -> Bool {
@@ -453,8 +465,28 @@ class HistoryViewModel: ObservableObject {
     }
 }
 
-// MARK: - Retry helpers
+// MARK: - Helpers (Normalization, Dedupe, Retry)
 private extension HistoryViewModel {
+    // Normalize reflection text: CRLF->LF, trim trailing spaces per line, collapse 3+ blank lines to 2, trim ends
+    func normalize(_ s: String) -> String {
+        var t = s.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+        let parts = t.split(separator: "\n", omittingEmptySubsequences: false)
+        t = parts.map { $0.trimmingCharacters(in: .whitespaces) }.joined(separator: "\n")
+        while t.contains("\n\n\n") { t = t.replacingOccurrences(of: "\n\n\n", with: "\n\n") }
+        return t.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    // Short-window dedupe for identical immediate appends per day
+    private static var recentAppends: [Date: String] = [:]
+    func dedupeAllow(day: Date, text: String) -> Bool {
+        if Self.recentAppends[day] == text { return false }
+        Self.recentAppends[day] = text
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            Self.recentAppends[day] = nil
+        }
+        return true
+    }
+
     func markReflectionsAsSaved(_ snapshotReflections: [Date: DayReflection]) {
         var updated = reflectionsByDay
         for (date, reflection) in snapshotReflections where reflection.isPendingSave {
