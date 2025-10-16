@@ -17,7 +17,6 @@ struct DailyTimelineView: View {
     // 既存のプロパティ（後方互換性のため保持）
     @State private var restoreError: String?
     @State private var showRestoreAlert = false
-    @State private var selectedRecordForMemoEdit: SessionRecord?
     private let cal = Calendar.current
     private let dayModeCardHeight: CGFloat = 40
     private let dayModeCardSpacing: CGFloat = 2
@@ -30,10 +29,7 @@ struct DailyTimelineView: View {
         self._viewModel = StateObject(wrappedValue: DailyTimelineViewModel(targetDate: targetDate))
         self._detailViewModel = StateObject(wrappedValue: HistoryDetailViewModel(targetDate: targetDate))
     }
-    private var inlineReflectionEnabled: Bool { FeatureFlags.historyInlineReflection }
-    private var memoSheetBinding: Binding<SessionRecord?> {
-        inlineReflectionEnabled ? .constant(nil) : $selectedRecordForMemoEdit
-    }
+
     var body: some View {
         VStack(spacing: 0) {
             TotalCard(text: TimeFormatters.totalTextWithSeconds(
@@ -43,44 +39,34 @@ struct DailyTimelineView: View {
 
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    if inlineReflectionEnabled {
-                        let sessionSummaries = dataProvider
-                            .daySessionSummaries(historyVM: historyVM, targetDate: targetDate)
-                        if !sessionSummaries.isEmpty {
-                            DailyTimelineSummaryTreeView(
-                                sessions: sessionSummaries,
-                                displayName: { sessionName in
-                                    historyVM.displaySessionName(
-                                        sessionManager: sessionManager,
-                                        sessionName: sessionName
-                                    )
-                                }
-                            )
-                        }
-                        DailyTimelineInlineReflectionSection(
-                            text: $detailViewModel.reflectionText,
-                            isSaving: detailViewModel.isSaving,
-                            error: detailViewModel.error,
-                            onRetry: { detailViewModel.retry() },
-                            focus: $isReflectionFocused
+                    let sessionSummaries = dataProvider
+                        .daySessionSummaries(historyVM: historyVM, targetDate: targetDate)
+                    if !sessionSummaries.isEmpty {
+                        DailyTimelineSummaryTreeView(
+                            sessions: sessionSummaries,
+                            displayName: { sessionName in
+                                historyVM.displaySessionName(
+                                    sessionManager: sessionManager,
+                                    sessionName: sessionName
+                                )
+                            }
                         )
-                    } else {
-                        if viewModel.records(historyVM: historyVM).count > 1 {
-                            sectionBuilder.activitySummarySection(summaries: viewModel.byActivity(historyVM: historyVM))
-                            sectionBuilder.taskSummarySection(summaries: viewModel.byTask(historyVM: historyVM))
-                        }
-                        memoSection()
                     }
+                    DailyTimelineInlineReflectionSection(
+                        text: $detailViewModel.reflectionText,
+                        isSaving: detailViewModel.isSaving,
+                        error: detailViewModel.error,
+                        onRetry: { detailViewModel.retry() },
+                        focus: $isReflectionFocused
+                    )
 
                     sectionBuilder.dayModeRecordsSection(
                         records: viewModel.records(historyVM: historyVM),
-                        showsMemoButton: !inlineReflectionEnabled,
+                        showsMemoButton: false,
                         onRestore: { record in
                             viewModel.restoreRecord(record, historyVM: historyVM, sessionManager: sessionManager)
                         },
-                        onMemoEdit: { record in
-                            viewModel.selectRecordForMemoEdit(record)
-                        }
+                        onMemoEdit: { _ in }
                     )
                 }
                 .padding(.horizontal)
@@ -106,25 +92,17 @@ struct DailyTimelineView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-        .sheet(item: memoSheetBinding) { record in
-            MemoEditView(record: record, anchorDate: targetDate)
-        }
         .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
-        .modifier(DailyTimelineKeyboardAwareInset(isEnabled: !inlineReflectionEnabled))
+        .modifier(DailyTimelineKeyboardAwareInset(isEnabled: false))
         .onAppear {
-            if inlineReflectionEnabled {
-                detailViewModel.attach(historyViewModel: historyVM)
-                selectedRecordForMemoEdit = nil
-            }
+            detailViewModel.attach(historyViewModel: historyVM)
             // View Details画面ではbackスワイプを有効化
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 enableBackSwipeGesture()
             }
         }
         .onDisappear {
-            if inlineReflectionEnabled {
-                detailViewModel.flush()
-            }
+            detailViewModel.flush()
             // History画面に戻る際はbackスワイプを無効化
             disableBackSwipeGesture()
         }
@@ -296,135 +274,6 @@ private struct DailyTimelineKeyboardAwareInset: ViewModifier {
 }
 
 private extension DailyTimelineView {
-    // MARK: - Records Section
-    @ViewBuilder
-    private func dayModeRecordsSection() -> some View {
-        VStack(alignment: .leading, spacing: dayModeCardSpacing) {
-            ForEach(records()) { rec in
-                recordRow(rec)
-            }
-        }
-    }
-    @ViewBuilder
-    private func recordRow(_ rec: SessionRecord) -> some View {
-        let isDeleted = historyVM.isDeleted(sessionManager: sessionManager, sessionName: rec.sessionName)
-        let displayName = historyVM.displaySessionName(sessionManager: sessionManager, sessionName: rec.sessionName)
-        HStack(spacing: 0) {
-            timeRangeView(rec)
-            Spacer(minLength: 8)
-            activityInfoView(displayName: displayName, rec: rec, isDeleted: isDeleted)
-            actionButtonView(rec: rec, isDeleted: isDeleted)
-        }
-        .font(DesignTokens.Fonts.label)
-        .frame(minHeight: dayModeCardHeight, alignment: .leading)
-        .padding(.horizontal, DesignTokens.Padding.cardHorizontal)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(DesignTokens.CosmosColors.cardBackground)
-        )
-    }
-    @ViewBuilder
-    private func timeRangeView(_ rec: SessionRecord) -> some View {
-        Text(rec.start.formatted(date: .omitted, time: .shortened))
-            .monospacedDigit()
-            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-        Spacer().frame(width: 8)
-        Image(systemName: "arrow.right")
-            .font(DesignTokens.Fonts.caption)
-            .foregroundColor(DesignTokens.MoonColors.textSecondary)
-        Spacer().frame(width: 8)
-        Text(rec.end.formatted(date: .omitted, time: .shortened))
-            .monospacedDigit()
-            .foregroundColor(DesignTokens.MoonColors.textPrimary)
-    }
-    @ViewBuilder
-    private func activityInfoView(displayName: String, rec: SessionRecord, isDeleted: Bool) -> some View {
-        Text("\(displayName) \(durationSeconds(rec) / 60) min")
-            .foregroundColor(isDeleted ? DesignTokens.MoonColors.textMuted : DesignTokens.MoonColors.textPrimary)
-            .opacity(isDeleted ? 0.5 : 1.0)
-    }
-    @ViewBuilder
-    private func actionButtonView(rec: SessionRecord, isDeleted: Bool) -> some View {
-        if isDeleted {
-            restoreButton(rec: rec)
-        } else if !inlineReflectionEnabled {
-            memoButton(rec: rec)
-        }
-    }
-    @ViewBuilder
-    private func restoreButton(rec: SessionRecord) -> some View {
-        Button("Restore") {
-            do {
-                try historyVM.restore(record: rec, sessionManager: sessionManager)
-            } catch {
-                restoreError = error.localizedDescription
-                showRestoreAlert = true
-            }
-        }
-        .font(DesignTokens.Fonts.caption)
-        .foregroundColor(DesignTokens.MoonColors.accentBlue)
-    }
-    @ViewBuilder
-    private func memoButton(rec: SessionRecord) -> some View {
-        let hasMemo = rec.memo?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
-        Group {
-            if hasMemo {
-                EditIconButton(size: .small) {
-                    selectedRecordForMemoEdit = rec
-                }
-            } else {
-                Image(systemName: "plus")
-                    .font(DesignTokens.Fonts.caption)
-                    .foregroundStyle(DesignTokens.IconColors.pencil)
-            }
-        }
-    }
-    // MARK: - Data Methods
-    private func records() -> [SessionRecord] {
-        return dataProvider.records(historyVM: historyVM, targetDate: targetDate)
-    }
-    private func totalSeconds() -> Int {
-        return dataProvider.totalSeconds(historyVM: historyVM, targetDate: targetDate)
-    }
-    private func durationSeconds(_ rec: SessionRecord) -> Int {
-        return dataProvider.durationSeconds(rec)
-    }
-    // MARK: - Summary Sections
-    private func byActivity() -> [LabelSummary] {
-        return dataProvider.byActivity(historyVM: historyVM, targetDate: targetDate)
-    }
-    private func byTask() -> [LabelSummary] {
-        return dataProvider.byTask(historyVM: historyVM, targetDate: targetDate)
-    }
-    @ViewBuilder
-    private func activitySummarySection() -> some View {
-        sectionBuilder.activitySummarySection(summaries: byActivity())
-    }
-    @ViewBuilder
-    private func taskSummarySection() -> some View {
-        if !byTask().isEmpty {
-            sectionBuilder.taskSummarySection(summaries: byTask())
-        }
-    }
-
-    private func memoSection() -> some View {
-        let recordsWithMemos = recordsWithMemos()
-        let onMemoEditClosure: (SessionRecord) -> Void = { record in
-            self.selectRecordForMemoEdit(record)
-        }
-
-        // DailyTimelineSectionBuilderを直接インスタンス化
-        let sectionBuilder = DailyTimelineSectionBuilder()
-
-        return sectionBuilder.memoSection(records: recordsWithMemos, onMemoEdit: onMemoEditClosure)
-    }
-
-    private func recordsWithMemos() -> [SessionRecord] {
-        return dataProvider.recordsWithMemos(historyVM: historyVM, targetDate: targetDate)
-    }
-
-    // MARK: - Inline Reflection Views
-
     // MARK: - Back Swipe Control
     private func disableBackSwipeGesture() {
         DispatchQueue.main.async {
@@ -462,11 +311,6 @@ private extension DailyTimelineView {
             }
         }
         return nil
-    }
-
-    // MARK: - Memo Edit
-    private func selectRecordForMemoEdit(_ record: SessionRecord) {
-        selectedRecordForMemoEdit = record
     }
 
 }

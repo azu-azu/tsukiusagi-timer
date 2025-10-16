@@ -9,9 +9,6 @@ enum FeatureFlags {
         /// 統一UI の有効/無効
         static let unifiedUI = "enableUnifiedUI"
 
-        /// 履歴詳細のインラインReflection
-        static let historyInlineReflection = "enableHistoryInlineReflection"
-
         /// Streak機能のフラグ
         static let achievements = "enableAchievements"
         static let xp = "enableXP"
@@ -38,18 +35,7 @@ enum FeatureFlags {
         }
     }
 
-    /// 履歴詳細画面のインラインReflection導入フラグ
-    static var historyInlineReflection: Bool {
-        get {
-            if UserDefaults.standard.object(forKey: Keys.historyInlineReflection) == nil {
-                return false
-            }
-            return UserDefaults.standard.bool(forKey: Keys.historyInlineReflection)
-        }
-        set {
-            UserDefaults.standard.set(newValue, forKey: Keys.historyInlineReflection)
-        }
-    }
+    // historyInlineReflection removed: daily reflection is always enabled
 
     // MARK: - Streak Features
 
@@ -125,13 +111,7 @@ enum FeatureFlags {
             #endif
         }
 
-        if UserDefaults.standard.object(forKey: Keys.historyInlineReflection) == nil {
-            #if DEBUG
-                UserDefaults.standard.set(true, forKey: Keys.historyInlineReflection)
-            #else
-                UserDefaults.standard.set(false, forKey: Keys.historyInlineReflection)
-            #endif
-        }
+        // historyInlineReflection removed
 
         // Streak機能のデフォルト値設定（MVPでは全て false）
         let streakKeys = [Keys.achievements, Keys.xp, Keys.sharing, Keys.smartNotifications]
@@ -147,7 +127,7 @@ enum FeatureFlags {
     static func resetToDefaults() {
         #if DEBUG
             UserDefaults.standard.removeObject(forKey: Keys.unifiedUI)
-            UserDefaults.standard.removeObject(forKey: Keys.historyInlineReflection)
+            // historyInlineReflection removed
             // Streak機能のフラグもリセット
             let streakKeys = [Keys.achievements, Keys.xp, Keys.sharing, Keys.smartNotifications]
             for key in streakKeys {
@@ -165,7 +145,7 @@ enum FeatureFlags {
             return """
             Feature Flags Debug Info:
             - enableUnifiedUI: \(enableUnifiedUI)
-            - historyInlineReflection: \(historyInlineReflection)
+            // historyInlineReflection removed
             - achievements: \(achievements)
             - xp: \(xp)
             - sharing: \(sharing)
