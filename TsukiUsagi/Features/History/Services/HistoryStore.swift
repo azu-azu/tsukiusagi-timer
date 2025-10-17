@@ -112,15 +112,32 @@ private extension HistoryStore {
     }
 
     static func dictionary(from reflections: [DayReflection]) -> [Date: DayReflection] {
-        reflections.reduce(into: [:]) { result, reflection in
+        var result: [Date: DayReflection] = [:]
+        var collisions = 0
+
+        for var reflection in reflections {
             let key = HistoryDateKey.dayKey(for: reflection.date)
-            if let existing = result[key], existing.lastUpdatedAt > reflection.lastUpdatedAt {
-                return
+            if let existing = result[key] {
+                collisions += 1
+                if existing.lastUpdatedAt > reflection.lastUpdatedAt {
+                    continue
+                }
             }
-            var normalized = reflection
-            normalized.date = key
-            result[key] = normalized
+            reflection.date = key // normalize stored date to day key
+            result[key] = reflection
         }
+
+        if collisions > 0 {
+            NotificationCenter.default.post(
+                name: Notification.Name("HistoryReflectionsNormalized"),
+                object: collisions
+            )
+            #if DEBUG
+                print("[history_health] normalized_reflection_collisions=", collisions)
+            #endif
+        }
+
+        return result
     }
 
     func migrateLegacyPayload(_ payload: PersistedHistory) -> HistorySnapshot {
