@@ -48,7 +48,6 @@ enum Labels {
     enum State {
         static let noTask = NSLocalizedString("session_task_none", comment: "No task")
         static let noTasksConfigured = NSLocalizedString("session_task_none_available", comment: "No tasks configured")
-        static let noTasksYet = NSLocalizedString("no_tasks_title", comment: "No tasks yet")
         static let noCustomSessionsYet = NSLocalizedString(
             "empty_custom_sessions_title",
             comment: "No custom sessions yet"

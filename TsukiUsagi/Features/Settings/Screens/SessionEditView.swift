@@ -174,7 +174,7 @@ extension SessionEditView {
     fileprivate func tasksSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(Labels.InfoRow.tasks)
+                Text(Labels.InfoRow.tasksOptional)
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
@@ -189,9 +189,7 @@ extension SessionEditView {
                 }
             }
 
-            if editedTasks.isEmpty {
-                emptyTasksView()
-            } else {
+            if !editedTasks.isEmpty {
                 LazyVStack(spacing: 8) {
                     ForEach(Array(editedTasks.enumerated()), id: \.offset) { index, task in
                         taskRow(task: task, index: index)
@@ -202,26 +200,12 @@ extension SessionEditView {
             if showAddTaskField {
                 addTaskField()
             }
-        }
-    }
 
-    @ViewBuilder
-    fileprivate func emptyTasksView() -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: "text.bubble")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolLarge)
-
-            Text(Labels.State.noTasksYet)
+            // Match helper copy with default Manage Tasks
+            Text(LocalizedStringKey("settings_add_tasks_description"))
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(DesignTokens.MoonColors.textMuted.opacity(0.05))
-        )
     }
 
     @ViewBuilder
