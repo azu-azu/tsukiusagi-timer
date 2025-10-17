@@ -18,7 +18,7 @@
 "default_session_name_readonly_hint" = "デフォルトのセッション名は変更できません";
 "enter_session_name_placeholder" = "セッション名を入力";
 "tasks_label" = "タスク";
-"no_tasks_title" = "タスクはまだありません";
+// 未使用削除: no_tasks_title
 "task_placeholder" = "タスク";
 "new_task_placeholder" = "新しいタスク";
 "new_custom_session_title" = "新規カスタムセッション";
@@ -27,10 +27,10 @@
 "create_custom_session_task" = "カスタムセッションは、異なる文脈やプロジェクトを整理するのに役立ちます。\n名前やタスクを自由にカスタマイズでき、いつでも削除できます。";
 "session_name_required_label" = "セッション名 *";
 "session_name_placeholder" = "例: 個人プロジェクト、リサーチ";
-"session_name_hint" = "セッション名は重複しないように設定してください";
+// 未使用削除: session_name_hint
 "tasks_optional_label" = "タスク（任意）";
-"tasks_help_text" = "このセッション内の活動を整理するためにタスクを追加しましょう";
-"tap_plus_to_add_task" = "+ をタップして最初のタスクを追加";
+// 未使用削除: tasks_help_text
+// 未使用削除: tap_plus_to_add_task
 "duplicate_tasks_detected" = "タスクが重複しています";
 "duplicate_tasks_resolved" = "タスクの重複が解消されました";
 "error_title" = "エラー";
