@@ -144,14 +144,7 @@ private extension NewSessionFormView {
                         .font(DesignTokens.Fonts.symbolMedium)
                 }
             }
-
-            Text(Copy.Link.openDaily) // placeholder minimal text per constraint
-                .font(.caption2)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-
-            if tasks.isEmpty {
-                emptyTasksView()
-            } else {
+            if !tasks.isEmpty {
                 LazyVStack(spacing: DesignTokens.Spacing.medium) {
                     ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
                         taskRow(task: task, index: index)
@@ -168,31 +161,15 @@ private extension NewSessionFormView {
             if showAddTaskField {
                 addTaskField()
             }
-        }
-    }
 
-    @ViewBuilder
-    func emptyTasksView() -> some View {
-        VStack(spacing: DesignTokens.Spacing.medium) {
-            Image(systemName: "text.bubble")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolMedium)
-
-            Text(Labels.State.noTasksYet)
+            // Match default Manage Tasks helper text
+            Text(LocalizedStringKey("settings_add_tasks_description"))
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-
-            Text(LocalizedStringKey("tap_plus_to_add_task"))
-                .font(.caption2)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .foregroundColor(DesignTokens.MoonColors.textSecondary)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, DesignTokens.Padding.large)
-        .background(
-            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                .fill(DesignTokens.MoonColors.textMuted.opacity(0.05))
-        )
     }
+
+
 
     @ViewBuilder
     func taskRow(task: String, index: Int) -> some View {
