@@ -23,5 +23,3 @@ public struct ExpandIconButton: View {
         .accessibilityIdentifier(accessibilityId ?? "")
     }
 }
-
-
