@@ -170,6 +170,11 @@ private extension TaskEditContent {
                             ? DesignTokens.UtilityColors.duplicateWarning
                             : DesignTokens.MoonColors.textPrimary
                     )
+                    .foregroundColor(
+                        isDuplicate
+                            ? DesignTokens.UtilityColors.duplicateWarning
+                            : DesignTokens.MoonColors.textPrimary
+                    )
                     .background(DesignTokens.CosmosColors.cardBackground)
                     .cornerRadius(DesignTokens.CornerRadius.medium)
                     .overlay(

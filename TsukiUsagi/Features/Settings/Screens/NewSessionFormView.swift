@@ -111,6 +111,7 @@ private extension NewSessionFormView {
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 .background(DesignTokens.CosmosColors.cardBackground)
                 .cornerRadius(DesignTokens.CornerRadius.medium)
                 .overlay(
@@ -187,6 +188,11 @@ private extension NewSessionFormView {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(DesignTokens.CosmosColors.cardBackground)
+            .foregroundColor(
+                duplicateIndices.contains(index)
+                    ? DesignTokens.UtilityColors.duplicateWarning
+                    : DesignTokens.MoonColors.textPrimary
+            )
             .cornerRadius(DesignTokens.CornerRadius.medium)
             .overlay(
                 RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
@@ -219,6 +225,7 @@ private extension NewSessionFormView {
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
+                .foregroundColor(DesignTokens.MoonColors.textPrimary)
                 .background(DesignTokens.CosmosColors.cardBackground)
                 .cornerRadius(DesignTokens.CornerRadius.medium)
                 .overlay(

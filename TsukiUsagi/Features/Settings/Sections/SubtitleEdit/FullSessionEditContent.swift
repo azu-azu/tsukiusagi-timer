@@ -120,6 +120,7 @@ private extension FullSessionEditContent {
             .textFieldStyle(PlainTextFieldStyle())
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
+            .foregroundColor(DesignTokens.MoonColors.textPrimary)
             .background(DesignTokens.CosmosColors.cardBackground)
             .cornerRadius(DesignTokens.CornerRadius.medium)
             .overlay(
