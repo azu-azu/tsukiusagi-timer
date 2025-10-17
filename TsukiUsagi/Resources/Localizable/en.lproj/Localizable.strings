@@ -18,7 +18,7 @@
 "default_session_name_readonly_hint" = "Default session names cannot be changed";
 "enter_session_name_placeholder" = "Enter session name";
 "tasks_label" = "Tasks";
-"no_tasks_title" = "No tasks yet";
+// removed unused: no_tasks_title
 "task_placeholder" = "Task";
 "new_task_placeholder" = "New task";
 "new_custom_session_title" = "New Custom Session";
@@ -27,10 +27,10 @@
 "create_custom_session_task" = "Custom sessions help you organize different contexts or projects.\nYou can fully customize them including name, tasks, and delete them anytime.";
 "session_name_required_label" = "Session Name *";
 "session_name_placeholder" = "e.g., Personal Project, Research";
-"session_name_hint" = "Choose a unique name for your session";
+// removed unused: session_name_hint
 "tasks_optional_label" = "Tasks (Optional)";
-"tasks_help_text" = "Add tasks to help organize different activities within this session";
-"tap_plus_to_add_task" = "Tap + to add your first task";
+// removed unused: tasks_help_text
+// removed unused: tap_plus_to_add_task
 "duplicate_tasks_detected" = "Duplicate tasks detected";
 "duplicate_tasks_resolved" = "Duplicates resolved";
 "error_title" = "Error";
