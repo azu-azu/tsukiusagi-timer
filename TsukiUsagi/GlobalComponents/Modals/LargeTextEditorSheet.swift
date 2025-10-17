@@ -27,9 +27,10 @@ struct LargeTextEditorSheet: View {
             .navigationTitle(Text(title))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(Copy.Button.close) { onClose() }
-                        .accessibilityIdentifier("large_text_editor_sheet_close")
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    CollapseIconButton(accessibilityIdentifier: "large_text_editor_sheet_close") {
+                        onClose()
+                    }
                 }
             }
             .presentationDetents([.large])
