@@ -133,7 +133,7 @@ private extension TaskEditContent {
     var tasksSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(Labels.InfoRow.tasks)
+                Text(Labels.InfoRow.tasksOptional)
                     .font(DesignTokens.Fonts.caption)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                     .textCase(.uppercase)
