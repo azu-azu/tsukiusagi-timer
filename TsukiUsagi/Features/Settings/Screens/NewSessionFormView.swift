@@ -169,8 +169,6 @@ private extension NewSessionFormView {
         }
     }
 
-
-
     @ViewBuilder
     func taskRow(task: String, index: Int) -> some View {
         HStack(spacing: DesignTokens.Spacing.medium) {
