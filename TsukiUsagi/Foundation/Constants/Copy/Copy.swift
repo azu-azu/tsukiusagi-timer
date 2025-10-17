@@ -12,6 +12,7 @@ enum Copy {
         static let save = "Save"
         static let close = "Close"
         static let reset = "Reset"
+        static let expand = "Expand"
         static let ok = "OK"
         static let delete = NSLocalizedString("delete", comment: "Delete")
         static let create = NSLocalizedString("create", comment: "Create")

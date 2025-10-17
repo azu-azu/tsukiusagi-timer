@@ -33,7 +33,9 @@ final class DailyTimelineViewModel: ObservableObject {
 
     /// レコード一覧を取得
     func records(historyVM: HistoryViewModel) -> [SessionRecord] {
-        return historyVM.history.filter { calendar.isDate($0.start, inSameDayAs: targetDate) }
+        return historyVM.history
+            .filter { calendar.isDate($0.start, inSameDayAs: targetDate) }
+            .sorted { $0.start > $1.start }
     }
 
     /// 総時間（秒）を計算

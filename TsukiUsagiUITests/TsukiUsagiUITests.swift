@@ -32,6 +32,34 @@ final class TsukiUsagiUITests: XCTestCase {
     }
 
     @MainActor
+    func testReflectionSheetOpensFromDailyTimeline() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        // Navigate to History tab if needed
+        // Assuming default opens on main where History is accessible
+
+        // Try to find the expand button; fallback to tapping editor if present
+        let expandButton = app.buttons["open_reflection_sheet_button"]
+        if expandButton.waitForExistence(timeout: 3) {
+            expandButton.tap()
+        } else {
+            let editor = app.textViews["history_detail_reflection_editor"]
+            if editor.waitForExistence(timeout: 2) {
+                editor.tap()
+            }
+        }
+
+        // Verify sheet editor appears
+        let sheetEditor = app.textViews["large_text_editor_sheet_editor"]
+        XCTAssertTrue(sheetEditor.waitForExistence(timeout: 3))
+
+        // Close the sheet
+        let closeButton = app.buttons["large_text_editor_sheet_close"]
+        if closeButton.exists { closeButton.tap() }
+    }
+
+    @MainActor
     func testLaunchPerformance() throws {
         // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {
