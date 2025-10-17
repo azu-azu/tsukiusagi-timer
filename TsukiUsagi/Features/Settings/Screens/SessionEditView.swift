@@ -208,8 +208,6 @@ extension SessionEditView {
         }
     }
 
-
-
     @ViewBuilder
     fileprivate func taskRow(task: String, index: Int) -> some View {
         HStack(spacing: 8) {
