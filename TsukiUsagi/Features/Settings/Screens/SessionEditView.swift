@@ -174,7 +174,7 @@ extension SessionEditView {
     fileprivate func tasksSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(Labels.InfoRow.tasks)
+                Text(Labels.InfoRow.tasksOptional)
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
