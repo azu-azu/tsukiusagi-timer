@@ -204,7 +204,9 @@ final class TimerViewModel: ObservableObject {
         }
 
         engine.onSessionCompleted = { [weak self] sessionInfo in
-            self?.handleSessionCompleted(sessionInfo)
+            Task { @MainActor [weak self] in
+                await self?.handleSessionCompleted(sessionInfo)
+            }
         }
     }
 
@@ -278,7 +280,9 @@ final class TimerViewModel: ObservableObject {
         lifecycleCoordinator.willEnterForeground(
             params: params
         ) { [weak self] info in
-            self?.handleSessionCompleted(info)
+            Task { @MainActor [weak self] in
+                await self?.handleSessionCompleted(info)
+            }
         }
     }
 

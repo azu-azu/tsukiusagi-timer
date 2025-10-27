@@ -11,21 +11,29 @@ import Foundation
 extension TimerViewModel {
 
     /// タイマー開始
-    func startTimer() {
-        startTimerFromAnyState()
+    func startTimer() async {
+        await startTimerFromAnyState()
     }
 
     /// タイマー一時停止
-    func pauseTimer() {
+    func pauseTimer() async {
         stateManager.pauseTimer()
         notificationAndHapticManager.triggerLightHaptic()
         // 通知をキャンセル（一時停止中は通知不要）
         // debug log removed
         notificationService.cancelSessionEndNotification()
+
+        // Live Activity更新（一時停止状態を反映）
+        if let endAt = sessionManager.endAt {
+            await LiveActivityManager.shared.updateActivity(
+                isPaused: true,
+                newEndsAt: endAt
+            )
+        }
     }
 
     /// タイマー再開
-    func resumeTimer() {
+    func resumeTimer() async {
         // 再開時はフェーズを強制変更しない（休憩再開を潰さない）
         stateManager.resumeTimer()
         animationController.triggerStartAnimations()
@@ -35,6 +43,13 @@ extension TimerViewModel {
         if timeRemaining > 0 {
             let endAt = dateProvider.now().addingTimeInterval(TimeInterval(timeRemaining))
             sessionManager.setEndAt(endAt)
+
+            // Live Activity更新（再開状態を反映）
+            await LiveActivityManager.shared.updateActivity(
+                isPaused: false,
+                newEndsAt: endAt
+            )
+
             // 現在のフェーズに応じて再スケジュール（連鎖/冪等）
             if isWorkSession {
                 let workEndAt = endAt
@@ -54,21 +69,24 @@ extension TimerViewModel {
     }
 
     /// タイマー停止（完全停止 - セッションリセット）
-    func stopTimer() {
+    func stopTimer() async {
         // debug log removed
         stateManager.stopTimer()
         sessionManager.resetSession()
         notificationService.cancelSessionEndNotification()
         clearQuietMoonMessage()
+
+        // Live Activity終了
+        await LiveActivityManager.shared.endActivity()
     }
 
     /// タイマーリセット
-    func resetTimer(to seconds: Int) {
-        resetTimer(to: seconds, keepSession: false)
+    func resetTimer(to seconds: Int) async {
+        await resetTimer(to: seconds, keepSession: false)
     }
 
     /// タイマーリセット（セッション保持の有無を選択）
-    func resetTimer(to seconds: Int, keepSession: Bool) {
+    func resetTimer(to seconds: Int, keepSession: Bool) async {
         // debug log removed
         stateManager.resetTimer(to: seconds)
         if keepSession {
@@ -79,10 +97,13 @@ extension TimerViewModel {
         }
         animationController.resetAnimationState()
         notificationService.cancelSessionEndNotification()
+
+        // Live Activity終了
+        await LiveActivityManager.shared.endActivity()
     }
 
     /// セッション完了処理
-    func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) {
+    func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) async {
         // debug log removed
         let completedWasWorkSession = isWorkSession
         // 保存のSoT（真実）は endAt/セッション情報の endTime を優先
@@ -100,6 +121,9 @@ extension TimerViewModel {
 
         // ペンディング予約の重複を避けるためキャンセル
         notificationService.cancelSessionEndNotification()
+
+        // Live Activity終了
+        await LiveActivityManager.shared.endActivity()
 
         // 即時通知は送らない（開始時に予約済みのため、完了時は重複を避ける）
 
@@ -123,7 +147,7 @@ extension TimerViewModel {
     }
 
     /// 強制終了
-    func forceFinish() {
+    func forceFinish() async {
         guard startTime != nil && !isSessionFinished else { return }
         guard canForceFinish else { return }
         // debug log removed
@@ -146,6 +170,9 @@ extension TimerViewModel {
         notificationService.cancelSessionEndNotification()
 
         updateQuietMoonMessage(forCompletedWorkSession: completedWasWorkSession)
+
+        // Live Activity終了
+        await LiveActivityManager.shared.endActivity()
     }
 
     /// セッション完了状態をリセット
@@ -202,7 +229,7 @@ extension TimerViewModel {
     }
 
     /// Quiet Moon状態からの専用開始処理
-    func startFromQuietMoon() {
+    func startFromQuietMoon() async {
         performCompleteStateReset()
 
         // Workセッションとして開始
@@ -225,6 +252,12 @@ extension TimerViewModel {
         let endAt = dateProvider.now().addingTimeInterval(TimeInterval(workLengthMinutes * 60))
         sessionManager.setEndAt(endAt)
 
+        // Live Activity開始
+        await LiveActivityManager.shared.startActivity(
+            sessionKind: activityLabel,
+            endsAt: endAt
+        )
+
         // Work→Rest と Rest→Focus を開始時点で連鎖予約
         let workEndAt = endAt
         let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
@@ -239,16 +272,16 @@ extension TimerViewModel {
     }
 
     /// 状態に応じた分岐処理でタイマー開始（新しいエントリポイント）
-    func startTimerFromAnyState() {
+    func startTimerFromAnyState() async {
         if isSessionFinished {
-            startFromQuietMoon()
+            await startFromQuietMoon()
             return
         }
-        startTimerNormalFlow()
+        await startTimerNormalFlow()
     }
 
     /// 通常のタイマー開始フロー（既存のstartTimer()の内容）
-    private func startTimerNormalFlow() {
+    private func startTimerNormalFlow() async {
         // debug log removed
         // アイドル時は最新のworkMinutesを採用、進行/一時停止中は残り秒数を尊重
         let targetTime: Int = (runState == .idle) ? workLengthMinutes * 60 : timeRemaining
@@ -278,6 +311,13 @@ extension TimerViewModel {
         // 終了時刻を設定し、次フェーズの通知を連鎖で予約
         let endAt = dateProvider.now().addingTimeInterval(TimeInterval(targetTime))
         sessionManager.setEndAt(endAt)
+
+        // Live Activity開始
+        await LiveActivityManager.shared.startActivity(
+            sessionKind: activityLabel,
+            endsAt: endAt
+        )
+
         // 次のセッションの種類に応じて連鎖/冪等予約
         if isWorkSession {
             // Work→Rest と Rest→Focus を開始時点で連鎖予約
