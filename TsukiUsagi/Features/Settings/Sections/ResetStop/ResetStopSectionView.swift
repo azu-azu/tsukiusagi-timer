@@ -17,8 +17,10 @@ struct ResetStopSectionView: View {
                 // 🛑 Reset
                 if timerVM.canResetNow {
                     Button {
-                        timerVM.resetTimer(to: timerVM.workMinutes * 60)
-                        dismiss()
+                        Task { @MainActor in
+                            await timerVM.resetTimer(to: timerVM.workMinutes * 60)
+                            dismiss()
+                        }
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "arrow.uturn.backward")
@@ -45,8 +47,10 @@ struct ResetStopSectionView: View {
                 // 🛑 Stop
                 if timerVM.canStopNow {
                     Button {
-                        timerVM.forceFinish()
-                        dismiss()
+                        Task { @MainActor in
+                            await timerVM.forceFinish()
+                            dismiss()
+                        }
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "forward.end")

@@ -42,6 +42,9 @@ struct TsukiUsagiApp: App {
                 .environmentObject(timerVM)
                 .environmentObject(historyVM)
                 .environmentObject(sessionManager)
+                .onOpenURL { url in
+                    DeepLinkRouter.shared.handle(url: url)
+                }
         }
     }
 

@@ -115,9 +115,11 @@ struct SideMenuDurationView: View {
     private func resetButton() -> some View {
         if timerVM.canForceFinish {
             Button {
-                timerVM.resetTimer(to: timerVM.workMinutes * 60)
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isPresented = false
+                Task { @MainActor in
+                    await timerVM.resetTimer(to: timerVM.workMinutes * 60)
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isPresented = false
+                    }
                 }
             } label: {
                 HStack(spacing: 8) {
@@ -150,9 +152,11 @@ struct SideMenuDurationView: View {
     private func stopButton() -> some View {
         if timerVM.canStopNow {
             Button {
-                timerVM.forceFinish()
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isPresented = false
+                Task { @MainActor in
+                    await timerVM.forceFinish()
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isPresented = false
+                    }
                 }
             } label: {
                 HStack(spacing: 8) {

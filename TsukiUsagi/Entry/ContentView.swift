@@ -69,6 +69,13 @@ struct ContentView: View {
 
                 if context.hasValidSize {
                     mainScene(for: context)
+                        .onChange(of: DeepLinkRouter.shared.shouldOpenTimer) { oldValue, shouldOpen in
+                            if shouldOpen {
+                                // Deep Linkからタイマー画面を開く
+                                // 現在はタイマーがメイン画面のため、特別な処理は不要
+                                DeepLinkRouter.shared.reset()
+                            }
+                        }
                 }
             }
         }
@@ -314,10 +321,16 @@ private extension ContentView {
             isRunning: timerVM.isRunning,
             isSessionFinished: timerVM.isSessionFinished,
             showingSideMenu: $showingSideMenu,
-            onPause: { [weak timerVM] in timerVM?.pauseTimer() },
+            onPause: { [weak timerVM] in
+                Task { @MainActor in
+                    await timerVM?.pauseTimer()
+                }
+            },
             onStart: { [weak timerVM] in
                 isQuietMoonFocused = false
-                timerVM?.startTimer()
+                Task { @MainActor in
+                    await timerVM?.startTimer()
+                }
             }
         ))
         .id("footer-\(timerVM.isRunning)-\(timerVM.isSessionFinished)")
