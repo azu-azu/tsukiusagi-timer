@@ -52,6 +52,17 @@
                ReferencedContainer = "container:TsukiUsagi.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "326B31612E77F5910047FE81"
+               BuildableName = "TsukiUsagi-Watch Watch AppUITests.xctest"
+               BlueprintName = "TsukiUsagi-Watch Watch AppUITests"
+               ReferencedContainer = "container:TsukiUsagi.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

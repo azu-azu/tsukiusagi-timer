@@ -1,8 +1,8 @@
 //
 //  TimerActivityAttributes.swift
-//  TsukiUsagiLiveActivity
+//  TsukiUsagi
 //
-//  Created by Kazumi on 2025/01/19.
+//  Created by Kazumi on 2025/01/20.
 //
 
 import ActivityKit
@@ -10,6 +10,7 @@ import Foundation
 
 /// Live Activity のデータモデル
 ///
+/// App と Widget Extension で共有する
 /// TimerViewModelからタイマー開始時にLiveActivityManagerを通じて
 /// ActivityAttributesとして渡され、Widget側で表示される
 struct TimerActivityAttributes: ActivityAttributes {

@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  TsukiUsagi-Watch Watch App
 //
-//  Created by 松本和実 on 2025/09/15.
+//  Created by Azu on 2025/09/15.
 //
 
 import SwiftUI

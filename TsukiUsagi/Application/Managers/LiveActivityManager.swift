@@ -8,18 +8,6 @@
 import ActivityKit
 import Foundation
 
-/// Live Activity のデータモデル（Main App用）
-///
-/// Widget Extensionと共有するため、同じ構造を定義
-struct TimerActivityAttributes: ActivityAttributes {
-    struct ContentState: Codable, Hashable {
-        var endsAt: Date
-        var isPaused: Bool
-    }
-
-    var sessionKind: String
-}
-
 /// Live Activity を管理するシングルトン
 ///
 /// TimerViewModel からタイマーのライフサイクルに応じて
@@ -70,11 +58,14 @@ final class LiveActivityManager {
             )
             #if DEBUG
             print("🌙 LiveActivity: Started (\(sessionKind), endsAt: \(endsAt))")
+            print("🌙 enabled =", ActivityAuthorizationInfo().areActivitiesEnabled)
+            print("🌙 active count =", Activity<TimerActivityAttributes>.activities.count)
             #endif
         } catch {
             currentActivity = nil
             #if DEBUG
             print("🌙 LiveActivity: Failed to start → \(error)")
+            print("🌙 error details:", error.localizedDescription)
             #endif
         }
     }

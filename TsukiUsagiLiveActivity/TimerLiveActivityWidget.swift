@@ -10,7 +10,6 @@ import SwiftUI
 import WidgetKit
 
 /// Live Activity Widget の本体
-@main
 struct TimerLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TimerActivityAttributes.self) { context in
@@ -22,7 +21,7 @@ struct TimerLiveActivityWidget: Widget {
                     .foregroundColor(.white.opacity(0.8))
 
                 // 残り時間（中央、大きく、モノスペース）
-                Text(timerInterval: DateInterval(start: .now, end: context.state.endsAt),
+                Text(timerInterval: Date.now...context.state.endsAt,
                      countsDown: true)
                     .font(.title2)
                     .monospacedDigit()
@@ -51,7 +50,7 @@ struct TimerLiveActivityWidget: Widget {
 
                 DynamicIslandExpandedRegion(.trailing) {
                     // 右端：残り時間
-                    Text(timerInterval: DateInterval(start: .now, end: context.state.endsAt),
+                    Text(timerInterval: Date.now...context.state.endsAt,
                          countsDown: true)
                         .font(.title3)
                         .monospacedDigit()
@@ -61,7 +60,7 @@ struct TimerLiveActivityWidget: Widget {
 
             } compactLeading: {
                 // MARK: - Compact Leading（Island左側）
-                Text(timerInterval: DateInterval(start: .now, end: context.state.endsAt),
+                Text(timerInterval: Date.now...context.state.endsAt,
                      countsDown: true)
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .monospacedDigit()
@@ -84,7 +83,6 @@ struct TimerLiveActivityWidget: Widget {
                 }
                 .frame(width: 32, height: 32)
                 .widgetURL(URL(string: "tsukiusagi://timer"))
-                .contentMarginsDisabled()
 
             } minimal: {
                 // MARK: - Minimal（最小表示：🌙ロゴのみ）

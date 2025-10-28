@@ -2,7 +2,7 @@
 //  TsukiUsagi_Watch_Watch_AppTests.swift
 //  TsukiUsagi-Watch Watch AppTests
 //
-//  Created by 松本和実 on 2025/09/15.
+//  Created by Azu on 2025/09/15.
 //
 
 import Testing
