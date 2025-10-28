@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreText
+import ActivityKit
 
 @main
 struct TsukiUsagiApp: App {
@@ -44,6 +45,10 @@ struct TsukiUsagiApp: App {
                 .environmentObject(sessionManager)
                 .onOpenURL { url in
                     DeepLinkRouter.shared.handle(url: url)
+                }
+                .task {
+                    // アプリ起動時に孤児Activityをクリーンアップ
+                    await cleanupOrphanActivities()
                 }
         }
     }
@@ -92,5 +97,31 @@ struct TsukiUsagiApp: App {
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
 
+    }
+
+    /// アプリ起動時に残存する孤児Live Activityを終了
+    private func cleanupOrphanActivities() async {
+        #if DEBUG
+        let activeCountBefore = Activity<TimerActivityAttributes>.activities.count
+        print("🌙 Cleanup: Active activities count = \(activeCountBefore)")
+        #endif
+
+        for activity in Activity<TimerActivityAttributes>.activities {
+            let dismissPolicy: ActivityUIDismissalPolicy = .immediate
+            let currentContentState = TimerActivityAttributes.ContentState(
+                endsAt: Date(),
+                isPaused: false
+            )
+            await activity.end(.init(state: currentContentState, staleDate: nil), dismissalPolicy: dismissPolicy)
+
+            #if DEBUG
+            print("🌙 Cleanup: Ended orphan activity (\(activity.id))")
+            #endif
+        }
+
+        #if DEBUG
+        let activeCountAfter = Activity<TimerActivityAttributes>.activities.count
+        print("🌙 Cleanup: Active activities count after = \(activeCountAfter)")
+        #endif
     }
 }

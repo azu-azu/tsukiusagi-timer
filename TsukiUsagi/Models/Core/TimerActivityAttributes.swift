@@ -20,6 +20,8 @@ struct TimerActivityAttributes: ActivityAttributes {
         var endsAt: Date
         /// 一時停止中かどうか
         var isPaused: Bool
+        /// Pause中の固定残り秒（Pause時のみ有効）。nilなら未使用
+        var remainingSeconds: Int?
     }
 
     /// セッション種別（"Work", "Study", "Read", "Break" など）
