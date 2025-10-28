@@ -75,12 +75,13 @@ final class LiveActivityManager {
     /// - Parameters:
     ///   - isPaused: 一時停止中かどうか
     ///   - newEndsAt: 新しい終了予定時刻
-    func updateActivity(isPaused: Bool, newEndsAt: Date) async {
+    func updateActivity(isPaused: Bool, newEndsAt: Date, remainingSeconds: Int? = nil) async {
         guard let activity = currentActivity else { return }
 
         let contentState = TimerActivityAttributes.ContentState(
             endsAt: newEndsAt,
-            isPaused: isPaused
+            isPaused: isPaused,
+            remainingSeconds: remainingSeconds
         )
 
         await activity.update(.init(state: contentState, staleDate: nil))
