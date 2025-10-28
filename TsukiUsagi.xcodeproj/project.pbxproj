@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		326B314A2E77F5900047FE81 /* TsukiUsagi-Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 326B31492E77F58F0047FE81 /* TsukiUsagi-Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3291E8872E239566006B02CB /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 3291E8862E239566006B02CB /* Kingfisher */; };
+		3294C3AA2EAF8FAA00880498 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3294C3A92EAF8FAA00880498 /* WidgetKit.framework */; };
+		3294C3AC2EAF8FAA00880498 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3294C3AB2EAF8FAA00880498 /* SwiftUI.framework */; };
+		3294C3BD2EAF8FAD00880498 /* TsukiUsagiLiveActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3294C3A82EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +57,13 @@
 			remoteGlobalIDString = 32021C772DF97DF200A53A37;
 			remoteInfo = TsukiUsagi;
 		};
+		3294C3BB2EAF8FAD00880498 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 32021C702DF97DF200A53A37 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3294C3A72EAF8FAA00880498;
+			remoteInfo = TsukiUsagiLiveActivityExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -68,6 +78,17 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3294C3BE2EAF8FAD00880498 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3294C3BD2EAF8FAD00880498 /* TsukiUsagiLiveActivityExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -78,12 +99,35 @@
 		326B31492E77F58F0047FE81 /* TsukiUsagi-Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TsukiUsagi-Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		326B31582E77F5910047FE81 /* TsukiUsagi-Watch Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TsukiUsagi-Watch Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		326B31622E77F5910047FE81 /* TsukiUsagi-Watch Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TsukiUsagi-Watch Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3294C3A82EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TsukiUsagiLiveActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3294C3A92EAF8FAA00880498 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		3294C3AB2EAF8FAA00880498 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		32A3E4D52E10E6C100EBD3E2 /* TsukiUsagi.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TsukiUsagi.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3265784C2EB0A971000B047F /* Exceptions for "TsukiUsagi" folder in "TsukiUsagiLiveActivityExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/Core/TimerActivityAttributes.swift,
+			);
+			target = 3294C3A72EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension */;
+		};
+		3294C3C12EAF8FAD00880498 /* Exceptions for "TsukiUsagiLiveActivity" folder in "TsukiUsagiLiveActivityExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3294C3A72EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		32021C7A2DF97DF200A53A37 /* TsukiUsagi */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3265784C2EB0A971000B047F /* Exceptions for "TsukiUsagi" folder in "TsukiUsagiLiveActivityExtension" target */,
+			);
 			path = TsukiUsagi;
 			sourceTree = "<group>";
 		};
@@ -110,6 +154,14 @@
 		326B31652E77F5910047FE81 /* TsukiUsagi-Watch Watch AppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "TsukiUsagi-Watch Watch AppUITests";
+			sourceTree = "<group>";
+		};
+		3294C3AD2EAF8FAA00880498 /* TsukiUsagiLiveActivity */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3294C3C12EAF8FAD00880498 /* Exceptions for "TsukiUsagiLiveActivity" folder in "TsukiUsagiLiveActivityExtension" target */,
+			);
+			path = TsukiUsagiLiveActivity;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -158,6 +210,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3294C3A52EAF8FAA00880498 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3294C3AC2EAF8FAA00880498 /* SwiftUI.framework in Frameworks */,
+				3294C3AA2EAF8FAA00880498 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -170,6 +231,7 @@
 				326B314D2E77F5900047FE81 /* TsukiUsagi-Watch Watch App */,
 				326B315B2E77F5910047FE81 /* TsukiUsagi-Watch Watch AppTests */,
 				326B31652E77F5910047FE81 /* TsukiUsagi-Watch Watch AppUITests */,
+				3294C3AD2EAF8FAA00880498 /* TsukiUsagiLiveActivity */,
 				3291E8852E239566006B02CB /* Frameworks */,
 				32021C792DF97DF200A53A37 /* Products */,
 			);
@@ -185,6 +247,7 @@
 				326B31492E77F58F0047FE81 /* TsukiUsagi-Watch Watch App.app */,
 				326B31582E77F5910047FE81 /* TsukiUsagi-Watch Watch AppTests.xctest */,
 				326B31622E77F5910047FE81 /* TsukiUsagi-Watch Watch AppUITests.xctest */,
+				3294C3A82EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -192,6 +255,8 @@
 		3291E8852E239566006B02CB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3294C3A92EAF8FAA00880498 /* WidgetKit.framework */,
+				3294C3AB2EAF8FAA00880498 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -211,10 +276,12 @@
 				32021C742DF97DF200A53A37 /* Sources */,
 				32021C752DF97DF200A53A37 /* Frameworks */,
 				32021C762DF97DF200A53A37 /* Resources */,
+				3294C3BE2EAF8FAD00880498 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				3294C3BC2EAF8FAD00880498 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				32021C7A2DF97DF200A53A37 /* TsukiUsagi */,
@@ -361,6 +428,28 @@
 			productReference = 326B31622E77F5910047FE81 /* TsukiUsagi-Watch Watch AppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		3294C3A72EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3294C3C22EAF8FAD00880498 /* Build configuration list for PBXNativeTarget "TsukiUsagiLiveActivityExtension" */;
+			buildPhases = (
+				3294C3A42EAF8FAA00880498 /* Sources */,
+				3294C3A52EAF8FAA00880498 /* Frameworks */,
+				3294C3A62EAF8FAA00880498 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3294C3AD2EAF8FAA00880498 /* TsukiUsagiLiveActivity */,
+			);
+			name = TsukiUsagiLiveActivityExtension;
+			packageProductDependencies = (
+			);
+			productName = TsukiUsagiLiveActivityExtension;
+			productReference = 3294C3A82EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -395,6 +484,9 @@
 					326B31612E77F5910047FE81 = {
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = 32021C772DF97DF200A53A37;
+					};
+					3294C3A72EAF8FAA00880498 = {
+						CreatedOnToolsVersion = 16.4;
 					};
 				};
 			};
@@ -431,6 +523,7 @@
 				326B31482E77F58F0047FE81 /* TsukiUsagi-Watch Watch App */,
 				326B31572E77F5910047FE81 /* TsukiUsagi-Watch Watch AppTests */,
 				326B31612E77F5910047FE81 /* TsukiUsagi-Watch Watch AppUITests */,
+				3294C3A72EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -485,6 +578,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3294C3A62EAF8FAA00880498 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -530,6 +630,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3294C3A42EAF8FAA00880498 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -562,6 +669,11 @@
 			isa = PBXTargetDependency;
 			target = 32021C772DF97DF200A53A37 /* TsukiUsagi */;
 			targetProxy = 326B31772E7C25800047FE81 /* PBXContainerItemProxy */;
+		};
+		3294C3BC2EAF8FAD00880498 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3294C3A72EAF8FAA00880498 /* TsukiUsagiLiveActivityExtension */;
+			targetProxy = 3294C3BB2EAF8FAD00880498 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -704,6 +816,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -738,6 +851,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -979,6 +1093,60 @@
 			};
 			name = Release;
 		};
+		3294C3BF2EAF8FAD00880498 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZD854UM35V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TsukiUsagiLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TsukiUsagiLiveActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tsukiusagi.TsukiUsagi.TsukiUsagiLiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3294C3C02EAF8FAD00880498 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZD854UM35V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TsukiUsagiLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TsukiUsagiLiveActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tsukiusagi.TsukiUsagi.TsukiUsagiLiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1050,6 +1218,15 @@
 			buildConfigurations = (
 				326B31712E77F5910047FE81 /* Debug */,
 				326B31722E77F5910047FE81 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3294C3C22EAF8FAD00880498 /* Build configuration list for PBXNativeTarget "TsukiUsagiLiveActivityExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3294C3BF2EAF8FAD00880498 /* Debug */,
+				3294C3C02EAF8FAD00880498 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
