@@ -68,7 +68,7 @@ struct TimerLiveActivityWidget: Widget {
                                         .lineLimit(1)
                                 } else {
                                     Text(timerInterval: Date.now...context.state.endsAt,
-                                         countsDown: true)
+                                        countsDown: true)
                                         .font(.system(size: 28, weight: .semibold, design: .rounded))
                                         .monospacedDigit()
                                         .foregroundColor(.white)
