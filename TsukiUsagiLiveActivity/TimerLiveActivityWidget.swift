@@ -36,20 +36,11 @@ struct TimerLiveActivityWidget: Widget {
                     .frame(height: headerH)
 
                     // ── ボディ：半透明イエロー ──
-                    ZStack {
-                        Color.yellow.opacity(0.26)
-                    }
-                    .frame(height: bodyH)
-                    .overlay(alignment: .center) {
-                        // 3 カラム：［左ダミー | 中央(🌙+残り) | 右ダミー］
-                        HStack(spacing: 0) {
+                    GeometryReader { geo in
+                        ZStack {
+                            Color.yellow.opacity(0.26)
 
-                            // 左ダミー（“実体あり”で最適化されない）
-                            Rectangle()
-                                .fill(Color.black.opacity(0.001))
-                                .frame(maxWidth: .infinity, minHeight: 1)
-
-                            // 中央塊（自然幅のまま固定）
+                            // 中央塊を座標指定で“絶対中央”に配置
                             HStack(spacing: 10) {
                                 Image(systemName: "moon.fill")
                                     .resizable()
@@ -57,7 +48,6 @@ struct TimerLiveActivityWidget: Widget {
                                     .frame(width: 20, height: 20)
                                     .foregroundColor(.yellow.opacity(0.95))
 
-                                // Pause時は remainingSeconds を“そのまま”静的表示（endsAt/now から逆算しない）
                                 if context.state.isPaused, let secs = context.state.remainingSeconds {
                                     let minutes = secs / 60
                                     let seconds = secs % 60
@@ -76,15 +66,11 @@ struct TimerLiveActivityWidget: Widget {
                                         .contentTransition(.numericText())
                                 }
                             }
-                            .fixedSize() // ← 中央塊を"自然幅"に固定
-
-                            // 右ダミー（左と同じ重み）
-                            Rectangle()
-                                .fill(Color.black.opacity(0.001))
-                                .frame(maxWidth: .infinity, minHeight: 1)
+                            .fixedSize()
+                            .position(x: geo.size.width / 2, y: geo.size.height / 2)
                         }
-                        .frame(maxWidth: .infinity) // 親幅いっぱいに広げる
                     }
+                    .frame(height: bodyH)
                 }
                 // 枠線（いちばん外）
                 // .overlay(
