@@ -110,7 +110,7 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
             isRunning = storedRunState == "running"
             if storedRunState == "running", storedEndAtEpoch > 0 {
                 let nowTs = Date().timeIntervalSince1970
-                let remain = Int(ceil(max(0, storedEndAtEpoch - nowTs)))
+                let remain = Int(floor(max(0, storedEndAtEpoch - nowTs)))
                 timeRemaining = remain
             } else if storedRunState == "paused" {
                 timeRemaining = max(0, storedRemainingAtPause)
@@ -124,7 +124,7 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
         // Fallback: legacy behavior (pre-runState)
         if storedIsRunning && storedEndAtTimestamp > 0 {
             let nowTs = Date().timeIntervalSince1970
-            let remain = Int(ceil(max(0, storedEndAtTimestamp - nowTs)))
+            let remain = Int(floor(max(0, storedEndAtTimestamp - nowTs)))
             timeRemaining = remain
             isRunning = remain > 0
         } else {

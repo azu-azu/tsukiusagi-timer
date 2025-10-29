@@ -110,7 +110,8 @@ final class TimerLifecycleCoordinator {
 
     /// endAt から残り秒数を導出（負値は0に、端数は切り上げ）
     private func remainingSeconds(until endAt: Date, now: Date) -> Int {
-        return max(0, Int(ceil(endAt.timeIntervalSince(now))))
+        // Keep in sync with WidgetKit (.timer) which visually floors to current second
+        return max(0, Int(floor(endAt.timeIntervalSince(now))))
     }
 
     private func restoreTimerState() {
