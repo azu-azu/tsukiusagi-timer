@@ -284,6 +284,21 @@ final class TimerViewModel: ObservableObject {
                 await self?.handleSessionCompleted(info)
             }
         }
+
+        // 復帰直後の1ステップ（サイレント再始動）
+        if runState == .running {
+            // 1) 最初のフレームで正しい残り時間を反映（チラつき抑止）
+            if let endAt = sessionManager.endAt {
+                let now = dateProvider.now()
+                let remain = max(0, Int(ceil(endAt.timeIntervalSince(now))))
+                stateManager.timeRemaining = remain
+            }
+            // 2) アニメーションは発火しない（静かに復帰）
+            // 3) エンジンが止まっている場合のみ再開（重複起動防止）
+            if !stateManager.isRunning {
+                stateManager.resumeTimer()
+            }
+        }
     }
 
     // MARK: - Private Helpers are implemented in TimerViewModel+SessionControl
