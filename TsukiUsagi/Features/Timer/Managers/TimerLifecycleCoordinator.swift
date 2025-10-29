@@ -69,14 +69,13 @@ final class TimerLifecycleCoordinator {
         notificationAndHapticManager.appWillEnterForeground()
 
         // Task 1: Pre-update state before UI render
-        // 復帰直後に endAt を基準に timeRemaining を確定させ、
-        // 最初のフレームから正しい残り時間（0を含む）を描画できるようにする。
+        // 復帰直後のUI補正。ただし「一時停止中」は残り時間を再計算しない（ドリフト防止）。
         if !params.isSessionFinished {
             // 状態復元を先に実施
             restoreTimerState()
 
-            // endAt から残り時間を導出して即時反映（UI先行安定）
-            if let endAt = sessionManager.endAt {
+            // Running 中のみ endAt から残り時間を導出して即時反映
+            if stateManager.runState == .running, let endAt = sessionManager.endAt {
                 let now = dateProvider.now()
                 let remaining = remainingSeconds(until: endAt, now: now)
                 stateManager.timeRemaining = remaining
