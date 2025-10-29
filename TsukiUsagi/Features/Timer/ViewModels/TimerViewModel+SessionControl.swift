@@ -25,9 +25,11 @@ extension TimerViewModel {
 
         // Live Activity更新（一時停止状態を反映）
         if let endAt = sessionManager.endAt {
+            let remaining = timeRemaining // 現在の残り秒をスナップショット
             await LiveActivityManager.shared.updateActivity(
                 isPaused: true,
-                newEndsAt: endAt
+                newEndsAt: endAt,
+                remainingSeconds: remaining
             )
         }
     }
