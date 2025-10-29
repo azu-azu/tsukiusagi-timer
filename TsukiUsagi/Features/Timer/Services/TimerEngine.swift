@@ -64,7 +64,8 @@ final class TimerEngine: TimerEngineable {
 
     private func tick() {
         guard isRunning, let endAt else { return }
-        let remain = max(0, Int(ceil(endAt.timeIntervalSinceNow)))
+        // Align with WidgetKit timer (.timer) which effectively floors to the current second
+        let remain = max(0, Int(floor(endAt.timeIntervalSinceNow)))
         if remain != timeRemaining {
             timeRemaining = remain
             onTick?(timeRemaining)

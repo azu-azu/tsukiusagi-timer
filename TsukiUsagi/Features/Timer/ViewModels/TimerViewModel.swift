@@ -290,7 +290,8 @@ final class TimerViewModel: ObservableObject {
             // 1) 最初のフレームで正しい残り時間を反映（チラつき抑止）
             if let endAt = sessionManager.endAt {
                 let now = dateProvider.now()
-                let remain = max(0, Int(ceil(endAt.timeIntervalSince(now))))
+                // Match WidgetKit (.timer) rounding: floor to current second
+                let remain = max(0, Int(floor(endAt.timeIntervalSince(now))))
                 stateManager.timeRemaining = remain
             }
             // 2) アニメーションは発火しない（静かに復帰）
