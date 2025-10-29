@@ -68,21 +68,9 @@ final class TimerLifecycleCoordinator {
 #endif
         notificationAndHapticManager.appWillEnterForeground()
 
-        // Task 1: Pre-update state before UI render
-        // 復帰直後のUI補正。ただし「一時停止中」は残り時間を再計算しない（ドリフト防止）。
+        // Task 1: 状態復元。Paused時は残り時間を再計算しない（ドリフト防止）。
         if !params.isSessionFinished {
-            // 状態復元を先に実施
             restoreTimerState()
-
-            // Running 中のみ endAt から残り時間を導出して即時反映
-            if stateManager.runState == .running, let endAt = sessionManager.endAt {
-                let now = dateProvider.now()
-                let remaining = remainingSeconds(until: endAt, now: now)
-                stateManager.timeRemaining = remaining
-                #if DEBUG
-                // debug log removed
-                #endif
-            }
         }
 
         // Task 4: Add immediate completion when expired (endAt を唯一の真実として判定)
@@ -108,26 +96,12 @@ final class TimerLifecycleCoordinator {
             }
         }
 
-        // バックグラウンドで完了していない場合のみ再始動の判定（復元は上で済み）
-        if !params.isSessionFinished {
-            // 再始動の判定も endAt ベースに統一
-            if stateManager.runState == .running, let endAt = sessionManager.endAt {
-                let now = dateProvider.now()
-                let remaining = remainingSeconds(until: endAt, now: now)
-                if remaining > 0 {
-                    #if DEBUG
-                    // debug log removed
-                    #endif
-                    startFromRestoredIfNeeded()
-                } else {
-                    #if DEBUG
-                    // debug log removed
-                    #endif
-                }
-            } else {
-                #if DEBUG
-                    // debug log removed
-                #endif
+        // Task 5: Running 中のみタイマー再起動（状態は restoreTimerState で確定済み）
+        if !params.isSessionFinished, stateManager.runState == .running, let endAt = sessionManager.endAt {
+            let now = dateProvider.now()
+            if endAt > now {
+                // Engine に再起動を伝える（タイマーは1本のみ）
+                // Engine 側で整合済みのため、ここでは処理不要
             }
         }
     }
