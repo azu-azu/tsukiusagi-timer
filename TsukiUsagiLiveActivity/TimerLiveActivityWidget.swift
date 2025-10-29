@@ -57,11 +57,10 @@ struct TimerLiveActivityWidget: Widget {
                                     .frame(width: 20, height: 20)
                                     .foregroundColor(.yellow.opacity(0.95))
 
-                                // Pause時は静止表示、実行中は自動カウントダウン
-                                if context.state.isPaused {
-                                    let remaining = context.state.endsAt.timeIntervalSinceNow
-                                    let minutes = Int(remaining) / 60
-                                    let seconds = Int(remaining) % 60
+                                // Pause時は remainingSeconds を“そのまま”静的表示（endsAt/now から逆算しない）
+                                if context.state.isPaused, let secs = context.state.remainingSeconds {
+                                    let minutes = secs / 60
+                                    let seconds = secs % 60
                                     Text("\(minutes):\(String(format: "%02d", seconds))")
                                         .font(.system(size: 28, weight: .semibold, design: .rounded))
                                         .monospacedDigit()
@@ -104,11 +103,10 @@ struct TimerLiveActivityWidget: Widget {
             DynamicIsland {
                 // Expanded
                 DynamicIslandExpandedRegion(.leading) {
-                    // Pause時は静止表示、実行中は自動カウントダウン
-                    if context.state.isPaused {
-                        let remaining = context.state.endsAt.timeIntervalSinceNow
-                        let minutes = Int(remaining) / 60
-                        let seconds = Int(remaining) % 60
+                    // Pause時は remainingSeconds の固定値を表示
+                    if context.state.isPaused, let secs = context.state.remainingSeconds {
+                        let minutes = secs / 60
+                        let seconds = secs % 60
                         Text("\(minutes):\(String(format: "%02d", seconds))")
                             .font(.title3)
                             .monospacedDigit()
@@ -149,11 +147,10 @@ struct TimerLiveActivityWidget: Widget {
                 .frame(width: 32, height: 32)
                 .widgetURL(URL(string: "tsukiusagi://timer"))
             } compactTrailing: {
-                // Pause時は静止表示、実行中は自動カウントダウン
-                if context.state.isPaused {
-                    let remaining = context.state.endsAt.timeIntervalSinceNow
-                    let minutes = Int(remaining) / 60
-                    let seconds = Int(remaining) % 60
+                // Pause時は remainingSeconds の固定値を表示
+                if context.state.isPaused, let secs = context.state.remainingSeconds {
+                    let minutes = secs / 60
+                    let seconds = secs % 60
                     Text("\(minutes):\(String(format: "%02d", seconds))")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .monospacedDigit()
