@@ -69,6 +69,8 @@ struct PreviewData {
         class DummyNotification: PhaseNotificationServiceable {
             func sendStartNotification() {}
             func cancelNotification() {}
+            func cancelSessionEnd(for phase: PomodoroPhase) {}
+            func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {}
             func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
             func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
             func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}

@@ -8,6 +8,7 @@ import os
 protocol PhaseNotificationServiceable: AnyObject {
     func sendStartNotification()
     func cancelNotification()
+    func cancelSessionEnd(for phase: PomodoroPhase)
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase)
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool)
     func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool)
@@ -18,6 +19,7 @@ protocol PhaseNotificationServiceable: AnyObject {
     func sendPhaseChangeNotification(for phase: PomodoroPhase)
     func cancelSessionEndNotification()
     func cancelSessionEndAll()
+    func cancelSessionEndSafely(for completedPhase: PomodoroPhase)
     func finalizeWorkPhase()
     func finalizeBreakPhase()
 
@@ -47,26 +49,38 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
         notificationManager.cancelSessionEndNotification()
     }
 
+    func cancelSessionEnd(for phase: PomodoroPhase) {
+        notificationManager.removePending(for: phase)
+    }
+
+    /// 連鎖の2本（break+focus）が同時にpendingのときは何も消さない
+    func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {
+        Task {
+            let center = UNUserNotificationCenter.current()
+            let pending = await center.pendingNotificationRequests()
+            let countSessionEnd = pending.filter { $0.identifier.hasPrefix("SessionEnd.") }.count
+            if countSessionEnd >= 2 {
+                #if DEBUG
+                print("🔔 [cancel@safe] skip: both phases pending; keep chain intact")
+                #endif
+                return
+            }
+            notificationManager.removePending(for: completedPhase)
+        }
+    }
+
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
-        // 予約の衝突を防ぐため、これから張るIDの pending のみを取消
+        // 予約の衝突を防ぐため、これから張るフェーズのみを取消
         // debug log removed
-        let id = notificationManager.id(for: phase)
-        notificationManager.cancelSessionEndNotifications(ids: [id], removeDelivered: false, removePending: true)
+        notificationManager.removePending(for: phase)
         // バックグラウンド時の終了時刻通知をスケジューリング（後方互換性）
         notificationManager.scheduleSessionEndNotification(after: seconds, phase: phase)
     }
 
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {
-        // 予約の衝突を防ぐため、これから張るIDの pending のみを取消
+        // 予約の衝突を防ぐため、これから張るフェーズのみを取消
         // debug log removed
-        let focusId = notificationManager.id(for: .focus)
-        let breakId = notificationManager.id(for: .breakTime)
-        // まず全フェーズの pending を整理（過去予約の取りこぼし防止）
-        notificationManager.cancelSessionEndNotifications(
-            ids: [focusId, breakId],
-            removeDelivered: false,
-            removePending: true
-        )
+        notificationManager.removePending(for: phase)
         // FG での再START時、同フェーズの古い delivered が残っていると抑制される場合があるため整理
         if phase == .breakTime, UIApplication.shared.applicationState == .active {
             notificationManager.clearLastDelivered(for: .breakTime)
@@ -86,13 +100,7 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
 
             // キャンセルしてから再スケジュール
             // debug log removed
-            let focusId = notificationManager.id(for: .focus)
-            let breakId = notificationManager.id(for: .breakTime)
-            notificationManager.cancelSessionEndNotifications(
-                ids: [focusId, breakId],
-                removeDelivered: false,
-                removePending: true
-            )
+            notificationManager.removePending(for: phase)
             if phase == .breakTime,
                UIApplication.shared.applicationState == .active {
                 notificationManager.clearLastDelivered(for: .breakTime)
@@ -124,6 +132,9 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     func cancelSessionEndNotification() {
         // セッション終了通知の pending を prefix 単位でキャンセル
         // 一意ID (prefix.epoch.uuid) に対応
+        #if DEBUG
+        print("🔔 [cancel@call] global cancel from PhaseNotificationService.cancelSessionEndNotification")
+        #endif
         notificationManager.removeAllSessionEndPendingByPrefix()
     }
 

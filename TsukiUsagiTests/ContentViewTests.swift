@@ -147,6 +147,8 @@ private class DummyTimerEngine: TimerEngineable {
 private class DummyNotificationService: PhaseNotificationServiceable {
     func sendStartNotification() {}
     func cancelNotification() {}
+    func cancelSessionEnd(for phase: PomodoroPhase) {}
+    func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {}
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
     func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
@@ -154,6 +156,7 @@ private class DummyNotificationService: PhaseNotificationServiceable {
     func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
     func cancelSessionEndNotification() {}
+    func cancelSessionEndAll() {}
     func finalizeWorkPhase() {}
     func finalizeBreakPhase() {}
     func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
