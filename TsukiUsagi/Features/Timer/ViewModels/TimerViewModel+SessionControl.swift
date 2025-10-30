@@ -21,9 +21,6 @@ extension TimerViewModel {
         notificationAndHapticManager.triggerLightHaptic()
         // 通知をキャンセル（一時停止中は直近フェーズのみを取り消す）
         // debug log removed
-        #if DEBUG
-        print("🔔 [cancel@call] phase-scoped from pauseTimer phase=\(isWorkSession ? "breakTime" : "focus")")
-        #endif
         let phaseToCancel: PomodoroPhase = isWorkSession ? .breakTime : .focus
         notificationService.cancelSessionEnd(for: phaseToCancel)
 
@@ -79,9 +76,6 @@ extension TimerViewModel {
         // debug log removed
         stateManager.stopTimer()
         sessionManager.resetSession()
-        #if DEBUG
-        print("🔔 [cancel@call] global from stopTimer")
-        #endif
         notificationService.cancelSessionEndNotification()
         clearQuietMoonMessage()
 
@@ -105,9 +99,6 @@ extension TimerViewModel {
             clearQuietMoonMessage()
         }
         animationController.resetAnimationState()
-        #if DEBUG
-        print("🔔 [cancel@call] global from resetTimer(keepSession: \(keepSession))")
-        #endif
         notificationService.cancelSessionEndNotification()
 
         // Live Activity終了
@@ -133,9 +124,6 @@ extension TimerViewModel {
 
         // ペンディング予約の重複を避けるためキャンセル
         let completedPhase: PomodoroPhase = completedWasWorkSession ? .focus : .breakTime
-        #if DEBUG
-        print("🔔 [cancel@call] phase-scoped from handleSessionCompleted phase=\(completedPhase)")
-        #endif
         notificationService.cancelSessionEndSafely(for: completedPhase)
 
         // Live Activity終了
@@ -169,7 +157,6 @@ extension TimerViewModel {
         // debug log removed
 
         let completedWasWorkSession = isWorkSession
-
         sessionManager.completeSession(
             isWorkSession: isWorkSession,
             activityLabel: activityLabel,
@@ -183,11 +170,7 @@ extension TimerViewModel {
         notificationAndHapticManager.triggerHeavyHaptic()
 
         // スケジュール済みの通知をキャンセル
-        #if DEBUG
-        print("🔔 [cancel@call] global from forceFinish")
-        #endif
         notificationService.cancelSessionEndNotification()
-
         updateQuietMoonMessage(forCompletedWorkSession: completedWasWorkSession)
 
         // Live Activity終了
@@ -353,7 +336,6 @@ extension TimerViewModel {
                 timeSensitive: true
             )
         }
-
         // Send start pulse
         startPulse.send()
     }

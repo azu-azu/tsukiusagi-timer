@@ -60,9 +60,6 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
             let pending = await center.pendingNotificationRequests()
             let countSessionEnd = pending.filter { $0.identifier.hasPrefix("SessionEnd.") }.count
             if countSessionEnd >= 2 {
-                #if DEBUG
-                print("🔔 [cancel@safe] skip: both phases pending; keep chain intact")
-                #endif
                 return
             }
             notificationManager.removePending(for: completedPhase)
@@ -132,9 +129,6 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     func cancelSessionEndNotification() {
         // セッション終了通知の pending を prefix 単位でキャンセル
         // 一意ID (prefix.epoch.uuid) に対応
-        #if DEBUG
-        print("🔔 [cancel@call] global cancel from PhaseNotificationService.cancelSessionEndNotification")
-        #endif
         notificationManager.removeAllSessionEndPendingByPrefix()
     }
 
@@ -164,14 +158,8 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
                     options: [.alert, .sound, .badge]
                 ) { granted, error in
                     if let error = error {
-                        #if DEBUG
-                        print("🔔 通知許可リクエストでエラー: \(error.localizedDescription)")
-                        #endif
                         completion(false)
                     } else {
-                        #if DEBUG
-                        print("🔔 通知許可: \(granted ? "承認" : "拒否")")
-                        #endif
                         completion(granted)
                     }
                 }

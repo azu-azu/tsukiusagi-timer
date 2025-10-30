@@ -14,9 +14,7 @@ import Foundation
 /// Live Activity を開始・更新・終了する
 @MainActor
 final class LiveActivityManager {
-
     // MARK: - Singleton
-
     static let shared = LiveActivityManager()
 
     // MARK: - Private Properties
@@ -37,12 +35,7 @@ final class LiveActivityManager {
     ///   - endsAt: タイマー終了予定時刻
     func startActivity(sessionKind: String, endsAt: Date) async {
         // Live Activityが無効化されている場合は静かにスキップ
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
-            #if DEBUG
-            print("🌙 LiveActivity: Skipped (not enabled)")
-            #endif
-            return
-        }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
         // 既存のActivityがあれば終了（単一化ポリシー）
         await endActivityIfNeeded()
@@ -50,23 +43,13 @@ final class LiveActivityManager {
         // 新しいActivityを作成
         let attributes = TimerActivityAttributes(sessionKind: sessionKind)
         let contentState = TimerActivityAttributes.ContentState(endsAt: endsAt, isPaused: false)
-
         do {
             currentActivity = try await Activity<TimerActivityAttributes>.request(
                 attributes: attributes,
                 content: .init(state: contentState, staleDate: nil)
             )
-            #if DEBUG
-            print("🌙 LiveActivity: Started (\(sessionKind), endsAt: \(endsAt))")
-            print("🌙 enabled =", ActivityAuthorizationInfo().areActivitiesEnabled)
-            print("🌙 active count =", Activity<TimerActivityAttributes>.activities.count)
-            #endif
         } catch {
             currentActivity = nil
-            #if DEBUG
-            print("🌙 LiveActivity: Failed to start → \(error)")
-            print("🌙 error details:", error.localizedDescription)
-            #endif
         }
     }
 
@@ -77,18 +60,12 @@ final class LiveActivityManager {
     ///   - newEndsAt: 新しい終了予定時刻
     func updateActivity(isPaused: Bool, newEndsAt: Date, remainingSeconds: Int? = nil) async {
         guard let activity = currentActivity else { return }
-
         let contentState = TimerActivityAttributes.ContentState(
             endsAt: newEndsAt,
             isPaused: isPaused,
             remainingSeconds: remainingSeconds
         )
-
         await activity.update(.init(state: contentState, staleDate: nil))
-
-        #if DEBUG
-        print("🌙 LiveActivity: Updated (paused: \(isPaused), newEndsAt: \(newEndsAt))")
-        #endif
     }
 
     /// タイマー完了/キャンセル時にActivityを終了
@@ -101,7 +78,6 @@ final class LiveActivityManager {
     /// 既存のActivityがある場合は終了
     private func endActivityIfNeeded() async {
         guard let activity = currentActivity else { return }
-
         let dismissPolicy: ActivityUIDismissalPolicy = .immediate
         let currentContentState = TimerActivityAttributes.ContentState(
             endsAt: Date(),
@@ -109,10 +85,5 @@ final class LiveActivityManager {
         )
         await activity.end(.init(state: currentContentState, staleDate: nil), dismissalPolicy: dismissPolicy)
         currentActivity = nil
-
-        #if DEBUG
-        print("🌙 LiveActivity: Ended")
-        #endif
     }
 }
-
