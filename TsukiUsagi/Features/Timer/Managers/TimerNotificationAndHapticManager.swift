@@ -11,19 +11,16 @@ import Combine
 /// タイマーの通知とハプティックフィードバックを担当するManager
 @MainActor
 final class TimerNotificationAndHapticManager: ObservableObject {
-
     // MARK: - Dependencies
 
     private let notificationService: PhaseNotificationServiceable
     private let hapticService: HapticServiceable
 
     // MARK: - Published Properties
-
     @Published var shouldSuppressAnimation = false
     @Published var shouldSuppressSessionFinishedAnimation = false
 
     // MARK: - Initialization
-
     init(
         notificationService: PhaseNotificationServiceable,
         hapticService: HapticServiceable
@@ -93,17 +90,7 @@ final class TimerNotificationAndHapticManager: ObservableObject {
     /// アプリがバックグラウンドに入った時の処理
     func appDidEnterBackground() {
         // 通知権限の確認
-        ensureNotificationAuthorization { granted in
-            if granted {
-                #if DEBUG
-                print("🔔 通知許可: 承認済み")
-                #endif
-            } else {
-                #if DEBUG
-                print("🔔 通知許可: 拒否または未承認")
-                #endif
-            }
-        }
+        ensureNotificationAuthorization { _ in }
     }
 
     /// アプリがフォアグラウンドに戻った時の処理

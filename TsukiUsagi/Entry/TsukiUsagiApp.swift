@@ -17,22 +17,17 @@ struct TsukiUsagiApp: App {
     init() {
         // ハプティックフィードバックの事前初期化
         _ = HapticManager.shared
-
         // DIコンテナ生成（ローカル変数で参照を固定）
         let c = DependencyContainer()
         self.container = c
-
         // StateObjects — Container から注入
         _historyVM = StateObject(wrappedValue: c.historyVM)
         _timerVM = StateObject(wrappedValue: c.timerVM)
         _sessionManager = StateObject(wrappedValue: c.sessionManager)
-
         // Feature Flags の初期化
         FeatureFlags.setDefaultValues()
-
         // NavigationBar外観設定
         configureNavigationBarAppearance()
-
         // カスタムフォントの登録
         registerCustomFonts()
     }
@@ -54,9 +49,7 @@ struct TsukiUsagiApp: App {
     }
 
     private func registerCustomFonts() {
-
         let fontFiles = ["Nunito-Bold.ttf", "Nunito-Italic.ttf", "Nunito-Medium.ttf", "Nunito-Regular.ttf"]
-
         for fontFile in fontFiles {
             guard let fontURL = Bundle.main.url(
                 forResource: fontFile.replacingOccurrences(of: ".ttf", with: ""),
@@ -64,10 +57,8 @@ struct TsukiUsagiApp: App {
             ) else {
                 continue
             }
-
             var error: Unmanaged<CFError>?
             let success = CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error)
-
             if success {
                 // フォント登録成功
 			} else if (error?.takeRetainedValue() as Error?) != nil {
@@ -76,11 +67,9 @@ struct TsukiUsagiApp: App {
                 // その他のエラー
             }
         }
-
     }
 
     private func configureNavigationBarAppearance() {
-
         // NavigationBarの外観設定
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -96,16 +85,10 @@ struct TsukiUsagiApp: App {
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-
     }
 
     /// アプリ起動時に残存する孤児Live Activityを終了
     private func cleanupOrphanActivities() async {
-        #if DEBUG
-        let activeCountBefore = Activity<TimerActivityAttributes>.activities.count
-        print("🌙 Cleanup: Active activities count = \(activeCountBefore)")
-        #endif
-
         for activity in Activity<TimerActivityAttributes>.activities {
             let dismissPolicy: ActivityUIDismissalPolicy = .immediate
             let currentContentState = TimerActivityAttributes.ContentState(
@@ -113,15 +96,6 @@ struct TsukiUsagiApp: App {
                 isPaused: false
             )
             await activity.end(.init(state: currentContentState, staleDate: nil), dismissalPolicy: dismissPolicy)
-
-            #if DEBUG
-            print("🌙 Cleanup: Ended orphan activity (\(activity.id))")
-            #endif
         }
-
-        #if DEBUG
-        let activeCountAfter = Activity<TimerActivityAttributes>.activities.count
-        print("🌙 Cleanup: Active activities count after = \(activeCountAfter)")
-        #endif
     }
 }

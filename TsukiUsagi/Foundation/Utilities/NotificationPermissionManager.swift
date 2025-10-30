@@ -37,22 +37,10 @@ final class NotificationPermissionManager {
 
             // リクエスト済みフラグを設定
             userDefaults.set(true, forKey: hasRequestedPermissionKey)
-
-            if granted {
-                #if DEBUG
-                print("🔔 通知許可が承認されました")
-                #endif
-            } else {
-                #if DEBUG
-                print("🔔 通知許可が拒否されました")
-                #endif
-            }
+            _ = granted
 
             return granted
         } catch {
-            #if DEBUG
-            print("🔔 通知許可リクエストでエラーが発生: \(error.localizedDescription)")
-            #endif
             userDefaults.set(true, forKey: hasRequestedPermissionKey)
             return false
         }

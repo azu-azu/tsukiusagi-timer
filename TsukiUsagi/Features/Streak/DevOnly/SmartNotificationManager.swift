@@ -110,7 +110,6 @@ class SmartNotificationManager: ObservableObject {
             TimeSlot(hour: 20, frequency: 5),  // Evening most common
             TimeSlot(hour: 22, frequency: 1)   // Late evening
         ]
-
         return commonSlots.sorted { $0.frequency > $1.frequency }
     }
 
@@ -158,7 +157,6 @@ class SmartNotificationManager: ObservableObject {
             title = "🎖 Elite Focus Master"
             body = "\(currentStreak) days! You've mastered the art of consistency. Legendary!"
         }
-
         return (title, body)
     }
 
@@ -170,7 +168,6 @@ class SmartNotificationManager: ObservableObject {
             let granted = try await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
             return granted
         } catch {
-            print("🔔 Failed to request notification permissions: \(error)")
             return false
         }
     }
@@ -181,10 +178,7 @@ class SmartNotificationManager: ObservableObject {
 
         Task {
             let hasPermission = await requestNotificationPermissions()
-            guard hasPermission else {
-                print("🔔 Smart notifications disabled: no permission")
-                return
-            }
+            guard hasPermission else { return }
 
             await MainActor.run {
                 scheduleNextReminder()
@@ -201,8 +195,6 @@ class SmartNotificationManager: ObservableObject {
 
         // Schedule notification for tomorrow at optimal time
         scheduleNotification(at: reminderHour)
-
-        print("🔔 Smart notification scheduled for \(reminderHour):00")
     }
 
     private func getOptimalReminderTime() -> Int {
@@ -236,20 +228,12 @@ class SmartNotificationManager: ObservableObject {
             content: content,
             trigger: trigger
         )
-
-        notificationCenter.add(request) { error in
-            if let error = error {
-                print("🔔 Failed to schedule smart notification: \(error)")
-            } else {
-                print("🔔 Smart notification scheduled successfully")
-            }
-        }
+        notificationCenter.add(request) { _ in }
     }
 
     /// Update notification content based on current streak and pattern
     func updateNotificationContent(streakData: StreakData) {
         guard isSmartNotificationEnabled else { return }
-
         let pattern = analyzeUsagePattern(from: streakData)
         let (title, body) = generateNotificationMessage(for: pattern, currentStreak: streakData.totalContinuousStreak)
 
@@ -277,20 +261,12 @@ class SmartNotificationManager: ObservableObject {
             content: content,
             trigger: trigger
         )
-
-        notificationCenter.add(request) { error in
-            if let error = error {
-                print("🔔 Failed to update smart notification: \(error)")
-            } else {
-                print("🔔 Smart notification updated: \(title)")
-            }
-        }
+        notificationCenter.add(request) { _ in }
     }
 
     /// Cancel all smart notifications
     func cancelSmartNotifications() {
         notificationCenter.removePendingNotificationRequests(withIdentifiers: ["smart_daily_reminder"])
-        print("🔔 Smart notifications cancelled")
     }
 
     // MARK: - Public Interface
