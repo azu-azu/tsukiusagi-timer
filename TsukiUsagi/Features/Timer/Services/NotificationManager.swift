@@ -20,8 +20,8 @@ final class NotificationManager {
         setupNotificationCategories()
     }
 
-    // BG挙動チューニング用の定数（スタガのみ採用）
-    private let bgFocusStaggerSeconds: TimeInterval = 5.0
+    // BG挙動チューニング用の定数（遅延は設けない）
+    private let bgFocusStaggerSeconds: TimeInterval = 0.0
 
     // MARK: - Phase-scoped identifiers
     enum NotificationID {
@@ -40,8 +40,11 @@ final class NotificationManager {
 
     // 権限リクエスト
     func requestAuthorization(completion: @escaping (Bool) -> Void) {
+        let options: UNAuthorizationOptions
+        if #available(iOS 15.0, *) { options = [.alert, .badge, .sound, .timeSensitive] }
+        else { options = [.alert, .badge, .sound] }
         UNUserNotificationCenter.current()
-            .requestAuthorization(options: [.alert, .sound]) { granted, error in
+            .requestAuthorization(options: options) { granted, error in
                 if error != nil {
                     #if DEBUG
                     #endif
@@ -72,13 +75,14 @@ final class NotificationManager {
         case .focus:
             content.title = "Time to Focus 🌕"
             content.body = "Let's begin, quietly centered."
+            content.categoryIdentifier = "TIMER_FOCUS"
         case .breakTime:
             content.title = "Time to Rest 🌑"
             content.body = "The moon is still. So can you be."
+            content.categoryIdentifier = "TIMER_REST"
         }
 
         content.sound = .default
-        content.categoryIdentifier = "TIMER_CATEGORY"
 
         let request = UNNotificationRequest(
             identifier: "test_\(phase)_\(UUID().uuidString)",
@@ -102,23 +106,30 @@ final class NotificationManager {
     // 指定秒後にセッション終了通知をスケジューリング（TimeInterval版 - 後方互換性のため残す）
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
         let endAt = Date().addingTimeInterval(TimeInterval(seconds))
-        scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: false)
+        scheduleSessionEndNotification(at: endAt, phase: phase, timeSensitive: true)
     }
 
     // 絶対時刻でセッション終了通知をスケジューリング（推奨）
     func scheduleSessionEndNotification(
         at endAt: Date,
         phase: PomodoroPhase,
-        timeSensitive: Bool = false,
+        timeSensitive: Bool = true,
         cleanupPendingPrefixes: Bool = true
     ) {
+        #if DEBUG
+        print("🔔 [schedule] begin phase=\(phase) endAt=\(endAt) timeSensitive=\(timeSensitive)")
+        #endif
         checkNotificationStatus { [weak self] allowed in
+            #if DEBUG
+            print("🔔 [schedule] allowed=\(allowed)")
+            #endif
             guard allowed else { return }
             Task { [weak self] in
                 // 予約前の pending 整理（必要に応じて）
                 if cleanupPendingPrefixes {
-                    await self?.removePendingForPrefix(NotificationID.focus)
-                    await self?.removePendingForPrefix(NotificationID.rest)
+                    if let phaseId = self?.id(for: phase) {
+                        await self?.removePendingForPrefix(phaseId)
+                    }
                 }
                 await MainActor.run { [weak self] in
                     self?.scheduleNotificationAtAbsoluteTime(endAt: endAt, phase: phase, timeSensitive: timeSensitive)
@@ -138,6 +149,10 @@ final class NotificationManager {
         removeDelivered: Bool = false,
         removePending: Bool = true
     ) {
+        #if DEBUG
+        print("🔔 [cancel@exact] ids=\(ids) removePending=\(removePending) removeDelivered=\(removeDelivered)")
+        debugDumpPending("before cancel@exact")
+        #endif
         let center = UNUserNotificationCenter.current()
         if removePending {
             center.removePendingNotificationRequests(withIdentifiers: ids)
@@ -145,6 +160,9 @@ final class NotificationManager {
         if removeDelivered {
             center.removeDeliveredNotifications(withIdentifiers: ids)
         }
+        #if DEBUG
+        debugDumpPending("after cancel@exact")
+        #endif
     }
 
     /// 明示的に delivered を掃除（復旧・手動クリア等）
@@ -199,13 +217,38 @@ final class NotificationManager {
 
     /// 連鎖（2本）予約を順序保証で実行（初回のみpending掃除 → Work→Rest, Rest→Focus の順に予約）
     func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {
+        #if DEBUG
+        print("🔔 [scheduleChained] workEndAt=\(workEndAt) breakEndAt=\(breakEndAt)")
+        #endif
         checkNotificationStatus { [weak self] allowed in
+            #if DEBUG
+            print("🔔 [scheduleChained] checkStatus allowed=\(allowed)")
+            #endif
             guard allowed else { return }
             Task { [weak self] in
                 guard let self else { return }
+                // Idempotency: if already have 2 SessionEnd.* pending for near times, skip
+                let center = UNUserNotificationCenter.current()
+                let pending = await center.pendingNotificationRequests()
+                let sessionEnds = pending.filter { $0.identifier.hasPrefix("SessionEnd.") }
+                if sessionEnds.count >= 2 {
+                    #if DEBUG
+                    print("🔔 [scheduleChained] SKIP: already has \(sessionEnds.count) sessionEnd pending")
+                    #endif
+                    return
+                }
                 // 初回に両prefixのpendingを掃除
+                #if DEBUG
+                print("🔔 [scheduleChained] cleanup prefix focus")
+                #endif
                 await self.removePendingForPrefix(NotificationID.focus)
+                #if DEBUG
+                print("🔔 [scheduleChained] cleanup prefix break")
+                #endif
                 await self.removePendingForPrefix(NotificationID.rest)
+                #if DEBUG
+                print("🔔 [scheduleChained] pending cleaned, scheduling Work→Rest")
+                #endif
                 // Work→Rest
                 await MainActor.run { [weak self] in
                     self?.scheduleNotificationAtAbsoluteTime(
@@ -214,6 +257,9 @@ final class NotificationManager {
                         timeSensitive: timeSensitive
                     )
                 }
+                #if DEBUG
+                print("🔔 [scheduleChained] scheduling Rest→Focus")
+                #endif
                 // Rest→Focus
                 await MainActor.run { [weak self] in
                     self?.scheduleNotificationAtAbsoluteTime(
@@ -222,6 +268,9 @@ final class NotificationManager {
                         timeSensitive: timeSensitive
                     )
                 }
+                #if DEBUG
+                print("🔔 [scheduleChained] completed")
+                #endif
             }
         }
     }
@@ -243,7 +292,6 @@ final class NotificationManager {
             }
         }
     }
-
 }
 
 // MARK: - Private helpers
@@ -277,9 +325,14 @@ extension NotificationManager {
     private func checkNotificationStatus(completion: @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current()
             .getNotificationSettings { settings in
-                DispatchQueue.main.async {
-                    completion(settings.authorizationStatus == .authorized)
+                let allowed: Bool
+                switch settings.authorizationStatus {
+                case .authorized, .provisional, .ephemeral:
+                    allowed = true
+                default:
+                    allowed = false
                 }
+                DispatchQueue.main.async { completion(allowed) }
             }
     }
 
@@ -296,8 +349,7 @@ extension NotificationManager {
     }
 
     private func adjustedEndDate(for endAt: Date, phase: PomodoroPhase) -> Date {
-        guard UIApplication.shared.applicationState != .active, phase == .focus else { return endAt }
-        return endAt.addingTimeInterval(bgFocusStaggerSeconds)
+        return endAt
     }
 
     private func makeNotificationIdentifier(for phase: PomodoroPhase, targetEndAt: Date) -> String {
@@ -343,31 +395,36 @@ extension NotificationManager {
         phase: PomodoroPhase,
         timeSensitive: Bool
     ) {
-        if #available(iOS 15.0, *), timeSensitive {
-            content.interruptionLevel = .timeSensitive
-        }
-
-        if UIApplication.shared.applicationState != .active,
-           #available(iOS 15.0, *),
-           phase == .breakTime {
-            content.interruptionLevel = .active
+        if #available(iOS 15.0, *) {
+            content.interruptionLevel = timeSensitive ? .timeSensitive : .active
         }
     }
 
     private func makeNotificationTrigger(for targetEndAt: Date) -> UNNotificationTrigger {
-        let delta = targetEndAt.timeIntervalSince(Date())
-        if delta >= 1 {
-            var components = Calendar.current.dateComponents(
-                [.year, .month, .day, .hour, .minute, .second],
-                from: targetEndAt
-            )
-            if let second = components.second, second < 0 {
-                components.second = 0
-            }
-            return UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        } else {
-            return UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let delta = max(0.0, targetEndAt.timeIntervalSince(Date()))
+        // 近接（<= 1h）は TimeInterval を使う（CalendarMatchingの丸め/最適化を回避）
+        if delta <= 3600 {
+            let ti = max(1, ceil(delta))
+            #if DEBUG
+            print("🔔 [trigger] type=TimeInterval delta=\(delta) ti=\(ti)")
+            #endif
+            return UNTimeIntervalNotificationTrigger(timeInterval: ti, repeats: false)
         }
+        var components = Calendar.current.dateComponents(
+            [ .year,
+                .month,
+                .day,
+                .hour,
+                .minute,
+                .second
+            ],
+            from: targetEndAt
+        )
+        components.second = (components.second ?? 0)
+        #if DEBUG
+        print("🔔 [trigger] type=Calendar comps=\(components)")
+        #endif
+        return UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
     }
 
     private func submitNotification(
@@ -381,7 +438,33 @@ extension NotificationManager {
             content: content,
             trigger: trigger
         )
-        UNUserNotificationCenter.current().add(request) { _ in }
+        UNUserNotificationCenter.current().add(request) { err in
+            #if DEBUG
+            if let err { print("🔔 [submit] FAILED id=\(uniqueId) err=\(err.localizedDescription)") } else { print("🔔 [submit] OK id=\(uniqueId) phase=\(phase)") }
+            UNUserNotificationCenter.current().getPendingNotificationRequests { reqs in
+                let total = reqs.count
+                let sessionEnd = reqs.filter { $0.identifier.hasPrefix("SessionEnd.") }.count
+                print("🔔 [pending] total=\(total) sessionEnd=\(sessionEnd)")
+                if let trig = request.trigger {
+                    if let cal = trig as? UNCalendarNotificationTrigger { print("🔔 [next] \(String(describing: cal.nextTriggerDate()))") }
+                    if let ti = trig as? UNTimeIntervalNotificationTrigger { print("🔔 [next] \(String(describing: ti.nextTriggerDate()))") }
+                }
+                // ---- Full dump for diagnosis ----
+                print("🔔 [dump] ---- pending detail ----")
+                for r in reqs {
+                    if let cal = r.trigger as? UNCalendarNotificationTrigger {
+                        let next = cal.nextTriggerDate() ?? .distantPast
+                        print("  next: \(next) id: \(r.identifier)")
+                    } else if let ti = r.trigger as? UNTimeIntervalNotificationTrigger {
+                        print("  firesIn: \(ti.timeInterval) id: \(r.identifier)")
+                    } else {
+                        print("  trigger: (nil) id: \(r.identifier)")
+                    }
+                }
+                print("🔔 [dump] -----------------------")
+            }
+            #endif
+        }
         lastIssuedIdForPhase[phase] = uniqueId
     }
 
@@ -414,9 +497,18 @@ extension NotificationManager {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
         let ids = pending.map { $0.identifier }.filter { $0.hasPrefix(prefix) }
+        #if DEBUG
+        print("🔔 [cancel@prefix] prefix=\(prefix) willRemove=\(ids.count)")
+        #endif
         if !ids.isEmpty {
             center.removePendingNotificationRequests(withIdentifiers: ids)
         }
+        #if DEBUG
+        UNUserNotificationCenter.current().getPendingNotificationRequests { reqs in
+            let seCount = reqs.filter { $0.identifier.hasPrefix("SessionEnd.") }.count
+            print("🔔 [cancel@prefix] after remaining=\(reqs.count) sessionEnd=\(seCount)")
+        }
+        #endif
     }
 
     /// 同フェーズの古い delivered のみを予約直前に整理（incomingと同一IDは残す）
@@ -448,12 +540,39 @@ extension NotificationManager {
 
     /// セッション終了通知をすべてキャンセル（前方一致で全削除）
     func cancelSessionEndAll() {
+        #if DEBUG
+        debugDumpPending("before cancelAll")
+        #endif
         Task { [weak self] in
             guard let self else { return }
             // Focus通知を削除
             await self.removePendingForPrefix(NotificationID.focus)
             // Rest通知を削除
             await self.removePendingForPrefix(NotificationID.rest)
+            #if DEBUG
+            self.debugDumpPending("after cancelAll")
+            #endif
         }
     }
 }
+
+#if DEBUG
+private extension NotificationManager {
+    func debugDumpPending(_ context: String) {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { reqs in
+            let seCount = reqs.filter { $0.identifier.hasPrefix("SessionEnd.") }.count
+            print("🔔 [dump] (\(context)) total=\(reqs.count) sessionEnd=\(seCount)")
+            for r in reqs {
+                if let cal = r.trigger as? UNCalendarNotificationTrigger {
+                    let next = cal.nextTriggerDate() ?? .distantPast
+                    print("  next: \(next) id: \(r.identifier)")
+                } else if let ti = r.trigger as? UNTimeIntervalNotificationTrigger {
+                    print("  firesIn: \(ti.timeInterval) id: \(r.identifier)")
+                } else {
+                    print("  trigger: (nil) id: \(r.identifier)")
+                }
+            }
+        }
+    }
+}
+#endif

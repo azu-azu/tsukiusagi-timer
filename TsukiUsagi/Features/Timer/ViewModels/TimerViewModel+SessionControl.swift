@@ -19,9 +19,13 @@ extension TimerViewModel {
     func pauseTimer() async {
         stateManager.pauseTimer()
         notificationAndHapticManager.triggerLightHaptic()
-        // 通知をキャンセル（一時停止中は通知不要）
+        // 通知をキャンセル（一時停止中は直近フェーズのみを取り消す）
         // debug log removed
-        notificationService.cancelSessionEndNotification()
+        #if DEBUG
+        print("🔔 [cancel@call] phase-scoped from pauseTimer phase=\(isWorkSession ? "breakTime" : "focus")")
+        #endif
+        let phaseToCancel: PomodoroPhase = isWorkSession ? .breakTime : .focus
+        notificationService.cancelSessionEnd(for: phaseToCancel)
 
         // Live Activity更新（一時停止状態を反映）
         if let endAt = sessionManager.endAt {
@@ -52,16 +56,16 @@ extension TimerViewModel {
                 newEndsAt: endAt
             )
 
-            // 現在のフェーズに応じて再スケジュール（連鎖/冪等）
+            // 現在のフェーズに応じて“次に鳴る1本だけ”を再スケジュール
             if isWorkSession {
-                let workEndAt = endAt
-                let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
-                notificationService.scheduleChainedSessionEnds(
-                    workEndAt: workEndAt,
-                    breakEndAt: breakEndAt,
+                // Work中は break のみを張る（break発火時に次FocusはensureFocusAtで張る）
+                notificationService.scheduleSessionEndNotification(
+                    at: endAt,
+                    phase: .breakTime,
                     timeSensitive: true
                 )
             } else {
+                // Break中開始（稀）: Focusのみ冪等予約
                 notificationService.ensureFocusAt(
                     breakEndAt: endAt,
                     timeSensitive: true
@@ -75,6 +79,9 @@ extension TimerViewModel {
         // debug log removed
         stateManager.stopTimer()
         sessionManager.resetSession()
+        #if DEBUG
+        print("🔔 [cancel@call] global from stopTimer")
+        #endif
         notificationService.cancelSessionEndNotification()
         clearQuietMoonMessage()
 
@@ -98,6 +105,9 @@ extension TimerViewModel {
             clearQuietMoonMessage()
         }
         animationController.resetAnimationState()
+        #if DEBUG
+        print("🔔 [cancel@call] global from resetTimer(keepSession: \(keepSession))")
+        #endif
         notificationService.cancelSessionEndNotification()
 
         // Live Activity終了
@@ -122,7 +132,11 @@ extension TimerViewModel {
         notificationAndHapticManager.triggerHeavyHaptic()
 
         // ペンディング予約の重複を避けるためキャンセル
-        notificationService.cancelSessionEndNotification()
+        let completedPhase: PomodoroPhase = completedWasWorkSession ? .focus : .breakTime
+        #if DEBUG
+        print("🔔 [cancel@call] phase-scoped from handleSessionCompleted phase=\(completedPhase)")
+        #endif
+        notificationService.cancelSessionEndSafely(for: completedPhase)
 
         // Live Activity終了
         await LiveActivityManager.shared.endActivity()
@@ -169,6 +183,9 @@ extension TimerViewModel {
         notificationAndHapticManager.triggerHeavyHaptic()
 
         // スケジュール済みの通知をキャンセル
+        #if DEBUG
+        print("🔔 [cancel@call] global from forceFinish")
+        #endif
         notificationService.cancelSessionEndNotification()
 
         updateQuietMoonMessage(forCompletedWorkSession: completedWasWorkSession)
@@ -217,8 +234,7 @@ extension TimerViewModel {
         runState = .idle
         endTime = nil
 
-        // 3) 通知の掃除（prefix一致で全削除）
-        notificationService.cancelSessionEndAll()
+        // 3) 通知の掃除は開始/再開時は行わない（フェーズ粒度の掃除はスケジューラ側で実施）
 
         // 4) アニメの状態クリア
         animationController.resetAnimationState()
