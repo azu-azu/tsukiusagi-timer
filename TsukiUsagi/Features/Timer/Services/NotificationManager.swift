@@ -40,9 +40,7 @@ final class NotificationManager {
 
     // 権限リクエスト
     func requestAuthorization(completion: @escaping (Bool) -> Void) {
-        let options: UNAuthorizationOptions
-        if #available(iOS 15.0, *) { options = [.alert, .badge, .sound, .timeSensitive] }
-        else { options = [.alert, .badge, .sound] }
+        let options: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current()
             .requestAuthorization(options: options) { granted, error in
                 if error != nil {

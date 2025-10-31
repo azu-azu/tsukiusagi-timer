@@ -55,7 +55,7 @@ final class NotificationPermissionManager {
         let center = notificationCenter
         let settings = await center.notificationSettings()
 
-        // notDetermined → 初回リクエスト（timeSensitive 含む）
+        // notDetermined → 初回リクエスト（timeSensitive entitlement は Info.plist で設定）
         if settings.authorizationStatus == .notDetermined {
             do {
                 if #available(iOS 15.0, *) {
@@ -63,8 +63,7 @@ final class NotificationPermissionManager {
                         options: [
                             .alert,
                             .badge,
-                            .sound,
-                            .timeSensitive
+                            .sound
                         ]
                     )
                     userDefaults.set(true, forKey: hasRequestedPermissionKey)
