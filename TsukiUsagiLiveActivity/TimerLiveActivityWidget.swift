@@ -48,7 +48,13 @@ struct TimerLiveActivityWidget: Widget {
                                     .frame(width: 20, height: 20)
                                     .foregroundColor(.yellow.opacity(0.95))
 
-                                if context.state.isPaused, let secs = context.state.remainingSeconds {
+                                if context.state.isFinished {
+                                    Text("0:00")
+                                        .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                        .monospacedDigit()
+                                        .foregroundColor(.white)
+                                        .lineLimit(1)
+                                } else if context.state.isPaused, let secs = context.state.remainingSeconds {
                                     let minutes = secs / 60
                                     let seconds = secs % 60
                                     Text("\(minutes):\(String(format: "%02d", seconds))")
@@ -57,13 +63,23 @@ struct TimerLiveActivityWidget: Widget {
                                         .foregroundColor(.white)
                                         .lineLimit(1)
                                 } else {
-                                    Text(context.state.endsAt, style: .timer)
-                                        .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                        .monospacedDigit()
-                                        .foregroundColor(.white)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.85)
-                                        .contentTransition(.numericText())
+                                    // endsAtが過去なら0:00表示（安全策）
+                                    let now = Date()
+                                    if context.state.endsAt <= now {
+                                        Text("0:00")
+                                            .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                            .monospacedDigit()
+                                            .foregroundColor(.white)
+                                            .lineLimit(1)
+                                    } else {
+                                        Text(context.state.endsAt, style: .timer)
+                                            .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                            .monospacedDigit()
+                                            .foregroundColor(.white)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.85)
+                                            .contentTransition(.numericText())
+                                    }
                                 }
                             }
                             .fixedSize()
@@ -88,8 +104,14 @@ struct TimerLiveActivityWidget: Widget {
             DynamicIsland {
                 // Expanded
                 DynamicIslandExpandedRegion(.leading) {
-                    // Pause時は remainingSeconds の固定値を表示
-                    if context.state.isPaused, let secs = context.state.remainingSeconds {
+                    if context.state.isFinished {
+                        Text("0:00")
+                            .font(.title3)
+                            .monospacedDigit()
+                            .foregroundColor(.white)
+                            .layoutPriority(1)
+                            .padding(.leading, 8)
+                    } else if context.state.isPaused, let secs = context.state.remainingSeconds {
                         let minutes = secs / 60
                         let seconds = secs % 60
                         Text("\(minutes):\(String(format: "%02d", seconds))")
@@ -99,12 +121,22 @@ struct TimerLiveActivityWidget: Widget {
                             .layoutPriority(1)
                             .padding(.leading, 8)
                     } else {
-                        Text(context.state.endsAt, style: .timer)
-                            .font(.title3)
-                            .monospacedDigit()
-                            .foregroundColor(.white)
-                            .layoutPriority(1)
-                            .padding(.leading, 8)
+                        let now = Date()
+                        if context.state.endsAt <= now {
+                            Text("0:00")
+                                .font(.title3)
+                                .monospacedDigit()
+                                .foregroundColor(.white)
+                                .layoutPriority(1)
+                                .padding(.leading, 8)
+                        } else {
+                            Text(context.state.endsAt, style: .timer)
+                                .font(.title3)
+                                .monospacedDigit()
+                                .foregroundColor(.white)
+                                .layoutPriority(1)
+                                .padding(.leading, 8)
+                        }
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
@@ -132,8 +164,14 @@ struct TimerLiveActivityWidget: Widget {
                 .frame(width: 32, height: 32)
                 .widgetURL(URL(string: "tsukiusagi://timer"))
             } compactTrailing: {
-                // Pause時は remainingSeconds の固定値を表示
-                if context.state.isPaused, let secs = context.state.remainingSeconds {
+                if context.state.isFinished {
+                    Text("0:00")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                } else if context.state.isPaused, let secs = context.state.remainingSeconds {
                     let minutes = secs / 60
                     let seconds = secs % 60
                     Text("\(minutes):\(String(format: "%02d", seconds))")
@@ -143,12 +181,22 @@ struct TimerLiveActivityWidget: Widget {
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 } else {
-                    Text(context.state.endsAt, style: .timer)
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundColor(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                    let now = Date()
+                    if context.state.endsAt <= now {
+                        Text("0:00")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    } else {
+                        Text(context.state.endsAt, style: .timer)
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
                 }
             } minimal: {
                 Image(systemName: "moon.fill")
