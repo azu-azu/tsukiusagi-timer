@@ -155,7 +155,7 @@ struct TimerLiveActivityWidget: Widget {
                 }
             } compactLeading: {
                 ZStack {
-                    Circle().strokeBorder(Color.white.opacity(0.22), lineWidth: 1)
+                    Circle().strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
                     Image(systemName: "moon.fill")
                         .resizable().scaledToFit()
                         .padding(6)
