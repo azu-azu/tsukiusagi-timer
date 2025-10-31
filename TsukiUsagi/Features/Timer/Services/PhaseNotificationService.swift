@@ -7,7 +7,6 @@ import os
 
 protocol PhaseNotificationServiceable: AnyObject {
     func sendStartNotification()
-    func cancelNotification()
     func cancelSessionEnd(for phase: PomodoroPhase)
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase)
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool)
@@ -43,11 +42,6 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     func sendStartNotification() {
         hapticService.heavyImpact()
         // 開始時のpushは不要なため送信しない（仕様）
-    }
-
-    func cancelNotification() {
-        // 全ての通知をキャンセル
-        notificationManager.cancelSessionEndNotification()
     }
 
     func cancelSessionEnd(for phase: PomodoroPhase) {

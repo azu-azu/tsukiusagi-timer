@@ -257,7 +257,6 @@ private class PreviewSideMenuDummyEngine: TimerEngineable {
 
 private class PreviewSideMenuDummyNotification: PhaseNotificationServiceable {
     func sendStartNotification() {}
-    func cancelNotification() {}
     func cancelSessionEnd(for phase: PomodoroPhase) {}
     func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {}
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
