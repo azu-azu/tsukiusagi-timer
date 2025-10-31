@@ -5,7 +5,7 @@
 //  Created by Kazumi on 2025/01/19.
 //
 
-import ActivityKit
+@preconcurrency import ActivityKit
 import Foundation
 
 /// Live Activity を管理するシングルトン
@@ -38,16 +38,21 @@ final class LiveActivityManager {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
         // 既存のActivityがあれば終了（単一化ポリシー）
-        await endActivityIfNeeded(finalEndsAt: nil)
+        if currentActivity != nil {
+            await endActivityIfNeeded(finalEndsAt: nil)
+        }
 
         // 新しいActivityを作成
         let attributes = TimerActivityAttributes(sessionKind: sessionKind)
         let contentState = TimerActivityAttributes.ContentState(endsAt: endsAt, isPaused: false)
         do {
-            currentActivity = try await Activity<TimerActivityAttributes>.request(
+            // NOTE: Activity.request is async by API contract.
+            // Even if the compiler warns "no async ops in await", keep `await` for safety & future-proofing.
+            let activity = try await Activity<TimerActivityAttributes>.request(
                 attributes: attributes,
                 content: .init(state: contentState, staleDate: nil)
             )
+            currentActivity = activity
         } catch {
             currentActivity = nil
         }
