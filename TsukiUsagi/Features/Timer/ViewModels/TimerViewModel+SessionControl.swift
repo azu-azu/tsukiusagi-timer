@@ -133,8 +133,8 @@ extension TimerViewModel {
         let completedPhase: PomodoroPhase = completedWasWorkSession ? .focus : .breakTime
         notificationService.cancelSessionEndSafely(for: completedPhase)
 
-        // Live Activity終了
-        await LiveActivityManager.shared.endActivity()
+        // Live Activity終了（元の終了時刻を維持）
+        await LiveActivityManager.shared.endActivity(finalEndsAt: sessionManager.endAt)
 
         // 即時通知は送らない（開始時に予約済みのため、完了時は重複を避ける）
 

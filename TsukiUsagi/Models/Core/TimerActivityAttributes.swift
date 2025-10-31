@@ -22,6 +22,8 @@ struct TimerActivityAttributes: ActivityAttributes {
         var isPaused: Bool
         /// Pause中の固定残り秒（Pause時のみ有効）。nilなら未使用
         var remainingSeconds: Int?
+        /// セッション完了フラグ（完了時はtimer表示を使わず0:00固定）
+        var isFinished: Bool = false
     }
 
     /// セッション種別（"Work", "Study", "Read", "Break" など）

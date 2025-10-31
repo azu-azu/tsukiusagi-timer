@@ -293,6 +293,11 @@ final class TimerViewModel: ObservableObject {
                 // Match WidgetKit (.timer) rounding: floor to current second
                 let remain = max(0, Int(floor(endAt.timeIntervalSince(now))))
                 stateManager.timeRemaining = remain
+                // remain==0なら絶対に再開しない（終了済み）
+                if remain == 0 {
+                    stateManager.stopTimer()
+                    return
+                }
             }
             // 2) アニメーションは発火しない（静かに復帰）
             // 3) エンジンが止まっている場合のみ再開（重複起動防止）

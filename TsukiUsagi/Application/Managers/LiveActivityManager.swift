@@ -38,7 +38,7 @@ final class LiveActivityManager {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
         // 既存のActivityがあれば終了（単一化ポリシー）
-        await endActivityIfNeeded()
+        await endActivityIfNeeded(finalEndsAt: nil)
 
         // 新しいActivityを作成
         let attributes = TimerActivityAttributes(sessionKind: sessionKind)
@@ -69,19 +69,24 @@ final class LiveActivityManager {
     }
 
     /// タイマー完了/キャンセル時にActivityを終了
-    func endActivity() async {
-        await endActivityIfNeeded()
+    /// - Parameter finalEndsAt: 終了時の最終的なendsAt（元の終了時刻を維持）。nilの場合は現在のActivityのendsAtを使用
+    func endActivity(finalEndsAt: Date? = nil) async {
+        await endActivityIfNeeded(finalEndsAt: finalEndsAt)
     }
 
     // MARK: - Private Helpers
 
     /// 既存のActivityがある場合は終了
-    private func endActivityIfNeeded() async {
+    private func endActivityIfNeeded(finalEndsAt: Date? = nil) async {
         guard let activity = currentActivity else { return }
         let dismissPolicy: ActivityUIDismissalPolicy = .immediate
+        // 終了時は元のendsAtを維持（Date()に上書きしない）＋isFinishedをtrueにする
+        let preservedEndsAt = finalEndsAt ?? activity.content.state.endsAt
         let currentContentState = TimerActivityAttributes.ContentState(
-            endsAt: Date(),
-            isPaused: false
+            endsAt: preservedEndsAt,
+            isPaused: false,
+            remainingSeconds: nil,
+            isFinished: true
         )
         await activity.end(.init(state: currentContentState, staleDate: nil), dismissalPolicy: dismissPolicy)
         currentActivity = nil
