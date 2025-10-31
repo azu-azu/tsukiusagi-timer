@@ -382,6 +382,9 @@ private extension ContentView {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         isQuietMoonFocused = true
                     }
+                } else {
+                    // リセット時など、isSessionFinishedがfalseになったときにフォーカスを解除
+                    isQuietMoonFocused = false
                 }
             }
             .onReceive(
