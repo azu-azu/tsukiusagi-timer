@@ -17,6 +17,7 @@ protocol PhaseNotificationServiceable: AnyObject {
     // 冪等Focus予約: Break終了時刻に対してFocusのみを再予約
     func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool)
     func sendPhaseChangeNotification(for phase: PomodoroPhase)
+    @available(*, deprecated, message: "Use cancelSessionEndSafely(for:) or cancelSessionEnd(for:) instead")
     func cancelSessionEndNotification()
     func cancelSessionEndAll()
     func cancelSessionEndSafely(for completedPhase: PomodoroPhase)
@@ -147,7 +148,7 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     /// 通知権限を確認し、必要に応じて要求する（timeSensitive 含む統一フロー）
     func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) {
         Task {
-            let ok = await NotificationPermissionManager.shared.ensureUnifiedAuthorization(openSettingsIfNeeded: false)
+            let ok = await NotificationPermissionManager.shared.ensureUnifiedAuthorization(openSettingsIfNeeded: true)
             completion(ok)
         }
     }

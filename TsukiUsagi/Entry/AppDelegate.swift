@@ -10,8 +10,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
-        // 権限フローを単一路線化（timeSensitive を含む）
-        Task { _ = await NotificationPermissionManager.shared.ensureUnifiedAuthorization(openSettingsIfNeeded: false) }
+        // 権限フローを単一路線化（timeSensitive を含む）+ 設定誘導を有効化
+        Task { _ = await NotificationPermissionManager.shared.ensureUnifiedAuthorization(openSettingsIfNeeded: true) }
         return true
     }
 

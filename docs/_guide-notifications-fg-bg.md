@@ -71,6 +71,10 @@ Do / Don’t rules
   - Pending helpers: `removePending(for:)` / `removePending(for: [PomodoroPhase])`
   - Previous‑phase cleanup (FG‑only call site): `clearPreviousPhaseDeliveredOnly(forIncoming:)`
 
+### Authorization (additional note)
+
+If `timeSensitiveSetting` is not enabled after authorization, open Settings to let the user enable "Time Sensitive Notifications." (`openSettingsIfNeeded = true`)
+
 ### Code Locations – High‑level API
 - `TsukiUsagi/Features/Timer/Services/PhaseNotificationService.swift`
   - Chained schedule: `scheduleChainedSessionEnds(workEndAt:breakEndAt:timeSensitive:)`
@@ -79,6 +83,8 @@ Do / Don’t rules
 - `TsukiUsagi/Features/Timer/ViewModels/TimerViewModel+SessionControl.swift`
   - `startTimer()` / `resumeTimer()` use the APIs above to schedule.
   - `handleSessionCompleted` uses `cancelSessionEndSafely(for:)` instead of global cancel.
+
+Implementation note: We use sequential individual scheduling (Rest→Focus) while maintaining the two‑pending invariant; this aligns with the policy described for `scheduleChainedSessionEnds`.
 
 ### Invariants / Checkpoints
 - Always keep request identifiers unique (prefix + epoch + UUID8).
@@ -121,11 +127,42 @@ We prioritize a simple, explicit model: same‑phase cleanup happens at schedule
 - If UX requires tighter grouping or different priority balances, adjust `threadIdentifier` and `interruptionLevel` with the matrix above in mind.
 
 
+## Background – Why BG keeps Rest and suppresses Focus
+
+### Initial intent
+
+- Goal: Seamlessly connect "Work → Rest → Focus" by showing Focus immediately after Rest in BG.
+- Implementation attempt: Run previous‑phase cleanup even in BG (delete Rest when scheduling Focus) inside `NotificationManager`.
+- Reality: On iOS, `willPresent` is FG‑only and there is no public API to remove a banner from the Lock Screen while the app is in BG. Programmatically removing Rest in BG is not feasible.
+
+### Middle phase (experiments and dead‑ends)
+
+- Tried calling `removeDeliveredNotifications(withIdentifiers:)` around Focus scheduling after Work completion.
+- Result in BG:
+  - Rest remains on the Lock Screen (cannot be removed programmatically).
+  - Focus also fails to surface.
+  - iOS coalesces/suppresses notifications from the same app/thread, leading to a "doesn’t disappear + doesn’t appear" loop.
+
+### Pivot (design decision)
+
+- Decision: If we cannot remove Rest in BG, design the system assuming it remains.
+- Changes:
+  - Do not perform previous‑phase cleanup in BG (keep Rest).
+  - Suppress Focus while Rest is visible in BG; only surface Focus after the user clears Rest.
+  - Document the policy explicitly: "Focus will not surface while Rest is still present." (accepted behavior).
+
+### Outcome (current stable shape)
+
+- FG: `willPresent` provides a just‑in‑time hook to clean the previous phase before presentation; UX remains smooth and predictable.
+- BG: Without presentation hooks or removal APIs, we intentionally keep Rest and suppress Focus until Rest is cleared. This matches OS constraints and avoids surprise removals.
+- Together with same‑phase cleanup at schedule time and phase‑scoped safe‑cancel, this policy forms the stable baseline we use today.
+
+
 ## Appendix A – Constants & System Notes
 
 ### A. Constants (reference)
-- `bgFocusStaggerSeconds = 5.0`
-  - Purpose: avoid iOS coalescing Focus & Rest notifications in BG when triggers are at the same second.
+- `bgFocusStaggerSeconds = 0.0`
+  - Staggering was removed to avoid perceived delays; stability comes from the chain invariant + safe-cancel.
 
 ### B. System Notes
 - iOS may coalesce or suppress multiple notifications from the same app in BG when a prior banner is visible.
