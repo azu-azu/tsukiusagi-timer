@@ -10,13 +10,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
-        // 権限リクエスト（timeSensitive含む）
-        let center = UNUserNotificationCenter.current()
-        if #available(iOS 15.0, *) {
-            center.requestAuthorization(options: [.alert, .badge, .sound, .timeSensitive]) { _, _ in }
-        } else {
-            center.requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
-        }
+        // 権限フローを単一路線化（timeSensitive を含む）
+        Task { _ = await NotificationPermissionManager.shared.ensureUnifiedAuthorization(openSettingsIfNeeded: false) }
         return true
     }
 

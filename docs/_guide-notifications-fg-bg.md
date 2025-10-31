@@ -2,6 +2,8 @@
 
 This document records the final behavior, design rules, and code locations for the timer phase notifications (Focus/Rest) so the same problems do not recur.
 
+Update 2025-10-30: Consolidated cancellation policy and scheduling rules after resolving a chain-cancellation defect. Global cancel calls were the root cause of “break disappears” delays; we now use phase‑scoped cancellation with a safe guard.
+
 ### Goals
 - Deliver stable, understandable notifications without surprise removals.
 - Keep foreground UX smooth; accept OS constraints in background.
@@ -13,12 +15,12 @@ This document records the final behavior, design rules, and code locations for t
 - Foreground (FG)
   - Rest: shows and stays (no instant vanish).
   - Focus: shows normally.
-  - We clean only the previous-phase delivered right before presentation (willPresent). Same‑phase duplicates are avoided at schedule-time.
+  - Clean only the previous‑phase delivered right before presentation (willPresent). Same‑phase duplicates are avoided at schedule time.
 
 - Background (BG)
   - Rest: shows and stays on the Lock Screen.
   - Focus: WILL NOT surface while Rest is still present. User must clear Rest first (explicitly accepted policy).
-  - No previous-phase cleanup is performed in BG.
+  - No previous‑phase cleanup is performed in BG.
 
 ### Implementation & Code Mapping
 
@@ -55,38 +57,42 @@ Do / Don’t rules
 
 ### Code Locations – Core Logic (Where to look / change)
 - Foreground cleanup (previous‑phase only):
-  - `TsukiUsagi/Entry/AppDelegate.swift`
-    - `userNotificationCenter(_:willPresent:withCompletionHandler:)`
-    - Calls: `NotificationManager.shared.clearPreviousPhaseDeliveredOnly(forIncoming:)`
+- `TsukiUsagi/Entry/AppDelegate.swift`
+  - `userNotificationCenter(_:willPresent:withCompletionHandler:)`
+  - Calls: `NotificationManager.shared.clearPreviousPhaseDeliveredOnly(forIncoming:)`
 
 - Schedule-time behavior (shared FG/BG):
-  - `TsukiUsagi/Features/Timer/Services/NotificationManager.swift`
-    - `scheduleSessionEndNotification(at:phase:timeSensitive:cleanupPendingPrefixes:)`
-    - `scheduleNotificationAtAbsoluteTime(endAt:phase:timeSensitive:)`
-      - SAME‑PHASE cleanup: `clearDeliveredSamePhaseOnly(forIncomingId:phase:)`
-      - FG/BG threadIdentifier selection (FG: prefix, BG: uniqueId)
-      - BG Focus stagger (+5s)
-    - Pending helpers: `removePending(for:)` / `removePending(for: [PomodoroPhase])`
-    - Previous‑phase cleanup (FG‑only call site): `clearPreviousPhaseDeliveredOnly(forIncoming:)`
+- `TsukiUsagi/Features/Timer/Services/NotificationManager.swift`
+  - `scheduleSessionEndNotification(at:phase:timeSensitive:cleanupPendingPrefixes:)`
+  - `scheduleNotificationAtAbsoluteTime(endAt:phase:timeSensitive:)`
+    - SAME‑PHASE cleanup: `clearDeliveredSamePhaseOnly(forIncomingId:phase:)`
+    - FG/BG threadIdentifier selection (FG: prefix, BG: uniqueId)
+    - Trigger policy: `UNTimeIntervalNotificationTrigger` for ≤ 1 hour to avoid calendar rounding; `UNCalendarNotificationTrigger` otherwise.
+  - Pending helpers: `removePending(for:)` / `removePending(for: [PomodoroPhase])`
+  - Previous‑phase cleanup (FG‑only call site): `clearPreviousPhaseDeliveredOnly(forIncoming:)`
 
 ### Code Locations – High‑level API
 - `TsukiUsagi/Features/Timer/Services/PhaseNotificationService.swift`
   - Chained schedule: `scheduleChainedSessionEnds(workEndAt:breakEndAt:timeSensitive:)`
   - Idempotent Focus schedule: `ensureFocusAt(breakEndAt:timeSensitive:)`
+  - Safe cancellation during phase completion: `cancelSessionEndSafely(for:)` (skips cancel while both break and focus are pending)
 - `TsukiUsagi/Features/Timer/ViewModels/TimerViewModel+SessionControl.swift`
   - `startTimer()` / `resumeTimer()` use the APIs above to schedule.
+  - `handleSessionCompleted` uses `cancelSessionEndSafely(for:)` instead of global cancel.
 
 ### Invariants / Checkpoints
 - Always keep request identifiers unique (prefix + epoch + UUID8).
+- Chain invariant (new): While in the Work→Rest→Focus chain window, keep exactly two pending SessionEnd.* requests until Rest fires.
+- No global cancel (policy): do not remove both phases together during normal flow. Use phase‑scoped cancel only, and prefer `cancelSessionEndSafely(for:)` at completion boundaries.
 - FG
   - threadIdentifier = phase `prefix`.
   - willPresent cleans previous‑phase only; never clean same‑phase here.
 - BG
   - threadIdentifier = `uniqueId`.
-  - Do not remove previous‑phase delivered at schedule-time.
-  - Focus is staggered by +5s; no fallback/one‑at‑a‑time policies.
-- Schedule-time
+  - Do not remove previous‑phase delivered at schedule time.
+- Schedule time
   - Clean only same‑phase older delivered.
+  - Use `UNTimeIntervalNotificationTrigger` for intervals ≤ 3600s to avoid calendar rounding.
 
 ### Testing Checklist (with expected outcomes)
 
@@ -100,9 +106,11 @@ Do / Don’t rules
 | Short intervals    | Use short break/work lengths           | FG ok; BG matches policy without surprise removals    |
 
 ### Rationale (Why this design)
+We prioritize a simple, explicit model: same‑phase cleanup happens at schedule time; previous‑phase cleanup is FG‑only at presentation. The chain invariant (two pendings) plus phase‑scoped safe cancel eliminates surprise removals that previously caused apparent delays.
+
 ### Constants (reference)
-- `bgFocusStaggerSeconds = 5.0`
-  - Purpose: avoid iOS coalescing Focus & Rest notifications in BG when triggers are at the same second.
+- `bgFocusStaggerSeconds = 0.0`
+  - Staggering was removed to prevent perceived delays; stability now comes from the chain invariant and safe cancellation.
 
 - iOS aggressively coalesces/suppresses notifications from the same app in BG when a prior banner is present.
 - Foreground offers a delegate hook (willPresent) to clean just in time; background doesn’t. To avoid surprise removals in BG, we accept the one‑visible‑at‑a‑time reality and require user clearing.
@@ -121,7 +129,7 @@ Do / Don’t rules
 
 ### B. System Notes
 - iOS may coalesce or suppress multiple notifications from the same app in BG when a prior banner is visible.
-- Presentation-time hooks exist only in FG (`willPresent`); BG has no equivalent callback.
+- Presentation‑time hooks exist only in FG (`willPresent`); BG has no equivalent callback.
 - Thread policy summary:
   - FG: `threadIdentifier = <phase prefix>` for readable grouping.
   - BG: `threadIdentifier = <uniqueId>` to reduce OS coalescing.
