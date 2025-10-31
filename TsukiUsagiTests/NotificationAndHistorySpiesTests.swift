@@ -17,6 +17,8 @@ final class SpyNotificationService: PhaseNotificationServiceable {
 
     func sendStartNotification() { calls.append(.start) }
     func cancelNotification() { calls.append(.cancelAll) }
+    func cancelSessionEnd(for phase: PomodoroPhase) { calls.append(.cancelEnd) }
+    func cancelSessionEndSafely(for completedPhase: PomodoroPhase) { calls.append(.cancelEnd) }
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
         calls.append(.schedulePhase(phase))
     }

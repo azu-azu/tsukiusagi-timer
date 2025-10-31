@@ -46,6 +46,61 @@ final class NotificationPermissionManager {
         }
     }
 
+    // MARK: - Unified (timeSensitive) Authorization
+
+    /// iOS 15+ の timeSensitive を含めて統一的に許可を整える
+    /// - Returns: 利用可能かどうか（timeSensitive 前提環境では、iOS15+ で timeSensitive が無効なら false）
+    @discardableResult
+    func ensureUnifiedAuthorization(openSettingsIfNeeded: Bool = false) async -> Bool {
+        let center = notificationCenter
+        let settings = await center.notificationSettings()
+
+        // notDetermined → 初回リクエスト（timeSensitive 含む）
+        if settings.authorizationStatus == .notDetermined {
+            do {
+                if #available(iOS 15.0, *) {
+                    let granted = try await center.requestAuthorization(options: [.alert, .badge, .sound, .timeSensitive])
+                    userDefaults.set(true, forKey: hasRequestedPermissionKey)
+                    return granted
+                } else {
+                    let granted = try await center.requestAuthorization(options: [.alert, .badge, .sound])
+                    userDefaults.set(true, forKey: hasRequestedPermissionKey)
+                    return granted
+                }
+            } catch {
+                userDefaults.set(true, forKey: hasRequestedPermissionKey)
+                return false
+            }
+        }
+
+        // authorized/provisional/ephemeral の場合、iOS15+ では timeSensitiveSetting も確認
+        if #available(iOS 15.0, *) {
+            switch settings.authorizationStatus {
+            case .authorized, .provisional, .ephemeral:
+                if settings.timeSensitiveSetting != .enabled {
+                    if openSettingsIfNeeded {
+                        await openSettingsAsync()
+                    }
+                    return false
+                }
+                return true
+            default:
+                return false
+            }
+        } else {
+            // iOS14 以下は通常の authorized のみ確認
+            return settings.authorizationStatus == .authorized
+        }
+    }
+
+    private func openSettingsAsync() async {
+        await MainActor.run {
+            if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsUrl)
+            }
+        }
+    }
+
     /// 現在の通知許可状態を取得
     func getCurrentPermissionStatus() async -> UNAuthorizationStatus {
         let settings = await notificationCenter.notificationSettings()

@@ -144,31 +144,11 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
 
     // MARK: - Authorization Management
 
-    /// 通知権限を確認し、必要に応じて要求する
+    /// 通知権限を確認し、必要に応じて要求する（timeSensitive 含む統一フロー）
     func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            switch settings.authorizationStatus {
-            case .authorized, .provisional:
-                completion(true)
-            case .denied:
-                completion(false)
-            case .notDetermined:
-                // 初回権限要求
-                UNUserNotificationCenter.current().requestAuthorization(
-                    options: [.alert, .sound, .badge]
-                ) { granted, error in
-                    if let error = error {
-                        completion(false)
-                    } else {
-                        completion(granted)
-                    }
-                }
-            case .ephemeral:
-                // 一時的な許可（App Clip等）は有効として扱う
-                completion(true)
-            @unknown default:
-                completion(false)
-            }
+        Task {
+            let ok = await NotificationPermissionManager.shared.ensureUnifiedAuthorization(openSettingsIfNeeded: false)
+            completion(ok)
         }
     }
 

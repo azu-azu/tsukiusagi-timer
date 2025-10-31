@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 @MainActor
 extension TimerViewModel {
@@ -53,19 +54,21 @@ extension TimerViewModel {
                 newEndsAt: endAt
             )
 
-            // 現在のフェーズに応じて“次に鳴る1本だけ”を再スケジュール
+            // 現在のフェーズに応じて“次に鳴る1本だけ”を再スケジュール（BG優先度適用）
             if isWorkSession {
                 // Work中は break のみを張る（break発火時に次FocusはensureFocusAtで張る）
+                let isBG = UIApplication.shared.applicationState != .active
                 notificationService.scheduleSessionEndNotification(
                     at: endAt,
                     phase: .breakTime,
-                    timeSensitive: true
+                    timeSensitive: isBG ? false : true
                 )
             } else {
                 // Break中開始（稀）: Focusのみ冪等予約
+                let isBG = UIApplication.shared.applicationState != .active
                 notificationService.ensureFocusAt(
                     breakEndAt: endAt,
-                    timeSensitive: true
+                    timeSensitive: isBG ? true : true
                 )
             }
         }
@@ -76,7 +79,9 @@ extension TimerViewModel {
         // debug log removed
         stateManager.stopTimer()
         sessionManager.resetSession()
-        notificationService.cancelSessionEndNotification()
+        // フェーズごとにキャンセル（グローバルCancelを避ける）
+        notificationService.cancelSessionEnd(for: .focus)
+        notificationService.cancelSessionEnd(for: .breakTime)
         clearQuietMoonMessage()
 
         // Live Activity終了
@@ -99,7 +104,9 @@ extension TimerViewModel {
             clearQuietMoonMessage()
         }
         animationController.resetAnimationState()
-        notificationService.cancelSessionEndNotification()
+        // フェーズごとにキャンセル（グローバルCancelを避ける）
+        notificationService.cancelSessionEnd(for: .focus)
+        notificationService.cancelSessionEnd(for: .breakTime)
 
         // Live Activity終了
         await LiveActivityManager.shared.endActivity()
@@ -169,8 +176,9 @@ extension TimerViewModel {
         animationController.triggerSessionFinishedAnimations()
         notificationAndHapticManager.triggerHeavyHaptic()
 
-        // スケジュール済みの通知をキャンセル
-        notificationService.cancelSessionEndNotification()
+        // スケジュール済みの通知をフェーズごとにキャンセル
+        notificationService.cancelSessionEnd(for: .focus)
+        notificationService.cancelSessionEnd(for: .breakTime)
         updateQuietMoonMessage(forCompletedWorkSession: completedWasWorkSession)
 
         // Live Activity終了
@@ -259,12 +267,20 @@ extension TimerViewModel {
             endsAt: endAt
         )
 
-        // Work→Rest と Rest→Focus を開始時点で連鎖予約
+        // Work→Rest と Rest→Focus を開始時点で個別に予約（BG優先度適用）
         let workEndAt = endAt
         let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
-        notificationService.scheduleChainedSessionEnds(
-            workEndAt: workEndAt,
-            breakEndAt: breakEndAt,
+        let isBG = UIApplication.shared.applicationState != .active
+        // Rest（break）は BG では .active（= timeSensitive: false）
+        notificationService.scheduleSessionEndNotification(
+            at: workEndAt,
+            phase: .breakTime,
+            timeSensitive: isBG ? false : true
+        )
+        // Focus は BG でも timeSensitive: true
+        notificationService.scheduleSessionEndNotification(
+            at: breakEndAt,
+            phase: .focus,
             timeSensitive: true
         )
 
@@ -321,19 +337,26 @@ extension TimerViewModel {
 
         // 次のセッションの種類に応じて連鎖/冪等予約
         if isWorkSession {
-            // Work→Rest と Rest→Focus を開始時点で連鎖予約
+            // Work→Rest と Rest→Focus を開始時点で個別に予約（BG優先度適用）
             let workEndAt = endAt
             let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
-            notificationService.scheduleChainedSessionEnds(
-                workEndAt: workEndAt,
-                breakEndAt: breakEndAt,
+            let isBG = UIApplication.shared.applicationState != .active
+            notificationService.scheduleSessionEndNotification(
+                at: workEndAt,
+                phase: .breakTime,
+                timeSensitive: isBG ? false : true
+            )
+            notificationService.scheduleSessionEndNotification(
+                at: breakEndAt,
+                phase: .focus,
                 timeSensitive: true
             )
         } else {
             // Break中開始（稀）: Focusのみ冪等予約
+            let isBG = UIApplication.shared.applicationState != .active
             notificationService.ensureFocusAt(
                 breakEndAt: endAt,
-                timeSensitive: true
+                timeSensitive: isBG ? true : true
             )
         }
         // Send start pulse
