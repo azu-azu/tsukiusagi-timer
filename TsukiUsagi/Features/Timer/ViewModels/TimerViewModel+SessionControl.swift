@@ -96,6 +96,9 @@ extension TimerViewModel {
     /// タイマーリセット（セッション保持の有無を選択）
     func resetTimer(to seconds: Int, keepSession: Bool) async {
         // debug log removed
+        // アニメーション抑制を設定（リセット時の不要なアニメーション発火を防ぐ）
+        animationController.setAnimationSuppression(true)
+
         stateManager.resetTimer(to: seconds)
         if keepSession {
             // セッション情報は保持
@@ -110,6 +113,9 @@ extension TimerViewModel {
 
         // Live Activity終了
         await LiveActivityManager.shared.endActivity()
+
+        // アニメーション抑制を解除（次の操作で正常にアニメーションが発火するように）
+        animationController.setAnimationSuppression(false)
     }
 
     /// セッション完了処理
