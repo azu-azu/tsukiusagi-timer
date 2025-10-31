@@ -59,7 +59,14 @@ final class NotificationPermissionManager {
         if settings.authorizationStatus == .notDetermined {
             do {
                 if #available(iOS 15.0, *) {
-                    let granted = try await center.requestAuthorization(options: [.alert, .badge, .sound, .timeSensitive])
+                    let granted = try await center.requestAuthorization(
+                        options: [
+                            .alert,
+                            .badge,
+                            .sound,
+                            .timeSensitive
+                        ]
+                    )
                     userDefaults.set(true, forKey: hasRequestedPermissionKey)
                     return granted
                 } else {

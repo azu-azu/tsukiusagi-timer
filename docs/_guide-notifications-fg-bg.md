@@ -84,7 +84,7 @@ If `timeSensitiveSetting` is not enabled after authorization, open Settings to l
   - `startTimer()` / `resumeTimer()` use the APIs above to schedule.
   - `handleSessionCompleted` uses `cancelSessionEndSafely(for:)` instead of global cancel.
 
-Implementation note: We use sequential individual scheduling (Rest→Focus) while maintaining the two‑pending invariant; this aligns with the policy described for `scheduleChainedSessionEnds`.
+Implementation note: We use sequential individual scheduling (Rest→Focus) while maintaining the two‑pending invariant; this aligns with the policy described for `scheduleChainedSessionEnds`, ensuring consistent two‑pending behavior even without explicit chain scheduling.
 
 ### Invariants / Checkpoints
 - Always keep request identifiers unique (prefix + epoch + UUID8).
@@ -170,5 +170,3 @@ We prioritize a simple, explicit model: same‑phase cleanup happens at schedule
 - Thread policy summary:
   - FG: `threadIdentifier = <phase prefix>` for readable grouping.
   - BG: `threadIdentifier = <uniqueId>` to reduce OS coalescing.
-
-
