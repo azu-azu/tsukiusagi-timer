@@ -241,11 +241,17 @@ extension TimerViewModel {
 
         // 6) セッションマネージャーのリセット
         sessionManager.resetSession()
+
+        // 7) アニメーション購読の再確立（cancellables.removeAll()で解除された購読を復元）
+        reestablishBindings()
     }
 
     /// Quiet Moon状態からの専用開始処理
     func startFromQuietMoon() async {
         performCompleteStateReset()
+
+        // 購読の確立を確実にするため、次の実行ループまで待機
+        await Task.yield()
 
         // Workセッションとして開始
         ensureWorkOnStart()
@@ -260,8 +266,17 @@ extension TimerViewModel {
         // 時間を設定してからstartTimerを呼ぶ
         stateManager.timeRemaining = workLengthMinutes * 60
         stateManager.startTimer()
+
+        // アニメーションを発火
+        // 注意: triggerStartAnimations()内でanimationController.startPulse.send()が呼ばれるが、
+        // reestablishBindings()で購読が確立されているため、timerVM.startPulseに転送される
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
+
+        // 直接startPulseも送信（reestablishBindings()の購読が確立されていない場合の保険）
+        // 購読が確立されていれば、triggerStartAnimations()内のstartPulse.send()で既に送信されているため、
+        // この直接送信は重複になるが、購読が確立されていない場合のフォールバックとして機能する
+        startPulse.send()
 
         // 終了時刻を設定し、次フェーズの通知を連鎖で予約
         let endAt = dateProvider.now().addingTimeInterval(TimeInterval(workLengthMinutes * 60))
@@ -289,9 +304,6 @@ extension TimerViewModel {
             phase: .focus,
             timeSensitive: true
         )
-
-        // Send start pulse
-        startPulse.send()
     }
 
     /// 状態に応じた分岐処理でタイマー開始（新しいエントリポイント）

@@ -46,6 +46,7 @@
 - [`_guide-font-installation.md`](./_guide-font-installation.md) - Nunitoフォントのインストール手順
 - [`_guide-keyboard.md`](./_guide-keyboard.md) - キーボード操作ガイドライン
 - [`_guide-notifications-fg-bg.md`](./_guide-notifications-fg-bg.md) - フォアグラウンド・バックグラウンド通知ガイド
+- [`_guide-quiet-moon-animation.md`](./_guide-quiet-moon-animation.md) - Quiet Moon状態からのSTART時アニメーション不発火問題の修正ガイド
 
 ### 🏗️ 構造・設計ルール
 - [`structure-directory.md`](./structure-directory.md) - プロジェクトディレクトリ構造

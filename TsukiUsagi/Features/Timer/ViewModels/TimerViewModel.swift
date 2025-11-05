@@ -194,8 +194,23 @@ final class TimerViewModel: ObservableObject {
                 .assign(to: &$shouldSuppressSessionFinishedAnimation)
 
             // Sync startPulse from animation controller to TimerViewModel
-            concreteController.startPulse.subscribe(startPulse).store(in: &cancellables)
+            concreteController.startPulse
+                .sink { [weak self] _ in
+                    self?.startPulse.send()
+                }
+                .store(in: &cancellables)
         }
+    }
+
+    /// アニメーション購読を再確立（performCompleteStateReset後用）
+    ///
+    /// `performCompleteStateReset()`で`cancellables.removeAll()`により
+    /// 購読が解除された後、アニメーション購読を復元するために使用
+    func reestablishBindings() {
+        guard let controller = animationController as? TimerAnimationController else { return }
+        // startPulse を ViewModel 側に橋渡し
+        // setupBindings()と同じ実装を使用
+        controller.startPulse.subscribe(startPulse).store(in: &cancellables)
     }
 
     private func setupEngineCallbacks() {

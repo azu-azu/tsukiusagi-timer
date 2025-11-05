@@ -1,6 +1,15 @@
 # TsukiUsagi Timer 🐇
 *A poetic Pomodoro timer inspired by the moon — where focus meets quiet rhythm.*
 
+📱 **App Store:**
+[Download on the App Store](https://apps.apple.com/jp/app/tsukiusagi-timer/id6753893693)
+
+🌐 **Portfolio Page:**
+[tsukiusagi.biz/works/tsukiusagi-timer](https://tsukiusagi.biz/works/tsukiusagi-timer/)
+
+> Built with SwiftUI · ActivityKit
+
+🎨 Designed & developed by [Azu](https://tsukiusagi.biz)
 ---
 
 ## 🌕 Concept

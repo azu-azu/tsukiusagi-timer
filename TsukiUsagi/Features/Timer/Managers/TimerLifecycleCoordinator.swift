@@ -10,6 +10,9 @@ import Foundation
 import os
 #endif
 
+// Live Activity終了処理のため
+@preconcurrency import ActivityKit
+
 struct TimerForegroundParams {
     let isSessionFinished: Bool
     let isBackgroundCompleted: Bool
@@ -80,6 +83,13 @@ final class TimerLifecycleCoordinator {
                 #if DEBUG
                 // debug log removed
                 #endif
+
+                // ✅ FG復帰時の即時Live Activity終了（handleSessionCompletedより先に実行）
+                // BG滞留中のカウントアップを防ぐため、最初のフレームで確実に終了
+                Task { @MainActor in
+                    await LiveActivityManager.shared.endActivity(finalEndsAt: endAt)
+                }
+
                 // 一度だけ画面内で静かな完了チップを表示するための通知
                 NotificationCenter.default.post(name: Notification.Name("TimerSilentCompleted"), object: nil)
 
