@@ -72,7 +72,8 @@ struct TimerLiveActivityWidget: Widget {
                                             .foregroundColor(.white)
                                             .lineLimit(1)
                                     } else {
-                                        Text(context.state.endsAt, style: .timer)
+                                        // timerIntervalを使用（BG中のカウントアップを防止）
+                                        Text(timerInterval: now...context.state.endsAt, countsDown: true)
                                             .font(.system(size: 28, weight: .semibold, design: .rounded))
                                             .monospacedDigit()
                                             .foregroundColor(.white)
@@ -130,7 +131,8 @@ struct TimerLiveActivityWidget: Widget {
                                 .layoutPriority(1)
                                 .padding(.leading, 8)
                         } else {
-                            Text(context.state.endsAt, style: .timer)
+                            // timerIntervalを使用（BG中のカウントアップを防止）
+                            Text(timerInterval: now...context.state.endsAt, countsDown: true)
                                 .font(.title3)
                                 .monospacedDigit()
                                 .foregroundColor(.white)
@@ -190,7 +192,8 @@ struct TimerLiveActivityWidget: Widget {
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     } else {
-                        Text(context.state.endsAt, style: .timer)
+                        // timerIntervalを使用（BG中のカウントアップを防止）
+                        Text(timerInterval: now...context.state.endsAt, countsDown: true)
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .monospacedDigit()
                             .foregroundColor(.white)
