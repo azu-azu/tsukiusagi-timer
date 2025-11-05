@@ -42,5 +42,6 @@ Copyright © 2025 TsukiUsagi
 ---
 
 ### ✨ App Store
-v1.0.0 2025/10/15
-v1.1.0 2025/10/21 - Design tweaks
+- v1.0.0 2025/10/15
+- v1.1.0 2025/10/21 - Design tweaks
+- v1.2.0 2025/11/02 - Live Activity support
