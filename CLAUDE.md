@@ -1,6 +1,6 @@
 ## CLAUDE.md - AI Assistant Guide
-# Version: 1.0 (Synced with ENGINEERING_RULES.md v1.0)
-# Last Updated: 2025-10-13
+# Version: 2.0 (Synced with ENGINEERING_RULES.md Supervised Engineering Edition)
+# Last Updated: 2025-11-01
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -14,14 +14,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Design System**: `TsukiUsagi/Foundation/DesignTokens.swift` - Centralized design tokens
 - **Session Management**: `TsukiUsagi/Foundation/Managers/SessionManager.swift` - Core session data management
 
-### Architecture (See Core: ARCH-01, ARCH-02)
+### Architecture (See: arch-01, arch-02)
 
 **Clean Architecture** with unidirectional dependencies:
 - UI → Application(UseCases) → Domain
 - Domain layer has no external dependencies
 - All external elements abstracted via Protocols
 
-**Feature Organization** (See Core: STRUCT-01):
+**Feature Organization** (See: struct-01):
 ```
 TsukiUsagi/Features/
 ├── Timer/          # Core Pomodoro timer functionality
@@ -32,9 +32,9 @@ TsukiUsagi/Features/
 
 ---
 
-## Development Commands (See Core: BUILD-01)
+## Development Commands (See: build-01)
 
-Build and test commands are defined in `ENGINEERING_RULES.md` BUILD-01 section.
+Build and test commands are defined in `ENGINEERING_RULES.md` build-01 section.
 
 ---
 
@@ -43,23 +43,23 @@ Build and test commands are defined in `ENGINEERING_RULES.md` BUILD-01 section.
 ### How to Ask the Assistant
 
 **For Code Review**:
-- "Review this code for Clean Architecture compliance" (See Core: ARCH-01, ARCH-02)
-- "Check if this follows the 3-layer text classification system" (See Core: TXT-01)
-- "Verify this uses DesignTokens instead of direct font/color specs" (See Core: UI-01)
+- "Review this code for Clean Architecture compliance" (See: arch-01, arch-02)
+- "Check if this follows the 3-layer text classification system" (See: text-01)
+- "Verify this uses DesignTokens instead of direct font/color specs" (See: ui-01)
 
 **For Implementation**:
-- "Implement this feature following Clean Architecture principles" (See Core: ARCH-01, ARCH-02)
-- "Create a new session management feature with proper validation" (See Core: QUALITY-01)
-- "Add error handling with user-friendly messages" (See Core: QUALITY-01)
+- "Implement this feature following Clean Architecture principles" (See: arch-01, arch-02)
+- "Create a new session management feature with proper validation" (See: quality-01)
+- "Add error handling with user-friendly messages" (See: quality-01)
 
 **For Debugging**:
-- "Help debug this FocusState issue" (See Core: UI-02)
-- "Fix this ScrollView layout problem" (See Core: UI-02)
-- "Resolve this EnvironmentObject injection error" (See Core: QUALITY-01)
+- "Help debug this FocusState issue" (See: ui-02)
+- "Fix this ScrollView layout problem" (See: ui-02)
+- "Resolve this EnvironmentObject injection error" (See: quality-01)
 
 ### Code Generation Patterns
 
-**ViewModel Pattern** (See Core: ARCH-02):
+**ViewModel Pattern** (See: arch-02):
 ```swift
 @MainActor
 final class FeatureViewModel: ObservableObject {
@@ -77,7 +77,7 @@ final class FeatureViewModel: ObservableObject {
 }
 ```
 
-**View Pattern** (See Core: UI-01, UI-02):
+**View Pattern** (See: ui-01, ui-02):
 ```swift
 struct FeatureView: View {
     @StateObject private var viewModel: FeatureViewModel
@@ -90,14 +90,14 @@ struct FeatureView: View {
 
 ---
 
-## Private Commands (See Core: TOOL-01)
+## Private Commands
 
-### log.n
+### /fn (log filename generator)
 Generate log file names for issue tracking.
 
 **Format**: `<YYYY-MM-DD>_log_title_in_snake_case.md`
 
-**Usage**: "Generate `log.n` with format for focus state keyboard sync issue"
+**Usage**: "Generate log filename for focus state keyboard sync issue"
 
 
 ---
@@ -113,7 +113,7 @@ Generate log file names for issue tracking.
 
 ## Version Sync
 
-This file is synchronized with `ENGINEERING_RULES.md v1.0`. When core rules are updated, this file should be updated to reference the new version and any changed policy IDs.
+This file is synchronized with `ENGINEERING_RULES.md` (Supervised Engineering Edition). When core rules are updated, this file should be updated to reference the new version and any changed policy IDs.
 
 ---
 
@@ -121,12 +121,21 @@ This file is synchronized with `ENGINEERING_RULES.md v1.0`. When core rules are 
 
 For detailed implementation guidelines, see the following sections in `ENGINEERING_RULES.md`:
 
-- **ARCH-01, ARCH-02**: Architecture principles and Clean Architecture implementation
-- **UI-01**: Design system usage (DesignTokens)
-- **UI-02**: SwiftUI best practices (onChange, FocusState, ScrollView)
-- **TXT-01, TXT-02**: Text classification system and localization rules
-- **BUILD-01**: Build and test standards (iPhone 16 simulator)
-- **TOOL-01**: Private commands (log.n)
-- **LOG-01**: Logging standards
-- **STRUCT-01**: File organization (feature-based)
-- **QUALITY-01**: Code quality standards and error handling
+**Philosophy & Process:**
+- Philosophy: Core beliefs and simplicity principles
+- Process: Planning, implementation flow, and "3 attempts" rule
+
+**Project-Specific Technical Rules:**
+- **arch-01**: Architecture principles and Clean Architecture implementation
+- **arch-02**: Clean Architecture layer structure and checklist
+- **ui-01**: Design system usage (DesignTokens)
+- **ui-02**: SwiftUI best practices (onChange, FocusState, ScrollView)
+- **text-01**: Text classification system (Labels/Copy/Messages)
+- **text-02**: Localization rules
+- **build-01**: Build and test standards (iPhone 16 simulator)
+- **struct-01**: File organization (feature-based)
+- **quality-01**: Code quality standards and error handling
+
+**Quality & Governance:**
+- Quality Gates: Definition of Done, test guidelines
+- Observability & Governance: Traceability, AI collaboration boundaries, metrics
