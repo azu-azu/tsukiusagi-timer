@@ -1,29 +1,82 @@
-## Engineering Rules v1.0 • 2025-10-13
+# Development Guidelines (Supervised Engineering Edition)
 
-This document serves as the Single Source of Truth for all engineering standards and practices in the TsukiUsagi project.
+## Philosophy
 
-## Table of Contents
+### Core Beliefs
 
-- [ARCH-01: Architecture Principles](#arch-01-architecture-principles)
-- [ARCH-02: Clean Architecture Implementation](#arch-02-clean-architecture-implementation)
-- [UI-01: Design System Usage](#ui-01-design-system-usage)
-- [UI-02: SwiftUI Best Practices](#ui-02-swiftui-best-practices)
-- [TXT-01: Text Classification System](#txt-01-text-classification-system)
-- [TXT-02: Localization Rules](#txt-02-localization-rules)
-- [BUILD-01: Build and Test Standards](#build-01-build-and-test-standards)
-- [TOOL-01: Private Commands](#tool-01-private-commands)
-- [LOG-01: Logging Standards](#log-01-logging-standards)
-- [STRUCT-01: File Organization](#struct-01-file-organization)
-- [QUALITY-01: Code Quality Standards](#quality-01-code-quality-standards)
+* **Incremental progress over big bangs** – Prefer many small, safe merges.
+* **Learning from existing code** – Observe before acting; patterns reveal intent.
+* **Pragmatic over dogmatic** – Adapt principles to context, not context to principles.
+* **Clear intent over clever code** – Readability is the highest form of elegance.
+* **Human-guided over auto-generated** – AI is a tool, not a decision maker.
+
+### Simplicity Means
+
+* Single responsibility per function/class
+* Avoid premature abstractions
+* No clever tricks — prefer boring correctness
+* If it requires explaining, it probably needs refactoring
 
 ---
 
-## ARCH-01: Architecture Principles
+## Process
 
-**Policy ID**: ARCH-01
+### 1. Planning & Staging
+
+Break complex work into 3–5 verifiable stages, and record in `IMPLEMENTATION_PLAN.md`:
+
+```markdown
+## Stage N: [Name]
+**Goal**: [Specific deliverable]
+**Success Criteria**: [Testable outcomes]
+**Tests**: [Specific test cases]
+**Status**: [Not Started | In Progress | Complete]
+**AI Involvement**: [None | Partial | Generated]
+```
+
+* Update status as you progress
+* Explicitly note which steps involve AI tools
+* Remove file once all stages are complete and reviewed
+
+---
+
+### 2. Implementation Flow
+
+1. **Understand** – Study existing patterns and constraints
+2. **Test** – Write a failing test first (red)
+3. **Implement** – Write minimal passing code (green)
+4. **Refactor** – Clean and align with project conventions
+5. **Commit** – Reference related plan stage and intent
+
+---
+
+### 3. When Stuck (After 3 Attempts)
+
+**Critical rule:** Stop after 3 failed attempts.
+
+1. **Document failures**
+
+   * What was tried
+   * Exact error or test output
+   * Hypothesis of failure cause
+2. **Research 2–3 external examples**
+3. **Question abstraction level**
+
+   * Is this too general / too granular?
+4. **Reframe the problem**
+
+   * Try removing complexity, not adding it
+5. **Record insight in `LESSONS_LEARNED.md`**
+
+---
+
+## Project-Specific Technical Rules
+
+### arch-01: Architecture Principles
+
 **Last Updated**: 2025-10-13
 
-### Core Principles (Non-Negotiable)
+#### Core Principles (Non-Negotiable)
 
 - **Clean Architecture / Clean Code** as the foundation
 - **Unidirectional dependency**: UI → Application(UseCases) → Domain
@@ -33,7 +86,7 @@ This document serves as the Single Source of Truth for all engineering standards
 - **Early returns preferred**, shallow nesting
 - **Intent-revealing names**: Focus on "why + outcome" rather than "what"
 
-### SwiftUI Application Guidelines
+#### SwiftUI Application Guidelines
 
 - **View**: Only rendering and input handling. Business logic goes to ViewModel/UseCase
 - **ViewModel**: State management and UseCase invocation only. **No direct calls** to date/notifications/storage
@@ -43,12 +96,11 @@ This document serves as the Single Source of Truth for all engineering standards
 
 ---
 
-## ARCH-02: Clean Architecture Implementation
+### arch-02: Clean Architecture Implementation
 
-**Policy ID**: ARCH-02
 **Last Updated**: 2025-10-13
 
-### Layer Structure
+#### Layer Structure
 
 ```
 Domain/
@@ -65,7 +117,7 @@ Infrastructure/
   Concrete/ (UserDefaultsStorage, UNUserNotificationCenterAdapter ...)
 ```
 
-### Review Checklist
+#### Review Checklist
 
 - [ ] Dependency direction is UI→App→Domain unidirectional? (No reverse dependencies)
 - [ ] External access (notifications/time/storage/UUID) via Protocol? Testable with mocks?
@@ -75,7 +127,7 @@ Infrastructure/
 - [ ] Exceptions/failures not swallowed? (Use Result/throws)
 - [ ] Tests exist for Domain/UseCase? (UI snapshots optional)
 
-### Implementation Example
+#### Implementation Example
 
 ```swift
 // Domain
@@ -109,19 +161,18 @@ final class TimerViewModel: ObservableObject {
 
 ---
 
-## UI-01: Design System Usage
+### ui-01: Design System Usage
 
-**Policy ID**: UI-01
 **Last Updated**: 2025-10-13
 
-### Mandatory Rules
+#### Mandatory Rules
 
 - **Always use semantic tokens** from `DesignTokens.swift` instead of direct font/color values
 - **Font usage**: Use `DesignTokens.Fonts.label`, `.labelBold`, `.title`, etc.
 - **Color usage**: Use `DesignTokens.MoonColors.textPrimary`, `.textSecondary`, etc.
 - **Never use direct font specifications** like `.font(.system(size: 17))` - this will fail lint checks
 
-### Design Token Categories
+#### Design Token Categories
 
 - **Fonts**: `DesignTokens.Fonts.*`
 - **Colors**: `DesignTokens.MoonColors.*`
@@ -130,12 +181,11 @@ final class TimerViewModel: ObservableObject {
 
 ---
 
-## UI-02: SwiftUI Best Practices
+### ui-02: SwiftUI Best Practices
 
-**Policy ID**: UI-02
 **Last Updated**: 2025-10-13
 
-### iOS 17+ onChange Syntax
+#### iOS 17+ onChange Syntax
 
 **MANDATORY**: Use 2-argument closure format:
 
@@ -149,16 +199,16 @@ final class TimerViewModel: ObservableObject {
 .onChange(of: value) { newValue in ... }
 ```
 
-### FocusState vs Binding Rules
+#### FocusState vs Binding Rules
 
-#### Rule #1: focused() requires FocusState.Binding only
+**Rule #1: focused() requires FocusState.Binding only**
 
 ```swift
 TextField(...).focused($isActivityFocused)
 // $isActivityFocused is FocusState<Bool>.Binding, NOT Binding<Bool>
 ```
 
-#### Rule #2: ViewModifier uses regular Binding<Bool>
+**Rule #2: ViewModifier uses regular Binding<Bool>**
 
 ```swift
 struct SomeModifier: ViewModifier {
@@ -171,7 +221,7 @@ struct DismissKeyboardOnTap: ViewModifier {
 }
 ```
 
-#### Rule #3: State for UI switching
+**Rule #3: State for UI switching**
 
 ```swift
 // ❌ Computed properties don't trigger View redraw
@@ -181,7 +231,7 @@ private var isCustomActivity: Bool { ... }
 @State var isCustomActivity: Bool
 ```
 
-### ScrollView Implementation
+#### ScrollView Implementation
 
 **MANDATORY**: Put actual content inside ScrollView:
 
@@ -206,7 +256,7 @@ ScrollView(.vertical, showsIndicators: false) {
 .frame(height: 300)
 ```
 
-### Landscape Handling
+#### Landscape Handling
 
 ```swift
 @Environment(\.horizontalSizeClass) private var horizontalClass
@@ -217,7 +267,7 @@ private func safeIsLandscape(size: CGSize) -> Bool {
 }
 ```
 
-### SafeArea and Notch Avoidance
+#### SafeArea and Notch Avoidance
 
 ```swift
 // Landscape notch avoidance
@@ -237,31 +287,30 @@ private var topPadding: CGFloat {
 
 ---
 
-## TXT-01: Text Classification System
+### text-01: Text Classification System
 
-**Policy ID**: TXT-01
 **Last Updated**: 2025-10-13
 
-### 3-Layer Classification (MANDATORY for new code)
+#### 3-Layer Classification (MANDATORY for new code)
 
 **Labels.swift**: Name tags (headings, item names, status names)
 **Copy.swift**: Microcopy (buttons, tabs, links)
 **Messages.swift**: Contextual messages (placeholders, descriptions, alerts)
 
-### Classification Rules
+#### Classification Rules
 
 - **Labels**: End with `:` (section prefixes), status names, item names
 - **Copy**: Action verbs (OK/Save/Delete/Retry), buttons, links
 - **Messages**: Contain `? . ! …`, over 40 characters, placeholders, descriptions
 
-### Boundary Rules
+#### Boundary Rules
 
 - Contains `? . ! …` → Messages
 - Ends with `:` (line prefix) → Labels
 - Action verbs (OK/Save/Delete/Retry) → Copy
 - Over 40 characters → Messages
 
-### Implementation Examples
+#### Implementation Examples
 
 ```swift
 // ❌ Forbidden
@@ -273,42 +322,40 @@ Button(Copy.Button.save) { }
 Text(Messages.Placeholders.sessionName)
 ```
 
-### Exceptions
+#### Exceptions
 
 - Legacy code migration: `NSLocalizedString` direct calls allowed during transition
 - New features/new files: Must use 3-layer classification
 
 ---
 
-## TXT-02: Localization Rules
+### text-02: Localization Rules
 
-**Policy ID**: TXT-02
 **Last Updated**: 2025-10-13
 
-### Prohibited Patterns
+#### Prohibited Patterns
 
 - **Direct `NSLocalizedString` calls** in new code
 - **Hardcoded strings** in UI components
 - **Mixed language** in same component
 
-### Required Patterns
+#### Required Patterns
 
-- **Use 3-layer classification** (TXT-01)
+- **Use 3-layer classification** (text-01)
 - **Semantic naming** for localization keys
 - **Contextual comments** for translators
 
 ---
 
-## BUILD-01: Build and Test Standards
+### build-01: Build and Test Standards
 
-**Policy ID**: BUILD-01
 **Last Updated**: 2025-10-13
 
-### Mandatory Simulator
+#### Mandatory Simulator
 
 **iPhone 16 simulator ONLY** - other simulators may not be available
 
-### Build Commands
+#### Build Commands
 
 ```bash
 # Build for iPhone 16 simulator (required)
@@ -318,7 +365,7 @@ xcodebuild -project TsukiUsagi.xcodeproj -scheme TsukiUsagi -destination 'platfo
 xcodebuild -project TsukiUsagi.xcodeproj -scheme TsukiUsagi -destination 'platform=iOS Simulator,name=iPhone 16' test
 ```
 
-### Build Verification
+#### Build Verification
 
 - **Always run build verification** before major changes
 - **Test both light and dark mode** appearances
@@ -326,78 +373,11 @@ xcodebuild -project TsukiUsagi.xcodeproj -scheme TsukiUsagi -destination 'platfo
 
 ---
 
-## TOOL-01: Private Commands
+### struct-01: File Organization
 
-**Policy ID**: TOOL-01
 **Last Updated**: 2025-10-13
 
-### log.n Command
-
-**Purpose**: Generate log file names for issue tracking
-
-**Format**: `<YYYY-MM-DD>_log_title_in_snake_case.md`
-
-**Examples**:
-- `2025-10-13_focus_state_does_not_sync_with_keyboard.md`
-- `2025-10-13_session_management_validation_error.md`
-
-**Usage**: Keep concise and descriptive
-
-
----
-
-## LOG-01: Logging Standards
-
-**Policy ID**: LOG-01
-**Last Updated**: 2025-10-13
-
-### Log File Naming
-
-**Format**: `YYYY-MM-DD_description_in_snake_case`
-
-**Examples**:
-- `2025-10-13_build_errors_iphone16_simulator`
-- `2025-10-13_focus_state_keyboard_sync_issue`
-
-### Log Directory
-
-**Location**: `logs/` (project root)
-
-### Log Content Structure
-
-```markdown
-# Log Title - YYYY-MM-DD
-
-## Issue Description
-Brief description of the issue
-
-## Steps to Reproduce
-1. Step one
-2. Step two
-
-## Expected Behavior
-What should happen
-
-## Actual Behavior
-What actually happens
-
-## Environment
-- iOS Version:
-- Simulator: iPhone 16
-- Xcode Version:
-
-## Resolution
-How it was fixed (if applicable)
-```
-
----
-
-## STRUCT-01: File Organization
-
-**Policy ID**: STRUCT-01
-**Last Updated**: 2025-10-13
-
-### Feature-Based Organization (MANDATORY)
+#### Feature-Based Organization (MANDATORY)
 
 All features must follow this structure:
 
@@ -411,7 +391,7 @@ Features/[FeatureName]/
 └── Utilities/      # Feature-specific utilities
 ```
 
-### Naming Conventions (STRICTLY ENFORCED)
+#### Naming Conventions (STRICTLY ENFORCED)
 
 - **Directory names**: Complete words (`Utilities`, not `Utils`)
 - **Pluralization**: Directories with multiple items use plural form (`Moons/`, `Stars/`, `Usagis/`)
@@ -419,14 +399,14 @@ Features/[FeatureName]/
   - **Manager**: System resource management, lifecycle management, external API coordination
   - **Store**: Application state persistence, data storage, state change notifications
 
-### File Placement Rules
+#### File Placement Rules
 
 - **Visual components**: `Visual/[Category]/`
 - **Reusable UI components**: `Components/[Category]/`
 - **Business logic**: `Services/`
 - **Time formatting**: `Foundation/Formatters/`
 
-### Compliance Requirements
+#### Compliance Requirements
 
 - **Pre-implementation check**: Verify file placement follows structure guidelines
 - **No exceptions**: Structure violations will be rejected
@@ -434,25 +414,24 @@ Features/[FeatureName]/
 
 ---
 
-## QUALITY-01: Code Quality Standards
+### quality-01: Code Quality Standards
 
-**Policy ID**: QUALITY-01
 **Last Updated**: 2025-10-13
 
-### Lint Exception Management
+#### Lint Exception Management
 
 - **Issue numbers required** for all suppressions
 - **Reasons and target dates** must be documented
 - **All suppressions** must be documented in `/docs/lint_exceptions.md`
 - **Format**: `// swiftlint:disable:next rule_name // Issue #123: Reason (YYYY-MM target)`
 
-### Environment Object Injection
+#### Environment Object Injection
 
 - **Ensure `SessionManager`** is injected into all relevant views
 - **Missing injection causes crashes** - particularly important for Settings views and previews
 - **Test all previews** with proper environment objects
 
-### Session Management
+#### Session Management
 
 - **Use `SessionManager`** for all session-related CRUD operations
 - **Session names**: 30-character limit
@@ -460,14 +439,15 @@ Features/[FeatureName]/
 - **Default sessions** ("Work", "Study", "Read") cannot be deleted
 - **All operations** include validation through `SessionManagerValidator`
 
-### Error Handling
+#### Error Handling
 
 - **User input validation** (duplicates, required, limits) in ViewModel
 - **Immediate error feedback** in UI
 - **Use try/catch** for error handling
 - **Display errors** via alerts to users
+- **Log with trace IDs** for observability
 
-### Implementation Approach
+#### Implementation Approach
 
 - **Incremental implementation** - small units, verify, get user confirmation
 - **Specification changes** and bug fixes are easier with this approach
@@ -475,14 +455,109 @@ Features/[FeatureName]/
 
 ---
 
-## Version History
+## Quality Gates
 
-- **v1.0** (2025-10-13): Initial version with core rules consolidation
+### Definition of Done
+
+* [ ] Tests written and passing
+* [ ] Code follows conventions and architecture rules (see project-specific rules)
+* [ ] No linter/formatter warnings
+* [ ] Commit messages explain *why*, not just *what*
+* [ ] Reviewed (human or pair)
+* [ ] Observability hooks added if relevant
+* [ ] No `TODO` without linked issue ID
 
 ---
 
-## References
+### Test Guidelines
 
-- **Structure Guidelines**: `/docs/structure-guidelines.md`
-- **Lint Exceptions**: `/docs/lint_exceptions.md`
-- **Copy Classification Guide**: `/docs/_guide-copy-classification.md`
+* Test **behavior**, not implementation details
+* One assertion per test when possible
+* Descriptive test names ("given-when-then" style)
+* Deterministic outputs; avoid external dependency noise
+* Use shared mocks/stubs for consistency
+
+---
+
+## Observability & Governance
+
+### Traceability
+
+* Each feature must produce minimal logs or metrics for debugging.
+* Key flows (timer, notification, data sync) must include `traceID`.
+* Important decisions documented under `/docs/architecture/decisions`.
+
+### AI Collaboration Boundaries
+
+* AI tools may **generate or refactor**, but cannot **merge or approve** without human review.
+* All AI edits must appear as isolated commits with clear diff.
+* Human must review and sign-off before merging.
+* If AI introduces code across multiple layers, perform dependency audit.
+
+### Metrics to Watch
+
+| Metric                     | Goal  | Alert Trigger             |
+| -------------------------- | ----- | ------------------------- |
+| Build Success Rate         | ≥ 95% | Drop >5%                  |
+| Revert Rate                | ≤ 2%  | Revert >3 times per month |
+| Test Coverage              | ≥ 80% | Drop >5%                  |
+| AI-generated Code Reviewed | 100%  | Any unreviewed commit     |
+
+---
+
+## Important Reminders
+
+**NEVER:**
+
+* Use `--no-verify` to skip checks
+* Disable tests instead of fixing them
+* Commit code that doesn't compile
+* Accept AI changes blindly
+
+**ALWAYS:**
+
+* Commit small, working increments
+* Keep documentation aligned with plan
+* Use AI to assist, not decide
+* Stop after 3 failed attempts and reassess
+
+---
+
+## 🌙 Meta-Note
+
+This guideline defines a **supervised engineering model**:
+
+> *Human judgment + AI acceleration + transparent traceability.*
+
+It's not "AI-driven development."
+It's **"human-directed, AI-amplified development."**
+
+---
+
+## Policy ID Quick Reference
+
+| Policy ID  | Topic                           |
+| ---------- | ------------------------------- |
+| arch-01    | Architecture Principles         |
+| arch-02    | Clean Architecture              |
+| ui-01      | Design System Usage             |
+| ui-02      | SwiftUI Best Practices          |
+| text-01    | Text Classification System      |
+| text-02    | Localization Rules              |
+| build-01   | Build and Test Standards        |
+| struct-01  | File Organization               |
+| quality-01 | Code Quality Standards          |
+
+---
+
+### Vocabulary（英 | 日）
+
+| English                | 日本語          |
+| ---------------------- | ------------ |
+| Supervised Engineering | 監督付き開発       |
+| Observability          | 可観測性         |
+| Traceability           | 追跡可能性        |
+| Guardrails             | 安全枠／制御境界     |
+| Rollback               | ロールバック（取り消し） |
+| Governance             | 統制・運用方針      |
+| Reversibility          | 取り返しのつく設計    |
