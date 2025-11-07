@@ -285,4 +285,3 @@ stateManager.timeRemaining = 0  // 明示的に0にリセット
 ## 🔗 関連コミット
 
 - Commit: `ed3d217` - "Fix timer display issue: ensure initial value shows for full second"
-

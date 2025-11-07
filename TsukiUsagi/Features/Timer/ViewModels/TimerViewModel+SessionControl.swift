@@ -68,7 +68,6 @@ extension TimerViewModel {
                 )
             } else {
                 // Break中開始（稀）: Focusのみ冪等予約
-                let isBG = UIApplication.shared.applicationState != .active
                 notificationService.ensureFocusAt(
                     breakEndAt: endAt,
                     timeSensitive: true
@@ -351,7 +350,6 @@ extension TimerViewModel {
             scheduleChainNotifications(workEndAt: endAt)
         } else {
             // Break中開始（稀）: Focusのみ冪等予約
-            let isBG = UIApplication.shared.applicationState != .active
             notificationService.ensureFocusAt(
                 breakEndAt: endAt,
                 timeSensitive: true
