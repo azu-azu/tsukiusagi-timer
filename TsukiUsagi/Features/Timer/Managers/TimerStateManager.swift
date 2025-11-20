@@ -41,23 +41,7 @@ final class TimerStateManager: ObservableObject {
         // 初期値は0（initializeWithWorkMinutesで正しい時間が設定される）
         self.timeRemaining = 0
 
-        setupEngineBindings()
-    }
-
-    // MARK: - Engine Bindings
-
-    private func setupEngineBindings() {
-        engine.onTick = { [weak self] remaining in
-            self?.timeRemaining = remaining
-            // TimerEngineの状態と同期
-            if let self = self, self.engine.isRunning != self.isRunning {
-                self.isRunning = self.engine.isRunning
-            }
-        }
-
-        engine.onSessionCompleted = { [weak self] sessionInfo in
-            self?.handleSessionCompleted(sessionInfo)
-        }
+        // Note: engine.onTick と engine.onSessionCompleted は TimerViewModel.setupEngineCallbacks() で一元管理される
     }
 
     // MARK: - State Management

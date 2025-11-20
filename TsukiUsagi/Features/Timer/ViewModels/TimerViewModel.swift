@@ -194,8 +194,43 @@ final class TimerViewModel: ObservableObject {
                 .assign(to: &$shouldSuppressSessionFinishedAnimation)
 
             // Sync startPulse from animation controller to TimerViewModel
-            concreteController.startPulse.subscribe(startPulse).store(in: &cancellables)
+            concreteController.startPulse
+                .sink { [weak self] _ in
+                    self?.startPulse.send()
+                }
+                .store(in: &cancellables)
         }
+    }
+
+    /// アニメーション購読を再確立（performCompleteStateReset後用）
+    ///
+    /// `performCompleteStateReset()`で`cancellables.removeAll()`により
+    /// 購読が解除された後、必要な購読を復元するために使用
+    func reestablishBindings() {
+        // stateManagerの購読を再確立（performCompleteStateResetで削除されたため）
+        stateManager.$timeRemaining.assign(to: &$timeRemaining)
+        stateManager.$isRunning.assign(to: &$isRunning)
+        stateManager.$runState.assign(to: &$runState)
+        stateManager.$isWorkSession.assign(to: &$isWorkSession)
+        stateManager.$isSessionFinished.assign(to: &$isSessionFinished)
+
+        // sessionManagerの購読を再確立
+        sessionManager.$startTime.assign(to: &$startTime)
+        sessionManager.$endTime.assign(to: &$endTime)
+
+        // アニメーション購読を再確立
+        guard let controller = animationController as? TimerAnimationController else { return }
+        // startPulse を ViewModel 側に橋渡し
+        controller.startPulse
+            .sink { [weak self] _ in
+                self?.startPulse.send()
+            }
+            .store(in: &cancellables)
+
+        controller.$flashStars.assign(to: &$flashStars)
+        controller.$shouldSuppressAnimation.assign(to: &$shouldSuppressAnimation)
+        controller.$shouldSuppressSessionFinishedAnimation
+            .assign(to: &$shouldSuppressSessionFinishedAnimation)
     }
 
     private func setupEngineCallbacks() {

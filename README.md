@@ -9,6 +9,7 @@
 
 > Built with SwiftUI · ActivityKit
 
+🎨 Designed & developed by [Azu](https://tsukiusagi.biz)
 ---
 
 ## 🌕 Concept
