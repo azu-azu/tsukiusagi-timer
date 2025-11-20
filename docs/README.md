@@ -46,6 +46,7 @@
 - [`_guide-font-installation.md`](./_guide-font-installation.md) - Nunitoフォントのインストール手順
 - [`_guide-keyboard.md`](./_guide-keyboard.md) - キーボード操作ガイドライン
 - [`_guide-notifications-fg-bg.md`](./_guide-notifications-fg-bg.md) - フォアグラウンド・バックグラウンド通知ガイド
+- [`_guide-quiet-moon-animation.md`](./_guide-quiet-moon-animation.md) - Quiet Moon状態からのSTART時アニメーション不発火問題の修正ガイド
 
 ### 🏗️ 構造・設計ルール
 - [`structure-directory.md`](./structure-directory.md) - プロジェクトディレクトリ構造
@@ -76,6 +77,26 @@
 2. このREADMEの「ドキュメント一覧」も併せて更新
 3. 画像やコードサンプルは相対パスで参照
 4. **Fujiko構造の命名ルール**に従ってファイル名を決定
+
+### **コミット番号の記載方法**
+ドキュメント内で関連するコミットを参照する際は、以下の形式を使用：
+
+- **単一コミット**: ``Commit: `<hash>` - "<commit message>"``
+  - 例: ``Commit: `ed3d217` - "Fix timer display issue: ensure initial value shows for full second"``
+- **複数コミット**: リスト形式で記載
+  - 例:
+    ```markdown
+    ## 🔗 関連コミット
+    - Commit: `ed3d217` - "Fix timer display issue: ensure initial value shows for full second"
+    - Commit: `a521704` - "Add report documenting timer initial display fix"
+    ```
+- **リリースノート**: コミット数を記載する場合
+  - 例: `* **Commits:** 19`
+
+**記載場所**:
+- `report-*.md`: ドキュメント末尾の「関連コミット」セクションに主要なコミットを記載
+- `releases/*.md`: 変更統計セクションにコミット数を記載
+- `_guide-*.md`: 必要に応じて関連コミットを記載
 
 ## 🔗 関連リンク
 

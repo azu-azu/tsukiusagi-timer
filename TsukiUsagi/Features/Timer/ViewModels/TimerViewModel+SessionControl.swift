@@ -45,7 +45,10 @@ extension TimerViewModel {
 
         // 再開時に通知をリスケジューリング
         if timeRemaining > 0 {
-            let endAt = dateProvider.now().addingTimeInterval(TimeInterval(timeRemaining))
+            // Engineと同じ秒境界にアラインして、SOTを統一
+            let now = dateProvider.now()
+            let alignedStart = Date(timeIntervalSince1970: ceil(now.timeIntervalSince1970))
+            let endAt = alignedStart.addingTimeInterval(TimeInterval(timeRemaining))
             sessionManager.setEndAt(endAt)
 
             // Live Activity更新（再開状態を反映）
@@ -65,10 +68,9 @@ extension TimerViewModel {
                 )
             } else {
                 // Break中開始（稀）: Focusのみ冪等予約
-                let isBG = UIApplication.shared.applicationState != .active
                 notificationService.ensureFocusAt(
                     breakEndAt: endAt,
-                    timeSensitive: isBG ? true : true
+                    timeSensitive: true
                 )
             }
         }
@@ -228,6 +230,8 @@ extension TimerViewModel {
         // 2) エンジン停止・状態クリア
         stateManager.stopTimer()
         stateManager.resetSessionFinished()
+        // 前回のタイマー設定値が残らないように明示的に0にリセット
+        stateManager.timeRemaining = 0
         runState = .idle
         endTime = nil
 
@@ -241,11 +245,17 @@ extension TimerViewModel {
 
         // 6) セッションマネージャーのリセット
         sessionManager.resetSession()
+
+        // 7) アニメーション購読の再確立（cancellables.removeAll()で解除された購読を復元）
+        reestablishBindings()
     }
 
     /// Quiet Moon状態からの専用開始処理
     func startFromQuietMoon() async {
         performCompleteStateReset()
+
+        // 購読の確立を確実にするため、次の実行ループまで待機
+        await Task.yield()
 
         // Workセッションとして開始
         ensureWorkOnStart()
@@ -260,11 +270,18 @@ extension TimerViewModel {
         // 時間を設定してからstartTimerを呼ぶ
         stateManager.timeRemaining = workLengthMinutes * 60
         stateManager.startTimer()
+
+        // アニメーションを発火
+        // 注意: triggerStartAnimations()内でanimationController.startPulse.send()が呼ばれるため、
+        // reestablishBindings()で購読が確立されていれば、timerVM.startPulseに転送される
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
 
         // 終了時刻を設定し、次フェーズの通知を連鎖で予約
-        let endAt = dateProvider.now().addingTimeInterval(TimeInterval(workLengthMinutes * 60))
+        // Engineと同じ秒境界にアラインして、SOTを統一
+        let now = dateProvider.now()
+        let alignedStart = Date(timeIntervalSince1970: ceil(now.timeIntervalSince1970))
+        let endAt = alignedStart.addingTimeInterval(TimeInterval(workLengthMinutes * 60))
         sessionManager.setEndAt(endAt)
 
         // Live Activity開始
@@ -274,24 +291,7 @@ extension TimerViewModel {
         )
 
         // Work→Rest と Rest→Focus を開始時点で個別に予約（BG優先度適用）
-        let workEndAt = endAt
-        let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
-        let isBG = UIApplication.shared.applicationState != .active
-        // Rest（break）は BG では .active（= timeSensitive: false）
-        notificationService.scheduleSessionEndNotification(
-            at: workEndAt,
-            phase: .breakTime,
-            timeSensitive: isBG ? false : true
-        )
-        // Focus は BG でも timeSensitive: true
-        notificationService.scheduleSessionEndNotification(
-            at: breakEndAt,
-            phase: .focus,
-            timeSensitive: true
-        )
-
-        // Send start pulse
-        startPulse.send()
+        scheduleChainNotifications(workEndAt: endAt)
     }
 
     /// 状態に応じた分岐処理でタイマー開始（新しいエントリポイント）
@@ -332,7 +332,10 @@ extension TimerViewModel {
         notificationAndHapticManager.sendStartNotification()
 
         // 終了時刻を設定し、次フェーズの通知を連鎖で予約
-        let endAt = dateProvider.now().addingTimeInterval(TimeInterval(targetTime))
+        // Engineと同じ秒境界にアラインして、SOTを統一
+        let now = dateProvider.now()
+        let alignedStart = Date(timeIntervalSince1970: ceil(now.timeIntervalSince1970))
+        let endAt = alignedStart.addingTimeInterval(TimeInterval(targetTime))
         sessionManager.setEndAt(endAt)
 
         // Live Activity開始
@@ -344,37 +347,41 @@ extension TimerViewModel {
         // 次のセッションの種類に応じて連鎖/冪等予約
         if isWorkSession {
             // Work→Rest と Rest→Focus を開始時点で個別に予約（BG優先度適用）
-            let workEndAt = endAt
-            let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
-            let isBG = UIApplication.shared.applicationState != .active
-            notificationService.scheduleSessionEndNotification(
-                at: workEndAt,
-                phase: .breakTime,
-                timeSensitive: isBG ? false : true
-            )
-            notificationService.scheduleSessionEndNotification(
-                at: breakEndAt,
-                phase: .focus,
-                timeSensitive: true
-            )
+            scheduleChainNotifications(workEndAt: endAt)
         } else {
             // Break中開始（稀）: Focusのみ冪等予約
-            let isBG = UIApplication.shared.applicationState != .active
             notificationService.ensureFocusAt(
                 breakEndAt: endAt,
-                timeSensitive: isBG ? true : true
+                timeSensitive: true
             )
         }
-        // Send start pulse
-        startPulse.send()
     }
 
     // MARK: - Private Helpers
     /// Start時にWorkへ強制統一（Break完了残留を潰す）
+    /// 仕様: セッション完了直後は必ずWorkセッションから開始する
     private func ensureWorkOnStart() {
         if isSessionFinished || !isWorkSession {
             stateManager.setWorkSession(true)
         }
+    }
+
+    /// Work→Rest と Rest→Focus の通知を連鎖で予約（重複排除のため共通化）
+    private func scheduleChainNotifications(workEndAt: Date) {
+        let breakEndAt = workEndAt.addingTimeInterval(TimeInterval(breakMinutes * 60))
+        let isBG = UIApplication.shared.applicationState != .active
+        // Rest（break）は BG では timeSensitive: false
+        notificationService.scheduleSessionEndNotification(
+            at: workEndAt,
+            phase: .breakTime,
+            timeSensitive: isBG ? false : true
+        )
+        // Focus は BG でも timeSensitive: true
+        notificationService.scheduleSessionEndNotification(
+            at: breakEndAt,
+            phase: .focus,
+            timeSensitive: true
+        )
     }
 
     private func updateQuietMoonMessage(forCompletedWorkSession completedWorkSession: Bool) {
