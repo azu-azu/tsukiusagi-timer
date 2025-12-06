@@ -40,7 +40,7 @@ to turn stillness into rhythm, and rhythm into focus.
 ---
 
 ## 🔒 Privacy Policy
-- [Privacy Policy (English / 日本語)](./privacy.md)
+- [Privacy Policy (English / 日本語)](https://azu-azu.github.io/tsukiusagi-timer/privacy)
 
 ---
 
