@@ -9,7 +9,7 @@ This app **does not collect, store, or share** any personal data. It does not in
 The app requests system permissions **only** for features you use (e.g., notifications). All processing is on device.
 
 ## Contact
-For privacy inquiries, contact: [your email]
+For privacy inquiries, contact: info@tsukiusagi.biz
 
 ## Policy Changes
 If our practices change, we will update this page and App Store listing before release.
@@ -27,7 +27,7 @@ If our practices change, we will update this page and App Store listing before r
 通知など、利用機能に必要な権限のみを要求し、処理は端末内で完結します。
 
 ## お問い合わせ
-[your email]
+info@tsukiusagi.biz
 
 ## 変更について
 運用方針が変わる場合、公開前に本ページとApp Storeの記載を更新します。
