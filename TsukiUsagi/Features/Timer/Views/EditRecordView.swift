@@ -218,7 +218,8 @@ private extension EditRecordView {
     var sessionLabelSection: some View {
         sectionBuilder.section(
             title: Labels.Sections.sessionLabel,
-            isCompact: true
+            isCompact: true,
+            isHighlight: true
         ) {
             SessionLabelSection(
                 activity: $editedActivity,

@@ -19,12 +19,15 @@ struct EditRecordSectionBuilder {
     // MARK: - Section Builder
 
     /// セクションUIを構築するViewBuilder
+    /// - Parameters:
+    ///   - isHighlight: trueの場合、TsukiSoundのSoundカードと同じ明るい背景（白15%）を使用
     @ViewBuilder
     func section<Content: View>(
         title: String,
         showDone: Bool = false,
         doneAction: (() -> Void)? = nil,
         isCompact: Bool = false,
+        isHighlight: Bool = false,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: isCompact ? 5 : 10) {
@@ -58,14 +61,25 @@ struct EditRecordSectionBuilder {
         .padding(.vertical, isCompact ? 8 : 16)
         .background(
             ZStack {
+                if isHighlight {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white.opacity(0.15))
+                } else {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(DesignTokens.SkyToneColors.cardGradient)
+                }
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(DesignTokens.SkyToneColors.cardGradient)
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(DesignTokens.SkyToneColors.cardBorderGradient, lineWidth: 1)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
             }
         )
-        .shadow(color: Color.black.opacity(0.4), radius: 8, x: 0, y: 4)
-        .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+        .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - Helper Methods
