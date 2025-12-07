@@ -27,13 +27,9 @@ struct DailyTimelineView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TotalCard(
-                text: TimeFormatters.totalTextWithSeconds(
-                    dataProvider.totalSeconds(historyVM: historyVM, targetDate: targetDate)
-                ),
-                backgroundColor: Color.white.opacity(0.1),
-                textColor: DesignTokens.SkyToneColors.textPrimary
-            )
+            TotalCard(text: TimeFormatters.totalTextWithSeconds(
+                dataProvider.totalSeconds(historyVM: historyVM, targetDate: targetDate)
+            ))
             .padding(.horizontal)
 
             ScrollView {
