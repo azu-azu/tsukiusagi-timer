@@ -1,12 +1,12 @@
 import SwiftUI
 
-// MARK: - TimerEdit用のヘッダービュー
-struct TimerEditHeaderView: View {
+// MARK: - EditRecord用のヘッダービュー
+struct EditRecordHeaderView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM: TimerViewModel
 
-    // TimerEditViewから渡される編集中の値
+    // EditRecordViewから渡される編集中の値
     let editedActivity: String
     let editedTask: String
     let editedMemo: String
@@ -51,17 +51,17 @@ struct TimerEditHeaderView: View {
                 )
             )
 
-            // Reset button moved to bottom safe area inset (TimerEditView)
+            // Reset button moved to bottom safe area inset (EditRecordView)
         }
-        .accessibilityIdentifier("TimerEditHeaderView")
+        .accessibilityIdentifier("EditRecordHeaderView")
     }
 }
 
 // MARK: - プレビュー
 #if DEBUG
-struct TimerEditHeaderView_Previews: PreviewProvider {
+struct EditRecordHeaderView_Previews: PreviewProvider {
     static var previews: some View {
-        TimerEditHeaderView(
+        EditRecordHeaderView(
             editedActivity: "Work",
             editedTask: "Test task",
             editedMemo: "Test memo",

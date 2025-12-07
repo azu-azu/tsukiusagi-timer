@@ -93,7 +93,7 @@ struct TimerPanel: View {
     // 編集シートを新しいビューに置き換え
     @ViewBuilder
     private func editSheetView() -> some View {
-        TimerEditView()
+        EditRecordView()
     }
 
     private var formattedStartTime: String {

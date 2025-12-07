@@ -1,5 +1,5 @@
 //
-//  TimerEditViewModel.swift
+//  EditRecordViewModel.swift
 //  TsukiUsagi
 //
 //  Created by Azu on 2025/01/01.
@@ -8,9 +8,9 @@
 import SwiftUI
 import Combine
 
-/// TimerEditViewの状態管理とビジネスロジックを担当するViewModel
+/// EditRecordViewの状態管理とビジネスロジックを担当するViewModel
 @MainActor
-final class TimerEditViewModel: ObservableObject {
+final class EditRecordViewModel: ObservableObject {
 
     // MARK: - Published Properties
 
@@ -60,7 +60,7 @@ final class TimerEditViewModel: ObservableObject {
     /// 変更がないかどうかを判定
     var isNoChanges: Bool {
         // 元のデータと比較して変更がないかチェック
-        // この実装は既存のTimerEditViewから移行予定
+        // この実装は既存のEditRecordViewから移行予定
         return false // 仮実装
     }
 

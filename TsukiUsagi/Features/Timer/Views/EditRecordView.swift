@@ -1,14 +1,14 @@
 import SwiftUI
 
-struct TimerEditView: View {
+struct EditRecordView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var historyVM: HistoryViewModel
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var sessionManager: SessionManager
 
     // 新しいViewModelとBuilder（既存コードと並行動作）
-    @StateObject private var editViewModel = TimerEditViewModel()
-    private let sectionBuilder = TimerEditSectionBuilder()
+    @StateObject private var editViewModel = EditRecordViewModel()
+    private let sectionBuilder = EditRecordSectionBuilder()
 
     // 既存のプロパティ（後方互換性のため保持）
     @State private var editedActivity = ""
@@ -66,8 +66,8 @@ struct TimerEditView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // 背景（画面全体、clipされない）
-                DesignTokens.CosmosColors.background.ignoresSafeArea()
+                // 背景（画面全体、clipされない）- TsukiSound風グラデーション
+                DesignTokens.SkyToneColors.backgroundGradient.ignoresSafeArea()
 
                 // SettingsViewと同じ構造に統一
                 VStack(spacing: 0) {
@@ -82,8 +82,8 @@ struct TimerEditView: View {
             .navigationBarHidden(true) // NavigationBarを非表示
             // システムのセーフエリア調整を使う（競合を避けるためキーボード無視は外す）
             // シートの背景そのものを黒系テーマに統一
-            .presentationBackground(DesignTokens.CosmosColors.background)
-            .background(DesignTokens.CosmosColors.background) // 万一の透過対策
+            .presentationBackground(DesignTokens.SkyToneColors.nightStart)
+            .background(DesignTokens.SkyToneColors.nightStart) // 万一の透過対策
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
             .keyboardCloseToolbar(
@@ -151,21 +151,21 @@ struct TimerEditView: View {
         }
     }
 
-    // section関数は削除（TimerEditSectionBuilderを使用）
+    // section関数は削除（EditRecordSectionBuilderを使用）
 }
 
 // MARK: - Change detection
-private extension TimerEditView {
+private extension EditRecordView {
     @ViewBuilder
     var headerView: some View {
-        TimerEditHeaderView(
+        EditRecordHeaderView(
             editedActivity: editedActivity,
             editedTask: editedTask,
             editedMemo: editedMemo,
             editedEnd: editedEnd,
             isSaveDisabledExtra: isNoChanges
         )
-        .background(DesignTokens.CosmosColors.background)
+        .background(DesignTokens.SkyToneColors.nightStart)
         .zIndex(1)
     }
 
@@ -243,7 +243,7 @@ private extension TimerEditView {
             )
             .datePickerStyle(.compact)
             .padding(.horizontal, 8)
-            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+            .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
             .colorScheme(.dark)
         }
     }
@@ -257,7 +257,8 @@ private extension TimerEditView {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Text(Labels.Sections.reflection)
                     .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .fontWeight(.semibold)
+                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                 Spacer()
                 ExpandIconButton(accessibilityIdentifier: "open_memo_sheet_button") {
                     isMemoFocused = false
@@ -267,10 +268,17 @@ private extension TimerEditView {
 
             TextEditor(text: $editedMemo)
                 .frame(minHeight: 220, maxHeight: memoEditorMaxHeight)
-                .padding(8)
+                .padding(12)
                 .scrollContentBackground(.hidden)
-                .background(DesignTokens.WhiteColors.surface)
-                .cornerRadius(6)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
+                .background(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.05))
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    }
+                )
                 .focused($isMemoFocused)
                 .overlay(
                     Group {
@@ -279,13 +287,13 @@ private extension TimerEditView {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(LocalizedStringKey("reflection_placeholder"))
                                         .font(DesignTokens.Fonts.label)
-                                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                        .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
                                     Spacer()
                                 }
                                 Spacer()
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 12)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 18)
                             .allowsHitTesting(false)
                         }
                     }
@@ -323,7 +331,7 @@ private extension TimerEditView {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
-        .background(DesignTokens.CosmosColors.background.opacity(0.95))
+        .background(DesignTokens.SkyToneColors.nightStart.opacity(0.95))
     }
 
     @ViewBuilder
