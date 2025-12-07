@@ -207,7 +207,6 @@ private extension EditRecordView {
     var sessionLabelSection: some View {
         sectionBuilder.section(
             title: Labels.Sections.sessionLabel,
-            isCompact: true,
             isHighlight: true
         ) {
             SessionLabelSection(
@@ -223,7 +222,7 @@ private extension EditRecordView {
 
     @ViewBuilder
     var finalTimeSection: some View {
-        sectionBuilder.section(title: "", isCompact: true) {
+        sectionBuilder.section(title: "") {
             DatePicker(
                 Labels.Sections.finalTime,
                 selection: $editedEnd,
@@ -240,8 +239,7 @@ private extension EditRecordView {
     @ViewBuilder
     var reflectionSection: some View {
         sectionBuilder.section(
-            title: "",
-            isCompact: true
+            title: ""
         ) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Text(Labels.Sections.reflection)

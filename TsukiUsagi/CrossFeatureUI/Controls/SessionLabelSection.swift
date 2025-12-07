@@ -28,22 +28,12 @@ struct SessionLabelSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Session Selection Menu - TsukiSound style (no border on dropdown itself)
-            Menu {
-                // デフォルトセッション
-                ForEach(sessionManager.defaultEntries) { entry in
-                    Button {
-                        activity = entry.sessionName
-                        taskText = entry.tasks.first ?? ""
-                    } label: {
-                        Text(entry.sessionName)
-                    }
-                }
-
-                // カスタムセッションがある場合は区切り線
-                if !sessionManager.customEntries.isEmpty {
-                    Divider()
-                    ForEach(sessionManager.customEntries) { entry in
+            // Session Selection Menu - TsukiSound style (centered dropdown)
+            HStack {
+                Spacer()
+                Menu {
+                    // デフォルトセッション
+                    ForEach(sessionManager.defaultEntries) { entry in
                         Button {
                             activity = entry.sessionName
                             taskText = entry.tasks.first ?? ""
@@ -51,55 +41,24 @@ struct SessionLabelSection: View {
                             Text(entry.sessionName)
                         }
                     }
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    Text(activity.isEmpty ? "Select session..." : activity.withSessionEmoji)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
-                    Spacer()
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 14))
-                        .foregroundColor(DesignTokens.MoonColors.accentBlue.opacity(0.6))
-                }
-                .frame(maxWidth: .infinity)
-                .contentShape(Rectangle())
-            }
 
-            // Task Selection Menu - TsukiSound style (no border on dropdown itself)
-            let tasks = getCurrentSessionTasks()
-            if !tasks.isEmpty {
-                Menu {
-                    ForEach(tasks, id: \.self) { taskOption in
-                        Button {
-                            taskText = taskOption
-                        } label: {
-                            HStack {
-                                Text(taskOption)
-                                if taskText == taskOption {
-                                    Image(systemName: "checkmark")
-                                }
+                    // カスタムセッションがある場合は区切り線
+                    if !sessionManager.customEntries.isEmpty {
+                        Divider()
+                        ForEach(sessionManager.customEntries) { entry in
+                            Button {
+                                activity = entry.sessionName
+                                taskText = entry.tasks.first ?? ""
+                            } label: {
+                                Text(entry.sessionName)
                             }
                         }
                     }
-                    Divider()
-                    Button(Labels.State.noTask) {
-                        taskText = ""
-                    }
                 } label: {
-                    HStack(spacing: 8) {
-                        Text(
-                            taskText.isEmpty
-                                ? Labels.Settings.manageSessionNames
-                                : taskText.withTaskEmoji
-                        )
+                    HStack {
+                        Text(activity.isEmpty ? "Select session..." : activity.withSessionEmoji)
                             .font(DesignTokens.Fonts.label)
-                            .foregroundColor(
-                                taskText.isEmpty
-                                ? DesignTokens.SkyToneColors.textQuinary
-                                : DesignTokens.MoonColors.accentBlue
-                            )
-                            .lineLimit(1)
+                            .foregroundColor(DesignTokens.MoonColors.accentBlue)
                         Spacer()
                         Image(systemName: "chevron.up.chevron.down")
                             .font(.system(size: 14))
@@ -108,9 +67,59 @@ struct SessionLabelSection: View {
                     .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
                 }
+                Spacer()
+            }
+
+            // Task Selection Menu - TsukiSound style (centered dropdown)
+            let tasks = getCurrentSessionTasks()
+            if !tasks.isEmpty {
+                HStack {
+                    Spacer()
+                    Menu {
+                        ForEach(tasks, id: \.self) { taskOption in
+                            Button {
+                                taskText = taskOption
+                            } label: {
+                                HStack {
+                                    Text(taskOption)
+                                    if taskText == taskOption {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                        Divider()
+                        Button(Labels.State.noTask) {
+                            taskText = ""
+                        }
+                    } label: {
+                        HStack {
+                            Text(
+                                taskText.isEmpty
+                                    ? Labels.Settings.manageSessionNames
+                                    : taskText.withTaskEmoji
+                            )
+                                .font(DesignTokens.Fonts.label)
+                                .foregroundColor(
+                                    taskText.isEmpty
+                                    ? DesignTokens.SkyToneColors.textQuinary
+                                    : DesignTokens.MoonColors.accentBlue
+                                )
+                                .lineLimit(1)
+                            Spacer()
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 14))
+                                .foregroundColor(DesignTokens.MoonColors.accentBlue.opacity(0.6))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .contentShape(Rectangle())
+                    }
+                    Spacer()
+                }
             } else {
                 // セッションにタスクが設定されていない場合は空のプレースホルダー
-                HStack(spacing: 8) {
+                HStack {
+                    Spacer()
                     Text("\(SessionEmoji.task) \(Labels.State.noTasksConfigured)")
                         .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
                         .font(DesignTokens.Fonts.label)
