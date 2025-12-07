@@ -14,7 +14,7 @@ struct DailyDetailView: View {
             HStack {
                 Text(date.formatted(.dateTime.weekday(.wide).month().day()))
                     .font(DesignTokens.Fonts.labelBold)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
                 Spacer()
 
@@ -31,13 +31,26 @@ struct DailyDetailView: View {
             } else {
                 Text(Labels.State.noRecordsForThisDay)
                     .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
             }
         }
-        .padding()
-        .background(DesignTokens.CosmosColors.cardBackground)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
+        .padding(16)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(DesignTokens.SkyToneColors.cardGradient)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
+            }
+        )
+        .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
         .padding(.horizontal)
     }
 
@@ -48,13 +61,13 @@ struct DailyDetailView: View {
             HStack {
                 Text(String(format: Copy.Label.total, TimeFormatters.totalText(history.totalMinutes)))
                     .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
                 Spacer()
 
                 Text(LocalizedStringKey("history_detail_sessions \(history.sessionCount)"))
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
             }
 
             // 上位アクティビティ
@@ -64,14 +77,14 @@ struct DailyDetailView: View {
                         HStack {
                             Text("• \(activity)")
                                 .font(DesignTokens.Fonts.caption)
-                                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
                             Spacer()
 
                             if let minutes = history.activities[activity] {
                                 Text(TimeFormatters.totalText(minutes))
                                     .font(DesignTokens.Fonts.caption)
-                                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                                     .monospacedDigit()
                             }
                         }
