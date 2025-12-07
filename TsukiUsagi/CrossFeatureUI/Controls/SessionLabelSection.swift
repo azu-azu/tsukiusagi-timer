@@ -35,8 +35,8 @@ struct SessionLabelSection: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Session Selection Menu - TsukiSound style
+        VStack(alignment: .leading, spacing: 16) {
+            // Session Selection Menu - TsukiSound style (no border on dropdown itself)
             Menu {
                 // デフォルトセッション
                 ForEach(sessionManager.defaultEntries) { entry in
@@ -70,33 +70,11 @@ struct SessionLabelSection: View {
                         .font(.system(size: 14))
                         .foregroundColor(DesignTokens.MoonColors.accentBlue.opacity(0.6))
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
-                .background(
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(
-                                (showEmptyError && activity.isEmpty)
-                                ? Color.moonErrorBackground.opacity(0.3)
-                                : Color.white.opacity(0.15)
-                            )
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                ),
-                                lineWidth: 1
-                            )
-                    }
-                )
-                .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
                 .contentShape(Rectangle())
             }
 
-            // Task Selection Menu - TsukiSound style
+            // Task Selection Menu - TsukiSound style (no border on dropdown itself)
             let tasks = getCurrentSessionTasks()
             if !tasks.isEmpty {
                 Menu {
@@ -135,25 +113,7 @@ struct SessionLabelSection: View {
                             .font(.system(size: 14))
                             .foregroundColor(DesignTokens.MoonColors.accentBlue.opacity(0.6))
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
-                    .background(
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white.opacity(0.15))
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    ),
-                                    lineWidth: 1
-                                )
-                        }
-                    )
-                    .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
                     .contentShape(Rectangle())
                 }
             } else {
@@ -164,24 +124,6 @@ struct SessionLabelSection: View {
                         .font(DesignTokens.Fonts.label)
                     Spacer()
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity)
-                .background(
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.white.opacity(0.08))
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [Color.white.opacity(0.15), Color.white.opacity(0.02)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                ),
-                                lineWidth: 1
-                            )
-                    }
-                )
             }
         }
         .onAppear {
