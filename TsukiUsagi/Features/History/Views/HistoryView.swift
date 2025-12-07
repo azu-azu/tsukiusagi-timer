@@ -39,17 +39,6 @@ struct HistoryView: View {
         }
     }
 
-    private func enableBackSwipeGesture() {
-        DispatchQueue.main.async {
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let window = windowScene.windows.first {
-                findNavigationController(in: window.rootViewController)?
-                    .interactivePopGestureRecognizer?
-                    .isEnabled = true
-            }
-        }
-    }
-
     private func findNavigationController(in viewController: UIViewController?) -> UINavigationController? {
         if let navigationController = viewController as? UINavigationController {
             return navigationController

@@ -29,12 +29,6 @@ final class EditRecordViewModel: ObservableObject {
     @FocusState var isMemoFocused: Bool
     @FocusState var isActivityFocused: Bool
 
-    // MARK: - Constants
-
-    private let topPadding: CGFloat = 8
-    private let cardCornerRadius: CGFloat = 8
-    private let labelCornerRadius: CGFloat = 6
-
     // MARK: - Computed Properties
 
     /// カスタムアクティビティかどうかを判定
@@ -57,13 +51,6 @@ final class EditRecordViewModel: ObservableObject {
         return 0
     }
 
-    /// 変更がないかどうかを判定
-    var isNoChanges: Bool {
-        // 元のデータと比較して変更がないかチェック
-        // この実装は既存のEditRecordViewから移行予定
-        return false // 仮実装
-    }
-
     // MARK: - Validation Methods
 
     /// アクティビティが空かどうかを判定
@@ -73,7 +60,7 @@ final class EditRecordViewModel: ObservableObject {
 
     /// 保存ボタンを無効化すべきかどうかを判定
     func shouldDisableSave() -> Bool {
-        return isActivityEmpty() || isNoChanges
+        return isActivityEmpty()
     }
 
     // MARK: - Initialization
