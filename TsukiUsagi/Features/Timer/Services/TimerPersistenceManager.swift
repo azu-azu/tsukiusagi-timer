@@ -24,9 +24,6 @@ final class TimerPersistenceManager: ObservableObject, TimerPersistenceManageabl
     @Published var isWorkSession: Bool = true
     @Published private(set) var lastBackgroundDate: Date?
 
-    private var wasRunningBeforeBackground = false
-    private var savedRemainingSeconds: Int?
-
     // --- Persistent timer state for background/kill recovery ---
     private enum TimerPersistKeys {
         static let remainingSeconds = "remainingSeconds"
