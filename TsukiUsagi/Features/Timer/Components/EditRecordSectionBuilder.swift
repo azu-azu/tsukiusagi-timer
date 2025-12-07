@@ -1,5 +1,5 @@
 //
-//  TimerEditSectionBuilder.swift
+//  EditRecordSectionBuilder.swift
 //  TsukiUsagi
 //
 //  Created by Azu on 2025/01/01.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// TimerEditViewのセクションUI構築を担当するBuilder
-struct TimerEditSectionBuilder {
+/// EditRecordViewのセクションUI構築を担当するBuilder
+struct EditRecordSectionBuilder {
 
     // MARK: - Constants
 
@@ -38,7 +38,7 @@ struct TimerEditSectionBuilder {
                         Text(title)
                             .font(DesignTokens.Fonts.sectionTitle)
                             .fontWeight(.semibold)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                            .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                             .padding(.horizontal, 4)
                     }
                     Spacer()
@@ -47,7 +47,7 @@ struct TimerEditSectionBuilder {
                             action()
                         }
                         .font(DesignTokens.Fonts.sectionTitle)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                     }
                 }
             }
@@ -57,9 +57,15 @@ struct TimerEditSectionBuilder {
         .padding(.horizontal, 24)
         .padding(.vertical, isCompact ? 8 : 16)
         .background(
-            RoundedRectangle(cornerRadius: cardCornerRadius)
-                .fill(DesignTokens.CosmosColors.cardBackground)
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(DesignTokens.SkyToneColors.cardGradient)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignTokens.SkyToneColors.cardBorderGradient, lineWidth: 1)
+            }
         )
+        .shadow(color: Color.black.opacity(0.4), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
     }
 
     // MARK: - Helper Methods

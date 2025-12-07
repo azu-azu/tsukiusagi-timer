@@ -372,9 +372,9 @@ private extension ContentView {
             }
             .sheet(isPresented: $showingEditRecord) {
                 ZStack {
-                    DesignTokens.CosmosColors.background.ignoresSafeArea()
-                    TimerEditView()
-                        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+                    DesignTokens.SkyToneColors.nightStart.ignoresSafeArea()
+                    EditRecordView()
+                        .background(DesignTokens.SkyToneColors.nightStart.ignoresSafeArea())
                 }
             }
             .presentationBackground(DesignTokens.CosmosColors.background)
