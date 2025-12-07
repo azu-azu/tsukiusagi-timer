@@ -151,7 +151,7 @@ private struct DailyTimelineSummaryTreeView: View {
                                 id: \.title
                             ) { slice in
                                 HStack(alignment: .firstTextBaseline, spacing: 12) {
-                                    Text(slice.title)
+                                    Text(slice.title.withTaskEmoji)
                                         .font(DesignTokens.Fonts.label)
                                         .foregroundColor(DesignTokens.MoonColors.textPrimary)
                                         .lineLimit(1)

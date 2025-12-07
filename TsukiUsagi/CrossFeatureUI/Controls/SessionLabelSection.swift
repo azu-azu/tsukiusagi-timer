@@ -61,8 +61,8 @@ struct SessionLabelSection: View {
                     }
                 }
             } label: {
-                HStack {
-                    Text(activity.isEmpty ? "Select session..." : activity)
+                HStack(spacing: 8) {
+                    Text(activity.isEmpty ? "Select session..." : activity.withSessionEmoji)
                         .font(DesignTokens.Fonts.label)
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                     Spacer()
@@ -95,11 +95,11 @@ struct SessionLabelSection: View {
                         taskText = ""
                     }
                 } label: {
-                    HStack {
+                    HStack(spacing: 8) {
                         Text(
                             taskText.isEmpty
                                 ? Labels.Settings.manageSessionNames
-                                : taskText
+                                : taskText.withTaskEmoji
                         )
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(
@@ -118,8 +118,8 @@ struct SessionLabelSection: View {
                 }
             } else {
                 // セッションにタスクが設定されていない場合は空のプレースホルダー
-                HStack {
-                    Text(Labels.State.noTasksConfigured)
+                HStack(spacing: 8) {
+                    Text("\(SessionEmoji.task) \(Labels.State.noTasksConfigured)")
                         .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
                         .font(DesignTokens.Fonts.label)
                     Spacer()

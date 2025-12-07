@@ -37,13 +37,13 @@ struct DailyTimelineSectionBuilder {
     /// アクティビティ集計セクション
     @ViewBuilder
     func activitySummarySection(summaries: [LabelSummary]) -> some View {
-        summarySection(title: "Session Summary", summaries: summaries)
+        summarySection(title: "Session Summary", summaries: summaries, isTask: false)
     }
 
     /// タスク集計セクション
     @ViewBuilder
     func taskSummarySection(summaries: [LabelSummary]) -> some View {
-        summarySection(title: "Task Summary", summaries: summaries)
+        summarySection(title: "Task Summary", summaries: summaries, isTask: true)
     }
 
     // Legacy memo section removed (Reflection unified per-day)
@@ -91,7 +91,7 @@ extension DailyTimelineSectionBuilder {
     /// アクティビティ情報表示
     @ViewBuilder
     private func activityInfoView(displayName: String, rec: SessionRecord, isDeleted: Bool) -> some View {
-        Text(displayName)
+        Text(displayName.withSessionEmoji)
             .font(.body)
             .foregroundColor(isDeleted ? DesignTokens.MoonColors.textSecondary : DesignTokens.MoonColors.textPrimary)
             .strikethrough(isDeleted)
@@ -157,7 +157,7 @@ extension DailyTimelineSectionBuilder {
 extension DailyTimelineSectionBuilder {
     /// 集計セクション共通
     @ViewBuilder
-    private func summarySection(title: String, summaries: [LabelSummary]) -> some View {
+    private func summarySection(title: String, summaries: [LabelSummary], isTask: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.caption)
@@ -166,7 +166,7 @@ extension DailyTimelineSectionBuilder {
             LazyVStack(spacing: 4) {
                 ForEach(summaries, id: \LabelSummary.label) { summary in
                     HStack {
-                        Text(summary.label)
+                        Text(isTask ? summary.label.withTaskEmoji : summary.label.withSessionEmoji)
                             .font(.body)
                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
                         Spacer()
