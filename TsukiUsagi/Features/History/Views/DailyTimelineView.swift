@@ -27,9 +27,13 @@ struct DailyTimelineView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TotalCard(text: TimeFormatters.totalTextWithSeconds(
-                dataProvider.totalSeconds(historyVM: historyVM, targetDate: targetDate)
-            ))
+            TotalCard(
+                text: TimeFormatters.totalTextWithSeconds(
+                    dataProvider.totalSeconds(historyVM: historyVM, targetDate: targetDate)
+                ),
+                backgroundColor: Color.white.opacity(0.1),
+                textColor: DesignTokens.SkyToneColors.textPrimary
+            )
             .padding(.horizontal)
 
             ScrollView {
@@ -89,7 +93,7 @@ struct DailyTimelineView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+        .background(DesignTokens.SkyToneColors.backgroundGradient.ignoresSafeArea())
         .modifier(DailyTimelineKeyboardAwareInset(isEnabled: false))
         .sheet(isPresented: $showReflectionSheet) {
             LargeTextEditorSheet(
@@ -127,12 +131,12 @@ private struct DailyTimelineSummaryTreeView: View {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Text(displayName(session.sessionName))
                             .font(DesignTokens.Fonts.labelBold)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                             .lineLimit(1)
                         Spacer(minLength: 12)
                         Text(formattedDuration(session.total))
                             .font(DesignTokens.Fonts.labelBold)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                            .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                             .monospacedDigit()
                     }
 
@@ -145,13 +149,13 @@ private struct DailyTimelineSummaryTreeView: View {
                                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                                     Text(slice.title.withTaskEmoji)
                                         .font(DesignTokens.Fonts.label)
-                                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                        .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                                         .lineLimit(1)
                                         .padding(.leading, 12)
                                     Spacer(minLength: 12)
                                     Text(formattedDuration(slice.duration))
                                         .font(DesignTokens.Fonts.caption)
-                                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                        .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                                         .monospacedDigit()
                                 }
                             }
@@ -160,7 +164,7 @@ private struct DailyTimelineSummaryTreeView: View {
                             if extraCount > 0 {
                                 Text("history_summary_more_tasks \(extraCount)")
                                     .font(DesignTokens.Fonts.caption)
-                                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                                     .padding(.leading, 12)
                             }
                         }
@@ -170,8 +174,22 @@ private struct DailyTimelineSummaryTreeView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DesignTokens.CosmosColors.cardBackground)
-        .cornerRadius(12)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(DesignTokens.SkyToneColors.cardGradient)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
+            }
+        )
+        .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
     }
 
     private func formattedDuration(_ interval: TimeInterval) -> String {
@@ -194,7 +212,7 @@ private struct DailyTimelineInlineReflectionSection: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(Labels.Sections.reflection)
                     .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                 Spacer()
                 ExpandIconButton(accessibilityIdentifier: "open_reflection_sheet_button", action: onExpand)
             }
@@ -204,17 +222,24 @@ private struct DailyTimelineInlineReflectionSection: View {
                     .focused(focus)
                     .frame(minHeight: 160)
                     .padding(12)
-                    .background(DesignTokens.WhiteColors.surface)
-                    .cornerRadius(8)
-                    .textEditorStyle(.plain)
                     .scrollContentBackground(.hidden)
+                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
+                    .background(
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.white.opacity(0.05))
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        }
+                    )
+                    .textEditorStyle(.plain)
                     .lineSpacing(4)
                     .accessibilityIdentifier("history_detail_reflection_editor")
 
                 if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     Text(placeholderTextKey)
                         .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 18)
                         .allowsHitTesting(false)
@@ -227,7 +252,7 @@ private struct DailyTimelineInlineReflectionSection: View {
                         .progressViewStyle(.circular)
                     Text("history_inline_reflection_saving")
                         .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                 }
             }
 
@@ -235,10 +260,10 @@ private struct DailyTimelineInlineReflectionSection: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("history_inline_reflection_error_message")
                         .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                        .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                     Text(error.localizedDescription)
                         .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                     Button(action: onRetry) {
                         Text(Copy.Button.retry)
                             .font(DesignTokens.Fonts.labelBold)
@@ -248,15 +273,29 @@ private struct DailyTimelineInlineReflectionSection: View {
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(DesignTokens.CosmosColors.cardBackground)
+                .background(Color.white.opacity(0.05))
                 .cornerRadius(8)
                 .accessibilityIdentifier("banner_history_reflection_retry")
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DesignTokens.CosmosColors.cardBackground)
-        .cornerRadius(12)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(DesignTokens.SkyToneColors.cardGradient)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
+            }
+        )
+        .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
         .keyboardAwareBottomPadding(baseBottomPadding: 16)
         .keyboardCloseToolbar(
             labelStyle: .iconWithText(Copy.Button.close)

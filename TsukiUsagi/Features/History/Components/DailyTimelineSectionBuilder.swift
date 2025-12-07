@@ -48,8 +48,14 @@ extension DailyTimelineSectionBuilder {
         }
         .frame(height: dayModeCardHeight)
         .padding(.horizontal, 12)
-        .background(DesignTokens.CosmosColors.cardBackground)
-        .cornerRadius(8)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white.opacity(0.08))
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+            }
+        )
     }
 
     /// 時間範囲表示
@@ -58,7 +64,7 @@ extension DailyTimelineSectionBuilder {
         Text("\(rec.start.formatted(date: .omitted, time: .shortened)) - " +
              "\(rec.end.formatted(date: .omitted, time: .shortened))")
             .font(.caption)
-            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
             .frame(width: timeWidth, alignment: .leading)
     }
 
@@ -67,7 +73,7 @@ extension DailyTimelineSectionBuilder {
     private func activityInfoView(displayName: String, isDeleted: Bool) -> some View {
         Text(displayName.withSessionEmoji)
             .font(.body)
-            .foregroundColor(isDeleted ? DesignTokens.MoonColors.textSecondary : DesignTokens.MoonColors.textPrimary)
+            .foregroundColor(isDeleted ? DesignTokens.SkyToneColors.textSecondary : DesignTokens.SkyToneColors.textPrimary)
             .strikethrough(isDeleted)
     }
 
@@ -80,7 +86,7 @@ extension DailyTimelineSectionBuilder {
 
         Text(durationText(minutes: minutes, seconds: seconds))
             .font(.body)
-            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+            .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
     }
 
     private func durationText(minutes: Int, seconds: Int) -> String {
