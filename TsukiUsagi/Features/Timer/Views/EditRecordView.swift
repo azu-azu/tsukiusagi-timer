@@ -60,25 +60,19 @@ struct EditRecordView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                // 背景（画面全体、clipされない）- TsukiSound風グラデーション
-                DesignTokens.SkyToneColors.backgroundGradient.ignoresSafeArea()
-
-                // SettingsViewと同じ構造に統一
-                VStack(spacing: 0) {
-                    headerView
-                    scrollContainer
-                }
-                // 角丸クリップを外し、シートの下地色が見えないようにする
-                .presentationDetents([.large])
-                // Bottom reset control in safe area inset to avoid mis-tap near Save
-                .safeAreaInset(edge: .bottom) { resetBar }
+            // SettingsViewと同じ構造に統一
+            VStack(spacing: 0) {
+                headerView
+                scrollContainer
             }
+            // Bottom reset control in safe area inset to avoid mis-tap near Save
+            .safeAreaInset(edge: .bottom) { resetBar }
+            // 背景（画面全体、セーフエリアを含む）- TsukiSound風グラデーション
+            .background(DesignTokens.SkyToneColors.backgroundGradient.ignoresSafeArea())
             .navigationBarHidden(true) // NavigationBarを非表示
-            // システムのセーフエリア調整を使う（競合を避けるためキーボード無視は外す）
             // シートの背景そのものを黒系テーマに統一
+            .presentationDetents([.large])
             .presentationBackground(DesignTokens.SkyToneColors.nightStart)
-            .background(DesignTokens.SkyToneColors.nightStart) // 万一の透過対策
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
             .keyboardCloseToolbar(
@@ -326,7 +320,6 @@ private extension EditRecordView {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
-        .background(DesignTokens.SkyToneColors.nightStart.opacity(0.95))
     }
 
     @ViewBuilder
