@@ -23,7 +23,7 @@ struct MemoEditView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                DesignTokens.CosmosColors.background
+                DesignTokens.SkyToneColors.backgroundGradient
                     .ignoresSafeArea()
 
                 ScrollView {
@@ -36,7 +36,8 @@ struct MemoEditView: View {
 
                         Spacer(minLength: 40)
                     }
-                    .padding()
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
                 }
                 .scrollContentBackground(.hidden)
                 .scrollIndicators(.hidden)
@@ -51,7 +52,7 @@ struct MemoEditView: View {
                     Button(Copy.Button.cancel) {
                         dismiss()
                     }
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -62,8 +63,8 @@ struct MemoEditView: View {
                     .fontWeight(.semibold)
                 }
             }
-            .presentationBackground(DesignTokens.CosmosColors.background)
-            .background(DesignTokens.CosmosColors.background)
+            .presentationBackground(DesignTokens.SkyToneColors.nightStart)
+            .background(DesignTokens.SkyToneColors.nightStart)
             .onAppear {
                 editedMemo = record.memo ?? ""
                 // モーダル表示時に自動でmemoにフォーカス
@@ -100,7 +101,8 @@ struct MemoEditView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(Labels.Sections.sessionInfo)
                 .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .fontWeight(.semibold)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
             sessionInfoContent()
         }
@@ -118,9 +120,17 @@ struct MemoEditView: View {
             durationInfoRow()
             timeInfoRow()
         }
-        .padding(12)
-        .background(DesignTokens.CosmosColors.cardBackground)
-        .cornerRadius(8)
+        .padding(16)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(DesignTokens.SkyToneColors.cardGradient)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(DesignTokens.SkyToneColors.cardBorderGradient, lineWidth: 1)
+            }
+        )
+        .shadow(color: Color.black.opacity(0.4), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
     }
 
     @ViewBuilder
@@ -128,11 +138,11 @@ struct MemoEditView: View {
         HStack {
             Text(Labels.InfoRow.session)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
             Spacer()
             Text(record.sessionName)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
         }
     }
 
@@ -141,11 +151,11 @@ struct MemoEditView: View {
         HStack {
             Text(Labels.InfoRow.task)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
             Spacer()
             Text(task)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
         }
     }
 
@@ -154,11 +164,11 @@ struct MemoEditView: View {
         HStack {
             Text(Labels.InfoRow.duration)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
             Spacer()
             Text(TimeFormatters.totalText(Int(record.duration / 60)))
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                 .monospacedDigit()
         }
     }
@@ -168,12 +178,12 @@ struct MemoEditView: View {
         HStack {
             Text(Copy.Label.time)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
             Spacer()
             Text("\(record.start.formatted(date: .omitted, time: .shortened)) - " +
                  "\(record.end.formatted(date: .omitted, time: .shortened))")
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                 .monospacedDigit()
         }
     }
@@ -183,14 +193,22 @@ struct MemoEditView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(Labels.Sections.reflection)
                 .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .fontWeight(.semibold)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
             TextEditor(text: $editedMemo)
                 .frame(minHeight: 120, maxHeight: memoEditorMaxHeight)
-                .padding(8)
+                .padding(12)
                 .scrollContentBackground(.hidden)
-                .background(DesignTokens.WhiteColors.surface)
-                .cornerRadius(6)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
+                .background(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(DesignTokens.SkyToneColors.cardGradient)
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(DesignTokens.SkyToneColors.cardBorderGradient, lineWidth: 1)
+                    }
+                )
                 .focused($isMemoFocused)
                 .overlay(
                     // プレースホルダー
@@ -201,17 +219,19 @@ struct MemoEditView: View {
                                     Text(Messages.Placeholders.addReflection)
                                         .lineLimit(nil)
                                         .font(DesignTokens.Fonts.label)
-                                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                                        .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
                                     Spacer()
                                 }
                                 Spacer()
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 12)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 18)
                             .allowsHitTesting(false)
                         }
                     }
                 )
+                .shadow(color: Color.black.opacity(0.4), radius: 8, x: 0, y: 4)
+                .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
         }
     }
 
