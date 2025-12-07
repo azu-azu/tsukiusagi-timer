@@ -46,7 +46,7 @@ struct CalendarDayCell: View {
     private var textColor: Color {
         if isSelected { return DesignTokens.PureColors.textWhite }
         if isToday { return DesignTokens.MoonColors.accentBlue }
-        return DesignTokens.MoonColors.textPrimary
+        return DesignTokens.SkyToneColors.textPrimary
     }
 
     private var historyColor: Color {

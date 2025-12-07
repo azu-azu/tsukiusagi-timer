@@ -38,7 +38,7 @@ struct CalendarHistoryView: View {
 
                 // カレンダー下の区切り線
                 Rectangle()
-                    .fill(DesignTokens.MoonColors.textSecondary.opacity(0.2))
+                    .fill(Color.white.opacity(0.15))
                     .frame(height: 1)
                     .padding(.horizontal, 8)
                     .padding(.top, 12)
@@ -58,7 +58,7 @@ struct CalendarHistoryView: View {
             }
         }
         .scrollIndicators(.hidden)
-        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+        .background(DesignTokens.SkyToneColors.backgroundGradient.ignoresSafeArea())
         .task(id: selectedMonth) {
             await loadMonthData()
         }
@@ -74,7 +74,7 @@ struct CalendarHistoryView: View {
             } label: {
                 Image(systemName: "chevron.left")
                     .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
             }
             .buttonStyle(.plain)
 
@@ -82,7 +82,7 @@ struct CalendarHistoryView: View {
 
             Text(monthTitle())
                 .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                 .contentTransition(.opacity)
 
             Spacer()
@@ -92,7 +92,7 @@ struct CalendarHistoryView: View {
             } label: {
                 Image(systemName: "chevron.right")
                     .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
             }
             .buttonStyle(.plain)
             .disabled(isCurrentMonth())
@@ -109,7 +109,7 @@ struct CalendarHistoryView: View {
             ForEach(CalendarUtilities.weekdays(), id: \.self) { weekday in
                 Text(weekday)
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                     .frame(maxWidth: .infinity)
             }
         }
