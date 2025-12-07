@@ -262,16 +262,6 @@ struct DurationSessionSettingsView: View {
             dismiss()
         }
     }
-
-    private func discardChanges() {
-        // 元の値に戻す（破棄）
-        activityLabel = originalActivityLabel
-        taskLabel = originalTaskLabel
-
-        // サイドメニューを開くリクエストを送る
-        sessionManager.requestSideMenuOnDismiss()
-        dismiss()
-    }
 }
 
 #if DEBUG
