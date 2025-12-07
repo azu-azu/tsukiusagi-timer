@@ -35,8 +35,8 @@ struct SessionLabelSection: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Session Selection Menu
+        VStack(alignment: .leading, spacing: 12) {
+            // Session Selection Menu - TsukiSound style
             Menu {
                 // デフォルトセッション
                 ForEach(sessionManager.defaultEntries) { entry in
@@ -45,7 +45,6 @@ struct SessionLabelSection: View {
                         taskText = entry.tasks.first ?? ""
                     } label: {
                         Text(entry.sessionName)
-                            .font(DesignTokens.Fonts.label)
                     }
                 }
 
@@ -58,7 +57,6 @@ struct SessionLabelSection: View {
                             taskText = entry.tasks.first ?? ""
                         } label: {
                             Text(entry.sessionName)
-                                .font(DesignTokens.Fonts.label)
                         }
                     }
                 }
@@ -66,26 +64,39 @@ struct SessionLabelSection: View {
                 HStack {
                     Text(activity.isEmpty ? "Select session..." : activity)
                         .font(DesignTokens.Fonts.label)
-                        .foregroundColor(
-                            activity.isEmpty
-                            ? DesignTokens.MoonColors.textMuted
-                            : DesignTokens.MoonColors.textPrimary
-                        )
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
                     Spacer()
-                    Image(systemName: "chevron.down")
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 14))
+                        .foregroundColor(DesignTokens.MoonColors.accentBlue.opacity(0.6))
                 }
-                .padding(.horizontal, 12)
-                .frame(height: labelHeight)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
                 .background(
-                    (showEmptyError && activity.isEmpty) ?
-                        Color.moonErrorBackground.opacity(0.3) :
-                        DesignTokens.WhiteColors.surface
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(
+                                (showEmptyError && activity.isEmpty)
+                                ? Color.moonErrorBackground.opacity(0.3)
+                                : Color.white.opacity(0.15)
+                            )
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                                lineWidth: 1
+                            )
+                    }
                 )
-                .cornerRadius(labelCornerRadius)
+                .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
+                .contentShape(Rectangle())
             }
 
-            // Task Selection Menu
+            // Task Selection Menu - TsukiSound style
             let tasks = getCurrentSessionTasks()
             if !tasks.isEmpty {
                 Menu {
@@ -109,36 +120,68 @@ struct SessionLabelSection: View {
                     HStack {
                         Text(
                             taskText.isEmpty
-                                ? Labels.Settings.manageSessionNames // replace with appropriate label if exists
+                                ? Labels.Settings.manageSessionNames
                                 : taskText
                         )
+                            .font(DesignTokens.Fonts.label)
                             .foregroundColor(
                                 taskText.isEmpty
-                                ? DesignTokens.MoonColors.textMuted
-                                : DesignTokens.MoonColors.textPrimary
+                                ? DesignTokens.SkyToneColors.textQuinary
+                                : DesignTokens.MoonColors.accentBlue
                             )
                             .lineLimit(1)
                         Spacer()
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 14))
+                            .foregroundColor(DesignTokens.MoonColors.accentBlue.opacity(0.6))
                     }
-                    .padding(.horizontal, 12)
-                    .frame(height: labelHeight)
-                    .background(DesignTokens.WhiteColors.surface)
-                    .cornerRadius(6)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.15))
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    ),
+                                    lineWidth: 1
+                                )
+                        }
+                    )
+                    .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
+                    .contentShape(Rectangle())
                 }
             } else {
                 // セッションにタスクが設定されていない場合は空のプレースホルダー
                 HStack {
                     Text(Labels.State.noTasksConfigured)
-                        .foregroundColor(DesignTokens.MoonColors.textMuted)
+                        .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
                         .font(DesignTokens.Fonts.label)
                     Spacer()
                 }
-                .padding(.horizontal, 12)
-                .frame(height: labelHeight)
-                .background(DesignTokens.WhiteColors.surface)
-                .cornerRadius(6)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white.opacity(0.08))
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.15), Color.white.opacity(0.02)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                                lineWidth: 1
+                            )
+                    }
+                )
             }
         }
         .onAppear {

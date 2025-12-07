@@ -135,6 +135,7 @@ private extension ContentView {
                 timerVM.flashStars = false
             }
             .allowsHitTesting(false)
+			
         }
     }
 
