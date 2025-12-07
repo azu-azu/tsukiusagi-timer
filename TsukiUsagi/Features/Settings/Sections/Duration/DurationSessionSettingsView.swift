@@ -23,7 +23,6 @@ struct DurationSessionSettingsView: View {
     @State private var isSessionNamesExpanded: Bool = false
 
     // レイアウト定数
-    private let labelCornerRadius: CGFloat = 8
     private let betweenCardSpace: CGFloat = 24
 
     var body: some View {
@@ -105,7 +104,6 @@ struct DurationSessionSettingsView: View {
                 taskText: $taskLabel,
                 isActivityFocused: $isActivityFocused,
                 isTaskFocused: $isTaskFocused,
-                labelCornerRadius: labelCornerRadius,
                 showEmptyError: $currentShowEmptyError,
                 onDone: {
                     // フォーカスを外す

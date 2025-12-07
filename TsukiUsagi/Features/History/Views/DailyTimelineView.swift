@@ -1,6 +1,6 @@
 import SwiftUI
-import Foundation
 import UIKit
+
 struct DailyTimelineView: View {
     let targetDate: Date
     @EnvironmentObject var historyVM: HistoryViewModel
@@ -15,14 +15,8 @@ struct DailyTimelineView: View {
     @FocusState private var isReflectionFocused: Bool
     @State private var showReflectionSheet = false
 
-    // 既存のプロパティ（後方互換性のため保持）
     @State private var restoreError: String?
     @State private var showRestoreAlert = false
-    private let cal = Calendar.current
-    private let dayModeCardHeight: CGFloat = 40
-    private let dayModeCardSpacing: CGFloat = 2
-    private let timeWidth: CGFloat = 100
-    private let summaryCardHeight: CGFloat = 50
 
     // 初期化
     init(targetDate: Date) {
@@ -67,11 +61,9 @@ struct DailyTimelineView: View {
 
                     sectionBuilder.dayModeRecordsSection(
                         records: viewModel.records(historyVM: historyVM),
-                        showsMemoButton: false,
                         onRestore: { record in
                             viewModel.restoreRecord(record, historyVM: historyVM, sessionManager: sessionManager)
-                        },
-                        onMemoEdit: { _ in }
+                        }
                     )
                 }
                 .padding(.horizontal)

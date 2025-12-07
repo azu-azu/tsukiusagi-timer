@@ -27,11 +27,6 @@ struct EditRecordView: View {
     @State private var bottomLiftPadding: CGFloat = 0
     @State private var showMemoSheet: Bool = false
 
-    // SettingsViewと同じ定数
-    private let topPadding: CGFloat = 8
-    private let cardCornerRadius: CGFloat = 8
-    private let labelCornerRadius: CGFloat = 6
-
     // 既存の計算プロパティ（新しいViewModelに委譲）
     private var isCustomActivity: Bool {
         return editViewModel.isCustomActivity
@@ -226,7 +221,6 @@ private extension EditRecordView {
                 taskText: $editedTask,
                 isActivityFocused: $isActivityFocused,
                 isTaskFocused: $isTaskFocused,
-                labelCornerRadius: labelCornerRadius,
                 showEmptyError: .constant(currentShowEmptyError),
                 onDone: nil
             )
