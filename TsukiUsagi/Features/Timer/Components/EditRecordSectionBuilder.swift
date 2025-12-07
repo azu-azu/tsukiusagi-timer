@@ -26,11 +26,10 @@ struct EditRecordSectionBuilder {
         title: String,
         showDone: Bool = false,
         doneAction: (() -> Void)? = nil,
-        isCompact: Bool = false,
         isHighlight: Bool = false,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: isCompact ? 5 : 10) {
+        VStack(alignment: .leading, spacing: 16) {
             let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
             let hasTitle = !trimmedTitle.isEmpty
             let canShowHeader = hasTitle || (showDone && doneAction != nil)
@@ -42,7 +41,6 @@ struct EditRecordSectionBuilder {
                             .font(DesignTokens.Fonts.sectionTitle)
                             .fontWeight(.semibold)
                             .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                            .padding(.horizontal, 4)
                     }
                     Spacer()
                     if showDone, let action = doneAction {
@@ -57,8 +55,7 @@ struct EditRecordSectionBuilder {
 
             content()
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, isCompact ? 8 : 16)
+        .padding(16)
         .background(
             ZStack {
                 if isHighlight {
