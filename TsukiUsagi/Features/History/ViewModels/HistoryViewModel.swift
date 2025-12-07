@@ -195,9 +195,12 @@ class HistoryViewModel: ObservableObject {
         !sessionManager.allEntries.contains(where: { $0.sessionName == sessionName })
     }
 
-    // (Deleted)表記付きアクティビティ名
+    // (Deleted)表記付きアクティビティ名（絵文字付き）
     func displaySessionName(sessionManager: SessionManager, sessionName: String) -> String {
-        isDeleted(sessionManager: sessionManager, sessionName: sessionName) ? "\(sessionName) (Deleted)" : sessionName
+        let baseName = isDeleted(sessionManager: sessionManager, sessionName: sessionName)
+            ? "\(sessionName) (Deleted)"
+            : sessionName
+        return baseName.withSessionEmoji
     }
 
     @available(*, deprecated, message: "Use isDeleted(sessionManager:sessionName:) instead")

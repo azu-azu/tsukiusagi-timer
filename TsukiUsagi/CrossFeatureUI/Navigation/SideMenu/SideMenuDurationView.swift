@@ -56,14 +56,14 @@ struct SideMenuDurationView: View {
                     Spacer()
 
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text(activityLabel)
+                        Text(activityLabel.withSessionEmoji)
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.MoonColors.textPrimary)
                             .lineLimit(1)
                             .truncationMode(.tail)
 
                         if !taskLabel.isEmpty {
-                            Text(taskLabel)
+                            Text(taskLabel.withTaskEmoji)
                                 .font(DesignTokens.Fonts.caption)
                                 .foregroundColor(DesignTokens.MoonColors.textMuted)
                                 .lineLimit(1)
