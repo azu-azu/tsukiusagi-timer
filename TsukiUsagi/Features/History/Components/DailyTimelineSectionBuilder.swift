@@ -23,13 +23,11 @@ struct DailyTimelineSectionBuilder {
     @ViewBuilder
     func dayModeRecordsSection(
         records: [SessionRecord],
-        showsMemoButton: Bool,
-        onRestore: @escaping (SessionRecord) -> Void,
-        onMemoEdit: @escaping (SessionRecord) -> Void
+        onRestore: @escaping (SessionRecord) -> Void
     ) -> some View {
         LazyVStack(spacing: dayModeCardSpacing) {
             ForEach(records, id: \.id) { rec in
-                recordRow(rec, showsMemoButton: showsMemoButton, onRestore: onRestore, onMemoEdit: onMemoEdit)
+                recordRow(rec, onRestore: onRestore)
             }
         }
     }
@@ -45,8 +43,6 @@ struct DailyTimelineSectionBuilder {
     func taskSummarySection(summaries: [LabelSummary]) -> some View {
         summarySection(title: "Task Summary", summaries: summaries, isTask: true)
     }
-
-    // Legacy memo section removed (Reflection unified per-day)
 }
 
 // MARK: - Row / Time / Info
@@ -55,22 +51,13 @@ extension DailyTimelineSectionBuilder {
     @ViewBuilder
     private func recordRow(
         _ rec: SessionRecord,
-        showsMemoButton: Bool,
-        onRestore: @escaping (SessionRecord) -> Void,
-        onMemoEdit: @escaping (SessionRecord) -> Void
+        onRestore: @escaping (SessionRecord) -> Void
     ) -> some View {
         HStack(spacing: 8) {
             timeRangeView(rec)
-            activityInfoView(displayName: rec.sessionName, rec: rec, isDeleted: false)
+            activityInfoView(displayName: rec.sessionName, isDeleted: false)
             Spacer()
             durationView(rec)
-            actionButtonView(
-                rec: rec,
-                isDeleted: false,
-                showsMemoButton: showsMemoButton,
-                onRestore: onRestore,
-                onMemoEdit: onMemoEdit
-            )
         }
         .frame(height: dayModeCardHeight)
         .padding(.horizontal, 12)
@@ -90,7 +77,7 @@ extension DailyTimelineSectionBuilder {
 
     /// アクティビティ情報表示
     @ViewBuilder
-    private func activityInfoView(displayName: String, rec: SessionRecord, isDeleted: Bool) -> some View {
+    private func activityInfoView(displayName: String, isDeleted: Bool) -> some View {
         Text(displayName.withSessionEmoji)
             .font(.body)
             .foregroundColor(isDeleted ? DesignTokens.MoonColors.textSecondary : DesignTokens.MoonColors.textPrimary)
@@ -118,39 +105,6 @@ extension DailyTimelineSectionBuilder {
             return "\(seconds) s"
         }
     }
-}
-
-// MARK: - Actions
-extension DailyTimelineSectionBuilder {
-    /// アクションボタン表示
-    @ViewBuilder
-    private func actionButtonView(
-        rec: SessionRecord,
-        isDeleted: Bool,
-        showsMemoButton: Bool,
-        onRestore: @escaping (SessionRecord) -> Void,
-        onMemoEdit: @escaping (SessionRecord) -> Void
-    ) -> some View {
-        HStack(spacing: 8) {
-            if isDeleted {
-                restoreButton(rec: rec, onRestore: onRestore)
-            }
-        }
-    }
-
-    /// 復元ボタン
-    @ViewBuilder
-    private func restoreButton(rec: SessionRecord, onRestore: @escaping (SessionRecord) -> Void) -> some View {
-        Button(
-            action: { onRestore(rec) },
-            label: {
-                Image(systemName: "arrow.clockwise")
-                    .foregroundColor(.blue)
-            }
-        )
-    }
-
-    // Legacy memo button removed
 }
 
 // MARK: - Summary
@@ -184,5 +138,3 @@ extension DailyTimelineSectionBuilder {
         }
     }
 }
-
-// MARK: - Memo (removed)

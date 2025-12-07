@@ -5,17 +5,9 @@ struct SessionLabelSection: View {
     @Binding var taskText: String
     @FocusState.Binding var isActivityFocused: Bool
     @FocusState.Binding var isTaskFocused: Bool
-    let labelCornerRadius: CGFloat
     @Binding var showEmptyError: Bool
     let onDone: (() -> Void)?
     @EnvironmentObject var sessionManager: SessionManager
-
-    // 内部で固定値として定義
-    private let inputHeight: CGFloat = 28
-    private let labelHeight: CGFloat = 28
-
-    // ツールバー強制更新用
-    @State private var toolbarID = UUID()
 
     // 現在選択されているセッションに紐づくタスクを取得
     private func getCurrentSessionTasks() -> [String] {
@@ -136,13 +128,3 @@ struct SessionLabelSection: View {
         .accessibilityIdentifier("SessionLabelSection")
     }
 }
-
-// SessionManagerのエントリモデルも更新が必要
-// 以下のようにtasksプロパティを追加する必要があります
-/*
-struct SessionEntry: Identifiable, Codable {
-    let id = UUID()
-    let sessionName: String
-    let tasks: [String]? // 追加
-}
-*/
