@@ -21,7 +21,6 @@ struct EditRecordView: View {
     // スクロール位置制御用の識別子（小さなアンカー用）
     private enum SectionID: Hashable { case memoAnchor }
     @FocusState private var isActivityFocused: Bool
-    @State private var scrollProxy: ScrollViewProxy?
     @State private var memoAnchorGlobalMaxY: CGFloat = 0
     @State private var keyboardEndFrame: CGRect = .zero
     @State private var bottomLiftPadding: CGFloat = 0
@@ -160,18 +159,16 @@ private extension EditRecordView {
 
     @ViewBuilder
     var scrollContainer: some View {
-        ScrollViewReader { proxy in
-            ScrollView { scrollContent }
-                .scrollContentBackground(.hidden)
+        ScrollView { scrollContent }
+            .scrollContentBackground(.hidden)
                 .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
                 .scrollBounceBehavior(.basedOnSize)
                 .dismissKeyboardOnTap { closeKeyboard() }
-                .onAppear { scrollProxy = proxy }
                 .onChange(of: isMemoFocused) { _, focused in
                     if focused {
-                        guard keyboardEndFrame.height > 0, let proxy = scrollProxy else { return }
-                        ensureMemoVisibleOnce(using: proxy)
+                        guard keyboardEndFrame.height > 0 else { return }
+                        ensureMemoVisibleOnce()
                     } else {
                         withAnimation(.easeInOut(duration: 0.2)) { bottomLiftPadding = 0 }
                     }
@@ -183,13 +180,12 @@ private extension EditRecordView {
                        let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
                         keyboardEndFrame = frameValue.cgRectValue
                     }
-                    guard isMemoFocused, let proxy = scrollProxy else { return }
-                    ensureMemoVisibleOnce(using: proxy)
-                }
-                .onPreferenceChange(MemoAnchorPreferenceKey.self) { maxY in
-                    memoAnchorGlobalMaxY = maxY
-                }
-        }
+                    guard isMemoFocused else { return }
+                    ensureMemoVisibleOnce()
+            }
+            .onPreferenceChange(MemoAnchorPreferenceKey.self) { maxY in
+                memoAnchorGlobalMaxY = maxY
+            }
     }
 
     @ViewBuilder
@@ -336,7 +332,7 @@ private extension EditRecordView {
         }
     }
 
-    func ensureMemoVisibleOnce(using _: ScrollViewProxy) {
+    func ensureMemoVisibleOnce() {
         guard keyboardEndFrame.height > 0 else {
             withAnimation(.easeInOut(duration: 0.2)) { bottomLiftPadding = 0 }
             return
