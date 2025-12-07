@@ -58,6 +58,47 @@ enum DesignTokens {
         /// 例: サイドメニューのDuration +/- ブロック背景
         static let cardBackgroundAlt = WhiteColors.primary.opacity(0.10)
     }
+    /// TsukiSound風のAudio画面スタイル（SkyTone.night）
+    enum SkyToneColors {
+        /// 背景グラデーション開始色
+        static let nightStart = Color(hex: "#0B0F18")
+        /// 背景グラデーション終了色
+        static let nightEnd = Color(hex: "#141A26")
+        /// 背景グラデーション
+        static var backgroundGradient: LinearGradient {
+            LinearGradient(
+                colors: [nightStart, nightEnd],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        /// テキスト色（白95%）- 最重要
+        static let textPrimary = Color.white.opacity(0.95)
+        /// テキスト色（白80%）- 重要
+        static let textSecondary = Color.white.opacity(0.8)
+        /// テキスト色（白70%）- 補助
+        static let textTertiary = Color.white.opacity(0.7)
+        /// テキスト色（白60%）- 控えめ
+        static let textQuaternary = Color.white.opacity(0.6)
+        /// テキスト色（白50%）- 薄い
+        static let textQuinary = Color.white.opacity(0.5)
+        /// カード背景グラデーション
+        static var cardGradient: LinearGradient {
+            LinearGradient(
+                colors: [Color.white.opacity(0.08), Color.white.opacity(0.03)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+        /// カード枠線グラデーション
+        static var cardBorderGradient: LinearGradient {
+            LinearGradient(
+                colors: [Color.white.opacity(0.15), Color.white.opacity(0.02)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+    }
     /// セマンティック無視の純粋な色（視覚的アクセント用）
     enum PureColors {
         /// 白テキスト色（全体統一用）
