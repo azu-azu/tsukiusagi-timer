@@ -32,27 +32,6 @@ struct EditRecordSectionBuilder {
 
             content()
         }
-        .padding(16)
-        .background(
-            ZStack {
-                if isHighlight {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.15))
-                } else {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(DesignTokens.SkyToneColors.cardGradient)
-                }
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1
-                    )
-            }
-        )
-        .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
+        .tsukiSoundCard(isHighlight: isHighlight)
     }
 }
