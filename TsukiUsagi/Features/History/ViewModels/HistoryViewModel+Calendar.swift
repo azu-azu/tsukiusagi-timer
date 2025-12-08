@@ -1,22 +1,6 @@
 import Foundation
 
 extension HistoryViewModel {
-    // MARK: - Fixed Date Support
-    // ❌ extensionではstored propertyは使えない
-    // @Published private(set) var fixedDate: Date?
-
-    // ✅ 既存のHistoryViewModelクラス内にfixedDateプロパティを追加する必要があります
-
-    func setFixedDate(_ date: Date) {
-        // このメソッドは既存のHistoryViewModelクラス内のfixedDateプロパティを使用
-        // fixedDate = Calendar.current.startOfDay(for: date)
-    }
-
-    func clearFixedDate() {
-        // このメソッドは既存のHistoryViewModelクラス内のfixedDateプロパティを使用
-        // fixedDate = nil
-    }
-
     // MARK: - Calendar Data Methods
 
     /// 指定月の全日についてDailyHistoryを取得
