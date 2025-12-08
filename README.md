@@ -55,3 +55,4 @@ Copyright © 2025 TsukiUsagi
 - v1.1.0 2025/10/21 - Design tweaks
 - v1.2.0 2025/11/02 - Live Activity support
 - v1.2.1 2025/11/08 - Bug fixes (Timer display, Animation, Live Activity)
+- v1.3.0 2025/12/08 - UI refresh with TsukiSound-style cards, chat-style Reflection input, emoji prefixes for sessions/tasks
