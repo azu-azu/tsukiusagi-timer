@@ -18,22 +18,13 @@ struct EditRecordView: View {
     @State private var minEnd = Date()
     @FocusState private var isTaskFocused: Bool
     @FocusState private var isMemoFocused: Bool
-    // スクロール位置制御用の識別子（小さなアンカー用）
-    private enum SectionID: Hashable { case memoAnchor }
     @FocusState private var isActivityFocused: Bool
-    @State private var memoAnchorGlobalMaxY: CGFloat = 0
-    @State private var keyboardEndFrame: CGRect = .zero
-    @State private var bottomLiftPadding: CGFloat = 0
     @State private var showMemoSheet: Bool = false
+    @State private var showReflectionInput: Bool = false
 
     // 既存の計算プロパティ（新しいViewModelに委譲）
     private var isCustomActivity: Bool {
         return editViewModel.isCustomActivity
-    }
-
-    // Memoエディタの最大高さ（新しいViewModelに委譲）
-    private var memoEditorMaxHeight: CGFloat {
-        return editViewModel.memoEditorMaxHeight
     }
 
     // バリデーション関数（新しいViewModelに委譲）
@@ -54,6 +45,7 @@ struct EditRecordView: View {
         isActivityFocused = false
         isTaskFocused = false
         isMemoFocused = false
+        showReflectionInput = false
         Keyboard.dismiss()
     }
 
@@ -64,8 +56,23 @@ struct EditRecordView: View {
                 headerView
                 scrollContainer
             }
-            // Bottom reset control in safe area inset to avoid mis-tap near Save
-            .safeAreaInset(edge: .bottom) { resetBar }
+            // Bottom: チャット風入力バー or リセットボタン
+            .safeAreaInset(edge: .bottom) {
+                if showReflectionInput {
+                    ReflectionInputBar(
+                        text: $editedMemo,
+                        isFocused: $isMemoFocused,
+                        placeholder: LocalizedStringKey("reflection_placeholder"),
+                        onExpand: {
+                            isMemoFocused = false
+                            showReflectionInput = false
+                            showMemoSheet = true
+                        }
+                    )
+                } else {
+                    resetBar
+                }
+            }
             // 背景（画面全体、セーフエリアを含む）- TsukiSound風グラデーション
             .background(DesignTokens.SkyToneColors.backgroundGradient.ignoresSafeArea())
             .navigationBarHidden(true) // NavigationBarを非表示
@@ -161,31 +168,10 @@ private extension EditRecordView {
     var scrollContainer: some View {
         ScrollView { scrollContent }
             .scrollContentBackground(.hidden)
-                .scrollIndicators(.hidden)
-                .scrollDismissesKeyboard(.interactively)
-                .scrollBounceBehavior(.basedOnSize)
-                .dismissKeyboardOnTap { closeKeyboard() }
-                .onChange(of: isMemoFocused) { _, focused in
-                    if focused {
-                        guard keyboardEndFrame.height > 0 else { return }
-                        ensureMemoVisibleOnce()
-                    } else {
-                        withAnimation(.easeInOut(duration: 0.2)) { bottomLiftPadding = 0 }
-                    }
-                }
-                .onReceive(
-                    NotificationCenter.default.publisher(for: UIResponder.keyboardDidChangeFrameNotification)
-                ) { notification in
-                    if let userInfo = notification.userInfo,
-                       let frameValue = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-                        keyboardEndFrame = frameValue.cgRectValue
-                    }
-                    guard isMemoFocused else { return }
-                    ensureMemoVisibleOnce()
-            }
-            .onPreferenceChange(MemoAnchorPreferenceKey.self) { maxY in
-                memoAnchorGlobalMaxY = maxY
-            }
+            .scrollIndicators(.hidden)
+            .scrollDismissesKeyboard(.interactively)
+            .scrollBounceBehavior(.basedOnSize)
+            .dismissKeyboardOnTap { closeKeyboard() }
     }
 
     @ViewBuilder
@@ -196,7 +182,6 @@ private extension EditRecordView {
             reflectionSection
         }
         .padding()
-        .padding(.bottom, bottomLiftPadding)
     }
 
     @ViewBuilder
@@ -237,62 +222,21 @@ private extension EditRecordView {
         sectionBuilder.section(
             title: ""
         ) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Text(Labels.Sections.reflection)
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .fontWeight(.semibold)
-                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                Spacer()
-                ExpandIconButton(accessibilityIdentifier: "open_memo_sheet_button") {
-                    isMemoFocused = false
-                    showMemoSheet = true
-                }
-            }
-
-            TextEditor(text: $editedMemo)
-                .frame(minHeight: 220, maxHeight: memoEditorMaxHeight)
-                .padding(12)
-                .scrollContentBackground(.hidden)
+            Text(Labels.Sections.reflection)
+                .font(DesignTokens.Fonts.sectionTitle)
+                .fontWeight(.semibold)
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                .background(
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.white.opacity(0.05))
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                    }
-                )
-                .focused($isMemoFocused)
-                .overlay(
-                    Group {
-                        if editedMemo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(LocalizedStringKey("reflection_placeholder"))
-                                        .font(DesignTokens.Fonts.label)
-                                        .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
-                                    Spacer()
-                                }
-                                Spacer()
-                            }
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 18)
-                            .allowsHitTesting(false)
-                        }
-                    }
-                )
 
-            Color.clear
-                .frame(height: 1)
-                .background(
-                    GeometryReader { geo in
-                        Color.clear.preference(
-                            key: MemoAnchorPreferenceKey.self,
-                            value: geo.frame(in: .global).maxY
-                        )
+            ReflectionPlaceholderCard(
+                text: editedMemo,
+                placeholder: LocalizedStringKey("reflection_placeholder"),
+                onTap: {
+                    showReflectionInput = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        isMemoFocused = true
                     }
-                )
-                .id(SectionID.memoAnchor)
+                }
+            )
         }
     }
     @ViewBuilder
@@ -324,32 +268,6 @@ private extension EditRecordView {
             placeholder: LocalizedStringKey("reflection_placeholder"),
             onClose: { showMemoSheet = false }
         )
-    }
-    struct MemoAnchorPreferenceKey: PreferenceKey {
-        static var defaultValue: CGFloat = 0
-        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-            value = nextValue()
-        }
-    }
-
-    func ensureMemoVisibleOnce() {
-        guard keyboardEndFrame.height > 0 else {
-            withAnimation(.easeInOut(duration: 0.2)) { bottomLiftPadding = 0 }
-            return
-        }
-
-        let keyboardTop = keyboardEndFrame.minY
-        guard keyboardTop > 0 else {
-            withAnimation(.easeInOut(duration: 0.2)) { bottomLiftPadding = 0 }
-            return
-        }
-
-        let overlap = memoAnchorGlobalMaxY - keyboardTop
-        let needed = max(0, overlap + 16)
-
-        withAnimation(.easeInOut(duration: 0.2)) {
-            bottomLiftPadding = needed
-        }
     }
 
     var isNoChanges: Bool {

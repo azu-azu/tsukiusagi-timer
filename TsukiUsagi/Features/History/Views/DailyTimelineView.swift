@@ -14,6 +14,7 @@ struct DailyTimelineView: View {
     private let dataProvider = DailyTimelineDataProvider()
     @FocusState private var isReflectionFocused: Bool
     @State private var showReflectionSheet = false
+    @State private var showReflectionInput = false
 
     @State private var restoreError: String?
     @State private var showRestoreAlert = false
@@ -47,15 +48,18 @@ struct DailyTimelineView: View {
                             }
                         )
                     }
-                    DailyTimelineInlineReflectionSection(
-                        text: $detailViewModel.reflectionText,
+
+                    // Reflection section with placeholder card
+                    DailyTimelineReflectionCard(
+                        text: detailViewModel.reflectionText,
                         isSaving: detailViewModel.isSaving,
                         error: detailViewModel.error,
                         onRetry: { detailViewModel.retry() },
-                        focus: $isReflectionFocused,
-                        onExpand: {
-                            isReflectionFocused = false
-                            showReflectionSheet = true
+                        onTap: {
+                            showReflectionInput = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                isReflectionFocused = true
+                            }
                         }
                     )
 
@@ -73,11 +77,26 @@ struct DailyTimelineView: View {
                 TapGesture().onEnded {
                     guard isReflectionFocused else { return }
                     isReflectionFocused = false
+                    showReflectionInput = false
                     Task { @MainActor in
                         Keyboard.dismiss()
                     }
                 }
             )
+        }
+        .safeAreaInset(edge: .bottom) {
+            if showReflectionInput {
+                ReflectionInputBar(
+                    text: $detailViewModel.reflectionText,
+                    isFocused: $isReflectionFocused,
+                    placeholder: LocalizedStringKey("reflection_placeholder"),
+                    onExpand: {
+                        isReflectionFocused = false
+                        showReflectionInput = false
+                        showReflectionSheet = true
+                    }
+                )
+            }
         }
         .simultaneousGesture(gestureHandler.backSwipeGesture())
         .navigationTitle(targetDate.formatted(.dateTime.weekday(.wide).month().day()))
@@ -193,54 +212,28 @@ private struct DailyTimelineSummaryTreeView: View {
     }
 }
 
-private struct DailyTimelineInlineReflectionSection: View {
-    @Binding var text: String
+/// Reflection section card with placeholder (tappable to show input bar)
+private struct DailyTimelineReflectionCard: View {
+    let text: String
     let isSaving: Bool
     let error: Error?
     let onRetry: () -> Void
-    let focus: FocusState<Bool>.Binding
-    let onExpand: () -> Void
+    let onTap: () -> Void
 
     private let placeholderTextKey: LocalizedStringKey = "reflection_placeholder"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(Labels.Sections.reflection)
-                    .font(DesignTokens.Fonts.sectionTitle)
-                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                Spacer()
-                ExpandIconButton(accessibilityIdentifier: "open_reflection_sheet_button", action: onExpand)
-            }
+            Text(Labels.Sections.reflection)
+                .font(DesignTokens.Fonts.sectionTitle)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
-            ZStack(alignment: .topLeading) {
-                TextEditor(text: $text)
-                    .focused(focus)
-                    .frame(minHeight: 160)
-                    .padding(12)
-                    .scrollContentBackground(.hidden)
-                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                    .background(
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.white.opacity(0.05))
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                        }
-                    )
-                    .textEditorStyle(.plain)
-                    .lineSpacing(4)
-                    .accessibilityIdentifier("history_detail_reflection_editor")
-
-                if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text(placeholderTextKey)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 18)
-                        .allowsHitTesting(false)
-                }
-            }
+            // Tappable placeholder card
+            ReflectionPlaceholderCard(
+                text: text,
+                placeholder: placeholderTextKey,
+                onTap: onTap
+            )
 
             if isSaving {
                 HStack(spacing: 8) {
@@ -292,16 +285,6 @@ private struct DailyTimelineInlineReflectionSection: View {
             }
         )
         .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
-        .keyboardAwareBottomPadding(baseBottomPadding: 16)
-        .keyboardCloseToolbar(
-            labelStyle: .iconWithText(Copy.Button.close)
-        ) {
-            focus.wrappedValue = false
-            Keyboard.dismiss()
-        }
-        .onDisappear {
-            focus.wrappedValue = false
-        }
     }
 }
 
