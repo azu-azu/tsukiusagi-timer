@@ -61,7 +61,7 @@ struct SessionLabelSection: View {
                             .foregroundColor(DesignTokens.MoonColors.accentBlue)
                         Spacer()
                         Image(systemName: "chevron.up.chevron.down")
-                            .font(.system(size: 14))
+                            .font(DesignTokens.Fonts.symbolSmall)
                             .foregroundColor(DesignTokens.MoonColors.accentBlue.opacity(0.6))
                     }
                     .frame(maxWidth: .infinity)
@@ -108,7 +108,7 @@ struct SessionLabelSection: View {
                                 .lineLimit(1)
                             Spacer()
                             Image(systemName: "chevron.up.chevron.down")
-                                .font(.system(size: 14))
+                                .font(DesignTokens.Fonts.symbolSmall)
                                 .foregroundColor(DesignTokens.MoonColors.accentBlue.opacity(0.6))
                         }
                         .frame(maxWidth: .infinity)

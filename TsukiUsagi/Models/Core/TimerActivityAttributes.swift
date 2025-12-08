@@ -30,4 +30,3 @@ struct TimerActivityAttributes: ActivityAttributes {
     /// これは動的ではなく、セッション開始時に一度設定される
     var sessionKind: String
 }
-

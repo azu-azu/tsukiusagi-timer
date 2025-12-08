@@ -69,7 +69,7 @@ struct ContentView: View {
 
                 if context.hasValidSize {
                     mainScene(for: context)
-                        .onChange(of: DeepLinkRouter.shared.shouldOpenTimer) { oldValue, shouldOpen in
+                        .onChange(of: DeepLinkRouter.shared.shouldOpenTimer) { _, shouldOpen in
                             if shouldOpen {
                                 // Deep Linkからタイマー画面を開く
                                 // 現在はタイマーがメイン画面のため、特別な処理は不要
@@ -135,7 +135,6 @@ private extension ContentView {
                 timerVM.flashStars = false
             }
             .allowsHitTesting(false)
-			
         }
     }
 
