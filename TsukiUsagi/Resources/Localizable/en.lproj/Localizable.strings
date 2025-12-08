@@ -97,4 +97,4 @@
 // Session Task Selection
 "session_task_select" = "Select task...";
 "session_task_none" = "No task";
-"session_task_none_available" = "No tasks configured";
+"session_task_none_available" = "Add tasks in Manage Sessions";
