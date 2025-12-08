@@ -97,4 +97,4 @@
 // Session Task Selection
 "session_task_select" = "タスクを選択...";
 "session_task_none" = "タスクなし";
-"session_task_none_available" = "タスクが設定されていません";
+"session_task_none_available" = "セッション管理でタスクを追加";
