@@ -71,7 +71,7 @@ struct ReflectionInputBar: View {
             onExpand()
         } label: {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                .font(.system(size: 16, weight: .medium))
+                .font(DesignTokens.Fonts.symbolMedium)
                 .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                 .frame(width: 36, height: 36)
                 .background(

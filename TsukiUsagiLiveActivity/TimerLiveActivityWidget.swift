@@ -48,6 +48,7 @@ struct TimerLiveActivityWidget: Widget {
                                     .frame(width: 20, height: 20)
                                     .foregroundColor(.yellow.opacity(0.95))
 
+                                // swiftlint:disable forbidden-font-direct
                                 if context.state.isFinished {
                                     Text("0:00")
                                         .font(.system(size: 28, weight: .semibold, design: .rounded))
@@ -82,6 +83,7 @@ struct TimerLiveActivityWidget: Widget {
                                             .contentTransition(.numericText())
                                     }
                                 }
+                                // swiftlint:enable forbidden-font-direct
                             }
                             .fixedSize()
                             .position(x: geo.size.width / 2, y: geo.size.height / 2)
@@ -166,6 +168,7 @@ struct TimerLiveActivityWidget: Widget {
                 .frame(width: 32, height: 32)
                 .widgetURL(URL(string: "tsukiusagi://timer"))
             } compactTrailing: {
+                // swiftlint:disable forbidden-font-direct
                 if context.state.isFinished {
                     Text("0:00")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
@@ -201,6 +204,7 @@ struct TimerLiveActivityWidget: Widget {
                             .minimumScaleFactor(0.8)
                     }
                 }
+                // swiftlint:enable forbidden-font-direct
             } minimal: {
                 Image(systemName: "moon.fill")
                     .resizable().scaledToFit().padding(4)
