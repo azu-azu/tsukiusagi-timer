@@ -85,64 +85,7 @@ struct ResetStopSectionView: View {
 #if DEBUG
 struct ResetStopSectionView_Previews: PreviewProvider {
     static var previews: some View {
-        // ダミーサービスを用意
-        class DummyEngine: TimerEngineable {
-            var timeRemaining: Int = 0
-            var isRunning: Bool = false
-            var onTick: ((Int) -> Void)?
-            var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-            func start(seconds: Int) {}
-            func pause() {}
-            func resume() {}
-            func stop() {}
-            func reset(to seconds: Int) {}
-        }
-        class DummyNotification: PhaseNotificationServiceable {
-            func sendStartNotification() {}
-            func cancelSessionEnd(for phase: PomodoroPhase) {}
-            func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {}
-            func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
-            func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
-            func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
-            func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
-            func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
-            func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
-            func cancelSessionEndNotification() {}
-            func cancelSessionEndAll() {}
-            func finalizeWorkPhase() {}
-            func finalizeBreakPhase() {}
-            func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
-        }
-        class DummyHaptic: HapticServiceable {
-            func heavyImpact() {}
-            func lightImpact() {}
-        }
-        class DummyHistory: SessionHistoryServiceable {
-            func add(parameters: AddSessionParameters) {}
-        }
-        class DummyPersistence: TimerPersistenceManageable {
-            var timeRemaining: Int = 0
-            var isRunning: Bool = false
-            var isWorkSession: Bool = true
-            var runStateRaw: String?
-            var endAtEpoch: Double?
-            var remainingAtPause: Int?
-            func saveTimerState() {}
-            func restoreTimerState() {}
-            func initializeWithWorkMinutes(_ minutes: Int) {}
-        }
-        class DummyFormatter: TimeFormatterUtilable {
-            func format(seconds: Int) -> String { "00:00" }
-            func format(date: Date?) -> String { "date" }
-        }
-        let vm = TimerViewModel(
-            engine: DummyEngine(),
-            notificationService: DummyNotification(),
-            hapticService: DummyHaptic(),
-            historyService: DummyHistory(),
-            persistenceManager: DummyPersistence(),
-            formatter: DummyFormatter()
-        )
+        let vm = PreviewData.MockServices.makeTimerViewModel()
         vm._setPreviewState(startTime: Date(), isWorkSession: true, isRunning: true)
         return ResetStopSectionView()
             .environmentObject(vm)

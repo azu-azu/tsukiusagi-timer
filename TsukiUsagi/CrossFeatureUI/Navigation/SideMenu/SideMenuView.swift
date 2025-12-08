@@ -242,88 +242,22 @@ private extension Text {
 }
 
 #if DEBUG
-// Preview用ダミーサービス
-private class PreviewSideMenuDummyEngine: TimerEngineable {
-    var timeRemaining: Int = 1500
-    var isRunning: Bool = false
-    var onTick: ((Int) -> Void)?
-    var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-    func start(seconds: Int) {}
-    func pause() {}
-    func resume() {}
-    func stop() {}
-    func reset(to seconds: Int) {}
-}
-
-private class PreviewSideMenuDummyNotification: PhaseNotificationServiceable {
-    func sendStartNotification() {}
-    func cancelSessionEnd(for phase: PomodoroPhase) {}
-    func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {}
-    func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
-    func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
-    func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
-    func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
-    func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
-    func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
-    func cancelSessionEndNotification() {}
-    func cancelSessionEndAll() {}
-    func finalizeWorkPhase() {}
-    func finalizeBreakPhase() {}
-    func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
-}
-
-private class PreviewSideMenuDummyHaptic: HapticServiceable {
-    func heavyImpact() {}
-    func lightImpact() {}
-}
-
-private class PreviewSideMenuDummyHistory: SessionHistoryServiceable {
-    func add(parameters: AddSessionParameters) {}
-}
-
-private class PreviewSideMenuDummyPersistence: TimerPersistenceManageable {
-    var timeRemaining: Int = 1500
-    var isRunning: Bool = false
-    var isWorkSession: Bool = true
-    var runStateRaw: String?
-    var endAtEpoch: Double?
-    var remainingAtPause: Int?
-    func saveTimerState() {}
-    func restoreTimerState() {}
-    func initializeWithWorkMinutes(_ minutes: Int) {}
-}
-
-private class PreviewSideMenuDummyFormatter: TimeFormatterUtilable {
-    func format(seconds: Int) -> String { "25:00" }
-    func format(date: Date?) -> String { "2024-01-01" }
-}
-
 struct SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
-
-        let timerVM = TimerViewModel(
-            engine: PreviewSideMenuDummyEngine(),
-            notificationService: PreviewSideMenuDummyNotification(),
-            hapticService: PreviewSideMenuDummyHaptic(),
-            historyService: PreviewSideMenuDummyHistory(),
-            persistenceManager: PreviewSideMenuDummyPersistence(),
-            formatter: PreviewSideMenuDummyFormatter()
-        )
-
+        let timerVM = PreviewData.MockServices.makeTimerViewModel()
         let historyVM = HistoryViewModel()
         let sessionManager = SessionManager()
 
         NavigationView {
             ZStack {
                 DesignTokens.CosmosColors.background.ignoresSafeArea()
-
                 SideMenuView(isPresented: .constant(true))
             }
         }
         .environmentObject(timerVM)
         .environmentObject(historyVM)
         .environmentObject(sessionManager)
-        .previewInterfaceOrientation(.landscapeLeft) // 横向きプレビュー用
+        .previewInterfaceOrientation(.landscapeLeft)
     }
 }
 #endif
