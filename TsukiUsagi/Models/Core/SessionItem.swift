@@ -11,9 +11,7 @@ struct SessionItem: Identifiable, Codable, Equatable {
     let id: UUID
     var name: String
     var task: String?
-    var isFixed: Bool // ← 固定／カスタムを区別
-    // 説明（description）複数対応（将来拡張用）
-    // var descriptions: [String] = []
+    var isFixed: Bool
 
     private enum CodingKeys: String, CodingKey {
         case id

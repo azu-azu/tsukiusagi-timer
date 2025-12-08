@@ -50,7 +50,6 @@ enum DesignTokens {
     }
     /// 宇宙空間をテーマにした背景カラー
     enum CosmosColors {
-        // static let background = Color.black
         static let background = Color(hex: "#0A0F1C")
         /// カード背景色（黒ベースの薄いグレー）
         static let cardBackground = BlackColors.secondary

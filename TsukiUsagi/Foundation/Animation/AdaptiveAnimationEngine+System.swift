@@ -30,13 +30,6 @@ extension AdaptiveAnimationEngine {
 
         DispatchQueue.main.async {
             self.isLowPowerMode = isLowPower
-
-            // 星が減ってしまうのでいったんコメントアウト
-            // if isLowPower {
-            //     self.updateAnimationQuality(to: .minimal, reason: "Low Power Mode enabled")
-            // } else if self.animationQuality == .minimal {
-            //     self.updateAnimationQuality(to: .medium, reason: "Low Power Mode disabled")
-            // }
         }
     }
 

@@ -94,7 +94,6 @@ struct DiamondStarsOnceView: View {
     @State private var generated = 0 // 今何個作ったか
     private let screen = UIScreen.main.bounds
     private let colors: [Color] = [.yellow]
-    // private let colors: [Color] = [.yellow, .white] // 複数指定する場合
 
     // アニメーション全体の想定時間
     private var animationTotalTime: Double {
@@ -185,8 +184,7 @@ struct DiamondStarsView: View {
         // swiftlint:disable:next identifier_name
         // t: Timerクロージャの一時変数（用途明示）
         Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { _ in
-            let count = Int.random(in: 30 ... 80) // ランダム数 repeatsの時
-            // let count = 80
+            let count = Int.random(in: 30 ... 80)
             for _ in 0 ..< count {
                 stars.append(randomSpec())
             }

@@ -16,41 +16,10 @@ extension AdaptiveAnimationEngine {
     // MARK: - 📈 Performance Evaluation
 
     internal func evaluatePerformance() {
-        _ = getCurrentCPUUsage()
         let memoryUsage = getCurrentMemoryUsage()
-
-        // 星が減ってしまうのでいったんコメントアウト
-        // CPU使用率に基づく自動調整
-        // if cpuUsage > 60 {
-        //     degradeQuality(reason: "High CPU usage: \(cpuUsage)%")
-        // } else if cpuUsage < 20 && animationQuality != .ultra {
-        //     improveQuality(reason: "Low CPU usage: \(cpuUsage)%")
-        // }
-
-        // メモリ使用量に基づく調整
         updateMemoryPressure(usage: memoryUsage)
     }
 
-    private func getCurrentCPUUsage() -> Double {
-        var info = mach_task_basic_info()
-        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
-
-        let kerr: kern_return_t = withUnsafeMutablePointer(to: &info) {
-            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
-                task_info(mach_task_self_,
-                        task_flavor_t(MACH_TASK_BASIC_INFO),
-                        $0,
-                        &count)
-            }
-        }
-
-        if kerr == KERN_SUCCESS {
-            return Double(info.resident_size) / (1024 * 1024) // MB単位
-        }
-        return 0
-    }
-
-    // 🛠 修正：実際のメモリ使用量を取得するように変更
     private func getCurrentMemoryUsage() -> Double {
         var info = mach_task_basic_info()
         var count = mach_msg_type_number_t(MemoryLayout.size(ofValue: info)) / 4
@@ -96,10 +65,6 @@ extension AdaptiveAnimationEngine {
 
         DispatchQueue.main.async {
             self.animationQuality = newQuality
-
-            // 一時的に starCount の自動上書きを止める
-            // self.starCount = newQuality.starCount
-            // self.sparkleInterval = newQuality.sparkleInterval
         }
     }
 
