@@ -160,7 +160,7 @@ struct CalendarHistoryView: View {
     // MARK: - Helper Methods
 
     private func loadMonthData() async {
-        dailyHistories = historyVM.getCalendarDailyHistories(for: selectedMonth)
+        dailyHistories = historyVM.getDailyHistories(for: selectedMonth)
 
         // 初回表示時、当月かつ本日に記録がある場合は自動で詳細を表示
         if selectedDate == nil && calendar.isDate(selectedMonth, equalTo: Date(), toGranularity: .month) {

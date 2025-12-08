@@ -85,7 +85,7 @@ private struct MonthlyPageContent: View {
     let month: Month
 
     var body: some View {
-        let summary = historyVM.getCalendarMonthSummary(for: month.date)
+        let summary = historyVM.getMonthSummary(for: month.date)
         VStack(alignment: .leading, spacing: 8) {
             // Header
             HStack {
@@ -178,7 +178,7 @@ private struct WeeklyTotalsList: View {
         let monthEnd = calendar.date(byAdding: .day, value: daysRange.count - 1, to: monthStart)!
 
         // Precomputed daily map for this month
-        let days = historyVM.getCalendarDailyHistories(for: month)
+        let days = historyVM.getDailyHistories(for: month)
         let sortedKeys = days.keys.sorted()
         guard let first = sortedKeys.first else { return [] }
 

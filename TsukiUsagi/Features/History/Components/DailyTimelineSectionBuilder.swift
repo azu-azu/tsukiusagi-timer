@@ -73,7 +73,11 @@ extension DailyTimelineSectionBuilder {
     private func activityInfoView(displayName: String, isDeleted: Bool) -> some View {
         Text(displayName.withSessionEmoji)
             .font(.body)
-            .foregroundColor(isDeleted ? DesignTokens.SkyToneColors.textSecondary : DesignTokens.SkyToneColors.textPrimary)
+            .foregroundColor(
+                isDeleted
+                    ? DesignTokens.SkyToneColors.textSecondary
+                    : DesignTokens.SkyToneColors.textPrimary
+            )
             .strikethrough(isDeleted)
     }
 
