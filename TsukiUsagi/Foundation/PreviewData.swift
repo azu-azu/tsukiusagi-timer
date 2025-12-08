@@ -1,6 +1,86 @@
 #if DEBUG
 import SwiftUI
 
+// MARK: - Mock Services (Top-level to avoid nesting violation)
+
+/// プレビュー用のモックサービス群
+/// 複数のPreviewProviderで再利用可能
+enum PreviewMockServices {
+    /// Timer Engine mock
+    final class Engine: TimerEngineable {
+        var timeRemaining: Int = 1500
+        var isRunning: Bool = false
+        var onTick: ((Int) -> Void)?
+        var onSessionCompleted: ((TimerSessionInfo) -> Void)?
+        func start(seconds: Int) {}
+        func pause() {}
+        func resume() {}
+        func stop() {}
+        func reset(to seconds: Int) {}
+    }
+
+    /// Notification Service mock
+    final class Notification: PhaseNotificationServiceable {
+        func sendStartNotification() {}
+        func cancelSessionEnd(for phase: PomodoroPhase) {}
+        func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {}
+        func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
+        func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+        func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
+        func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
+        func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
+        func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
+        func cancelSessionEndNotification() {}
+        func cancelSessionEndAll() {}
+        func finalizeWorkPhase() {}
+        func finalizeBreakPhase() {}
+        func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
+    }
+
+    /// Haptic Service mock
+    final class Haptic: HapticServiceable {
+        func heavyImpact() {}
+        func lightImpact() {}
+    }
+
+    /// History Service mock
+    final class History: SessionHistoryServiceable {
+        func add(parameters: AddSessionParameters) {}
+    }
+
+    /// Persistence Manager mock
+    final class Persistence: TimerPersistenceManageable {
+        var timeRemaining: Int = 1500
+        var isRunning: Bool = false
+        var isWorkSession: Bool = true
+        var runStateRaw: String?
+        var endAtEpoch: Double?
+        var remainingAtPause: Int?
+        func saveTimerState() {}
+        func restoreTimerState() {}
+        func initializeWithWorkMinutes(_ minutes: Int) {}
+    }
+
+    /// Time Formatter mock
+    final class Formatter: TimeFormatterUtilable {
+        func format(seconds: Int) -> String { "25:00" }
+        func format(date: Date?) -> String { "2024-01-01" }
+    }
+
+    /// Create a new TimerViewModel with mock services
+    @MainActor
+    static func makeTimerViewModel() -> TimerViewModel {
+        TimerViewModel(
+            engine: Engine(),
+            notificationService: Notification(),
+            hapticService: Haptic(),
+            historyService: History(),
+            persistenceManager: Persistence(),
+            formatter: Formatter()
+        )
+    }
+}
+
 /// プレビュー用のMockデータ
 /// 本番コードへの逆流を防ぐため、単方向依存の構造を維持
 @MainActor
@@ -55,94 +135,17 @@ struct PreviewData {
     /// サンプルTimerViewModel
     static let sampleTimerVM: TimerViewModel = {
         return TimerViewModel(
-            engine: MockServices.Engine(),
-            notificationService: MockServices.Notification(),
-            hapticService: MockServices.Haptic(),
-            historyService: MockServices.History(),
-            persistenceManager: MockServices.Persistence(),
-            formatter: MockServices.Formatter()
+            engine: PreviewMockServices.Engine(),
+            notificationService: PreviewMockServices.Notification(),
+            hapticService: PreviewMockServices.Haptic(),
+            historyService: PreviewMockServices.History(),
+            persistenceManager: PreviewMockServices.Persistence(),
+            formatter: PreviewMockServices.Formatter()
         )
     }()
 
-    // MARK: - Mock Services (Shared across previews)
-
-    /// プレビュー用のモックサービス群
-    /// 複数のPreviewProviderで再利用可能
-    enum MockServices {
-        /// Timer Engine mock
-        final class Engine: TimerEngineable {
-            var timeRemaining: Int = 1500
-            var isRunning: Bool = false
-            var onTick: ((Int) -> Void)?
-            var onSessionCompleted: ((TimerSessionInfo) -> Void)?
-            func start(seconds: Int) {}
-            func pause() {}
-            func resume() {}
-            func stop() {}
-            func reset(to seconds: Int) {}
-        }
-
-        /// Notification Service mock
-        final class Notification: PhaseNotificationServiceable {
-            func sendStartNotification() {}
-            func cancelSessionEnd(for phase: PomodoroPhase) {}
-            func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {}
-            func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {}
-            func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
-            func rescheduleEnd(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {}
-            func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
-            func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
-            func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
-            func cancelSessionEndNotification() {}
-            func cancelSessionEndAll() {}
-            func finalizeWorkPhase() {}
-            func finalizeBreakPhase() {}
-            func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
-        }
-
-        /// Haptic Service mock
-        final class Haptic: HapticServiceable {
-            func heavyImpact() {}
-            func lightImpact() {}
-        }
-
-        /// History Service mock
-        final class History: SessionHistoryServiceable {
-            func add(parameters: AddSessionParameters) {}
-        }
-
-        /// Persistence Manager mock
-        final class Persistence: TimerPersistenceManageable {
-            var timeRemaining: Int = 1500
-            var isRunning: Bool = false
-            var isWorkSession: Bool = true
-            var runStateRaw: String?
-            var endAtEpoch: Double?
-            var remainingAtPause: Int?
-            func saveTimerState() {}
-            func restoreTimerState() {}
-            func initializeWithWorkMinutes(_ minutes: Int) {}
-        }
-
-        /// Time Formatter mock
-        final class Formatter: TimeFormatterUtilable {
-            func format(seconds: Int) -> String { "25:00" }
-            func format(date: Date?) -> String { "2024-01-01" }
-        }
-
-        /// Create a new TimerViewModel with mock services
-        @MainActor
-        static func makeTimerViewModel() -> TimerViewModel {
-            TimerViewModel(
-                engine: Engine(),
-                notificationService: Notification(),
-                hapticService: Haptic(),
-                historyService: History(),
-                persistenceManager: Persistence(),
-                formatter: Formatter()
-            )
-        }
-    }
+    /// 後方互換性のためのエイリアス
+    typealias MockServices = PreviewMockServices
 
     // MARK: - Preview Devices
 
