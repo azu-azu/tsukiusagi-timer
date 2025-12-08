@@ -32,7 +32,7 @@ struct DurationSessionSettingsView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: betweenCardSpace) {
                             // Session Label セクション
-                            section("SESSION LABEL", bottomPadding: betweenCardSpace) {
+                            section("SESSION LABEL", isHighlight: true, bottomPadding: betweenCardSpace) {
                                 sessionLabelContent()
                             }
 
@@ -44,19 +44,19 @@ struct DurationSessionSettingsView: View {
                         .padding(.horizontal, 16)
                         .padding(.top, 16)
                     }
-                    .background(DesignTokens.CosmosColors.background)
+                    .background(DesignTokens.SkyToneColors.backgroundGradient)
 
                     // 保存完了メッセージ
                     if showSavedMessage {
                         VStack {
                             Text(LocalizedStringKey("settings_saved"))
                                 .font(DesignTokens.Fonts.label)
-                                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
                                 .background(
                                     RoundedRectangle(cornerRadius: 8)
-                                        .fill(DesignTokens.MoonColors.surfaceSecondary.opacity(0.9))
+                                        .fill(Color.white.opacity(0.15))
                                 )
                         }
                         .transition(.opacity.combined(with: .scale))
@@ -81,15 +81,17 @@ struct DurationSessionSettingsView: View {
     @ViewBuilder
     private func section<Content: View>(
         _ title: String,
+        isHighlight: Bool = false,
         bottomPadding: CGFloat = 0,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
             Text(title)
                 .font(DesignTokens.Fonts.sectionTitle)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
 
             content()
+                .tsukiSoundCard(isHighlight: isHighlight)
         }
         .padding(.bottom, bottomPadding)
     }
@@ -112,12 +114,7 @@ struct DurationSessionSettingsView: View {
                 }
             )
         }
-        .padding(.all)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(DesignTokens.CosmosColors.cardBackground)
-        )
     }
 
     // MARK: - Session Names Management Section
@@ -142,10 +139,10 @@ struct DurationSessionSettingsView: View {
                     HStack(spacing: 6) {
                         Image(systemName: isSessionNamesExpanded ? "chevron.down" : "chevron.right")
                             .font(DesignTokens.Fonts.caption)
-                            .foregroundColor(DesignTokens.MoonColors.textMuted)
+                            .foregroundColor(DesignTokens.SkyToneColors.textQuaternary)
                         Text(Labels.Settings.manageSessionNames)
                             .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                            .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                     }
                     if !isSessionNamesExpanded {
                         sessionNamesPreview()
@@ -157,10 +154,7 @@ struct DurationSessionSettingsView: View {
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
-            )
+            .tsukiSoundCard(padding: 0)
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
@@ -171,16 +165,13 @@ struct DurationSessionSettingsView: View {
         if isSessionNamesExpanded {
             VStack(alignment: .leading, spacing: 8) {
                 Divider()
-                    .background(DesignTokens.MoonColors.surfaceSecondary)
+                    .background(DesignTokens.SkyToneColors.textQuinary)
 
                 EmbeddedSessionManagementView()
                     .padding(.horizontal, 16)
                     .padding(.bottom, 12)
             }
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(DesignTokens.CosmosColors.cardBackground)
-            )
+            .tsukiSoundCard(padding: 0)
             .transition(.opacity.combined(with: .scale(scale: 1.0, anchor: .top)))
         }
     }
@@ -194,7 +185,7 @@ struct DurationSessionSettingsView: View {
         if !previewText.isEmpty {
             Text(previewText)
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .foregroundColor(DesignTokens.SkyToneColors.textQuaternary)
                 .lineLimit(1)
                 .truncationMode(.tail)
         }

@@ -187,24 +187,8 @@ private struct DailyTimelineSummaryTreeView: View {
                 }
             }
         }
-        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(DesignTokens.SkyToneColors.cardGradient)
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1
-                    )
-            }
-        )
-        .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
+        .tsukiSoundCard()
     }
 
     private func formattedDuration(_ interval: TimeInterval) -> String {
@@ -267,24 +251,8 @@ private struct DailyTimelineReflectionCard: View {
                 .accessibilityIdentifier("banner_history_reflection_retry")
             }
         }
-        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(DesignTokens.SkyToneColors.cardGradient)
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1
-                    )
-            }
-        )
-        .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
+        .tsukiSoundCard()
     }
 }
 

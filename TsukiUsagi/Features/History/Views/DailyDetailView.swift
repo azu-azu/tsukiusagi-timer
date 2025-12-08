@@ -34,23 +34,7 @@ struct DailyDetailView: View {
                     .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
             }
         }
-        .padding(16)
-        .background(
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(DesignTokens.SkyToneColors.cardGradient)
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.25), Color.white.opacity(0.02)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1
-                    )
-            }
-        )
-        .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
+        .tsukiSoundCard()
         .padding(.horizontal)
     }
 
