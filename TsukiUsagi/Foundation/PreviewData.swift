@@ -54,9 +54,24 @@ struct PreviewData {
 
     /// サンプルTimerViewModel
     static let sampleTimerVM: TimerViewModel = {
-        // ダミーサービスを用意
-        class DummyEngine: TimerEngineable {
-            var timeRemaining: Int = 0
+        return TimerViewModel(
+            engine: MockServices.Engine(),
+            notificationService: MockServices.Notification(),
+            hapticService: MockServices.Haptic(),
+            historyService: MockServices.History(),
+            persistenceManager: MockServices.Persistence(),
+            formatter: MockServices.Formatter()
+        )
+    }()
+
+    // MARK: - Mock Services (Shared across previews)
+
+    /// プレビュー用のモックサービス群
+    /// 複数のPreviewProviderで再利用可能
+    enum MockServices {
+        /// Timer Engine mock
+        final class Engine: TimerEngineable {
+            var timeRemaining: Int = 1500
             var isRunning: Bool = false
             var onTick: ((Int) -> Void)?
             var onSessionCompleted: ((TimerSessionInfo) -> Void)?
@@ -66,7 +81,9 @@ struct PreviewData {
             func stop() {}
             func reset(to seconds: Int) {}
         }
-        class DummyNotification: PhaseNotificationServiceable {
+
+        /// Notification Service mock
+        final class Notification: PhaseNotificationServiceable {
             func sendStartNotification() {}
             func cancelSessionEnd(for phase: PomodoroPhase) {}
             func cancelSessionEndSafely(for completedPhase: PomodoroPhase) {}
@@ -82,15 +99,21 @@ struct PreviewData {
             func finalizeBreakPhase() {}
             func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) { completion(true) }
         }
-        class DummyHaptic: HapticServiceable {
+
+        /// Haptic Service mock
+        final class Haptic: HapticServiceable {
             func heavyImpact() {}
             func lightImpact() {}
         }
-        class DummyHistory: SessionHistoryServiceable {
+
+        /// History Service mock
+        final class History: SessionHistoryServiceable {
             func add(parameters: AddSessionParameters) {}
         }
-        class DummyPersistence: TimerPersistenceManageable {
-            var timeRemaining: Int = 0
+
+        /// Persistence Manager mock
+        final class Persistence: TimerPersistenceManageable {
+            var timeRemaining: Int = 1500
             var isRunning: Bool = false
             var isWorkSession: Bool = true
             var runStateRaw: String?
@@ -100,19 +123,26 @@ struct PreviewData {
             func restoreTimerState() {}
             func initializeWithWorkMinutes(_ minutes: Int) {}
         }
-        class DummyFormatter: TimeFormatterUtilable {
-            func format(seconds: Int) -> String { "00:00" }
-            func format(date: Date?) -> String { "date" }
+
+        /// Time Formatter mock
+        final class Formatter: TimeFormatterUtilable {
+            func format(seconds: Int) -> String { "25:00" }
+            func format(date: Date?) -> String { "2024-01-01" }
         }
-        return TimerViewModel(
-            engine: DummyEngine(),
-            notificationService: DummyNotification(),
-            hapticService: DummyHaptic(),
-            historyService: DummyHistory(),
-            persistenceManager: DummyPersistence(),
-            formatter: DummyFormatter()
-        )
-    }()
+
+        /// Create a new TimerViewModel with mock services
+        @MainActor
+        static func makeTimerViewModel() -> TimerViewModel {
+            TimerViewModel(
+                engine: Engine(),
+                notificationService: Notification(),
+                hapticService: Haptic(),
+                historyService: History(),
+                persistenceManager: Persistence(),
+                formatter: Formatter()
+            )
+        }
+    }
 
     // MARK: - Preview Devices
 
