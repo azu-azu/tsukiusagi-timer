@@ -294,6 +294,7 @@ private extension ContentView {
                 NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
             ) { _ in
                 timerVM.appDidEnterBackground()
+                historyVM.save()  // 同期保存でデータ保護
             }
             .onAppear { scheduleMidnightTick() }
     }
@@ -311,7 +312,7 @@ private extension ContentView {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
             }
             .onReceive(
-                NotificationCenter.default.publisher(for: Notification.Name("HistorySaveFailed"))
+                NotificationCenter.default.publisher(for: .historySaveFailed)
             ) { _ in
                 historyToastWorkItem?.cancel()
                 historyToastMessage = "Save failed. Retrying…"
@@ -323,7 +324,7 @@ private extension ContentView {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: work)
             }
             .onReceive(
-                NotificationCenter.default.publisher(for: Notification.Name("HistorySaveRetrying"))
+                NotificationCenter.default.publisher(for: .historySaveRetrying)
             ) { notif in
                 guard let delay = notif.object as? Double else { return }
                 historyToastWorkItem?.cancel()
@@ -335,7 +336,7 @@ private extension ContentView {
                 historyToastWorkItem = work
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.3, execute: work)
             }
-            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("HistorySaveGaveUp"))) { _ in
+            .onReceive(NotificationCenter.default.publisher(for: .historySaveGaveUp)) { _ in
                 withAnimation(.easeInOut(duration: 0.2)) { showHistorySaveBanner = true }
             }
     }

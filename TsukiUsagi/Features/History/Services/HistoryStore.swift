@@ -42,7 +42,22 @@ struct HistoryStore {
 
     // MARK: - Save
 
+    /// 同期的に保存する（セッション終了など重要なタイミング用）
+    ///
+    /// - Note: This method is not thread-safe. Call from a single thread (typically main) only.
+    /// - Throws: Encoding or file write errors
+    func saveSync(_ snapshot: HistorySnapshot) throws {
+        let payload = PersistedHistory(
+            migrationVersion: snapshot.migrationVersion,
+            sessions: snapshot.sessions,
+            reflections: Array(snapshot.reflections.values)
+        )
+        let encoded = try encoder.encode(payload)
+        try encoded.write(to: url, options: [.atomic, .completeFileProtectionUnlessOpen])
+    }
+
     /// 非同期に保存し、結果をコールバックで返す
+    @available(*, deprecated, message: "Use saveSync for critical saves. This async version may lose data on crash.")
     func save(_ snapshot: HistorySnapshot, completion: ((Result<Void, Error>) -> Void)? = nil) {
         do {
             let payload = PersistedHistory(
