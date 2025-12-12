@@ -2,9 +2,32 @@
 
 このディレクトリには、TsukiUsagiプロジェクトの開発・運用に関するドキュメントが含まれています。
 
-## 🗂️ TsukiUsagi Docs Naming Rules（Fujiko構造版）
+---
 
-## 🧭 **命名フォーマット**
+## あなたは今どれを知りたい？
+
+| 目的 | ドキュメント |
+|------|-------------|
+| 🧠 なぜこの設計なのか | [`_arch-guidelines.md`](./_arch-guidelines.md) |
+| 🛠 実装方法を知りたい | [`implementation/`](./implementation/) |
+| 📊 過去の作業記録・修正内容 | [`report/`](./report/) |
+| 📜 リリース履歴 | [`releases/`](./releases/) |
+
+### ドキュメント階層
+
+```
+思想 (_arch-)
+      ↓
+実装 (_guide-)
+      ↓
+報告 (report-)
+```
+
+---
+
+## 🗂️ Docs Naming Rules（Fujiko構造版）
+
+### 🧭 命名フォーマット
 
 ```
 [_prefix]-[main-topic].md
@@ -42,11 +65,14 @@
 - [`_arch-guidelines.md`](./_arch-guidelines.md) - アーキテクチャガイドライン・設計原則
 
 ### 🔧 実装ガイド・手順書
-- [`_guide-font.md`](./_guide-font.md) - フォント使用ガイドライン
-- [`_guide-font-installation.md`](./_guide-font-installation.md) - Nunitoフォントのインストール手順
-- [`_guide-keyboard.md`](./_guide-keyboard.md) - キーボード操作ガイドライン
-- [`_guide-notifications-fg-bg.md`](./_guide-notifications-fg-bg.md) - フォアグラウンド・バックグラウンド通知ガイド
-- [`_guide-quiet-moon-animation.md`](./_guide-quiet-moon-animation.md) - Quiet Moon状態からのSTART時アニメーション不発火問題の修正ガイド
+- [`implementation/_guide-font.md`](./implementation/_guide-font.md) - フォント使用ガイドライン
+- [`implementation/_guide-font-installation.md`](./implementation/_guide-font-installation.md) - Nunitoフォントのインストール手順
+- [`implementation/_guide-keyboard.md`](./implementation/_guide-keyboard.md) - キーボード操作ガイドライン
+- [`implementation/_guide-notifications-fg-bg.md`](./implementation/_guide-notifications-fg-bg.md) - フォアグラウンド・バックグラウンド通知ガイド
+- [`implementation/_guide-quiet-moon-animation.md`](./implementation/_guide-quiet-moon-animation.md) - Quiet Moon状態からのSTART時アニメーション不発火問題の修正ガイド
+- [`implementation/_guide-copy-classification.md`](./implementation/_guide-copy-classification.md) - コピー分類ガイド
+- [`implementation/_guide-daily-reflection.md`](./implementation/_guide-daily-reflection.md) - 日次振り返り機能ガイド
+- [`implementation/_guide-edit-icon-semantics.md`](./implementation/_guide-edit-icon-semantics.md) - 編集アイコンセマンティクス
 
 ### 🏗️ 構造・設計ルール
 - [`structure-directory.md`](./structure-directory.md) - プロジェクトディレクトリ構造
@@ -56,23 +82,46 @@
 - [`lint-exceptions.md`](./lint-exceptions.md) - SwiftLint例外設定
 
 ### 📊 報告・記録
-- [`report-task-terminology-migration.md`](./report-task-terminology-migration.md) - Task用語移行レポート
-- [`report-timer-initial-display-fix.md`](./report-timer-initial-display-fix.md) - タイマー初期表示修正レポート
-- [`report-history-sync-save.md`](./report-history-sync-save.md) - History同期保存移行レポート（データロス防止）
+- [`report/report-history-sync-save.md`](./report/report-history-sync-save.md) - History同期保存移行レポート（データロス防止）★最新
+- [`report/report-task-terminology-migration.md`](./report/report-task-terminology-migration.md) - Task用語移行レポート
+- [`report/report-timer-initial-display-fix.md`](./report/report-timer-initial-display-fix.md) - タイマー初期表示修正レポート
 
 ### 🔧 トラブルシューティング
-- [`trouble-cursor-swift.md`](./trouble-cursor-swift.md) - Cursor Swift拡張のトラブルシューティング
+- [`report/trouble-cursor-swift.md`](./report/trouble-cursor-swift.md) - Cursor Swift拡張のトラブルシューティング
+
+### 📜 リリース履歴
+- [`releases/v1.2.1_2025-11-06_bug-fixes.md`](./releases/v1.2.1_2025-11-06_bug-fixes.md) - v1.2.1 バグ修正
+- [`releases/v1.2.0_2025-10-31_live-activity-notification-update.md`](./releases/v1.2.0_2025-10-31_live-activity-notification-update.md) - v1.2.0 Live Activity更新
+- [`releases/v1.1.0_2025-10-19_architectural-refinement.md`](./releases/v1.1.0_2025-10-19_architectural-refinement.md) - v1.1.0 アーキテクチャ改善
+
+---
 
 ## 📝 ドキュメント作成・更新ルール
 
 ### **ファイル命名規則（Fujiko構造版）**
 - `_arch-*.md` - 設計思想・アーキテクチャガイドライン
-- `_guide-*.md` - 実装手順・操作ガイド
+- `_guide-*.md` - 実装手順・操作ガイド（`implementation/` に配置）
 - `structure-*.md` - 構造・設計ルール
 - `lint-*.md` - コード規約・例外設定
-- `report-*.md` - 作業記録・移行レポート
-- `trouble-*.md` - トラブルシューティング
+- `report-*.md` - 作業記録・移行レポート（`report/` に配置）
+- `trouble-*.md` - トラブルシューティング（`report/` に配置）
 - `README.md` - フォルダ概要（プレフィックスなし）
+
+### **ディレクトリ構造**
+```
+Docs/
+├── README.md                    # このファイル
+├── _arch-guidelines.md          # 設計思想（ルート）
+├── structure-*.md               # 構造ルール（ルート）
+├── lint-exceptions.md           # Lint例外（ルート）
+├── implementation/              # 実装ガイド
+│   └── _guide-*.md
+├── report/                      # 報告・トラブルシュート
+│   ├── report-*.md
+│   └── trouble-*.md
+└── releases/                    # リリースノート
+    └── v*.md
+```
 
 ### **更新時の注意**
 1. 各ドキュメントの「更新履歴」セクションを必ず更新
@@ -92,23 +141,22 @@
     - Commit: `ed3d217` - "Fix timer display issue: ensure initial value shows for full second"
     - Commit: `a521704` - "Add report documenting timer initial display fix"
     ```
-- **リリースノート**: コミット数を記載する場合
-  - 例: `* **Commits:** 19`
 
 **記載場所**:
 - `report-*.md`: ドキュメント末尾の「関連コミット」セクションに主要なコミットを記載
 - `releases/*.md`: 変更統計セクションにコミット数を記載
 - `_guide-*.md`: 必要に応じて関連コミットを記載
 
+---
+
 ## 🔗 関連リンク
 
 ### **プロジェクト情報**
-- [メインリポジトリ](../) - プロジェクトルート
-- [ソースコード](../TsukiUsagi/) - アプリケーションコード
+- [メインリポジトリ](../../) - プロジェクトルート
+- [ソースコード](../) - アプリケーションコード
 
 ### **外部リソース**
 - [SwiftUI公式ドキュメント](https://developer.apple.com/documentation/swiftui/)
-- [Cursor公式ドキュメント](https://docs.cursor.sh/)
 
 ---
 

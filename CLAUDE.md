@@ -105,9 +105,9 @@ Generate log file names for issue tracking.
 ## Reference Links
 
 - **Core Rules**: `ENGINEERING_RULES.md` (Single Source of Truth)
-- **Structure Guidelines**: `/docs/structure-guidelines.md`
-- **Lint Exceptions**: `/docs/lint_exceptions.md`
-- **Copy Classification Guide**: `/docs/_guide-copy-classification.md`
+- **Structure Guidelines**: `/TsukiUsagi/Docs/structure-guidelines.md`
+- **Lint Exceptions**: `/TsukiUsagi/Docs/lint-exceptions.md`
+- **Copy Classification Guide**: `/TsukiUsagi/Docs/implementation/_guide-copy-classification.md`
 
 ---
 
