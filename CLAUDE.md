@@ -102,6 +102,24 @@ Generate log file names for issue tracking.
 
 ---
 
+## Known Technical Debt / Future Considerations
+
+These items are intentionally deferred but should be addressed when the codebase grows:
+
+### History Persistence (2025-12-12)
+- **Issue**: `HistoryViewModel.save()` runs synchronously on main thread via `HistoryStore.saveSync()`
+- **Current state**: Acceptable for current data size (< 1000 records typical)
+- **Future trigger**: If history JSON exceeds ~100KB or save takes >50ms
+- **Solution**: Migrate to serial queue + `beginBackgroundTask` for background saves
+- **Reference**: `/TsukiUsagi/Docs/report/report-history-sync-save.md`
+
+### Notification.Name Extension Placement (2025-12-12)
+- **Current**: `Notification.Name` extension is in `HistoryViewModel.swift`
+- **Future trigger**: When other features need typed notification names
+- **Solution**: Extract to `Foundation/Extensions/Notification+App.swift`
+
+---
+
 ## Reference Links
 
 - **Core Rules**: `ENGINEERING_RULES.md` (Single Source of Truth)
