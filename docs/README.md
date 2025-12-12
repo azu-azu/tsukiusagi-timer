@@ -57,6 +57,8 @@
 
 ### 📊 報告・記録
 - [`report-task-terminology-migration.md`](./report-task-terminology-migration.md) - Task用語移行レポート
+- [`report-timer-initial-display-fix.md`](./report-timer-initial-display-fix.md) - タイマー初期表示修正レポート
+- [`report-history-sync-save.md`](./report-history-sync-save.md) - History同期保存移行レポート（データロス防止）
 
 ### 🔧 トラブルシューティング
 - [`trouble-cursor-swift.md`](./trouble-cursor-swift.md) - Cursor Swift拡張のトラブルシューティング
