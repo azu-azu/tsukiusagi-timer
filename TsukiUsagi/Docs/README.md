@@ -75,8 +75,7 @@
 - [`_arch-guidelines.md`](./_arch-guidelines.md) - アーキテクチャガイドライン・設計原則
 
 ### 🎯 アーキテクチャ決定記録（ADR）
-- `architecture/adrs/_adr-*.md` - 設計判断の背景・トレードオフ・決定理由を記録
-- *(今後追加予定)*
+- [`architecture/adrs/_adr-0001-data-sync-strategy.md`](./architecture/adrs/_adr-0001-data-sync-strategy.md) - データ同期戦略（Export/Import → CloudKit ロードマップ）
 
 ### 🔧 実装ガイド・手順書
 - [`implementation/_guide-font.md`](./implementation/_guide-font.md) - フォント使用ガイドライン
