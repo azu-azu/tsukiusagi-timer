@@ -247,5 +247,5 @@ internal func save() {
 
 ## 関連ドキュメント
 
-- [`_arch-guidelines.md`](./_arch-guidelines.md) - アーキテクチャガイドライン
-- [`structure-guidelines.md`](./structure-guidelines.md) - コード構造ガイドライン
+- [`_arch-guidelines.md`](../_arch-guidelines.md) - アーキテクチャガイドライン
+- [`structure-guidelines.md`](../structure-guidelines.md) - コード構造ガイドライン
