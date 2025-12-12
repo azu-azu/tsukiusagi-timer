@@ -281,9 +281,10 @@ class StreakManager: ObservableObject {
         do {
             let data = try JSONEncoder().encode(streakData)
             userDefaults.set(data, forKey: streakDataKey)
-            // Data saved successfully
         } catch {
-            // Failed to save data
+            #if DEBUG
+            print("[streak_save_failed] \(error.localizedDescription)")
+            #endif
         }
     }
 

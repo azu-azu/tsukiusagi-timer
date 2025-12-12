@@ -2,6 +2,14 @@ import Combine
 import Foundation
 import SwiftUI
 
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let historySaveFailed = Notification.Name("HistorySaveFailed")
+    static let historySaveRetrying = Notification.Name("HistorySaveRetrying")
+    static let historySaveGaveUp = Notification.Name("HistorySaveGaveUp")
+}
+
 @MainActor
 class HistoryViewModel: ObservableObject {
     @Published private(set) var history: [SessionRecord] = []
@@ -141,25 +149,22 @@ class HistoryViewModel: ObservableObject {
             sessions: history,
             reflections: snapshotReflections
         )
-        store.save(snapshot) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success:
-                Task { @MainActor in
-                    self.saveRetryAttempts = 0
-                    self.migrationVersion = max(self.migrationVersion, 1)
-                    self.markReflectionsAsSaved(snapshotReflections)
-                    self.isSavingReflections = self.reflectionsByDay.values.contains { $0.isPendingSave }
-                    self.reflectionSaveError = nil
-                }
-            case .failure(let error):
-                Task { @MainActor in
-                    self.reflectionSaveError = error
-                    NotificationCenter.default.post(name: Notification.Name("HistorySaveFailed"), object: error)
-                    self.scheduleHistorySaveRetry()
-                    self.isSavingReflections = self.reflectionsByDay.values.contains { $0.isPendingSave }
-                }
-            }
+
+        do {
+            try store.saveSync(snapshot)
+            saveRetryAttempts = 0
+            migrationVersion = max(migrationVersion, 1)
+            markReflectionsAsSaved(snapshotReflections)
+            isSavingReflections = reflectionsByDay.values.contains { $0.isPendingSave }
+            reflectionSaveError = nil
+        } catch {
+            #if DEBUG
+            print("[history_save_failed] \(error.localizedDescription)")
+            #endif
+            reflectionSaveError = error
+            NotificationCenter.default.post(name: .historySaveFailed, object: error)
+            scheduleHistorySaveRetry()
+            isSavingReflections = reflectionsByDay.values.contains { $0.isPendingSave }
         }
     }
 
@@ -180,12 +185,12 @@ class HistoryViewModel: ObservableObject {
 
     private func scheduleHistorySaveRetry() {
         guard saveRetryAttempts < maxRetryAttempts else {
-            NotificationCenter.default.post(name: Notification.Name("HistorySaveGaveUp"), object: nil)
+            NotificationCenter.default.post(name: .historySaveGaveUp, object: nil)
             return
         }
         saveRetryAttempts += 1
         let delay = min(30.0, pow(2.0, Double(saveRetryAttempts - 1)))
-        NotificationCenter.default.post(name: Notification.Name("HistorySaveRetrying"), object: delay)
+        NotificationCenter.default.post(name: .historySaveRetrying, object: delay)
 
         let work = DispatchWorkItem { [weak self] in
             self?.save()

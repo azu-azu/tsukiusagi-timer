@@ -201,8 +201,13 @@ class SessionManager: ObservableObject {
     /// データの永続化
     internal func save() {
         let allSessionEntries = Array(sessionDatabase.values)
-        if let data = try? JSONEncoder().encode(allSessionEntries) {
+        do {
+            let data = try JSONEncoder().encode(allSessionEntries)
             UserDefaults.standard.set(data, forKey: "allSessionEntriesV3")
+        } catch {
+            #if DEBUG
+            print("[session_save_failed] \(error.localizedDescription)")
+            #endif
         }
     }
 
