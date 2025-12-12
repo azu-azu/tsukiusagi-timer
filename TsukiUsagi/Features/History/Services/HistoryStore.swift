@@ -46,6 +46,11 @@ struct HistoryStore {
     ///
     /// - Note: This method is not thread-safe. Call from a single thread (typically main) only.
     /// - Throws: Encoding or file write errors
+    ///
+    /// - Important: Performance consideration for future scaling:
+    ///   Current implementation blocks main thread. If history grows large (>100KB JSON or >50ms save time),
+    ///   consider migrating to serial queue + beginBackgroundTask.
+    ///   See: CLAUDE.md "Known Technical Debt" section
     func saveSync(_ snapshot: HistorySnapshot) throws {
         let payload = PersistedHistory(
             migrationVersion: snapshot.migrationVersion,
