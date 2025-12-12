@@ -463,20 +463,15 @@ History ViewModels: HistoryViewModel.swift, DailyTimelineViewModel.swift
 
 ## Deprecation Cleanup Plan
 
-### Phase 1: Current State (Release N)
+### Phase 1: Current State (v1.3)
 - ✅ **New APIs**: Fully implemented and functional
 - ⚠️ **Deprecated APIs**: Maintained for backward compatibility
-- 📝 **Migration**: Developers can gradually adopt new APIs
+- 📝 **Migration**: All internal code uses new APIs
 
-### Phase 2: Warning Phase (Release N+1)
-- 🚨 **Build Warnings**: Deprecated APIs will cause build warnings
-- 📋 **Migration Guide**: Provide clear migration documentation
-- ⏰ **Timeline**: 3-6 months for developers to migrate
-
-### Phase 3: Removal Phase (Release N+2)
+### Phase 2: Removal Phase (v1.4) - **Planned Deletion**
 - 🗑️ **Complete Removal**: All deprecated APIs physically removed
-- 🔧 **Build Breaking**: Projects using deprecated APIs will fail to build
 - ✅ **Clean Codebase**: Only new task terminology remains
+- 📋 **Target**: Remove all deprecated methods listed below
 
 ### Files Scheduled for Cleanup
 - `SessionManager.swift` - Remove deprecated methods and properties
@@ -489,6 +484,14 @@ History ViewModels: HistoryViewModel.swift, DailyTimelineViewModel.swift
 
 ---
 
+## Update History
+
+- **2025-12-12**: Dead code cleanup - Removed `OldSessionItem`, `Subtitle` typealias. Updated deprecation plan with v1.4 target.
+- **2025-10-11**: Initial migration completed
+
+---
+
 *Report generated on: 2025-10-11*
+*Last updated: 2025-12-12*
 *Migration completed by: Kazumi*
 *Branch: refactor/change-description-to-task*
