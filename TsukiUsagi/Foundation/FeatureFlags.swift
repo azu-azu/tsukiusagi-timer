@@ -119,41 +119,4 @@ enum FeatureFlags {
             UserDefaults.standard.set(false, forKey: key) // MVP: 全て無効
         }
     }
-
-    // MARK: - Reset
-
-    /// 開発用：Feature Flag をリセット
-    /// デバッグ時のみ使用
-    static func resetToDefaults() {
-        #if DEBUG
-            UserDefaults.standard.removeObject(forKey: Keys.unifiedUI)
-            // historyInlineReflection removed
-            // Streak機能のフラグもリセット
-            let streakKeys = [Keys.achievements, Keys.xp, Keys.sharing, Keys.smartNotifications]
-            for key in streakKeys {
-                UserDefaults.standard.removeObject(forKey: key)
-            }
-            setDefaultValues()
-        #endif
-    }
-
-    // MARK: - Debug Info
-
-    /// デバッグ用：現在の設定を表示
-    static func debugInfo() -> String {
-        #if DEBUG
-            return """
-            Feature Flags Debug Info:
-            - enableUnifiedUI: \(enableUnifiedUI)
-            // historyInlineReflection removed
-            - achievements: \(achievements)
-            - xp: \(xp)
-            - sharing: \(sharing)
-            - smartNotifications: \(smartNotifications)
-            - Keys.unifiedUI: \(Keys.unifiedUI)
-            """
-        #else
-            return "Feature Flags Debug Info: Not available in release build"
-        #endif
-    }
 }

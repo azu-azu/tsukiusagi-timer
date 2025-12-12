@@ -70,6 +70,3 @@ extension SessionName {
     /// 子（TaskItem）の最大数
     static let childLimit = 50
 }
-
-@available(*, deprecated, renamed: "TaskItem")
-typealias Subtitle = TaskItem

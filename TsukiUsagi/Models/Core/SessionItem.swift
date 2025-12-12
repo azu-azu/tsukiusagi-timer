@@ -1,12 +1,5 @@
 import Foundation
 
-// マイグレーション用の古いモデル定義
-struct OldSessionItem: Codable, Identifiable {
-    var id: UUID
-    var name: String
-    var detail: String?
-}
-
 struct SessionItem: Identifiable, Codable, Equatable {
     let id: UUID
     var name: String

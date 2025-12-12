@@ -55,14 +55,4 @@ final class TimerDisplayManager: ObservableObject {
     func setBreakMinutes(_ minutes: Int) {
         breakMinutes = max(1, minutes)
     }
-
-    /// デフォルト値にリセット
-    func resetToDefaults() {
-        activityLabel = ""
-        taskLabel = ""
-        workMinutes = 25
-        breakMinutes = 5
-    }
-
-    // subtitleLabel removed; use taskLabel APIs only
 }
