@@ -126,7 +126,17 @@ struct EditableModal<Content: View, BottomBar: View>: View {
                 scrollContent
                 .coordinateSpace(name: descScrollSpace)
                 .scrollDismissesKeyboard(.interactively)
-                .keyboardAwareInset(baseBottomPadding: ensureVisibleMode == .none ? 0 : 16)
+                // bottomBarがある場合はkeyboardAwareInsetを無効化（入力バーが余白を管理するため）
+                .modifier(ConditionalKeyboardAwareInset(
+                    isEnabled: !hasBottomBar,
+                    baseBottomPadding: ensureVisibleMode == .none ? 0 : 16
+                ))
+                // bottomBarがある場合は外側タップで閉じる
+                .simultaneousGesture(
+                    hasBottomBar
+                        ? TapGesture().onEnded { onKeyboardClose() }
+                        : nil
+                )
                 .onPreferenceChange(FocusedRowBottomPrefKey.self) { value in
                     focusedBottomY = value
                     recomputeBottomLift()
@@ -288,4 +298,18 @@ struct FocusedRowBottomPrefKey: PreferenceKey {
 struct ViewportHeightPrefKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+/// 条件付きでkeyboardAwareInsetを適用するモディファイア
+private struct ConditionalKeyboardAwareInset: ViewModifier {
+    let isEnabled: Bool
+    let baseBottomPadding: CGFloat
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.keyboardAwareInset(baseBottomPadding: baseBottomPadding)
+        } else {
+            content
+        }
+    }
 }

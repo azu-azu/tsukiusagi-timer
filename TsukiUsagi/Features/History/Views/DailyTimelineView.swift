@@ -87,7 +87,7 @@ struct DailyTimelineView: View {
         }
         .safeAreaInset(edge: .bottom) {
             if showReflectionInput {
-                ReflectionInputBar(
+                BottomInputBar(
                     text: $detailViewModel.reflectionText,
                     isFocused: $isReflectionFocused,
                     placeholder: LocalizedStringKey("reflection_placeholder"),
@@ -215,7 +215,7 @@ private struct DailyTimelineReflectionCard: View {
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
             // Tappable placeholder card
-            ReflectionPlaceholderCard(
+            EditablePlaceholderCard(
                 text: text,
                 placeholder: placeholderTextKey,
                 isEditing: isEditing,

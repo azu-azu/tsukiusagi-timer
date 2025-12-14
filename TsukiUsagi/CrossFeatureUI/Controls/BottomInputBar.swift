@@ -1,15 +1,19 @@
 //
-//  ReflectionInputBar.swift
+//  BottomInputBar.swift
 //  TsukiUsagi
 //
-//  Created by Claude on 2025/01/01.
+//  下部入力バーコンポーネント
+//  責務：
+//    - チャット風の入力UI提供
+//    - テキストエディタ + 拡大ボタン
+//    - キーボード上に固定表示
 //
 
 import SwiftUI
 
-/// チャット風のReflection入力バー
+/// チャット風の下部入力バー
 /// 画面下部に固定され、キーボードと連動する
-struct ReflectionInputBar: View {
+struct BottomInputBar: View {
     @Binding var text: String
     @FocusState.Binding var isFocused: Bool
     let placeholder: LocalizedStringKey
@@ -83,9 +87,9 @@ struct ReflectionInputBar: View {
     }
 }
 
-/// Reflectionエリアのプレースホルダー表示（タップで入力バーを表示）
-/// Settings画面のセッション/タスク編集にも使用可能
-struct ReflectionPlaceholderCard: View {
+/// 編集可能フィールドのプレースホルダーカード
+/// タップで入力バーを表示する
+struct EditablePlaceholderCard: View {
     let text: String
     let placeholder: LocalizedStringKey
     let isEditing: Bool
@@ -178,7 +182,7 @@ struct ReflectionPlaceholderCard: View {
     private var editingIndicator: some View {
         HStack(spacing: 6) {
             PencilIcon(size: .small)
-            Text("reflection_editing_below")
+            Text("editing_below")
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
         }

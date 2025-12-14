@@ -70,7 +70,7 @@ struct NewSessionFormView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 if editingField != .none {
-                    ReflectionInputBar(
+                    BottomInputBar(
                         text: currentEditingTextBinding,
                         isFocused: $isInputBarFocused,
                         placeholder: currentPlaceholder,
@@ -195,7 +195,7 @@ private extension NewSessionFormView {
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
 
-            ReflectionPlaceholderCard(
+            EditablePlaceholderCard(
                 text: sessionName,
                 placeholder: LocalizedStringKey("session_name_placeholder"),
                 isEditing: editingField == .sessionName,
@@ -242,7 +242,7 @@ private extension NewSessionFormView {
 
             // 新規タスク追加中のプレースホルダー
             if case .newTask = editingField {
-                ReflectionPlaceholderCard(
+                EditablePlaceholderCard(
                     text: newTask,
                     placeholder: LocalizedStringKey("new_task_placeholder"),
                     isEditing: true,
@@ -258,7 +258,7 @@ private extension NewSessionFormView {
 
     @ViewBuilder
     func taskRow(task: String, index: Int) -> some View {
-        ReflectionPlaceholderCard(
+        EditablePlaceholderCard(
             text: task,
             placeholder: LocalizedStringKey("task_placeholder"),
             isEditing: editingField == .task(index: index),
