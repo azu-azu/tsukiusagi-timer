@@ -323,14 +323,6 @@ struct SessionEditSheetBuilder: View {
 // MARK: - Helper Methods
 
 private extension SessionEditSheetBuilder {
-    func handleKeyboardClose() {
-        isAnyFieldFocused = false
-        focusedRowID = nil
-        Task { @MainActor in
-            Keyboard.dismiss()
-        }
-    }
-
     func containsDuplicateTasks(_ tasks: [String]) -> Bool {
         var seen = Set<String>()
         for value in tasks {
@@ -362,14 +354,6 @@ private extension SessionEditSheetBuilder {
 
     func commitDrafts() {
         propagateDrafts()
-    }
-
-    func editingDraftID() -> UUID? {
-        guard let index = context.taskIndex,
-              index < taskDrafts.count else {
-            return nil
-        }
-        return taskDrafts[index].id
     }
 
     /// 重複タスクIDのセット
