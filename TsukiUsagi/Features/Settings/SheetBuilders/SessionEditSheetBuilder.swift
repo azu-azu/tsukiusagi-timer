@@ -330,9 +330,12 @@ struct SessionEditSheetBuilder: View {
         )
     }
 
-    // MARK: - Helper Methods
+}
 
-    private func handleKeyboardClose() {
+// MARK: - Helper Methods
+
+private extension SessionEditSheetBuilder {
+    func handleKeyboardClose() {
         isAnyFieldFocused = false
         focusedRowID = nil
         Task { @MainActor in
@@ -340,7 +343,7 @@ struct SessionEditSheetBuilder: View {
         }
     }
 
-    private func containsDuplicateTasks(_ tasks: [String]) -> Bool {
+    func containsDuplicateTasks(_ tasks: [String]) -> Bool {
         var seen = Set<String>()
         for value in tasks {
             let key = value.tsu_taskNormalizedKey
@@ -353,7 +356,7 @@ struct SessionEditSheetBuilder: View {
         return false
     }
 
-    private func resetDrafts() {
+    func resetDrafts() {
         let existing = taskDrafts
         taskDrafts = tempTasks.enumerated().map { index, text in
             if index < existing.count {
@@ -365,15 +368,15 @@ struct SessionEditSheetBuilder: View {
         propagateDrafts()
     }
 
-    private func propagateDrafts() {
+    func propagateDrafts() {
         tempTasks = taskDrafts.map(\.text)
     }
 
-    private func commitDrafts() {
+    func commitDrafts() {
         propagateDrafts()
     }
 
-    private func editingDraftID() -> UUID? {
+    func editingDraftID() -> UUID? {
         guard let index = context.taskIndex,
               index < taskDrafts.count else {
             return nil
@@ -382,7 +385,7 @@ struct SessionEditSheetBuilder: View {
     }
 
     /// 重複タスクIDのセット
-    private var duplicateTaskIDs: Set<UUID> {
+    var duplicateTaskIDs: Set<UUID> {
         var seen: [String: UUID] = [:]
         var duplicates = Set<UUID>()
         for draft in taskDrafts {
@@ -399,7 +402,7 @@ struct SessionEditSheetBuilder: View {
     }
 
     /// 入力バーをアクティブにする
-    private func activateInputBar() {
+    func activateInputBar() {
         isAnyFieldFocused = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             isInputBarFocused = true
@@ -407,7 +410,7 @@ struct SessionEditSheetBuilder: View {
     }
 
     /// タスクを削除する
-    private func removeTask(with id: UUID) {
+    func removeTask(with id: UUID) {
         guard taskDrafts.count > 1,
               let index = taskDrafts.firstIndex(where: { $0.id == id }) else { return }
 

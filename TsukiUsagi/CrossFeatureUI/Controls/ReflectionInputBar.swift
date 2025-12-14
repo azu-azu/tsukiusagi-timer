@@ -84,66 +84,104 @@ struct ReflectionInputBar: View {
 }
 
 /// Reflectionエリアのプレースホルダー表示（タップで入力バーを表示）
+/// Settings画面のセッション/タスク編集にも使用可能
 struct ReflectionPlaceholderCard: View {
     let text: String
     let placeholder: LocalizedStringKey
     let isEditing: Bool
+    let isDuplicate: Bool
     let onTap: () -> Void
+    let onDelete: (() -> Void)?
+
+    init(
+        text: String,
+        placeholder: LocalizedStringKey,
+        isEditing: Bool,
+        isDuplicate: Bool = false,
+        onTap: @escaping () -> Void,
+        onDelete: (() -> Void)? = nil
+    ) {
+        self.text = text
+        self.placeholder = placeholder
+        self.isEditing = isEditing
+        self.isDuplicate = isDuplicate
+        self.onTap = onTap
+        self.onDelete = onDelete
+    }
 
     var body: some View {
         let isEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
-        Button(action: onTap) {
-            ZStack {
-                // 通常コンテンツ
-                HStack {
-                    if isEmpty {
-                        Text(placeholder)
-                            .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
-                    } else {
-                        Text(text)
-                            .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                            .lineLimit(3)
-                            .multilineTextAlignment(.leading)
+        HStack(spacing: DesignTokens.Spacing.medium) {
+            Button(action: onTap) {
+                ZStack {
+                    // 通常コンテンツ
+                    HStack {
+                        if isEmpty {
+                            Text(placeholder)
+                                .font(DesignTokens.Fonts.label)
+                                .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
+                        } else {
+                            Text(text)
+                                .font(DesignTokens.Fonts.label)
+                                .foregroundColor(
+                                    isDuplicate
+                                        ? DesignTokens.UtilityColors.duplicateWarning
+                                        : DesignTokens.SkyToneColors.textPrimary
+                                )
+                                .lineLimit(3)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer()
                     }
-                    Spacer()
-                }
-                .opacity(isEditing ? 0 : 1)
+                    .opacity(isEditing ? 0 : 1)
 
-                // 編集中インジケータ
-                if isEditing {
-                    editingIndicator
+                    // 編集中インジケータ
+                    if isEditing {
+                        editingIndicator
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, isEmpty ? 12 : 16)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .background(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white.opacity(0.05))
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                isDuplicate
+                                    ? DesignTokens.UtilityColors.duplicateWarning
+                                    : Color.white.opacity(0.1),
+                                lineWidth: isDuplicate ? 2 : 1
+                            )
+                    }
+                )
+            }
+            .buttonStyle(.plain)
+            .opacity(isEditing ? 0.5 : 1.0)
+            .animation(.easeInOut(duration: 0.2), value: isEditing)
+            .allowsHitTesting(!isEditing)
+
+            // 削除ボタン（編集中でなければ表示）
+            if let onDelete, !isEditing {
+                Button(action: onDelete) {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundColor(DesignTokens.SkyToneColors.accentOrange)
+                        .font(DesignTokens.Fonts.symbolMedium)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, isEmpty ? 12 : 16)
-            .frame(maxWidth: .infinity, alignment: .topLeading)
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.05))
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                }
-            )
         }
-        .buttonStyle(.plain)
-        .opacity(isEditing ? 0.5 : 1.0)
-        .animation(.easeInOut(duration: 0.2), value: isEditing)
-        .allowsHitTesting(!isEditing)
     }
 
     @ViewBuilder
     private var editingIndicator: some View {
         HStack(spacing: 6) {
-            Image(systemName: "pencil")
-                .font(DesignTokens.Fonts.symbolSmall)
+            PencilIcon(size: .small)
             Text("reflection_editing_below")
                 .font(DesignTokens.Fonts.caption)
+                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
         }
-        .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
         .frame(maxWidth: .infinity, alignment: .center)
     }
 }

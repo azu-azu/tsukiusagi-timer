@@ -53,9 +53,9 @@ private extension FullSessionEditContent {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
             Text(Labels.InfoRow.sessionName)
                 .font(DesignTokens.Fonts.labelBold)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
-            SessionFieldPlaceholderCard(
+            ReflectionPlaceholderCard(
                 text: sessionName,
                 placeholder: LocalizedStringKey("enter_session_name_placeholder"),
                 isEditing: editingField == .sessionName,
@@ -70,7 +70,7 @@ private extension FullSessionEditContent {
             HStack {
                 Text(Labels.InfoRow.tasksOptional)
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
 
@@ -80,7 +80,7 @@ private extension FullSessionEditContent {
                 Button(action: onNewTaskTap) {
                     Image(systemName: "plus.circle.fill")
                         .font(DesignTokens.Fonts.symbolMedium)
-                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                        .foregroundColor(DesignTokens.SkyToneColors.accentBlue)
                 }
                 .accessibilityLabel("Add task")
                 .disabled(!duplicateIDs.isEmpty)
@@ -90,7 +90,7 @@ private extension FullSessionEditContent {
                 let isDuplicate = duplicateIDs.contains(draft.id)
                 let isEditingThis = editingField == .task(id: draft.id)
 
-                SessionFieldPlaceholderCard(
+                ReflectionPlaceholderCard(
                     text: draft.text,
                     placeholder: LocalizedStringKey("task_placeholder"),
                     isEditing: isEditingThis,
@@ -102,7 +102,7 @@ private extension FullSessionEditContent {
 
             // 新規タスク追加中のプレースホルダー
             if isAddingNewTask {
-                SessionFieldPlaceholderCard(
+                ReflectionPlaceholderCard(
                     text: "",
                     placeholder: LocalizedStringKey("new_task_placeholder"),
                     isEditing: true,
@@ -120,7 +120,7 @@ private extension FullSessionEditContent {
             // 入力ヒント
             Text(LocalizedStringKey("settings_add_tasks_description"))
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                 .padding(.top, 4)
         }
     }

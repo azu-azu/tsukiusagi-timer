@@ -97,6 +97,10 @@ enum DesignTokens {
                 endPoint: .bottom
             )
         }
+        /// アクセントブルー（ボタン・リンク等）
+        static let accentBlue = Color.moonAccentBlue
+        /// アクセントオレンジ（削除・警告等）
+        static let accentOrange = Color(red: 1.0, green: 0.54, blue: 0.40) // #FF8A65
     }
     /// セマンティック無視の純粋な色（視覚的アクセント用）
     enum PureColors {
