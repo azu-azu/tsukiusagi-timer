@@ -32,14 +32,12 @@ struct SessionEditModal_Previews: PreviewProvider {
                             SessionEditSheetBuilder.TaskDraft(text: "SwiftUI development"),
                             SessionEditSheetBuilder.TaskDraft(text: "Code review")
                         ],
-                        editingID: nil,
-                        onTasksChange: { drafts in
-                            print("Tasks changed: \(drafts.map(\.text))")
-                        },
-                        isAnyFieldFocused: .constant(false),
-                        onClearFocus: {},
-                        onDuplicateStateChange: { _ in },
-                        onFocusChange: { _ in }
+                        duplicateIDs: [],
+                        editingTaskID: nil,
+                        onTaskTap: { _ in print("Task tapped") },
+                        onNewTaskTap: { print("New task tapped") },
+                        onTaskDelete: { _ in print("Task deleted") },
+                        isAddingNewTask: false
                     )
                 }
             )
@@ -47,37 +45,9 @@ struct SessionEditModal_Previews: PreviewProvider {
             .previewDisplayName("Task Edit")
 
             // Full Session編集のプレビュー
-            EditableModal(
-                title: "Edit Session",
-                onSave: { print("Save tapped") },
-                onCancel: { print("Cancel tapped") },
-                isSaveDisabled: false,
-                isKeyboardCloseVisible: false,
-                onKeyboardClose: {},
-                focusedRowID: .constant(nil),
-                content: {
-                    FullSessionEditContent(
-                        sessionName: "My Custom Project",
-                        taskDrafts: [
-                            SessionEditSheetBuilder.TaskDraft(text: "Task 1"),
-                            SessionEditSheetBuilder.TaskDraft(text: "Task 2"),
-                            SessionEditSheetBuilder.TaskDraft(text: "Task 3")
-                        ],
-                        onSessionNameChange: { newName in
-                            print("Session name changed: \(newName)")
-                        },
-                        onTasksChange: { drafts in
-                            print("Tasks changed: \(drafts.map(\.text))")
-                        },
-                        isAnyFieldFocused: .constant(false),
-                        onClearFocus: {},
-                        onDuplicateStateChange: { _ in },
-                        onFocusChange: { _ in }
-                    )
-                }
-            )
-            .presentationDetents([.large])
-            .previewDisplayName("Full Session Edit")
+            FullSessionEditPreviewWrapper()
+                .presentationDetents([.large])
+                .previewDisplayName("Full Session Edit")
 
             // EditableModal単体のプレビュー
             EditableModal(
@@ -105,6 +75,40 @@ struct SessionEditModal_Previews: PreviewProvider {
             .presentationDetents([.medium])
             .previewDisplayName("EditableModal Base")
         }
+    }
+}
+
+/// FullSessionEditContentのプレビュー用ラッパー（@Stateが必要なため）
+private struct FullSessionEditPreviewWrapper: View {
+    @State private var editingField: FullSessionEditContent.EditingField = .none
+
+    var body: some View {
+        EditableModal(
+            title: "Edit Session",
+            onSave: { print("Save tapped") },
+            onCancel: { print("Cancel tapped") },
+            isSaveDisabled: false,
+            isKeyboardCloseVisible: false,
+            onKeyboardClose: {},
+            focusedRowID: .constant(nil),
+            content: {
+                FullSessionEditContent(
+                    sessionName: "My Custom Project",
+                    taskDrafts: [
+                        SessionEditSheetBuilder.TaskDraft(text: "Task 1"),
+                        SessionEditSheetBuilder.TaskDraft(text: "Task 2"),
+                        SessionEditSheetBuilder.TaskDraft(text: "Task 3")
+                    ],
+                    duplicateIDs: [],
+                    editingField: $editingField,
+                    onSessionNameTap: { print("Session name tapped") },
+                    onTaskTap: { _ in print("Task tapped") },
+                    onNewTaskTap: { print("New task tapped") },
+                    onTaskDelete: { _ in print("Task deleted") },
+                    isAddingNewTask: false
+                )
+            }
+        )
     }
 }
 #endif
