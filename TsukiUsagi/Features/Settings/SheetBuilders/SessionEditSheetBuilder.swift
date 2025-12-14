@@ -207,15 +207,7 @@ struct SessionEditSheetBuilder: View {
         .onAppear {
             resetDrafts()
             hasDuplicateConflict = containsDuplicateTasks(tempTasks)
-            // 自動で最初のタスクまたは指定のタスクにフォーカス
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                if let editingID = editingDraftID() {
-                    editingField = .task(id: editingID)
-                } else if let firstID = taskDrafts.first?.id {
-                    editingField = .task(id: firstID)
-                }
-                activateInputBar()
-            }
+            // タップするまで入力バーは表示しない
         }
         .onChange(of: editingField) { _, newValue in
             if newValue != .none {
@@ -293,11 +285,7 @@ struct SessionEditSheetBuilder: View {
         .onAppear {
             resetDrafts()
             hasDuplicateConflict = containsDuplicateTasks(tempTasks)
-            // 自動でセッション名フィールドにフォーカス
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                editingField = .sessionName
-                activateInputBar()
-            }
+            // タップするまで入力バーは表示しない
         }
         .onChange(of: editingField) { _, newValue in
             if newValue != .none {
