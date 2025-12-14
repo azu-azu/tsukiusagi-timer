@@ -94,7 +94,7 @@ struct NewSessionFormView: View {
                 onClose: { showLargeEditor = false }
             )
         }
-        .background(DesignTokens.CosmosColors.background)
+        .background(DesignTokens.SkyToneColors.nightStart)
         .ignoresSafeArea()
         .onChange(of: editingField) { _, newValue in
             if newValue != .none {
@@ -173,16 +173,16 @@ private extension NewSessionFormView {
     func header() -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             Image(systemName: "folder.badge.plus")
-                .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                .foregroundColor(DesignTokens.SkyToneColors.accentBlue)
                 .font(DesignTokens.Fonts.symbolLarge)
 
             Text(Labels.Sections.createCustomSession)
                 .font(DesignTokens.Fonts.title)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
             Text(Labels.Settings.manageSessionNames)
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
+                .foregroundColor(DesignTokens.SkyToneColors.textQuaternary)
         }
     }
 
@@ -193,9 +193,9 @@ private extension NewSessionFormView {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
             Text(Labels.InfoRow.sessionNameRequired)
                 .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
 
-            SessionFieldPlaceholderCard(
+            ReflectionPlaceholderCard(
                 text: sessionName,
                 placeholder: LocalizedStringKey("session_name_placeholder"),
                 isEditing: editingField == .sessionName,
@@ -214,14 +214,14 @@ private extension NewSessionFormView {
             HStack {
                 Text(Labels.InfoRow.tasksOptional)
                     .font(DesignTokens.Fonts.label)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                 Spacer()
                 Button {
                     newTask = ""
                     editingField = .newTask
                 } label: {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                        .foregroundColor(DesignTokens.SkyToneColors.accentBlue)
                         .font(DesignTokens.Fonts.symbolMedium)
                 }
             }
@@ -242,7 +242,7 @@ private extension NewSessionFormView {
 
             // 新規タスク追加中のプレースホルダー
             if case .newTask = editingField {
-                SessionFieldPlaceholderCard(
+                ReflectionPlaceholderCard(
                     text: newTask,
                     placeholder: LocalizedStringKey("new_task_placeholder"),
                     isEditing: true,
@@ -252,13 +252,13 @@ private extension NewSessionFormView {
 
             Text(LocalizedStringKey("settings_add_tasks_description"))
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
         }
     }
 
     @ViewBuilder
     func taskRow(task: String, index: Int) -> some View {
-        SessionFieldPlaceholderCard(
+        ReflectionPlaceholderCard(
             text: task,
             placeholder: LocalizedStringKey("task_placeholder"),
             isEditing: editingField == .task(index: index),
@@ -327,7 +327,7 @@ struct NewSessionFormView_Previews: PreviewProvider {
         NewSessionFormView()
             .environmentObject(SessionManager())
             .padding()
-            .background(DesignTokens.CosmosColors.background)
+            .background(DesignTokens.SkyToneColors.nightStart)
     }
 }
 #endif

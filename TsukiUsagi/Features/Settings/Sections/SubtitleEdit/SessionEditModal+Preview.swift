@@ -66,7 +66,7 @@ struct SessionEditModal_Previews: PreviewProvider {
 
                         Text(LocalizedStringKey("settings_demo_description"))
                             .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                            .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding()
                     }

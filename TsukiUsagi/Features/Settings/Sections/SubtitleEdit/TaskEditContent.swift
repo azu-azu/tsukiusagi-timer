@@ -44,7 +44,7 @@ private extension TaskEditContent {
         VStack(alignment: .leading, spacing: 8) {
             Text(Labels.InfoRow.sessionName)
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                 .textCase(.uppercase)
                 .tracking(0.5)
 
@@ -52,22 +52,22 @@ private extension TaskEditContent {
                 Text(sessionName)
                     .font(DesignTokens.Fonts.title)
                     .fontWeight(.medium)
-                    .foregroundColor(DesignTokens.MoonColors.textPrimary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
                 Spacer()
 
                 Image(systemName: "lock.fill")
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.MoonColors.textMuted)
+                    .foregroundColor(DesignTokens.SkyToneColors.textQuaternary)
                     .accessibilityLabel("Fixed category")
             }
             .padding()
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.gray.opacity(0.1))
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.05))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
                     )
             )
         }
@@ -79,7 +79,7 @@ private extension TaskEditContent {
             HStack {
                 Text(Labels.InfoRow.tasksOptional)
                     .font(DesignTokens.Fonts.caption)
-                    .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                     .textCase(.uppercase)
                     .tracking(0.5)
 
@@ -88,7 +88,7 @@ private extension TaskEditContent {
                 Button(action: onNewTaskTap) {
                     Image(systemName: "plus.circle.fill")
                         .font(DesignTokens.Fonts.symbolMedium)
-                        .foregroundColor(DesignTokens.MoonColors.accentBlue)
+                        .foregroundColor(DesignTokens.SkyToneColors.accentBlue)
                 }
                 .accessibilityLabel("Add task")
                 .disabled(!duplicateIDs.isEmpty)
@@ -98,7 +98,7 @@ private extension TaskEditContent {
                 let isDuplicate = duplicateIDs.contains(draft.id)
                 let isEditingThis = editingTaskID == draft.id
 
-                SessionFieldPlaceholderCard(
+                ReflectionPlaceholderCard(
                     text: draft.text,
                     placeholder: LocalizedStringKey("task_placeholder"),
                     isEditing: isEditingThis,
@@ -110,7 +110,7 @@ private extension TaskEditContent {
 
             // 新規タスク追加中のプレースホルダー
             if isAddingNewTask {
-                SessionFieldPlaceholderCard(
+                ReflectionPlaceholderCard(
                     text: "",
                     placeholder: LocalizedStringKey("new_task_placeholder"),
                     isEditing: true,
@@ -127,7 +127,7 @@ private extension TaskEditContent {
 
             Text(LocalizedStringKey("settings_add_tasks_description"))
                 .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                 .padding(.top, 4)
         }
     }

@@ -192,7 +192,7 @@ struct EditableModal<Content: View, BottomBar: View>: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel", action: onCancel)
-                        .foregroundColor(DesignTokens.MoonColors.textSecondary)
+                        .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save", action: onSave)
@@ -217,7 +217,7 @@ struct EditableModal<Content: View, BottomBar: View>: View {
                 action: onKeyboardClose
             )
         }
-        .background(DesignTokens.CosmosColors.background.ignoresSafeArea())
+        .background(DesignTokens.SkyToneColors.nightStart.ignoresSafeArea())
         .interactiveDismissDisabled() // 意図しない閉じ操作を防ぐ
     }
 }
