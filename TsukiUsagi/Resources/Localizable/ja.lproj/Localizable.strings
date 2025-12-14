@@ -94,6 +94,7 @@
 "reflection_title" = "振り返り";
 "reflection_placeholder" = "残しておきたい言葉を自由に";
 "reflection_editing_below" = "下で入力中...";
+"editing_below" = "下で入力中...";
 
 // Session Task Selection
 "session_task_select" = "タスクを選択...";

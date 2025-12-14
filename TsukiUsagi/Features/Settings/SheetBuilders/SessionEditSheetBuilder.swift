@@ -130,7 +130,7 @@ struct SessionEditSheetBuilder: View {
     @ViewBuilder
     private func inputBarView() -> some View {
         if editingField != .none {
-            ReflectionInputBar(
+            BottomInputBar(
                 text: currentEditingTextBinding,
                 isFocused: $isInputBarFocused,
                 placeholder: currentPlaceholder,

@@ -59,7 +59,7 @@ struct EditRecordView: View {
             // Bottom: チャット風入力バー or リセットボタン
             .safeAreaInset(edge: .bottom) {
                 if showReflectionInput {
-                    ReflectionInputBar(
+                    BottomInputBar(
                         text: $editedMemo,
                         isFocused: $isMemoFocused,
                         placeholder: LocalizedStringKey("reflection_placeholder"),
@@ -227,7 +227,7 @@ private extension EditRecordView {
                 .fontWeight(.semibold)
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
-            ReflectionPlaceholderCard(
+            EditablePlaceholderCard(
                 text: editedMemo,
                 placeholder: LocalizedStringKey("reflection_placeholder"),
                 isEditing: showReflectionInput,

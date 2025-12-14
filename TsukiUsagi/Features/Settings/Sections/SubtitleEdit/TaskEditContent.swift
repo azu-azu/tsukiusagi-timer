@@ -98,7 +98,7 @@ private extension TaskEditContent {
                 let isDuplicate = duplicateIDs.contains(draft.id)
                 let isEditingThis = editingTaskID == draft.id
 
-                ReflectionPlaceholderCard(
+                EditablePlaceholderCard(
                     text: draft.text,
                     placeholder: LocalizedStringKey("task_placeholder"),
                     isEditing: isEditingThis,
@@ -110,7 +110,7 @@ private extension TaskEditContent {
 
             // 新規タスク追加中のプレースホルダー
             if isAddingNewTask {
-                ReflectionPlaceholderCard(
+                EditablePlaceholderCard(
                     text: "",
                     placeholder: LocalizedStringKey("new_task_placeholder"),
                     isEditing: true,

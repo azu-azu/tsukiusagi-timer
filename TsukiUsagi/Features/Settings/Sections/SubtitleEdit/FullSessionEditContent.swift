@@ -55,7 +55,7 @@ private extension FullSessionEditContent {
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
-            ReflectionPlaceholderCard(
+            EditablePlaceholderCard(
                 text: sessionName,
                 placeholder: LocalizedStringKey("enter_session_name_placeholder"),
                 isEditing: editingField == .sessionName,
@@ -90,7 +90,7 @@ private extension FullSessionEditContent {
                 let isDuplicate = duplicateIDs.contains(draft.id)
                 let isEditingThis = editingField == .task(id: draft.id)
 
-                ReflectionPlaceholderCard(
+                EditablePlaceholderCard(
                     text: draft.text,
                     placeholder: LocalizedStringKey("task_placeholder"),
                     isEditing: isEditingThis,
@@ -102,7 +102,7 @@ private extension FullSessionEditContent {
 
             // 新規タスク追加中のプレースホルダー
             if isAddingNewTask {
-                ReflectionPlaceholderCard(
+                EditablePlaceholderCard(
                     text: "",
                     placeholder: LocalizedStringKey("new_task_placeholder"),
                     isEditing: true,
