@@ -230,6 +230,7 @@ private extension EditRecordView {
             ReflectionPlaceholderCard(
                 text: editedMemo,
                 placeholder: LocalizedStringKey("reflection_placeholder"),
+                isEditing: showReflectionInput,
                 onTap: {
                     showReflectionInput = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {

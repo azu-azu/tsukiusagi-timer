@@ -93,6 +93,7 @@
 // Reflection
 "reflection_title" = "Reflection";
 "reflection_placeholder" = "Write anything you feel";
+"reflection_editing_below" = "Editing below...";
 
 // Session Task Selection
 "session_task_select" = "Select task...";
