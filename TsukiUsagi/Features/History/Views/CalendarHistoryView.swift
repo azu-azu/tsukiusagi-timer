@@ -162,12 +162,9 @@ struct CalendarHistoryView: View {
     private func loadMonthData() async {
         dailyHistories = historyVM.getDailyHistories(for: selectedMonth)
 
-        // 初回表示時、当月かつ本日に記録がある場合は自動で詳細を表示
+        // 初回表示時、当月の場合は本日の詳細を自動表示（記録の有無に関わらず）
         if selectedDate == nil && calendar.isDate(selectedMonth, equalTo: Date(), toGranularity: .month) {
-            let todayStart = calendar.startOfDay(for: Date())
-            if let todayHistory = dailyHistories[todayStart], todayHistory.hasRecords {
-                selectedDate = todayStart
-            }
+            selectedDate = calendar.startOfDay(for: Date())
         }
     }
 
