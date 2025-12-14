@@ -17,7 +17,7 @@ import SwiftUI
 ///
 /// Generic Contentを受け取ることで、様々な編集機能で再利用可能
 /// 統一されたナビゲーション構造とボタン配置を提供
-struct EditableModal<Content: View>: View {
+struct EditableModal<Content: View, BottomBar: View>: View {
     enum EnsureVisibleMode {
         case none               // 強制スクロールしない
         case centerAggressive   // 既存挙動：常にcenterへ寄せる
@@ -29,6 +29,8 @@ struct EditableModal<Content: View>: View {
     let isSaveDisabled: Bool
     let onCancel: () -> Void
     let content: () -> Content
+    let bottomBar: (() -> BottomBar)?
+    let hasBottomBar: Bool
     let isKeyboardCloseVisible: Bool
     let onKeyboardClose: () -> Void
     @Binding var focusedRowID: UUID?
@@ -49,6 +51,7 @@ struct EditableModal<Content: View>: View {
     ///   - onCancel: キャンセルボタンタップ時のアクション
     ///   - isKeyboardCloseVisible: キーボード閉じるボタンの表示状態
     ///   - onKeyboardClose: キーボード閉じるボタンタップ時のアクション
+    ///   - bottomBar: オプショナルな下部入力バー（Reflection方式の入力）
     ///   - content: モーダル内に表示するコンテンツView
     init(
         title: String,
@@ -59,6 +62,7 @@ struct EditableModal<Content: View>: View {
         onKeyboardClose: @escaping () -> Void,
         focusedRowID: Binding<UUID?> = .constant(nil),
         ensureVisibleMode: EnsureVisibleMode = .centerAggressive,
+        @ViewBuilder bottomBar: @escaping () -> BottomBar,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.title = title
@@ -68,33 +72,61 @@ struct EditableModal<Content: View>: View {
         self.isKeyboardCloseVisible = isKeyboardCloseVisible
         self.onKeyboardClose = onKeyboardClose
         self.content = content
+        self.bottomBar = bottomBar
+        self.hasBottomBar = true
         self._focusedRowID = focusedRowID
         self.ensureVisibleMode = ensureVisibleMode
+    }
+
+    /// EditableModalの初期化（bottomBarなし - 後方互換性）
+    init(
+        title: String,
+        onSave: @escaping () -> Void,
+        onCancel: @escaping () -> Void,
+        isSaveDisabled: Bool = false,
+        isKeyboardCloseVisible: Bool,
+        onKeyboardClose: @escaping () -> Void,
+        focusedRowID: Binding<UUID?> = .constant(nil),
+        ensureVisibleMode: EnsureVisibleMode = .centerAggressive,
+        @ViewBuilder content: @escaping () -> Content
+    ) where BottomBar == EmptyView {
+        self.title = title
+        self.onSave = onSave
+        self.isSaveDisabled = isSaveDisabled
+        self.onCancel = onCancel
+        self.isKeyboardCloseVisible = isKeyboardCloseVisible
+        self.onKeyboardClose = onKeyboardClose
+        self.content = content
+        self.bottomBar = nil
+        self.hasBottomBar = false
+        self._focusedRowID = focusedRowID
+        self.ensureVisibleMode = ensureVisibleMode
+    }
+
+    private var scrollContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
+                content()
+            }
+            .padding()
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(
+                        key: ViewportHeightPrefKey.self,
+                        value: geo.frame(in: .named(descScrollSpace)).height
+                    )
+                }
+            )
+        }
     }
 
     var body: some View {
         NavigationView {
             ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
-                        content()
-                    }
-                    .padding()
-                    .background(
-                        GeometryReader { geo in
-                            Color.clear.preference(
-                                key: ViewportHeightPrefKey.self,
-                                value: geo.frame(in: .named(descScrollSpace)).height
-                            )
-                        }
-                    )
-                }
+                scrollContent
                 .coordinateSpace(name: descScrollSpace)
                 .scrollDismissesKeyboard(.interactively)
                 .keyboardAwareInset(baseBottomPadding: ensureVisibleMode == .none ? 0 : 16)
-                .dismissKeyboardOnTap {
-                    onKeyboardClose()
-                }
                 .onPreferenceChange(FocusedRowBottomPrefKey.self) { value in
                     focusedBottomY = value
                     recomputeBottomLift()
@@ -104,7 +136,11 @@ struct EditableModal<Content: View>: View {
                     recomputeBottomLift()
                 }
                 .safeAreaInset(edge: .bottom) {
-                    Color.clear.frame(height: bottomLift)
+                    if let bottomBar {
+                        bottomBar()
+                    } else {
+                        Color.clear.frame(height: bottomLift)
+                    }
                 }
                 .onChange(of: focusedRowID) { _, newValue in
                     switch ensureVisibleMode {
@@ -164,17 +200,20 @@ struct EditableModal<Content: View>: View {
                         .disabled(isSaveDisabled)
                         .allowsHitTesting(!isSaveDisabled)
                 }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button {
-                        onKeyboardClose()
-                    } label: {
-                        Label("Close", systemImage: "keyboard.chevron.compact.down")
+                // bottomBarがある場合はキーボードツールバーを表示しない（入力バーが隠れるため）
+                if !hasBottomBar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button {
+                            onKeyboardClose()
+                        } label: {
+                            Label("Close", systemImage: "keyboard.chevron.compact.down")
+                        }
                     }
                 }
             }
             .keyboardCloseButton(
-                isVisible: isKeyboardCloseVisible,
+                isVisible: isKeyboardCloseVisible && !hasBottomBar,
                 action: onKeyboardClose
             )
         }

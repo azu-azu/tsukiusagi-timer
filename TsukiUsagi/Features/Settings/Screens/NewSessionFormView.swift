@@ -20,17 +20,19 @@ struct NewSessionFormView: View {
     @State private var sessionName: String = ""
     @State private var tasks: [String] = []
     @State private var newTask: String = ""
-    @State private var showAddTaskField = false
     @State private var errorMessage: String = ""
     @State private var showError = false
     @State private var duplicateIndices: Set<Int> = []
+    @State private var editingField: EditingField = .none
+    @State private var showLargeEditor = false
 
-    @FocusState private var focusedField: FocusedField?
+    @FocusState private var isInputBarFocused: Bool
 
-    private enum FocusedField: Hashable {
+    private enum EditingField: Equatable {
+        case none
         case sessionName
+        case task(index: Int)
         case newTask
-        case task(Int)
     }
 
     var body: some View {
@@ -40,10 +42,17 @@ struct NewSessionFormView: View {
                     header()
                     sessionNameSection()
                     tasksSection()
-                    Spacer(minLength: 50)
+                    Spacer(minLength: 100)
                 }
                 .padding(DesignTokens.Padding.large)
             }
+            .scrollDismissesKeyboard(.interactively)
+            .simultaneousGesture(
+                TapGesture().onEnded {
+                    guard editingField != .none else { return }
+                    closeInputBar()
+                }
+            )
             .navigationTitle(Labels.Sections.newCustomSession)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -59,26 +68,105 @@ struct NewSessionFormView: View {
                     .disabled(isCreateDisabled)
                 }
             }
-            .adaptiveKeyboardCloseButton(
-                isVisible: focusedField != nil,
-                position: .topTrailing,
-                action: {
-                    KeyboardHelper.hideKeyboard { focusedField = nil }
+            .safeAreaInset(edge: .bottom) {
+                if editingField != .none {
+                    ReflectionInputBar(
+                        text: currentEditingTextBinding,
+                        isFocused: $isInputBarFocused,
+                        placeholder: currentPlaceholder,
+                        onExpand: {
+                            showLargeEditor = true
+                        }
+                    )
                 }
-            )
+            }
         }
         .alert(Labels.State.readOnly, isPresented: $showError) {
             Button(Copy.Button.ok) { }
         } message: {
             Text(errorMessage)
         }
+        .sheet(isPresented: $showLargeEditor) {
+            LargeTextEditorSheet(
+                text: currentEditingTextBinding,
+                title: currentEditorTitle,
+                placeholder: currentPlaceholder,
+                onClose: { showLargeEditor = false }
+            )
+        }
         .background(DesignTokens.CosmosColors.background)
         .ignoresSafeArea()
+        .onChange(of: editingField) { _, newValue in
+            if newValue != .none {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    isInputBarFocused = true
+                }
+            }
+        }
     }
-
 }
 
 private extension NewSessionFormView {
+    // MARK: - Current Editing Binding
+
+    var currentEditingTextBinding: Binding<String> {
+        switch editingField {
+        case .none:
+            return .constant("")
+        case .sessionName:
+            return $sessionName
+        case .task(let index):
+            return Binding(
+                get: { tasks[safe: index] ?? "" },
+                set: { newValue in
+                    if index < tasks.count {
+                        tasks[index] = newValue
+                        duplicateIndices = findDuplicateIndices(in: tasks)
+                    }
+                }
+            )
+        case .newTask:
+            return $newTask
+        }
+    }
+
+    var currentPlaceholder: LocalizedStringKey {
+        switch editingField {
+        case .none:
+            return ""
+        case .sessionName:
+            return LocalizedStringKey("session_name_placeholder")
+        case .task, .newTask:
+            return LocalizedStringKey("task_placeholder")
+        }
+    }
+
+    var currentEditorTitle: String {
+        switch editingField {
+        case .none:
+            return ""
+        case .sessionName:
+            return Labels.InfoRow.sessionNameRequired
+        case .task, .newTask:
+            return Labels.InfoRow.tasksOptional
+        }
+    }
+
+    func closeInputBar() {
+        // 新規タスク追加時は空でなければ保存
+        if case .newTask = editingField {
+            let trimmed = newTask.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                tasks.append(trimmed)
+                newTask = ""
+                duplicateIndices = findDuplicateIndices(in: tasks)
+            }
+        }
+        isInputBarFocused = false
+        editingField = .none
+        Keyboard.dismiss()
+    }
+
     // MARK: - Header
 
     @ViewBuilder
@@ -92,7 +180,7 @@ private extension NewSessionFormView {
                 .font(DesignTokens.Fonts.title)
                 .foregroundColor(DesignTokens.MoonColors.textPrimary)
 
-            Text(Labels.Settings.manageSessionNames) // keep messaging minimal per instruction
+            Text(Labels.Settings.manageSessionNames)
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
         }
@@ -107,22 +195,14 @@ private extension NewSessionFormView {
                 .font(DesignTokens.Fonts.label)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
 
-            TextField(LocalizedStringKey("session_name_placeholder"), text: $sessionName)
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                .background(DesignTokens.CosmosColors.cardBackground)
-                .cornerRadius(DesignTokens.CornerRadius.medium)
-                .overlay(
-                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                        .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
-                )
-                .focused($focusedField, equals: .sessionName)
-
-            Text(Labels.Settings.manageSessionNames)
-                .font(.caption2)
-                .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
+            SessionFieldPlaceholderCard(
+                text: sessionName,
+                placeholder: LocalizedStringKey("session_name_placeholder"),
+                isEditing: editingField == .sessionName,
+                onTap: {
+                    editingField = .sessionName
+                }
+            )
         }
     }
 
@@ -137,14 +217,15 @@ private extension NewSessionFormView {
                     .foregroundColor(DesignTokens.MoonColors.textSecondary)
                 Spacer()
                 Button {
-                    showAddTaskField = true
                     newTask = ""
+                    editingField = .newTask
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(DesignTokens.MoonColors.accentBlue)
                         .font(DesignTokens.Fonts.symbolMedium)
                 }
             }
+
             if !tasks.isEmpty {
                 LazyVStack(spacing: DesignTokens.Spacing.medium) {
                     ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
@@ -159,11 +240,16 @@ private extension NewSessionFormView {
                     .foregroundColor(DesignTokens.UtilityColors.duplicateWarning)
             }
 
-            if showAddTaskField {
-                addTaskField()
+            // 新規タスク追加中のプレースホルダー
+            if case .newTask = editingField {
+                SessionFieldPlaceholderCard(
+                    text: newTask,
+                    placeholder: LocalizedStringKey("new_task_placeholder"),
+                    isEditing: true,
+                    onTap: {}
+                )
             }
 
-            // Match default Manage Tasks helper text
             Text(LocalizedStringKey("settings_add_tasks_description"))
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textSecondary)
@@ -172,93 +258,19 @@ private extension NewSessionFormView {
 
     @ViewBuilder
     func taskRow(task: String, index: Int) -> some View {
-        HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(LocalizedStringKey("task_placeholder"), text: Binding(
-                get: { tasks[safe: index] ?? "" },
-                set: { newValue in
-                    if index < tasks.count {
-                        tasks[index] = newValue
-                        if !duplicateIndices.isEmpty {
-                            duplicateIndices = findDuplicateIndices(in: tasks)
-                        }
-                    }
-                }
-            ))
-            .textFieldStyle(PlainTextFieldStyle())
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(DesignTokens.CosmosColors.cardBackground)
-            .foregroundColor(
-                duplicateIndices.contains(index)
-                    ? DesignTokens.UtilityColors.duplicateWarning
-                    : DesignTokens.MoonColors.textPrimary
-            )
-            .cornerRadius(DesignTokens.CornerRadius.medium)
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                    .stroke(
-                        duplicateIndices.contains(index)
-                            ? DesignTokens.UtilityColors.duplicateWarning
-                            : DesignTokens.BlackColors.stroke,
-                        lineWidth: 1
-                    )
-            )
-            .focused($focusedField, equals: .task(index))
-
-            Button {
+        SessionFieldPlaceholderCard(
+            text: task,
+            placeholder: LocalizedStringKey("task_placeholder"),
+            isEditing: editingField == .task(index: index),
+            isDuplicate: duplicateIndices.contains(index),
+            onTap: {
+                editingField = .task(index: index)
+            },
+            onDelete: {
                 tasks.remove(at: index)
-                if !duplicateIndices.isEmpty {
-                    duplicateIndices = findDuplicateIndices(in: tasks)
-                }
-            } label: {
-                Image(systemName: "minus.circle.fill")
-                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
-                    .font(DesignTokens.Fonts.symbolMedium)
+                duplicateIndices = findDuplicateIndices(in: tasks)
             }
-        }
-    }
-
-    @ViewBuilder
-    func addTaskField() -> some View {
-        HStack(spacing: DesignTokens.Spacing.medium) {
-            TextField(LocalizedStringKey("new_task_placeholder"), text: $newTask)
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .foregroundColor(DesignTokens.MoonColors.textPrimary)
-                .background(DesignTokens.CosmosColors.cardBackground)
-                .cornerRadius(DesignTokens.CornerRadius.medium)
-                .overlay(
-                    RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
-                        .stroke(DesignTokens.BlackColors.stroke, lineWidth: 1)
-                )
-                .focused($focusedField, equals: .newTask)
-
-            Button {
-                let trimmed = newTask.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmed.isEmpty {
-                    tasks.append(trimmed)
-                    newTask = ""
-                }
-                if !duplicateIndices.isEmpty {
-                    duplicateIndices = findDuplicateIndices(in: tasks)
-                }
-                showAddTaskField = false
-            } label: {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(DesignTokens.MoonColors.accentGreen)
-                    .font(DesignTokens.Fonts.symbolMedium)
-            }
-
-            Button {
-                showAddTaskField = false
-                newTask = ""
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(DesignTokens.MoonColors.accentOrange)
-                    .font(DesignTokens.Fonts.symbolMedium)
-            }
-        }
+        )
     }
 
     // MARK: - Create
