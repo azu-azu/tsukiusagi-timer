@@ -87,25 +87,35 @@ struct ReflectionInputBar: View {
 struct ReflectionPlaceholderCard: View {
     let text: String
     let placeholder: LocalizedStringKey
+    let isEditing: Bool
     let onTap: () -> Void
 
     var body: some View {
         let isEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
         Button(action: onTap) {
-            HStack {
-                if isEmpty {
-                    Text(placeholder)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
-                } else {
-                    Text(text)
-                        .font(DesignTokens.Fonts.label)
-                        .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                        .lineLimit(3)
-                        .multilineTextAlignment(.leading)
+            ZStack {
+                // 通常コンテンツ
+                HStack {
+                    if isEmpty {
+                        Text(placeholder)
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
+                    } else {
+                        Text(text)
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer()
                 }
-                Spacer()
+                .opacity(isEditing ? 0 : 1)
+
+                // 編集中インジケータ
+                if isEditing {
+                    editingIndicator
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, isEmpty ? 12 : 16)
@@ -120,5 +130,20 @@ struct ReflectionPlaceholderCard: View {
             )
         }
         .buttonStyle(.plain)
+        .opacity(isEditing ? 0.5 : 1.0)
+        .animation(.easeInOut(duration: 0.2), value: isEditing)
+        .allowsHitTesting(!isEditing)
+    }
+
+    @ViewBuilder
+    private var editingIndicator: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "pencil")
+                .font(DesignTokens.Fonts.symbolSmall)
+            Text("reflection_editing_below")
+                .font(DesignTokens.Fonts.caption)
+        }
+        .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }

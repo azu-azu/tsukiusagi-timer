@@ -54,6 +54,7 @@ struct DailyTimelineView: View {
                         text: detailViewModel.reflectionText,
                         isSaving: detailViewModel.isSaving,
                         error: detailViewModel.error,
+                        isEditing: showReflectionInput,
                         onRetry: { detailViewModel.retry() },
                         onTap: {
                             showReflectionInput = true
@@ -201,6 +202,7 @@ private struct DailyTimelineReflectionCard: View {
     let text: String
     let isSaving: Bool
     let error: Error?
+    let isEditing: Bool
     let onRetry: () -> Void
     let onTap: () -> Void
 
@@ -216,6 +218,7 @@ private struct DailyTimelineReflectionCard: View {
             ReflectionPlaceholderCard(
                 text: text,
                 placeholder: placeholderTextKey,
+                isEditing: isEditing,
                 onTap: onTap
             )
 
