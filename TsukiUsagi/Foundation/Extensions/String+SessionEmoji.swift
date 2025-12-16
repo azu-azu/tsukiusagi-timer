@@ -10,9 +10,9 @@ import Foundation
 /// セッション名・タスク名に絵文字を付与するためのユーティリティ
 enum SessionEmoji {
     /// セッション用絵文字
-    static let session = "🔖"
+    static let session = "📌"
     /// タスク用絵文字
-    static let task = "📌"
+    static let task = "🔖"
 }
 
 extension String {
