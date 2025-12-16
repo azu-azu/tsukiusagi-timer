@@ -99,3 +99,7 @@
 "session_task_select" = "タスクを選択...";
 "session_task_none" = "タスクなし";
 "session_task_none_available" = "セッション管理でタスクを追加";
+
+// Input Bar Accessibility
+"expand_editor" = "エディタを拡大";
+"submit" = "送信";

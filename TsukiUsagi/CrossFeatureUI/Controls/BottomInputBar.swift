@@ -18,14 +18,30 @@ struct BottomInputBar: View {
     @FocusState.Binding var isFocused: Bool
     let placeholder: LocalizedStringKey
     let onExpand: () -> Void
+    let onSubmit: (() -> Void)?
+
+    init(
+        text: Binding<String>,
+        isFocused: FocusState<Bool>.Binding,
+        placeholder: LocalizedStringKey,
+        onExpand: @escaping () -> Void,
+        onSubmit: (() -> Void)? = nil
+    ) {
+        self._text = text
+        self._isFocused = isFocused
+        self.placeholder = placeholder
+        self.onExpand = onExpand
+        self.onSubmit = onSubmit
+    }
+
+    private var isTextEmpty: Bool {
+        text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
-            // テキスト入力エリア
+            // テキスト入力エリア（ボタン内蔵）
             textInputArea
-
-            // 拡大ボタン
-            expandButton
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -44,7 +60,8 @@ struct BottomInputBar: View {
                 .focused($isFocused)
                 .frame(minHeight: 36, maxHeight: 120)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 12)
+                .padding(.leading, 12)
+                .padding(.trailing, 44) // ボタン用スペース
                 .padding(.vertical, 8)
                 .scrollContentBackground(.hidden)
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
@@ -56,9 +73,19 @@ struct BottomInputBar: View {
                     RoundedRectangle(cornerRadius: 20)
                         .stroke(Color.white.opacity(0.15), lineWidth: 1)
                 )
+                .overlay(alignment: .topTrailing) {
+                    expandButton
+                        .padding(.top, 6)
+                        .padding(.trailing, 6)
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    submitButton
+                        .padding(.bottom, 6)
+                        .padding(.trailing, 6)
+                }
 
             // プレースホルダー
-            if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if isTextEmpty {
                 Text(placeholder)
                     .font(DesignTokens.Fonts.label)
                     .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
@@ -75,15 +102,38 @@ struct BottomInputBar: View {
             onExpand()
         } label: {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                .font(DesignTokens.Fonts.symbolMedium)
-                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
-                .frame(width: 36, height: 36)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
+                .frame(width: 28, height: 28)
                 .background(
                     Circle()
-                        .fill(Color.white.opacity(0.1))
+                        .fill(Color.white.opacity(0.08))
                 )
         }
         .accessibilityLabel(LocalizedStringKey("expand_editor"))
+    }
+
+    @ViewBuilder
+    private var submitButton: some View {
+        Button {
+            if let onSubmit {
+                onSubmit()
+            } else {
+                // デフォルト: キーボードを閉じる
+                isFocused = false
+                Keyboard.dismiss()
+            }
+        } label: {
+            Image(systemName: "arrow.up.circle.fill")
+                .font(.system(size: 28))
+                .foregroundColor(
+                    isTextEmpty
+                        ? DesignTokens.SkyToneColors.textQuinary
+                        : DesignTokens.SkyToneColors.accentBlue
+                )
+        }
+        .disabled(isTextEmpty)
+        .accessibilityLabel(LocalizedStringKey("submit"))
     }
 }
 
