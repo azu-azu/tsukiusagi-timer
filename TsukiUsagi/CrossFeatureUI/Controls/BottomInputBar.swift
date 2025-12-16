@@ -171,7 +171,7 @@ struct BottomInputBar: View {
         Button {
             handleExpand()
         } label: {
-            Text("<>")
+            Image(systemName: "arrow.up.left.and.arrow.down.right")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
         }
