@@ -90,11 +90,6 @@ struct BottomInputBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(
-            Rectangle()
-                .fill(DesignTokens.SkyToneColors.nightStart)
-                .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: -4)
-        )
         .onAppear {
             // onSubmitモードでは初期値をコピー
             if saveMode == .onSubmit {
