@@ -74,16 +74,14 @@ struct DailyTimelineView: View {
                 .padding(.horizontal)
             }
             .scrollDismissesKeyboard(.interactively)
-            .simultaneousGesture(
-                TapGesture().onEnded {
-                    guard isReflectionFocused else { return }
-                    isReflectionFocused = false
-                    showReflectionInput = false
-                    Task { @MainActor in
-                        Keyboard.dismiss()
-                    }
-                }
-            )
+            // コンテンツ領域のタップで入力バーを閉じる（simultaneousGestureは削除）
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard isReflectionFocused else { return }
+                isReflectionFocused = false
+                showReflectionInput = false
+                Keyboard.dismiss()
+            }
         }
         .safeAreaInset(edge: .bottom) {
             if showReflectionInput {
