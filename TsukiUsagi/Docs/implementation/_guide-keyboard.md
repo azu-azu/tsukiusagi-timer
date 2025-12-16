@@ -67,10 +67,94 @@ Before shipping any screen with inline editing:
 
 Following these rules keeps keyboard behaviour predictable for users and reduces regressions when we add new inline editors.
 
-## 8. Revision History
+## 8. Initial Keyboard Delay (Cold Start)
+
+### 8.1 Problem Description
+
+When the keyboard is displayed for the **first time after app launch**, there is a noticeable delay (typically 0.3–1.0 seconds). This delay only occurs once per app lifecycle—subsequent keyboard appearances are instant.
+
+### 8.2 Root Cause
+
+This is an **iOS system-level behavior**, not an app bug:
+
+- **Independent system process**: The keyboard runs as a separate system process
+- **First-time initialization**: Language settings, predictive engine, personal dictionary loading
+- **Resource preparation**: Screen size, orientation, accessibility settings application
+- **Xcode 14+ SDK**: Since Xcode 14, keyboard appearance takes longer than previous SDKs ([Apple Developer Forums](https://developer.apple.com/forums/thread/721198))
+
+### 8.3 Attempted Solution: HiddenKeyboardWarmer
+
+In July 2025, a pre-warming approach was evaluated:
+
+```swift
+// ⚠️ NOT RECOMMENDED - Documented for historical reference only
+struct HiddenKeyboardWarmer: View {
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        TextField("", text: .constant(""))
+            .opacity(0.01)
+            .frame(width: 1, height: 1)
+            .allowsHitTesting(false)
+            .focused($isFocused)
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    isFocused = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        isFocused = false
+                    }
+                }
+            }
+    }
+}
+```
+
+### 8.4 Why Pre-Warming Doesn't Work
+
+The approach was **rejected** due to fundamental limitations:
+
+| Issue | Description |
+|-------|-------------|
+| **Keyboard cannot be hidden** | System-level component ignores app opacity/visibility |
+| **Layout disruption** | Even invisible TextFields trigger keyboard layout adjustments |
+| **Visual flickering** | Keyboard briefly appears then disappears |
+| **Excessive execution** | Runs on every screen transition, not just once |
+| **Architecture conflict** | Contradicts iOS design philosophy |
+
+### 8.5 Project Decision
+
+**Accept the initial delay** as an iOS system characteristic:
+
+- **Do NOT implement** HiddenKeyboardWarmer or similar workarounds
+- **Do NOT** attempt to pre-initialize the keyboard
+- **Keep implementation simple** and predictable
+- **Wait for Apple** to provide an official solution in future iOS versions
+
+### 8.6 Alternative UX Improvements
+
+Instead of technical workarounds, consider these approaches:
+
+- **Haptic feedback**: Provide immediate tactile response on input field tap
+- **Loading indicator**: Show subtle activity indicator during first keyboard appearance
+- **Design for expectation**: Accept minor delay as natural app behavior
+- **Natural initialization flow**: Design app flow so first keyboard use isn't critical
+
+### 8.7 Related Issues
+
+- **TabView + Keyboard bug**: First keyboard in TabView may trigger `onAppear` for all tab views ([Apple Developer Forums](https://developer.apple.com/forums/thread/659933))
+- **SwiftUI TextEditor limitations**: No built-in modifiers for keyboard issues; consider `UIViewRepresentable` with `UITextView` for complex cases
+- **Animation sync issues**: SwiftUI animations cannot perfectly sync with keyboard animations
+
+### 8.8 Historical References
+
+- `fujiko_memo/.../78_2025-07-14_keyboard_initialization_delay.md` - Initial investigation
+- `fujiko_memo/.../80_2025-07-15_hidden_keyboard_warmer_design_limitation.md` - Final decision
+
+## 9. Revision History
 
 | Date | Author | Summary |
 |------|--------|---------|
 | 2025-10-09 | Azu | Initial formalization of keyboard behaviour rules |
 | 2025-10-10 | Fujiko | Clarified dismiss responsibilities and inset scope |
 | 2025-10-10 | Kazumi | Added "Bottom Padding Lift" exception for list editors and coordinate-space guidance |
+| 2025-12-16 | Claude | Added "Initial Keyboard Delay (Cold Start)" section documenting iOS system limitation and project decision |
