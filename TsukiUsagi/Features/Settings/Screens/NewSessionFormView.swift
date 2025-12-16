@@ -20,6 +20,7 @@ struct NewSessionFormView: View {
     @State private var sessionName: String = ""
     @State private var tasks: [String] = []
     @State private var newTask: String = ""
+    @State private var editingTaskText: String = ""  // 既存タスク編集用の一時変数
     @State private var errorMessage: String = ""
     @State private var showError = false
     @State private var duplicateIndices: Set<Int> = []
@@ -118,16 +119,9 @@ private extension NewSessionFormView {
             return .constant("")
         case .sessionName:
             return $sessionName
-        case .task(let index):
-            return Binding(
-                get: { tasks[safe: index] ?? "" },
-                set: { newValue in
-                    if index < tasks.count {
-                        tasks[index] = newValue
-                        duplicateIndices = findDuplicateIndices(in: tasks)
-                    }
-                }
-            )
+        case .task:
+            // 一時変数を使用（submitで初めてtasksに反映）
+            return $editingTaskText
         case .newTask:
             return $newTask
         }
@@ -157,10 +151,9 @@ private extension NewSessionFormView {
 
     /// 入力バーを閉じる（保存しない）
     func closeInputBar() {
-        // 新規タスクの入力をクリア（保存しない）
-        if case .newTask = editingField {
-            newTask = ""
-        }
+        // 入力をクリア（保存しない）
+        editingTaskText = ""
+        newTask = ""
         isInputBarFocused = false
         editingField = .none
         Keyboard.dismiss()
@@ -168,14 +161,24 @@ private extension NewSessionFormView {
 
     /// 入力を確定して閉じる
     func submitAndCloseInputBar() {
-        // 新規タスク追加時は空でなければ保存
-        if case .newTask = editingField {
+        switch editingField {
+        case .task(let index):
+            // 既存タスクの編集を保存
+            if index < tasks.count {
+                tasks[index] = editingTaskText
+                duplicateIndices = findDuplicateIndices(in: tasks)
+            }
+            editingTaskText = ""
+        case .newTask:
+            // 新規タスク追加
             let trimmed = newTask.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
                 tasks.append(trimmed)
                 newTask = ""
                 duplicateIndices = findDuplicateIndices(in: tasks)
             }
+        default:
+            break
         }
         isInputBarFocused = false
         editingField = .none
@@ -279,6 +282,8 @@ private extension NewSessionFormView {
             isEditing: editingField == .task(index: index),
             isDuplicate: duplicateIndices.contains(index),
             onTap: {
+                // 編集開始時に現在の値をコピー
+                editingTaskText = task
                 editingField = .task(index: index)
             },
             onDelete: {
