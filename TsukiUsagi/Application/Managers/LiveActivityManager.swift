@@ -46,9 +46,7 @@ final class LiveActivityManager {
         let attributes = TimerActivityAttributes(sessionKind: sessionKind)
         let contentState = TimerActivityAttributes.ContentState(endsAt: endsAt, isPaused: false)
         do {
-            // NOTE: Activity.request is async by API contract.
-            // Even if the compiler warns "no async ops in await", keep `await` for safety & future-proofing.
-            let activity = try await Activity<TimerActivityAttributes>.request(
+            let activity = try Activity<TimerActivityAttributes>.request(
                 attributes: attributes,
                 content: .init(state: contentState, staleDate: nil)
             )
