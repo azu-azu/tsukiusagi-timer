@@ -39,6 +39,7 @@ struct SessionEditSheetBuilder: View {
     @State private var focusedRowID: UUID?
     @State private var editingField: EditingField = .none
     @State private var newTaskText: String = ""
+    @State private var editingTaskText: String = ""  // 既存タスク編集用の一時変数
     @State private var showLargeEditor = false
     @FocusState private var isInputBarFocused: Bool
 
@@ -71,17 +72,9 @@ struct SessionEditSheetBuilder: View {
             return .constant("")
         case .sessionName:
             return $tempSessionName
-        case .task(let id):
-            return Binding(
-                get: { taskDrafts.first(where: { $0.id == id })?.text ?? "" },
-                set: { newValue in
-                    if let index = taskDrafts.firstIndex(where: { $0.id == id }) {
-                        taskDrafts[index].text = newValue
-                        propagateDrafts()
-                        hasDuplicateConflict = containsDuplicateTasks(taskDrafts.map(\.text))
-                    }
-                }
-            )
+        case .task:
+            // 一時変数を使用（submitで初めてtaskDraftsに反映）
+            return $editingTaskText
         case .newTask:
             return $newTaskText
         }
@@ -111,10 +104,9 @@ struct SessionEditSheetBuilder: View {
 
     /// 入力バーを閉じる（保存しない）
     private func closeInputBar() {
-        // 新規タスクの入力をクリア（保存しない）
-        if case .newTask = editingField {
-            newTaskText = ""
-        }
+        // 入力をクリア（保存しない）
+        editingTaskText = ""
+        newTaskText = ""
         isInputBarFocused = false
         editingField = .none
         isAnyFieldFocused = false
@@ -123,8 +115,17 @@ struct SessionEditSheetBuilder: View {
 
     /// 入力を確定して閉じる
     private func submitAndCloseInputBar() {
-        // 新規タスク追加時は空でなければ保存
-        if case .newTask = editingField {
+        switch editingField {
+        case .task(let id):
+            // 既存タスクの編集を保存
+            if let index = taskDrafts.firstIndex(where: { $0.id == id }) {
+                taskDrafts[index].text = editingTaskText
+                propagateDrafts()
+                hasDuplicateConflict = containsDuplicateTasks(taskDrafts.map(\.text))
+            }
+            editingTaskText = ""
+        case .newTask:
+            // 新規タスク追加
             let trimmed = newTaskText.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
                 let newDraft = TaskDraft(text: trimmed)
@@ -133,6 +134,8 @@ struct SessionEditSheetBuilder: View {
                 hasDuplicateConflict = containsDuplicateTasks(taskDrafts.map(\.text))
             }
             newTaskText = ""
+        default:
+            break
         }
         isInputBarFocused = false
         editingField = .none
@@ -196,6 +199,8 @@ struct SessionEditSheetBuilder: View {
                     duplicateIDs: duplicateTaskIDs,
                     editingTaskID: editingTaskID,
                     onTaskTap: { id in
+                        // 編集開始時に現在の値をコピー
+                        editingTaskText = taskDrafts.first(where: { $0.id == id })?.text ?? ""
                         editingField = .task(id: id)
                         activateInputBar()
                     },
@@ -274,6 +279,8 @@ struct SessionEditSheetBuilder: View {
                         activateInputBar()
                     },
                     onTaskTap: { id in
+                        // 編集開始時に現在の値をコピー
+                        editingTaskText = taskDrafts.first(where: { $0.id == id })?.text ?? ""
                         editingField = .task(id: id)
                         activateInputBar()
                     },
