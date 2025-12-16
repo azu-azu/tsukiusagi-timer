@@ -109,7 +109,20 @@ struct SessionEditSheetBuilder: View {
         }
     }
 
+    /// 入力バーを閉じる（保存しない）
     private func closeInputBar() {
+        // 新規タスクの入力をクリア（保存しない）
+        if case .newTask = editingField {
+            newTaskText = ""
+        }
+        isInputBarFocused = false
+        editingField = .none
+        isAnyFieldFocused = false
+        Keyboard.dismiss()
+    }
+
+    /// 入力を確定して閉じる
+    private func submitAndCloseInputBar() {
         // 新規タスク追加時は空でなければ保存
         if case .newTask = editingField {
             let trimmed = newTaskText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -136,6 +149,9 @@ struct SessionEditSheetBuilder: View {
                 placeholder: currentPlaceholder,
                 onExpand: {
                     showLargeEditor = true
+                },
+                onSubmit: {
+                    submitAndCloseInputBar()
                 }
             )
         }

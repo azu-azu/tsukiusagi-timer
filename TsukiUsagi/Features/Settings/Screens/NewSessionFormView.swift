@@ -76,6 +76,9 @@ struct NewSessionFormView: View {
                         placeholder: currentPlaceholder,
                         onExpand: {
                             showLargeEditor = true
+                        },
+                        onSubmit: {
+                            submitAndCloseInputBar()
                         }
                     )
                 }
@@ -152,7 +155,19 @@ private extension NewSessionFormView {
         }
     }
 
+    /// 入力バーを閉じる（保存しない）
     func closeInputBar() {
+        // 新規タスクの入力をクリア（保存しない）
+        if case .newTask = editingField {
+            newTask = ""
+        }
+        isInputBarFocused = false
+        editingField = .none
+        Keyboard.dismiss()
+    }
+
+    /// 入力を確定して閉じる
+    func submitAndCloseInputBar() {
         // 新規タスク追加時は空でなければ保存
         if case .newTask = editingField {
             let trimmed = newTask.trimmingCharacters(in: .whitespacesAndNewlines)
