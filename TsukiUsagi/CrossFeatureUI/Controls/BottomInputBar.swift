@@ -144,8 +144,8 @@ struct BottomInputBar: View {
                 .overlay(alignment: .topTrailing) {
                     if shouldShowExpandButton {
                         expandButton
-                            .padding(.top, 6)
-                            .padding(.trailing, 6)
+                            .padding(.top, 12)
+                            .padding(.trailing, 12)
                     }
                 }
                 .overlay(alignment: .bottomTrailing) {
