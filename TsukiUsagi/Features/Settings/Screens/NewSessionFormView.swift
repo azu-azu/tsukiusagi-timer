@@ -150,16 +150,6 @@ private extension NewSessionFormView {
         }
     }
 
-    /// 入力バーを閉じる（保存しない）
-    func closeInputBar() {
-        // 入力をクリア（保存しない）
-        editingTaskText = ""
-        newTask = ""
-        isInputBarFocused = false
-        editingField = .none
-        Keyboard.dismiss()
-    }
-
     /// 入力を確定して閉じる
     func submitAndCloseInputBar() {
         switch editingField {

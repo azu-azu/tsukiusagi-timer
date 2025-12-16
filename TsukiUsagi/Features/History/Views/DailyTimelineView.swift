@@ -16,9 +16,6 @@ struct DailyTimelineView: View {
     @State private var showReflectionSheet = false
     @State private var showReflectionInput = false
 
-    @State private var restoreError: String?
-    @State private var showRestoreAlert = false
-
     // 初期化
     init(targetDate: Date) {
         self.targetDate = targetDate
@@ -89,7 +86,6 @@ struct DailyTimelineView: View {
                     text: $detailViewModel.reflectionText,
                     isFocused: $isReflectionFocused,
                     placeholder: LocalizedStringKey("reflection_placeholder"),
-                    saveMode: .onSubmit,
                     onExpand: {
                         // BottomInputBarが内部でtextを更新してからここに来る
                         isReflectionFocused = false
@@ -108,10 +104,10 @@ struct DailyTimelineView: View {
         .simultaneousGesture(gestureHandler.backSwipeGesture())
         .navigationTitle(targetDate.formatted(.dateTime.weekday(.wide).month().day()))
         .navigationBarTitleDisplayMode(.inline)
-        .alert(isPresented: $showRestoreAlert) {
+        .alert(isPresented: $viewModel.showRestoreAlert) {
             Alert(
                 title: Text("Restore Error"),
-                message: Text(restoreError ?? "Unknown error"),
+                message: Text(viewModel.restoreError ?? "Unknown error"),
                 dismissButton: .default(Text("OK"))
             )
         }

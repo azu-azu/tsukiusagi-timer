@@ -7,75 +7,45 @@
 //    - チャット風の入力UI提供
 //    - テキストエディタ + 拡大ボタン + 送信ボタン
 //    - キーボード上に固定表示
-//    - SaveModeによる保存タイミング制御
+//    - 送信ボタン押下時のみ外部バインディングに反映
 //
 
 import SwiftUI
 
 /// チャット風の下部入力バー
 /// 画面下部に固定され、キーボードと連動する
+/// 内部で一時変数を使用し、送信ボタン押下時のみ外部バインディングに反映する
 struct BottomInputBar: View {
-    /// 保存モード
-    enum SaveMode {
-        /// 毎キーストロークで即時反映（従来の動作）
-        case immediate
-        /// 送信ボタンでのみ反映（一時変数で編集）
-        case onSubmit
-    }
-
     @Binding var text: String
     @FocusState.Binding var isFocused: Bool
     let placeholder: LocalizedStringKey
-    let saveMode: SaveMode
     let onExpand: () -> Void
     let onSubmit: (() -> Void)?
 
-    /// 内部編集用テキスト（saveMode == .onSubmit時に使用）
+    /// 内部編集用テキスト（送信時のみ外部バインディングに反映）
     @State private var editingText: String = ""
 
     init(
         text: Binding<String>,
         isFocused: FocusState<Bool>.Binding,
         placeholder: LocalizedStringKey,
-        saveMode: SaveMode = .onSubmit,
         onExpand: @escaping () -> Void,
         onSubmit: (() -> Void)? = nil
     ) {
         self._text = text
         self._isFocused = isFocused
         self.placeholder = placeholder
-        self.saveMode = saveMode
         self.onExpand = onExpand
         self.onSubmit = onSubmit
     }
 
-    /// 実際に表示・編集するテキストのバインディング
-    private var activeTextBinding: Binding<String> {
-        switch saveMode {
-        case .immediate:
-            return $text
-        case .onSubmit:
-            return $editingText
-        }
-    }
-
-    /// 表示用テキスト（空判定などに使用）
-    private var displayText: String {
-        switch saveMode {
-        case .immediate:
-            return text
-        case .onSubmit:
-            return editingText
-        }
-    }
-
     private var isTextEmpty: Bool {
-        displayText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        editingText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     /// テキストの行数（改行で分割）
     private var lineCount: Int {
-        displayText.components(separatedBy: "\n").count
+        editingText.components(separatedBy: "\n").count
     }
 
     /// 拡大ボタンを表示するか（3行以上）
@@ -91,19 +61,13 @@ struct BottomInputBar: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .onAppear {
-            // onSubmitモードでは初期値をコピー
-            if saveMode == .onSubmit {
-                editingText = text
-            }
+            editingText = text
         }
     }
 
     private func handleSubmit() {
         guard !isTextEmpty else { return }
-        // onSubmitモードでは内部テキストを外部バインディングに反映
-        if saveMode == .onSubmit {
-            text = editingText
-        }
+        text = editingText
         if let onSubmit {
             onSubmit()
         } else {
@@ -112,11 +76,9 @@ struct BottomInputBar: View {
         }
     }
 
-    /// 拡大ボタン押下時（onSubmitモードでは内部テキストを反映してから拡大）
+    /// 拡大ボタン押下時（内部テキストを反映してから拡大）
     private func handleExpand() {
-        if saveMode == .onSubmit {
-            text = editingText
-        }
+        text = editingText
         onExpand()
     }
 
@@ -124,7 +86,7 @@ struct BottomInputBar: View {
     private var textInputArea: some View {
         ZStack(alignment: .topLeading) {
             // TextEditor
-            TextEditor(text: activeTextBinding)
+            TextEditor(text: $editingText)
                 .focused($isFocused)
                 .frame(minHeight: 36, maxHeight: 120)
                 .fixedSize(horizontal: false, vertical: true)
