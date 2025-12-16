@@ -60,15 +60,6 @@ struct BottomInputBar: View {
                 .fill(DesignTokens.SkyToneColors.nightStart)
                 .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: -4)
         )
-        .onChange(of: text) { oldValue, newValue in
-            // Enterキー検出：改行が追加されたら送信
-            if newValue.hasSuffix("\n") && !oldValue.hasSuffix("\n") {
-                // 末尾の改行を削除
-                text = String(newValue.dropLast())
-                // 送信処理
-                handleSubmit()
-            }
-        }
     }
 
     private func handleSubmit() {
