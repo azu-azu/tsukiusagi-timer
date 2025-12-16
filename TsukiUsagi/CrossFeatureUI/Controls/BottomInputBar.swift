@@ -171,14 +171,9 @@ struct BottomInputBar: View {
         Button {
             handleExpand()
         } label: {
-            Image(systemName: "arrow.up.left.and.arrow.down.right")
+            Text("<>")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
-                .frame(width: 28, height: 28)
-                .background(
-                    Circle()
-                        .fill(Color.white.opacity(0.08))
-                )
         }
         .accessibilityLabel(LocalizedStringKey("expand_editor"))
     }
