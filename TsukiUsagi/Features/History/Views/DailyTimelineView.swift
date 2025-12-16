@@ -15,6 +15,7 @@ struct DailyTimelineView: View {
     @FocusState private var isReflectionFocused: Bool
     @State private var showReflectionSheet = false
     @State private var showReflectionInput = false
+    @State private var editingReflectionText = ""  // 編集用一時変数
 
     @State private var restoreError: String?
     @State private var showRestoreAlert = false
@@ -57,6 +58,8 @@ struct DailyTimelineView: View {
                         isEditing: showReflectionInput,
                         onRetry: { detailViewModel.retry() },
                         onTap: {
+                            // 編集開始時に現在の値をコピー
+                            editingReflectionText = detailViewModel.reflectionText
                             showReflectionInput = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 isReflectionFocused = true
@@ -74,10 +77,12 @@ struct DailyTimelineView: View {
                 .padding(.horizontal)
             }
             .scrollDismissesKeyboard(.interactively)
-            // コンテンツ領域のタップで入力バーを閉じる（simultaneousGestureは削除）
+            // コンテンツ領域のタップで入力バーを閉じる（保存しない）
             .contentShape(Rectangle())
             .onTapGesture {
-                guard isReflectionFocused else { return }
+                guard showReflectionInput else { return }
+                // 外側タップは保存しない（一時変数をクリア）
+                editingReflectionText = ""
                 isReflectionFocused = false
                 showReflectionInput = false
                 Keyboard.dismiss()
@@ -86,13 +91,22 @@ struct DailyTimelineView: View {
         .safeAreaInset(edge: .bottom) {
             if showReflectionInput {
                 BottomInputBar(
-                    text: $detailViewModel.reflectionText,
+                    text: $editingReflectionText,
                     isFocused: $isReflectionFocused,
                     placeholder: LocalizedStringKey("reflection_placeholder"),
                     onExpand: {
+                        // 拡大時は一時変数をViewModelに反映してからシート表示
+                        detailViewModel.reflectionText = editingReflectionText
                         isReflectionFocused = false
                         showReflectionInput = false
                         showReflectionSheet = true
+                    },
+                    onSubmit: {
+                        // 送信ボタンで明示的に保存
+                        detailViewModel.reflectionText = editingReflectionText
+                        isReflectionFocused = false
+                        showReflectionInput = false
+                        Keyboard.dismiss()
                     }
                 )
             }
