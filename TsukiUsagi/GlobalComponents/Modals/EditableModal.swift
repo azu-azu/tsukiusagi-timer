@@ -117,6 +117,13 @@ struct EditableModal<Content: View, BottomBar: View>: View {
                     )
                 }
             )
+            // bottomBarがある場合、コンテンツ領域のタップで入力バーを閉じる
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if hasBottomBar {
+                    onKeyboardClose()
+                }
+            }
         }
     }
 
@@ -132,11 +139,7 @@ struct EditableModal<Content: View, BottomBar: View>: View {
                     baseBottomPadding: ensureVisibleMode == .none ? 0 : 16
                 ))
                 // bottomBarがある場合は外側タップで閉じる
-                .simultaneousGesture(
-                    hasBottomBar
-                        ? TapGesture().onEnded { onKeyboardClose() }
-                        : nil
-                )
+                // Note: simultaneousGestureを削除し、contentのonTapGestureで処理する方が安全
                 .onPreferenceChange(FocusedRowBottomPrefKey.self) { value in
                     focusedBottomY = value
                     recomputeBottomLift()
