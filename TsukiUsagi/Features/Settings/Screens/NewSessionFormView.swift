@@ -48,12 +48,13 @@ struct NewSessionFormView: View {
                 .padding(DesignTokens.Padding.large)
             }
             .scrollDismissesKeyboard(.interactively)
-            .simultaneousGesture(
-                TapGesture().onEnded {
-                    guard editingField != .none else { return }
-                    closeInputBar()
-                }
-            )
+            // コンテンツ領域のタップでキーボードだけを閉じる（入力バーは残す）
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard editingField != .none else { return }
+                isInputBarFocused = false
+                Keyboard.dismiss()
+            }
             .navigationTitle(Labels.Sections.newCustomSession)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

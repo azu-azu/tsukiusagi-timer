@@ -74,13 +74,12 @@ struct DailyTimelineView: View {
                 .padding(.horizontal)
             }
             .scrollDismissesKeyboard(.interactively)
-            // コンテンツ領域のタップで入力バーを閉じる（保存しない）
+            // コンテンツ領域のタップでキーボードだけを閉じる（入力バーは残す）
             .contentShape(Rectangle())
             .onTapGesture {
                 guard showReflectionInput else { return }
-                // 外側タップは保存しない（BottomInputBarの内部状態は破棄される）
+                // キーボードだけ閉じる（入力バーは残る）
                 isReflectionFocused = false
-                showReflectionInput = false
                 Keyboard.dismiss()
             }
         }

@@ -117,11 +117,11 @@ struct EditableModal<Content: View, BottomBar: View>: View {
                     )
                 }
             )
-            // bottomBarがある場合、コンテンツ領域のタップで入力バーを閉じる
+            // bottomBarがある場合、コンテンツ領域のタップでキーボードだけを閉じる（入力バーは残す）
             .contentShape(Rectangle())
             .onTapGesture {
                 if hasBottomBar {
-                    onKeyboardClose()
+                    Keyboard.dismiss()
                 }
             }
         }
