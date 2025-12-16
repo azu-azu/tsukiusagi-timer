@@ -38,6 +38,16 @@ struct BottomInputBar: View {
         text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    /// テキストの行数（改行で分割）
+    private var lineCount: Int {
+        text.components(separatedBy: "\n").count
+    }
+
+    /// 拡大ボタンを表示するか（3行以上）
+    private var shouldShowExpandButton: Bool {
+        lineCount >= 3
+    }
+
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
             // テキスト入力エリア（ボタン内蔵）
@@ -50,6 +60,25 @@ struct BottomInputBar: View {
                 .fill(DesignTokens.SkyToneColors.nightStart)
                 .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: -4)
         )
+        .onChange(of: text) { oldValue, newValue in
+            // Enterキー検出：改行が追加されたら送信
+            if newValue.hasSuffix("\n") && !oldValue.hasSuffix("\n") {
+                // 末尾の改行を削除
+                text = String(newValue.dropLast())
+                // 送信処理
+                handleSubmit()
+            }
+        }
+    }
+
+    private func handleSubmit() {
+        guard !isTextEmpty else { return }
+        if let onSubmit {
+            onSubmit()
+        } else {
+            isFocused = false
+            Keyboard.dismiss()
+        }
     }
 
     @ViewBuilder
@@ -74,9 +103,11 @@ struct BottomInputBar: View {
                         .stroke(Color.white.opacity(0.15), lineWidth: 1)
                 )
                 .overlay(alignment: .topTrailing) {
-                    expandButton
-                        .padding(.top, 6)
-                        .padding(.trailing, 6)
+                    if shouldShowExpandButton {
+                        expandButton
+                            .padding(.top, 6)
+                            .padding(.trailing, 6)
+                    }
                 }
                 .overlay(alignment: .bottomTrailing) {
                     submitButton
@@ -116,13 +147,7 @@ struct BottomInputBar: View {
     @ViewBuilder
     private var submitButton: some View {
         Button {
-            if let onSubmit {
-                onSubmit()
-            } else {
-                // デフォルト: キーボードを閉じる
-                isFocused = false
-                Keyboard.dismiss()
-            }
+            handleSubmit()
         } label: {
             Image(systemName: "arrow.up.circle.fill")
                 .font(.system(size: 28))
