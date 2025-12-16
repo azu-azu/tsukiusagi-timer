@@ -99,3 +99,7 @@
 "session_task_select" = "Select task...";
 "session_task_none" = "No task";
 "session_task_none_available" = "Add tasks in Manage Sessions";
+
+// Input Bar Accessibility
+"expand_editor" = "Expand editor";
+"submit" = "Submit";
