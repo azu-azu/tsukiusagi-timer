@@ -199,7 +199,7 @@ private struct DailyTimelineSummaryTreeView: View {
     }
 }
 
-/// Reflection section card with placeholder (tappable to show input bar)
+/// Reflection section with placeholder card (no outer card wrapper)
 private struct DailyTimelineReflectionCard: View {
     let text: String
     let isSaving: Bool
@@ -216,7 +216,7 @@ private struct DailyTimelineReflectionCard: View {
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
-            // Tappable placeholder card
+            // Tappable placeholder card (full width, no outer card wrapper)
             EditablePlaceholderCard(
                 text: text,
                 placeholder: placeholderTextKey,
@@ -257,7 +257,6 @@ private struct DailyTimelineReflectionCard: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .tsukiSoundCard()
     }
 }
 
