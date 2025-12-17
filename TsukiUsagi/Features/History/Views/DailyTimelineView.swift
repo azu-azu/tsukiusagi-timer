@@ -47,12 +47,9 @@ struct DailyTimelineView: View {
                     }
 
                     // Reflection section with placeholder card
-                    DailyTimelineReflectionCard(
+                    ReflectionInputSection(
                         text: detailViewModel.reflectionText,
-                        isSaving: detailViewModel.isSaving,
-                        error: detailViewModel.error,
                         isEditing: showReflectionInput,
-                        onRetry: { detailViewModel.retry() },
                         onTap: {
                             showReflectionInput = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -60,6 +57,23 @@ struct DailyTimelineView: View {
                             }
                         }
                     )
+
+                    // Saving/Error indicators
+                    if detailViewModel.isSaving {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            Text("history_inline_reflection_saving")
+                                .font(DesignTokens.Fonts.caption)
+                                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
+                        }
+                    }
+
+                    if let error = detailViewModel.error {
+                        ReflectionErrorBanner(error: error) {
+                            detailViewModel.retry()
+                        }
+                    }
 
                     sectionBuilder.dayModeRecordsSection(
                         records: viewModel.records(historyVM: historyVM),
@@ -199,64 +213,31 @@ private struct DailyTimelineSummaryTreeView: View {
     }
 }
 
-/// Reflection section with placeholder card (no outer card wrapper)
-private struct DailyTimelineReflectionCard: View {
-    let text: String
-    let isSaving: Bool
-    let error: Error?
-    let isEditing: Bool
+/// Reflection保存エラー時のバナー
+private struct ReflectionErrorBanner: View {
+    let error: Error
     let onRetry: () -> Void
-    let onTap: () -> Void
-
-    private let placeholderTextKey: LocalizedStringKey = "reflection_placeholder"
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(Labels.Sections.reflection)
-                .font(DesignTokens.Fonts.sectionTitle)
+        VStack(alignment: .leading, spacing: 8) {
+            Text("history_inline_reflection_error_message")
+                .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-
-            // Tappable placeholder card (full width, no outer card wrapper)
-            EditablePlaceholderCard(
-                text: text,
-                placeholder: placeholderTextKey,
-                isEditing: isEditing,
-                onTap: onTap
-            )
-
-            if isSaving {
-                HStack(spacing: 8) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text("history_inline_reflection_saving")
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
-                }
+            Text(error.localizedDescription)
+                .font(DesignTokens.Fonts.caption)
+                .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
+            Button(action: onRetry) {
+                Text(Copy.Button.retry)
+                    .font(DesignTokens.Fonts.labelBold)
+                    .foregroundColor(DesignTokens.MoonColors.accentBlue)
             }
-
-            if let error {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("history_inline_reflection_error_message")
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                    Text(error.localizedDescription)
-                        .font(DesignTokens.Fonts.caption)
-                        .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
-                    Button(action: onRetry) {
-                        Text(Copy.Button.retry)
-                            .font(DesignTokens.Fonts.labelBold)
-                            .foregroundColor(DesignTokens.MoonColors.accentBlue)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(8)
-                .accessibilityIdentifier("banner_history_reflection_retry")
-            }
+            .buttonStyle(.plain)
         }
+        .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(8)
+        .accessibilityIdentifier("banner_history_reflection_retry")
     }
 }
 
