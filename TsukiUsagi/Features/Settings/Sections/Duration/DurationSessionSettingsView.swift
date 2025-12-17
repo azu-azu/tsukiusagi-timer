@@ -163,13 +163,10 @@ struct DurationSessionSettingsView: View {
     @ViewBuilder
     private func sessionNamesExpandedContent() -> some View {
         if isSessionNamesExpanded {
-            VStack(alignment: .leading, spacing: 8) {
-                Divider()
-                    .background(DesignTokens.SkyToneColors.textQuinary)
-
+            VStack(alignment: .leading, spacing: 0) {
                 EmbeddedSessionManagementView()
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 12)
+                    .padding(.vertical, 12)
             }
             .tsukiSoundCard(padding: 0)
             .transition(.opacity.combined(with: .scale(scale: 1.0, anchor: .top)))
