@@ -183,8 +183,8 @@ private extension EditRecordView {
     var scrollContent: some View {
         VStack(alignment: .leading, spacing: 24) {
             sessionLabelSection
-            finalTimeSection
             reflectionSection
+            finalTimeSection
         }
         .padding()
     }
@@ -208,18 +208,17 @@ private extension EditRecordView {
 
     @ViewBuilder
     var finalTimeSection: some View {
-        sectionBuilder.section(title: "") {
-            DatePicker(
-                Labels.Sections.finalTime,
-                selection: $editedEnd,
-                in: minEnd...,
-                displayedComponents: [.hourAndMinute]
-            )
-            .datePickerStyle(.compact)
-            .padding(.horizontal, 8)
-            .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-            .colorScheme(.dark)
-        }
+        DatePicker(
+            Labels.Sections.finalTime,
+            selection: $editedEnd,
+            in: minEnd...,
+            displayedComponents: [.hourAndMinute]
+        )
+        .datePickerStyle(.compact)
+        .padding(.horizontal, 8)
+        .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
+        .colorScheme(.dark)
+        .tsukiSoundCard(padding: 12)
     }
 
     @ViewBuilder
