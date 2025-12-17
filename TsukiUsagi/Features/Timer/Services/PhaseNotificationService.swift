@@ -16,8 +16,6 @@ protocol PhaseNotificationServiceable: AnyObject {
     // 冪等Focus予約: Break終了時刻に対してFocusのみを再予約
     func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool)
     func sendPhaseChangeNotification(for phase: PomodoroPhase)
-    @available(*, deprecated, message: "Use cancelSessionEndSafely(for:) or cancelSessionEnd(for:) instead")
-    func cancelSessionEndNotification()
     func cancelSessionEndAll()
     func cancelSessionEndSafely(for completedPhase: PomodoroPhase)
     func finalizeWorkPhase()
@@ -119,12 +117,6 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
     func sendPhaseChangeNotification(for phase: PomodoroPhase) {
         // フェーズ切り替え通知を即座に送信
         notificationManager.sendPhaseChangeNotification(for: phase)
-    }
-
-    func cancelSessionEndNotification() {
-        // セッション終了通知の pending を prefix 単位でキャンセル
-        // 一意ID (prefix.epoch.uuid) に対応
-        notificationManager.removeAllSessionEndPendingByPrefix()
     }
 
     func finalizeWorkPhase() {
