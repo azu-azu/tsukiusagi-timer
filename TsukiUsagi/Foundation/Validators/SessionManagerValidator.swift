@@ -28,15 +28,6 @@ extension String {
             locale: .current
         )
     }
-
-    @available(*, deprecated, message: "Use tsu_taskNormalizedValue instead.")
-    var tsu_descriptionNormalizedValue: String { tsu_taskNormalizedValue }
-
-    @available(*, deprecated, message: "Use tsu_taskNormalizedKey instead.")
-    var tsu_descriptionNormalizedKey: String { tsu_taskNormalizedKey }
-
-    @available(*, deprecated, message: "Use tsuTaskSpacePattern instead.")
-    static var tsuDescriptionSpacePattern: String { tsuTaskSpacePattern }
 }
 
 /// バリデーション時に必要な文脈情報をまとめた構造体
@@ -65,12 +56,6 @@ enum SessionManagerError: Error {
             return "タスクが長すぎます（最大\(SessionManager.maxTaskLength)文字）"
         }
     }
-
-    @available(*, deprecated, message: "Use taskLimitExceeded instead.")
-    static var descriptionLimitExceeded: SessionManagerError { .taskLimitExceeded }
-
-    @available(*, deprecated, message: "Use taskTooLong instead.")
-    static var descriptionTooLong: SessionManagerError { .taskTooLong }
 }
 
 /// セッションバリデーションエラー
@@ -80,14 +65,8 @@ enum SessionValidationError: Error {
     case maxSessionCountExceeded
     case duplicateSessionName
     case duplicateTask(indices: [Int])
-    @available(*, deprecated, renamed: "duplicateTask")
-    case duplicateDescription(indices: [Int])
     case tooManyTasks
-    @available(*, deprecated, renamed: "tooManyTasks")
-    case tooManyDescriptions
     case taskTooLong
-    @available(*, deprecated, renamed: "taskTooLong")
-    case descriptionTooLong
     case sessionNotFound
     case invalidIndex
 
@@ -101,11 +80,11 @@ enum SessionValidationError: Error {
             return "セッション数が上限に達しています（最大\(SessionManager.maxSessionCount)個）"
         case .duplicateSessionName:
             return "同じ名前のセッションが既に存在します"
-        case .duplicateTask, .duplicateDescription:
+        case .duplicateTask:
             return "同じタスクが重複しています"
-        case .tooManyTasks, .tooManyDescriptions:
+        case .tooManyTasks:
             return "タスクが多すぎます（最大\(SessionManager.maxTaskCount)個）"
-        case .taskTooLong, .descriptionTooLong:
+        case .taskTooLong:
             return "タスクが長すぎます（最大\(SessionManager.maxTaskLength)文字）"
         case .sessionNotFound:
             return "指定されたセッションが見つかりません"
@@ -130,15 +109,6 @@ class SessionManagerValidator {
 
         // タスクの検証
         try validateTasksInternal(tasks)
-    }
-
-    @available(*, deprecated, message: "Use validateSessionEntry(sessionName:tasks:validationContext:) instead.")
-    static func validateSessionEntry(
-        sessionName: String,
-        descriptions: [String],
-        validationContext: SessionValidationContext
-    ) throws {
-        try validateSessionEntry(sessionName: sessionName, tasks: descriptions, validationContext: validationContext)
     }
 
     /// セッション名のバリデーション
@@ -197,11 +167,6 @@ class SessionManagerValidator {
         try validateTasksInternal(tasks)
     }
 
-    @available(*, deprecated, message: "Use validateTasks(_:) instead.")
-    static func validateDescriptions(_ descriptions: [String]) throws {
-        try validateTasksInternal(descriptions)
-    }
-
     /// タスクのバリデーション（内部用）
     private static func validateTasksInternal(_ tasks: [String]) throws {
 
@@ -252,16 +217,6 @@ class SessionManagerValidator {
         guard canonical.count <= SessionManager.maxTaskLength else {
             throw SessionValidationError.taskTooLong
         }
-    }
-
-    @available(*, deprecated, message: "Use validateAddTask(_:newText:) instead.")
-    static func validateAddDescription(_ entry: SessionEntry, newText: String) throws {
-        try validateAddTask(entry, newText: newText)
-    }
-
-    @available(*, deprecated, message: "Use validateUpdateTask(_:index:newText:) instead.")
-    static func validateUpdateDescription(_ entry: SessionEntry, index: Int, newText: String) throws {
-        try validateUpdateTask(entry, index: index, newText: newText)
     }
 
     static func validateAndUnwrap(_ entry: SessionEntry?) throws -> SessionEntry {
