@@ -211,7 +211,7 @@ private struct DailyTimelineReflectionCard: View {
     private let placeholderTextKey: LocalizedStringKey = "reflection_placeholder"
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(Labels.Sections.reflection)
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
