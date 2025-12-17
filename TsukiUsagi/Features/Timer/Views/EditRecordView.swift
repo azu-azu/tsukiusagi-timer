@@ -176,7 +176,18 @@ private extension EditRecordView {
             .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .scrollBounceBehavior(.basedOnSize)
-            .dismissKeyboardOnTap { closeKeyboard() }
+            // コンテンツ領域のタップでキーボードだけを閉じる（入力バーは残す）
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard showReflectionInput else {
+                    // Reflection以外のフォーカスを外す
+                    closeKeyboard()
+                    return
+                }
+                // キーボードだけ閉じる（入力バーは残る）
+                isMemoFocused = false
+                Keyboard.dismiss()
+            }
     }
 
     @ViewBuilder
