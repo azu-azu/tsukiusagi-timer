@@ -13,11 +13,6 @@ struct MemoEditView: View {
 
     private let memoEditorMaxHeight: CGFloat = 300
 
-    // 新規追加かどうかを判定
-    private var isNewRecord: Bool {
-        return false // legacy path removed
-    }
-
     var body: some View {
         NavigationStack {
             ZStack {
