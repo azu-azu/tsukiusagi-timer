@@ -36,12 +36,6 @@ struct EmbeddedSessionManagementView: View {
             // Add Custom Session Button
             addCustomSessionButton()
         }
-        .padding(DesignTokens.Padding.large)
-        .background(
-            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
-                .fill(DesignTokens.CosmosColors.cardBackground)
-                .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
-        )
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .edit(let context):
@@ -87,7 +81,6 @@ struct EmbeddedSessionManagementView: View {
                 Text("settings_session_delete_confirm_message \(session.sessionName)")
             }
         }
-        .background(DesignTokens.CosmosColors.background)
     }
 
 }
@@ -259,12 +252,8 @@ private extension EmbeddedSessionManagementView {
     @ViewBuilder
     func customSessionsSection() -> some View {
         VStack(spacing: 0) {
-            if sessionManager.customEntries.isEmpty {
-                emptyCustomSessionsView()
-            } else {
-                ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
-                    customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
-                }
+            ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
+                customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
             }
         }
     }
@@ -329,26 +318,6 @@ private extension EmbeddedSessionManagementView {
         tempTasks = []
     }
 
-    @ViewBuilder
-    func emptyCustomSessionsView() -> some View {
-        VStack(spacing: DesignTokens.Spacing.medium) {
-            Image(systemName: "folder.badge.plus")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolLarge)
-
-            Text(Labels.State.noCustomSessionsYet)
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-
-            Text(LocalizedStringKey("empty_custom_sessions_subtitle"))
-                .font(.caption2)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.vertical, DesignTokens.Padding.large)
-        .frame(maxWidth: .infinity)
-    }
-
     // MARK: - Add Custom Session Button
 
     @ViewBuilder
@@ -369,9 +338,12 @@ private extension EmbeddedSessionManagementView {
 struct EmbeddedSessionManagementView_Previews: PreviewProvider {
     static var previews: some View {
         EmbeddedSessionManagementView()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .tsukiSoundCard(padding: 0)
             .environmentObject(SessionManager())
             .padding()
-            .background(DesignTokens.CosmosColors.background)
+            .background(DesignTokens.SkyToneColors.backgroundGradient)
     }
 }
 #endif
