@@ -134,7 +134,7 @@ struct BottomInputBar: View {
             handleExpand()
         } label: {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                .font(.system(size: 14, weight: .medium))
+                .font(DesignTokens.Fonts.symbolMedium)
                 .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
         }
         .accessibilityLabel(LocalizedStringKey("expand_editor"))
@@ -146,7 +146,7 @@ struct BottomInputBar: View {
             handleSubmit()
         } label: {
             Image(systemName: "arrow.up.circle.fill")
-                .font(.system(size: 28))
+                .font(DesignTokens.Fonts.symbolExtraLarge)
                 .foregroundColor(
                     isTextEmpty
                         ? DesignTokens.SkyToneColors.textQuinary
