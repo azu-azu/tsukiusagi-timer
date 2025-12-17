@@ -219,26 +219,16 @@ private extension EditRecordView {
 
     @ViewBuilder
     var reflectionSection: some View {
-        sectionBuilder.section(
-            title: ""
-        ) {
-            Text(Labels.Sections.reflection)
-                .font(DesignTokens.Fonts.sectionTitle)
-                .fontWeight(.semibold)
-                .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-
-            EditablePlaceholderCard(
-                text: editedMemo,
-                placeholder: LocalizedStringKey("reflection_placeholder"),
-                isEditing: showReflectionInput,
-                onTap: {
-                    showReflectionInput = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        isMemoFocused = true
-                    }
+        ReflectionInputSection(
+            text: editedMemo,
+            isEditing: showReflectionInput,
+            onTap: {
+                showReflectionInput = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    isMemoFocused = true
                 }
-            )
-        }
+            }
+        )
     }
     @ViewBuilder
     var resetBar: some View {
