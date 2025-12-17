@@ -325,10 +325,6 @@ private extension EmbeddedSessionManagementView {
     @ViewBuilder
     func emptyCustomSessionsView() -> some View {
         VStack(spacing: DesignTokens.Spacing.medium) {
-            Image(systemName: "folder.badge.plus")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolLarge)
-
             Text(Labels.State.noCustomSessionsYet)
                 .font(DesignTokens.Fonts.caption)
                 .foregroundColor(DesignTokens.MoonColors.textMuted)
