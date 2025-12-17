@@ -48,14 +48,6 @@ struct SessionItem: Identifiable, Codable, Equatable {
 }
 
 extension SessionItem {
-    @available(*, deprecated, message: "Use task instead.")
-    var description: String? {
-        get { task }
-        set { task = newValue }
-    }
-}
-
-extension SessionItem {
     // 固定3種のSessionItemを返す
     static var fixedSessions: [SessionItem] {
         [
