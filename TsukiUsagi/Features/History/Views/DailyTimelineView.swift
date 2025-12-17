@@ -126,7 +126,6 @@ struct DailyTimelineView: View {
             )
         }
         .background(DesignTokens.SkyToneColors.backgroundGradient.ignoresSafeArea())
-        .modifier(DailyTimelineKeyboardAwareInset(isEnabled: false))
         .sheet(isPresented: $showReflectionSheet) {
             LargeTextEditorSheet(
                 text: $detailViewModel.reflectionText,
@@ -238,19 +237,6 @@ private struct ReflectionErrorBanner: View {
         .background(Color.white.opacity(0.05))
         .cornerRadius(8)
         .accessibilityIdentifier("banner_history_reflection_retry")
-    }
-}
-
-private struct DailyTimelineKeyboardAwareInset: ViewModifier {
-    let isEnabled: Bool
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if isEnabled {
-            content.keyboardAwareInset()
-        } else {
-            content
-        }
     }
 }
 
