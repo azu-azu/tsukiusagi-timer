@@ -47,7 +47,6 @@ private struct ReflectionInputCard: View {
                         Text(text)
                             .font(DesignTokens.Fonts.label)
                             .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
-                            .lineLimit(3)
                             .multilineTextAlignment(.leading)
                     }
                     Spacer()

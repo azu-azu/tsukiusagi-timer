@@ -210,6 +210,7 @@ ReflectionInputSection(
 | `.dismissKeyboardOnTap { closeKeyboard() }` with input bar | Same as above | Use custom `onTapGesture` |
 | Transparent text field background | Content shows through | Use `DesignTokens.CosmosColors.background` |
 | Different tap behavior between screens | User confusion | Keep DailyTimelineView and EditRecordView identical |
+| `.lineLimit()` on Reflection text | Long text truncated with "..." | Do NOT use lineLimit for Reflection display |
 
 ---
 
@@ -245,6 +246,7 @@ ReflectionInputSection(
 | 2025-12-17 | EditRecordView.swift | Submit button didn't close input bar | Added `onSubmit` handler |
 | 2025-12-17 | EditRecordView.swift | Background tap closed input bar and lost text | Changed from `dismissKeyboardOnTap` to custom `onTapGesture` |
 | 2025-12-17 | BottomInputBar.swift | Content visible through transparent text field | Changed to opaque background |
+| 2025-12-17 | ReflectionInputSection.swift | Long text truncated with "..." | Removed `.lineLimit(3)` |
 
 ---
 
