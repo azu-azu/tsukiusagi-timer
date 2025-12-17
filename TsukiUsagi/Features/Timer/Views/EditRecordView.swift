@@ -67,6 +67,11 @@ struct EditRecordView: View {
                             isMemoFocused = false
                             showReflectionInput = false
                             showMemoSheet = true
+                        },
+                        onSubmit: {
+                            isMemoFocused = false
+                            showReflectionInput = false
+                            Keyboard.dismiss()
                         }
                     )
                 } else {
