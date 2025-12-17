@@ -34,17 +34,6 @@ struct SessionName: Identifiable, Codable, Hashable {
         self.tasks = tasks
     }
 
-    @available(*, deprecated, message: "Use tasks instead.")
-    init(id: UUID = UUID(), name: String, subtitles: [TaskItem] = []) {
-        self.init(id: id, name: name, tasks: subtitles)
-    }
-
-    @available(*, deprecated, message: "Use tasks instead.")
-    var subtitles: [TaskItem] {
-        get { tasks }
-        set { tasks = newValue }
-    }
-
     // Equatable/Hashable: internalKeyで比較
     static func == (lhs: SessionName, rhs: SessionName) -> Bool {
         lhs.internalKey == rhs.internalKey

@@ -4,8 +4,6 @@
 "session_management_subtitle" = "Edit tasks for default sessions or manage your custom sessions";
 "default_sessions_title" = "Default Sessions";
 "custom_sessions_title" = "Custom Sessions";
-"empty_custom_sessions_title" = "No custom sessions yet";
-"empty_custom_sessions_subtitle" = "Create your first custom session to get started";
 "add_custom_session" = "Add Custom Session";
 "edit_tasks_title" = "Edit Tasks";
 "edit_session_title" = "Edit Session";

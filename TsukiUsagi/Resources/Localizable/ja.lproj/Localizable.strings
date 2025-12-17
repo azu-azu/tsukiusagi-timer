@@ -4,8 +4,6 @@
 "session_management_subtitle" = "デフォルトセッションのタスク編集やカスタムセッションの管理ができます";
 "default_sessions_title" = "デフォルトセッション";
 "custom_sessions_title" = "カスタムセッション";
-"empty_custom_sessions_title" = "カスタムセッションはまだありません";
-"empty_custom_sessions_subtitle" = "まずはカスタムセッションを作成しましょう";
 "add_custom_session" = "カスタムセッションを追加";
 "edit_tasks_title" = "タスクを編集";
 "edit_session_title" = "セッションを編集";

@@ -61,7 +61,6 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
 
     func scheduleSessionEndNotification(after seconds: Int, phase: PomodoroPhase) {
         // 予約の衝突を防ぐため、これから張るフェーズのみを取消
-        // debug log removed
         notificationManager.removePending(for: phase)
         // バックグラウンド時の終了時刻通知をスケジューリング（後方互換性）
         notificationManager.scheduleSessionEndNotification(after: seconds, phase: phase)
@@ -69,7 +68,6 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
 
     func scheduleSessionEndNotification(at endAt: Date, phase: PomodoroPhase, timeSensitive: Bool) {
         // 予約の衝突を防ぐため、これから張るフェーズのみを取消
-        // debug log removed
         notificationManager.removePending(for: phase)
         // FG での再START時、同フェーズの古い delivered が残っていると抑制される場合があるため整理
         if phase == .breakTime, UIApplication.shared.applicationState == .active {
@@ -89,7 +87,6 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
             try? await Task.sleep(nanoseconds: 300_000_000)
 
             // キャンセルしてから再スケジュール
-            // debug log removed
             notificationManager.removePending(for: phase)
             if phase == .breakTime,
                UIApplication.shared.applicationState == .active {
@@ -143,5 +140,3 @@ final class PhaseNotificationService: PhaseNotificationServiceable {
         notificationManager.cancelSessionEndAll()
     }
 }
-
-// debug helpers removed

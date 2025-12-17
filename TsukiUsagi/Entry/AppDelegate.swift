@@ -42,8 +42,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             )
         }
 
-        // debug log removed
         completionHandler()
     }
 }
-// debug helpers removed

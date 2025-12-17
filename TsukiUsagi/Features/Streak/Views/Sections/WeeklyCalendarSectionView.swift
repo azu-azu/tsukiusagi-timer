@@ -7,7 +7,7 @@ struct WeeklyCalendarSectionView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            Text("Your Weekly Progress")
+            Text("Weekly Progress")
                 .font(DesignTokens.Fonts.labelBold)
                 .foregroundColor(DesignTokens.MoonColors.accentBlueStrong)
 
