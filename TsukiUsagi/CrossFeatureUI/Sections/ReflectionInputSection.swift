@@ -69,6 +69,10 @@ private struct ReflectionInputCard: View {
             .padding(.vertical, isEmpty ? 12 : 16)
             .frame(maxWidth: .infinity, alignment: .topLeading)
             .background(DesignTokens.SkyToneColors.cardGradient)
+            .overlay(
+                Rectangle()
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
         .opacity(isEditing ? 0.5 : 1.0)
