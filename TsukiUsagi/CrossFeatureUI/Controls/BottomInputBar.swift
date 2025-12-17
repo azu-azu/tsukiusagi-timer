@@ -97,7 +97,7 @@ struct BottomInputBar: View {
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white.opacity(0.08))
+                        .fill(DesignTokens.CosmosColors.background)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
