@@ -75,16 +75,6 @@ class HistoryViewModel: ObservableObject {
         return baseName.withSessionEmoji
     }
 
-    @available(*, deprecated, message: "Use isDeleted(sessionManager:sessionName:) instead")
-    func isDeleted(sessionManager: SessionManager, activity: String) -> Bool {
-        isDeleted(sessionManager: sessionManager, sessionName: activity)
-    }
-
-    @available(*, deprecated, message: "Use displaySessionName(sessionManager:sessionName:) instead")
-    func displayActivity(sessionManager: SessionManager, activity: String) -> String {
-        displaySessionName(sessionManager: sessionManager, sessionName: activity)
-    }
-
     func restore(record: SessionRecord, sessionManager: SessionManager) throws {
         try sessionManager.addOrUpdateEntry(
             originalKey: "",
@@ -132,11 +122,6 @@ class HistoryViewModel: ObservableObject {
             history[idx].end = end
         }
         save()
-    }
-
-    @available(*, deprecated, message: "Use updateLast(sessionName:task:memo:end:) instead.")
-    func updateLast(sessionName: String, description: String, memo: String, end: Date? = nil) {
-        updateLast(sessionName: sessionName, task: description, memo: memo, end: end)
     }
 
     // MARK: - Save Operations

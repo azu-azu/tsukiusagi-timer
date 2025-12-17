@@ -56,30 +56,6 @@ struct SessionEditContext: Identifiable, Equatable {
         )
     }
 
-    /// Task編集用の初期化
-    /// - Parameters:
-    ///   - entryId: 編集対象のSessionEntryのID
-    ///   - sessionName: セッション名（Default Sessionの場合は固定値）
-    ///   - tasks: 現在のTaskリスト
-    ///   - taskIndex: 編集対象のTaskのインデックス（既存編集の場合）
-    /// - Note: 非推奨。taskEditを使用してください。
-    @available(*, deprecated, message: "Use taskEdit instead.")
-    static func descriptionEdit(
-        entryId: UUID,
-        sessionName: String,
-        tasks: [String],
-        isDefault: Bool,
-        taskIndex: Int? = nil
-    ) -> SessionEditContext {
-        taskEdit(
-            entryId: entryId,
-            sessionName: sessionName,
-            tasks: tasks,
-            isDefault: isDefault,
-            taskIndex: taskIndex
-        )
-    }
-
     /// Full Session編集用の初期化
     /// - Parameters:
     ///   - entryId: 編集対象のSessionEntryのID
@@ -108,11 +84,6 @@ struct SessionEditContext: Identifiable, Equatable {
         return nil
     }
 
-    /// 編集対象のTaskのインデックス（Task編集時のみ）
-    /// - Note: 非推奨。taskIndexを使用してください。
-    @available(*, deprecated, message: "Use taskIndex instead.")
-    var descriptionIndex: Int? { taskIndex }
-
     /// 編集対象のTaskテキスト（特定のTask編集時のみ）
     var currentTaskText: String? {
         if case .taskOnly(let optionalIndex) = editMode,
@@ -122,11 +93,6 @@ struct SessionEditContext: Identifiable, Equatable {
         }
         return nil
     }
-
-    /// 編集対象のTaskテキスト（特定のTask編集時のみ）
-    /// - Note: 非推奨。currentTaskTextを使用してください。
-    @available(*, deprecated, message: "Use currentTaskText instead.")
-    var currentDescriptionText: String? { currentTaskText }
 
     /// 編集コンテキストの説明文字列（デバッグ用）
     var debugDescription: String {
@@ -158,11 +124,6 @@ extension SessionEditContext {
         isDefault: true,
         taskIndex: 0
     )
-
-    /// テスト用のサンプルデータ
-    /// - Note: 非推奨。sampleTaskEditを使用してください。
-    @available(*, deprecated, message: "Use sampleTaskEdit instead.")
-    static let sampleDescriptionEdit = sampleTaskEdit
 
     static let sampleFullSessionEdit = SessionEditContext.fullSessionEdit(
         entryId: UUID(),
