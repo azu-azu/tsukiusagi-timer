@@ -13,13 +13,66 @@ struct ReflectionInputSection: View {
                 .font(DesignTokens.Fonts.sectionTitle)
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
 
-            EditablePlaceholderCard(
+            ReflectionInputCard(
                 text: text,
-                placeholder: LocalizedStringKey("reflection_placeholder"),
                 isEditing: isEditing,
                 onTap: onTap
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// Reflection専用のインセット風入力カード
+/// 角丸なし、暗めの背景で「書き込む場所」を表現
+private struct ReflectionInputCard: View {
+    let text: String
+    let isEditing: Bool
+    let onTap: () -> Void
+
+    private let placeholder: LocalizedStringKey = "reflection_placeholder"
+
+    var body: some View {
+        let isEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+        Button(action: onTap) {
+            ZStack {
+                // 通常コンテンツ
+                HStack {
+                    if isEmpty {
+                        Text(placeholder)
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.SkyToneColors.textQuinary)
+                    } else {
+                        Text(text)
+                            .font(DesignTokens.Fonts.label)
+                            .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer()
+                }
+                .opacity(isEditing ? 0 : 1)
+
+                // 編集中インジケータ
+                if isEditing {
+                    HStack(spacing: 6) {
+                        PencilIcon(size: .small)
+                        Text("editing_below")
+                            .font(DesignTokens.Fonts.caption)
+                            .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, isEmpty ? 12 : 16)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .background(Color.black.opacity(0.3))
+        }
+        .buttonStyle(.plain)
+        .opacity(isEditing ? 0.5 : 1.0)
+        .animation(.easeInOut(duration: 0.2), value: isEditing)
+        .allowsHitTesting(!isEditing)
     }
 }
