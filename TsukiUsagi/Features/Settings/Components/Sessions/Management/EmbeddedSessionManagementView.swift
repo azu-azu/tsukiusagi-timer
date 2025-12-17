@@ -36,12 +36,6 @@ struct EmbeddedSessionManagementView: View {
             // Add Custom Session Button
             addCustomSessionButton()
         }
-        .padding(DesignTokens.Padding.large)
-        .background(
-            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large)
-                .fill(DesignTokens.CosmosColors.cardBackground)
-                .stroke(DesignTokens.BlackColors.stroke.opacity(0.1), lineWidth: 1)
-        )
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .edit(let context):
@@ -87,7 +81,6 @@ struct EmbeddedSessionManagementView: View {
                 Text("settings_session_delete_confirm_message \(session.sessionName)")
             }
         }
-        .background(DesignTokens.CosmosColors.background)
     }
 
 }
@@ -369,9 +362,12 @@ private extension EmbeddedSessionManagementView {
 struct EmbeddedSessionManagementView_Previews: PreviewProvider {
     static var previews: some View {
         EmbeddedSessionManagementView()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .tsukiSoundCard(padding: 0)
             .environmentObject(SessionManager())
             .padding()
-            .background(DesignTokens.CosmosColors.background)
+            .background(DesignTokens.SkyToneColors.backgroundGradient)
     }
 }
 #endif
