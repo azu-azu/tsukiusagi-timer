@@ -6,11 +6,9 @@ struct EditRecordView: View {
     @EnvironmentObject private var timerVM: TimerViewModel
     @EnvironmentObject private var sessionManager: SessionManager
 
-    // 新しいViewModelとBuilder（既存コードと並行動作）
     @StateObject private var editViewModel = EditRecordViewModel()
     private let sectionBuilder = EditRecordSectionBuilder()
 
-    // 既存のプロパティ（後方互換性のため保持）
     @State private var editedActivity = ""
     @State private var editedTask = ""
     @State private var editedMemo = ""
@@ -22,19 +20,16 @@ struct EditRecordView: View {
     @State private var showMemoSheet: Bool = false
     @State private var showReflectionInput: Bool = false
 
-    // 既存の計算プロパティ（新しいViewModelに委譲）
     private var isCustomActivity: Bool {
-        return editViewModel.isCustomActivity
+        editViewModel.isCustomActivity
     }
 
-    // バリデーション関数（新しいViewModelに委譲）
     private func isActivityEmpty() -> Bool {
-        return editViewModel.isActivityEmpty()
+        editViewModel.isActivityEmpty()
     }
 
-    // リアルタイムでエラー状態を計算
     private var currentShowEmptyError: Bool {
-        return isCustomActivity && isActivityEmpty()
+        isCustomActivity && isActivityEmpty()
     }
 
     @MainActor private func closeKeyboard() {
@@ -76,12 +71,9 @@ struct EditRecordView: View {
             }
             // 背景（画面全体、セーフエリアを含む）- TsukiSound風グラデーション
             .background(DesignTokens.SkyToneColors.backgroundGradient.ignoresSafeArea())
-            .navigationBarHidden(true) // NavigationBarを非表示
-            // シートの背景そのものを黒系テーマに統一
+            .navigationBarHidden(true)
             .presentationDetents([.large])
             .presentationBackground(DesignTokens.SkyToneColors.nightStart)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(DesignTokens.CosmosColors.background, for: .navigationBar)
             .keyboardCloseToolbar(
                 labelStyle: .iconWithText(Copy.Button.close)
             ) {
