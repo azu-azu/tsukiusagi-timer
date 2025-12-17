@@ -23,6 +23,9 @@ It ensures consistency, accessibility, and predictable teardown across screens t
 - Background gestures should clear focus in the caller before delegating to `Keyboard.dismiss()`.
 - Do not rely solely on gestures—keep the explicit Close button for discoverability and accessibility.
 
+**Exception: BottomInputBar screens**
+When using `BottomInputBar` (chat-style input), do NOT use `.dismissKeyboardOnTap`. Instead, use a custom `onTapGesture` that only dismisses the keyboard without hiding the input bar. See `_guide-bottom-input-bar.md` for details.
+
 ## 4. Insets & Layout Safety
 
 - Default: Use the shared `keyboardAwareInset()` (or equivalent) driven by `keyboardWillChangeFrameNotification`.
