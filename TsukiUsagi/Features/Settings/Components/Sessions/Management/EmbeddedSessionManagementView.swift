@@ -252,12 +252,8 @@ private extension EmbeddedSessionManagementView {
     @ViewBuilder
     func customSessionsSection() -> some View {
         VStack(spacing: 0) {
-            if sessionManager.customEntries.isEmpty {
-                emptyCustomSessionsView()
-            } else {
-                ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
-                    customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
-                }
+            ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
+                customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
             }
         }
     }
@@ -320,22 +316,6 @@ private extension EmbeddedSessionManagementView {
         isAnyFieldFocused = false
         tempSessionName = ""
         tempTasks = []
-    }
-
-    @ViewBuilder
-    func emptyCustomSessionsView() -> some View {
-        VStack(spacing: DesignTokens.Spacing.medium) {
-            Text(Labels.State.noCustomSessionsYet)
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-
-            Text(LocalizedStringKey("empty_custom_sessions_subtitle"))
-                .font(.caption2)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.vertical, DesignTokens.Padding.large)
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Add Custom Session Button
