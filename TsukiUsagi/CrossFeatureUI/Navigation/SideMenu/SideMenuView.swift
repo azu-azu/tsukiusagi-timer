@@ -93,7 +93,7 @@ struct SideMenuView: View {
                                 Text("TsukiUsagi Timer")
                                     .appInfoStyle()
 
-                                Text("Version 1.3.0")
+                                Text("Version 1.4.0")
                                     .appInfoStyle()
                             }
                             .padding(.top, sectionSpacing)
