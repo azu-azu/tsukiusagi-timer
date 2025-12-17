@@ -32,10 +32,6 @@ struct EditRecordView: View {
         return editViewModel.isActivityEmpty()
     }
 
-    private func shouldDisableSave() -> Bool {
-        return editViewModel.shouldDisableSave()
-    }
-
     // リアルタイムでエラー状態を計算
     private var currentShowEmptyError: Bool {
         return isCustomActivity && isActivityEmpty()
@@ -150,8 +146,6 @@ struct EditRecordView: View {
             }
         }
     }
-
-    // section関数は削除（EditRecordSectionBuilderを使用）
 }
 
 // MARK: - Change detection
