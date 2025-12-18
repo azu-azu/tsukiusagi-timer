@@ -65,26 +65,4 @@ extension SessionManager {
         updatedTasks.remove(at: index)
         try updateSessionTasks(sessionName: sessionName, newTasks: updatedTasks)
     }
-
-    // MARK: - Legacy API
-
-    @available(*, deprecated, message: "Use updateSessionTasks(sessionName:newTasks:) instead.")
-    func updateSessionDescriptions(sessionName: String, newDescriptions: [String]) throws {
-        try updateSessionTasks(sessionName: sessionName, newTasks: newDescriptions)
-    }
-
-    @available(*, deprecated, message: "Use addTaskToSession(sessionName:newTask:) instead.")
-    func addDescriptionToSession(sessionName: String, newDescription: String) throws {
-        try addTaskToSession(sessionName: sessionName, newTask: newDescription)
-    }
-
-    @available(*, deprecated, message: "Use updateTask(sessionName:at:newTask:) instead.")
-    func updateDescription(sessionName: String, at index: Int, newDescription: String) throws {
-        try updateTask(sessionName: sessionName, at: index, newTask: newDescription)
-    }
-
-    @available(*, deprecated, message: "Use removeTask(sessionName:at:) instead.")
-    func removeDescription(sessionName: String, at index: Int) throws {
-        try removeTask(sessionName: sessionName, at: index)
-    }
 }

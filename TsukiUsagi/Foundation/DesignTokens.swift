@@ -272,6 +272,11 @@ enum DesignTokens {
             // swiftlint:disable:next discouraged-font-usage
             Font.system(size: FontSize.title2, weight: .regular)
         }
+        /// SF Symbols 用の特大サイズフォント（28pt程度）
+        static var symbolExtraLarge: Font {
+            // swiftlint:disable:next discouraged-font-usage
+            Font.system(size: FontSize.title, weight: .regular)
+        }
         /// タイマー表示用フォント（🚨 重要：絶対に変更禁止 🚨）
         /// 必ずシステムフォント .rounded を使用すること
         /// 理由：視認性・読みやすさ・数字表示最適化のため

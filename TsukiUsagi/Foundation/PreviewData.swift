@@ -30,7 +30,6 @@ enum PreviewMockServices {
         func scheduleChainedSessionEnds(workEndAt: Date, breakEndAt: Date, timeSensitive: Bool) {}
         func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {}
         func sendPhaseChangeNotification(for phase: PomodoroPhase) {}
-        func cancelSessionEndNotification() {}
         func cancelSessionEndAll() {}
         func finalizeWorkPhase() {}
         func finalizeBreakPhase() {}
