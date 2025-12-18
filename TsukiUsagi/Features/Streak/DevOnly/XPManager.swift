@@ -106,7 +106,7 @@ class XPManager {
         // Check for level up
         let newLevel = UserLevel.calculateLevel(from: streakData.totalXP)
         if newLevel.level > oldLevel {
-            print("🎉 Level Up! You are now Level \\(newLevel.level) - \\(newLevel.title)")
+            print("🎉 Level Up! You are now Level \(newLevel.level) - \(newLevel.title)")
         }
 
         return (xpActions, newLevel)
@@ -118,12 +118,12 @@ class XPManager {
         streakData.totalXP += totalXP
 
         if totalXP > 0 {
-            print("💫 Awarded \\(totalXP) XP! Total: \\(streakData.totalXP)")
+            print("💫 Awarded \(totalXP) XP! Total: \(streakData.totalXP)")
         }
 
         for action in actions {
-			_ = getXPActionDescription(action)
-            print("  • \\(description): +\\(action.xpValue) XP")
+            let description = getXPActionDescription(action)
+            print("  • \(description): +\(action.xpValue) XP")
         }
     }
 

@@ -35,9 +35,7 @@ extension ContentView {
         )
         .padding(.horizontal, 16)
         .padding(.bottom, params.safeAreaInsets.bottom)
-        .zIndex(2010) // SideMenuViewより高く設定してタップ可能にする
-        .onAppear {
-        }
+        .zIndex(2010)
 
         // ギアボタン（左下）と日付表示（右下）
         VStack {
@@ -97,10 +95,6 @@ extension ContentView {
         .foregroundColor(params.isSessionFinished ?
                         DesignTokens.PureColors.textWhite.opacity(0.5) :
                         DesignTokens.PureColors.textWhite)
-        .disabled(false) // セッション完了後も新しいセッションを開始できるようにする
-        .allowsHitTesting(true)
-        .zIndex(2020) // ボタンを最前面に配置
-        .onAppear {
-        }
+        .zIndex(2020)
     }
 }
