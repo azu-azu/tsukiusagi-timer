@@ -111,10 +111,6 @@ final class NotificationManager {
 
     // MARK: - Cancellation
 
-    func cancelSessionEndNotification() {
-        cancelSessionEndNotifications()
-    }
-
     func cancelSessionEndNotifications(
         ids: [String] = [NotificationID.focus, NotificationID.rest],
         removeDelivered: Bool = false,

@@ -52,9 +52,6 @@ final class TimerLifecycleCoordinator {
         isRunning: Bool
     ) -> (isBackgroundCompleted: Bool, lastBackgroundDate: Date) {
         let now = dateProvider.now()
-#if DEBUG
-        // debug log removed
-#endif
         notificationAndHapticManager.appDidEnterBackground()
         let isCompletedInBackground = (timeRemaining <= 0 && isRunning)
         return (isCompletedInBackground, now)
@@ -66,9 +63,6 @@ final class TimerLifecycleCoordinator {
         params: TimerForegroundParams,
         handleCompleted: (TimerSessionInfo) -> Void
     ) {
-#if DEBUG
-        // debug log removed
-#endif
         notificationAndHapticManager.appWillEnterForeground()
 
         // Task 1: 状態復元。Paused時は残り時間を再計算しない（ドリフト防止）。
@@ -80,10 +74,6 @@ final class TimerLifecycleCoordinator {
         if !params.isSessionFinished, let endAt = sessionManager.endAt {
             let now = dateProvider.now()
             if now >= endAt {
-                #if DEBUG
-                // debug log removed
-                #endif
-
                 // ✅ FG復帰時の即時Live Activity終了（handleSessionCompletedより先に実行）
                 // BG滞留中のカウントアップを防ぐため、最初のフレームで確実に終了
                 Task { @MainActor in

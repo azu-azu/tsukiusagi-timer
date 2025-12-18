@@ -34,19 +34,19 @@ struct SessionEditSheetBuilder: View {
     let onSave: () -> Void
     let onCancel: () -> Void
 
-    @State private var hasDuplicateConflict = false
-    @State private var taskDrafts: [TaskDraft] = []
-    @State private var focusedRowID: UUID?
-    @State private var editingField: EditingField = .none
-    @State private var newTaskText: String = ""
-    @State private var editingTaskText: String = ""  // 既存タスク編集用の一時変数
-    @State private var showLargeEditor = false
-    @FocusState private var isInputBarFocused: Bool
+    @State var hasDuplicateConflict = false
+    @State var taskDrafts: [TaskDraft] = []
+    @State var focusedRowID: UUID?
+    @State var editingField: EditingField = .none
+    @State var newTaskText: String = ""
+    @State var editingTaskText: String = ""
+    @State var showLargeEditor = false
+    @FocusState var isInputBarFocused: Bool
 
-    private var initialSessionName: String { context.sessionName }
-    private var initialTasks: [String] { context.tasks }
+    var initialSessionName: String { context.sessionName }
+    var initialTasks: [String] { context.tasks }
 
-    private var hasChanges: Bool {
+    var hasChanges: Bool {
         if context.isDefaultSession {
             return taskDrafts.map(\.text) != initialTasks
         } else {
@@ -54,7 +54,7 @@ struct SessionEditSheetBuilder: View {
         }
     }
 
-    private var isSaveDisabled: Bool {
+    var isSaveDisabled: Bool {
         if hasDuplicateConflict { return true }
         if !hasChanges { return true }
         if !context.isDefaultSession {
@@ -66,21 +66,20 @@ struct SessionEditSheetBuilder: View {
 
     // MARK: - Input Bar Bindings
 
-    private var currentEditingTextBinding: Binding<String> {
+    var currentEditingTextBinding: Binding<String> {
         switch editingField {
         case .none:
             return .constant("")
         case .sessionName:
             return $tempSessionName
         case .task:
-            // 一時変数を使用（submitで初めてtaskDraftsに反映）
             return $editingTaskText
         case .newTask:
             return $newTaskText
         }
     }
 
-    private var currentPlaceholder: LocalizedStringKey {
+    var currentPlaceholder: LocalizedStringKey {
         switch editingField {
         case .none:
             return ""
@@ -91,7 +90,7 @@ struct SessionEditSheetBuilder: View {
         }
     }
 
-    private var currentEditorTitle: String {
+    var currentEditorTitle: String {
         switch editingField {
         case .none:
             return ""
@@ -103,8 +102,7 @@ struct SessionEditSheetBuilder: View {
     }
 
     /// 入力バーを閉じる（保存しない）
-    private func closeInputBar() {
-        // 入力をクリア（保存しない）
+    func closeInputBar() {
         editingTaskText = ""
         newTaskText = ""
         isInputBarFocused = false
@@ -114,10 +112,9 @@ struct SessionEditSheetBuilder: View {
     }
 
     /// 入力を確定して閉じる
-    private func submitAndCloseInputBar() {
+    func submitAndCloseInputBar() {
         switch editingField {
         case .task(let id):
-            // 既存タスクの編集を保存
             if let index = taskDrafts.firstIndex(where: { $0.id == id }) {
                 taskDrafts[index].text = editingTaskText
                 propagateDrafts()
@@ -125,7 +122,6 @@ struct SessionEditSheetBuilder: View {
             }
             editingTaskText = ""
         case .newTask:
-            // 新規タスク追加
             let trimmed = newTaskText.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
                 let newDraft = TaskDraft(text: trimmed)
@@ -144,7 +140,7 @@ struct SessionEditSheetBuilder: View {
     }
 
     @ViewBuilder
-    private func inputBarView() -> some View {
+    func inputBarView() -> some View {
         if editingField != .none {
             BottomInputBar(
                 text: currentEditingTextBinding,
@@ -166,261 +162,6 @@ struct SessionEditSheetBuilder: View {
             taskEditModal
         case .fullSession:
             fullSessionEditModal
-        }
-    }
-
-    // MARK: - Private Views
-
-    private var taskEditModal: some View {
-        EditableModal(
-            title: "Manage Tasks",
-            onSave: {
-                if !isSaveDisabled {
-                    closeInputBar()
-                    commitDrafts()
-                    onSave()
-                }
-            },
-            onCancel: {
-                closeInputBar()
-                resetDrafts()
-                onCancel()
-            },
-            isSaveDisabled: isSaveDisabled,
-            isKeyboardCloseVisible: editingField != .none,
-            onKeyboardClose: closeInputBar,
-            focusedRowID: $focusedRowID,
-            ensureVisibleMode: .none,
-            bottomBar: { inputBarView() },
-            content: {
-                TaskEditContent(
-                    sessionName: context.sessionName,
-                    taskDrafts: taskDrafts,
-                    duplicateIDs: duplicateTaskIDs,
-                    editingTaskID: editingTaskID,
-                    onTaskTap: { id in
-                        // 編集開始時に現在の値をコピー
-                        editingTaskText = taskDrafts.first(where: { $0.id == id })?.text ?? ""
-                        editingField = .task(id: id)
-                        activateInputBar()
-                    },
-                    onNewTaskTap: {
-                        newTaskText = ""
-                        editingField = .newTask
-                        activateInputBar()
-                    },
-                    onTaskDelete: { id in
-                        removeTask(with: id)
-                    },
-                    isAddingNewTask: editingField == .newTask
-                )
-            }
-        )
-        .presentationDetents([.large])
-        .sheet(isPresented: $showLargeEditor) {
-            LargeTextEditorSheet(
-                text: currentEditingTextBinding,
-                title: currentEditorTitle,
-                placeholder: currentPlaceholder,
-                onClose: { showLargeEditor = false }
-            )
-        }
-        .onAppear {
-            resetDrafts()
-            hasDuplicateConflict = containsDuplicateTasks(tempTasks)
-            // タップするまで入力バーは表示しない
-        }
-        .onChange(of: editingField) { _, newValue in
-            if newValue != .none {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    isInputBarFocused = true
-                }
-            }
-        }
-    }
-
-    /// 現在編集中のタスクID（taskEditModal用）
-    private var editingTaskID: UUID? {
-        if case .task(let id) = editingField {
-            return id
-        }
-        return nil
-    }
-
-    private var fullSessionEditModal: some View {
-        EditableModal(
-            title: "Edit Session",
-            onSave: {
-                if !isSaveDisabled {
-                    closeInputBar()
-                    commitDrafts()
-                    onSave()
-                }
-            },
-            onCancel: {
-                closeInputBar()
-                resetDrafts()
-                onCancel()
-            },
-            isSaveDisabled: isSaveDisabled,
-            isKeyboardCloseVisible: editingField != .none,
-            onKeyboardClose: closeInputBar,
-            focusedRowID: $focusedRowID,
-            ensureVisibleMode: .none,
-            bottomBar: { inputBarView() },
-            content: {
-                FullSessionEditContent(
-                    sessionName: tempSessionName,
-                    taskDrafts: taskDrafts,
-                    duplicateIDs: duplicateTaskIDs,
-                    editingField: fullSessionEditingFieldBinding,
-                    onSessionNameTap: {
-                        editingField = .sessionName
-                        activateInputBar()
-                    },
-                    onTaskTap: { id in
-                        // 編集開始時に現在の値をコピー
-                        editingTaskText = taskDrafts.first(where: { $0.id == id })?.text ?? ""
-                        editingField = .task(id: id)
-                        activateInputBar()
-                    },
-                    onNewTaskTap: {
-                        newTaskText = ""
-                        editingField = .newTask
-                        activateInputBar()
-                    },
-                    onTaskDelete: { id in
-                        removeTask(with: id)
-                    },
-                    isAddingNewTask: editingField == .newTask
-                )
-            }
-        )
-        .presentationDetents([.large])
-        .sheet(isPresented: $showLargeEditor) {
-            LargeTextEditorSheet(
-                text: currentEditingTextBinding,
-                title: currentEditorTitle,
-                placeholder: currentPlaceholder,
-                onClose: { showLargeEditor = false }
-            )
-        }
-        .onAppear {
-            resetDrafts()
-            hasDuplicateConflict = containsDuplicateTasks(tempTasks)
-            // タップするまで入力バーは表示しない
-        }
-        .onChange(of: editingField) { _, newValue in
-            if newValue != .none {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    isInputBarFocused = true
-                }
-            }
-        }
-    }
-
-    /// FullSessionEditContentのEditingFieldへの変換バインディング
-    private var fullSessionEditingFieldBinding: Binding<FullSessionEditContent.EditingField> {
-        Binding(
-            get: {
-                switch editingField {
-                case .none: return .none
-                case .sessionName: return .sessionName
-                case .task(let id): return .task(id: id)
-                case .newTask: return .newTask
-                }
-            },
-            set: { newValue in
-                switch newValue {
-                case .none: editingField = .none
-                case .sessionName: editingField = .sessionName
-                case .task(let id): editingField = .task(id: id)
-                case .newTask: editingField = .newTask
-                }
-            }
-        )
-    }
-
-}
-
-// MARK: - Helper Methods
-
-private extension SessionEditSheetBuilder {
-    func containsDuplicateTasks(_ tasks: [String]) -> Bool {
-        var seen = Set<String>()
-        for value in tasks {
-            let key = value.tsu_taskNormalizedKey
-            if key.isEmpty { continue }
-            if seen.contains(key) {
-                return true
-            }
-            seen.insert(key)
-        }
-        return false
-    }
-
-    func resetDrafts() {
-        let existing = taskDrafts
-        taskDrafts = tempTasks.enumerated().map { index, text in
-            if index < existing.count {
-                return TaskDraft(id: existing[index].id, text: text)
-            } else {
-                return TaskDraft(text: text)
-            }
-        }
-        propagateDrafts()
-    }
-
-    func propagateDrafts() {
-        tempTasks = taskDrafts.map(\.text)
-    }
-
-    func commitDrafts() {
-        propagateDrafts()
-    }
-
-    /// 重複タスクIDのセット
-    var duplicateTaskIDs: Set<UUID> {
-        var seen: [String: UUID] = [:]
-        var duplicates = Set<UUID>()
-        for draft in taskDrafts {
-            let key = draft.text.tsu_taskNormalizedKey
-            if key.isEmpty { continue }
-            if let first = seen[key] {
-                duplicates.insert(first)
-                duplicates.insert(draft.id)
-            } else {
-                seen[key] = draft.id
-            }
-        }
-        return duplicates
-    }
-
-    /// 入力バーをアクティブにする
-    func activateInputBar() {
-        isAnyFieldFocused = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            isInputBarFocused = true
-        }
-    }
-
-    /// タスクを削除する
-    func removeTask(with id: UUID) {
-        guard taskDrafts.count > 1,
-              let index = taskDrafts.firstIndex(where: { $0.id == id }) else { return }
-
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        taskDrafts.remove(at: index)
-        propagateDrafts()
-        hasDuplicateConflict = containsDuplicateTasks(taskDrafts.map(\.text))
-
-        // 編集中のタスクが削除された場合、別のフィールドに移動
-        if case .task(let editingID) = editingField, editingID == id {
-            if let nextDraft = taskDrafts[safe: min(index, taskDrafts.count - 1)] {
-                editingField = .task(id: nextDraft.id)
-            } else {
-                editingField = .sessionName
-            }
         }
     }
 }

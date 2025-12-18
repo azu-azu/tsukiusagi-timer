@@ -13,17 +13,6 @@ struct SessionEntry: Identifiable, Codable, Equatable {
         self.isDefault = isDefault
     }
 
-    @available(*, deprecated, message: "Use tasks instead.")
-    init(id: UUID = UUID(), sessionName: String, descriptions: [String] = [], isDefault: Bool = false) {
-        self.init(id: id, sessionName: sessionName, tasks: descriptions, isDefault: isDefault)
-    }
-
-    @available(*, deprecated, message: "Use tasks instead.")
-    var descriptions: [String] {
-        get { tasks }
-        set { tasks = newValue }
-    }
-
     private enum CodingKeys: String, CodingKey {
         case id
         case sessionName

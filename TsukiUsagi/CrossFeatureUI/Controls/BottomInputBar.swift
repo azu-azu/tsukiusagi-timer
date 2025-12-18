@@ -97,7 +97,7 @@ struct BottomInputBar: View {
                 .foregroundColor(DesignTokens.SkyToneColors.textPrimary)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white.opacity(0.08))
+                        .fill(DesignTokens.CosmosColors.background)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
@@ -134,7 +134,7 @@ struct BottomInputBar: View {
             handleExpand()
         } label: {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                .font(.system(size: 14, weight: .medium))
+                .font(DesignTokens.Fonts.symbolMedium)
                 .foregroundColor(DesignTokens.SkyToneColors.textTertiary)
         }
         .accessibilityLabel(LocalizedStringKey("expand_editor"))
@@ -146,7 +146,7 @@ struct BottomInputBar: View {
             handleSubmit()
         } label: {
             Image(systemName: "arrow.up.circle.fill")
-                .font(.system(size: 28))
+                .font(DesignTokens.Fonts.symbolExtraLarge)
                 .foregroundColor(
                     isTextEmpty
                         ? DesignTokens.SkyToneColors.textQuinary

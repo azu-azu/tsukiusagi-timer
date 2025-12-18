@@ -67,49 +67,6 @@ struct SessionRecord: Codable, Identifiable {
         try container.encodeIfPresent(memo, forKey: .memo)
         try container.encodeIfPresent(completedSilently, forKey: .completedSilently)
     }
-
-    // MARK: - Legacy accessors (temporary)
-
-    @available(*, deprecated, message: "Use sessionName instead of activity")
-    var activity: String {
-        get { sessionName }
-        set { sessionName = newValue }
-    }
-
-    @available(*, deprecated, message: "Use task instead of subtitle")
-    var subtitle: String? {
-        get { task }
-        set { task = newValue }
-    }
-
-    @available(*, deprecated, message: "Use task instead.")
-    var description: String? {
-        get { task }
-        set { task = newValue }
-    }
-
-    @available(*, deprecated, message: "Use task-based initializer instead.")
-    init(
-        id: String,
-        start: Date,
-        end: Date,
-        phase: PomodoroPhase,
-        sessionName: String,
-        description: String?,
-        memo: String?,
-        completedSilently: Bool? = nil
-    ) {
-        self.init(
-            id: id,
-            start: start,
-            end: end,
-            phase: phase,
-            sessionName: sessionName,
-            task: description,
-            memo: memo,
-            completedSilently: completedSilently
-        )
-    }
 }
 
 // MARK: - Add Session Parameters

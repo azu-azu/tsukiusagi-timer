@@ -196,12 +196,8 @@ extension SessionManagementView {
     @ViewBuilder
     fileprivate func customSessionsList() -> some View {
         VStack(spacing: 0) {
-            if sessionManager.customEntries.isEmpty {
-                emptyCustomSessionsView()
-            } else {
-                ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
-                    customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
-                }
+            ForEach(Array(sessionManager.customEntries.enumerated()), id: \.element.id) { index, session in
+                customSessionRow(session, isLast: index == sessionManager.customEntries.count - 1)
             }
         }
     }
@@ -232,26 +228,6 @@ extension SessionManagementView {
             Divider()
                 .padding(.leading, DesignTokens.Padding.large + 20 + DesignTokens.Spacing.large)
         }
-    }
-
-    @ViewBuilder
-    fileprivate func emptyCustomSessionsView() -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: "folder.badge.plus")
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .font(DesignTokens.Fonts.symbolLarge)
-
-            Text(Labels.State.noCustomSessionsYet)
-                .font(DesignTokens.Fonts.label)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-
-            Text(LocalizedStringKey("empty_custom_sessions_subtitle"))
-                .font(DesignTokens.Fonts.caption)
-                .foregroundColor(DesignTokens.MoonColors.textMuted)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.vertical, DesignTokens.Padding.extraLarge)
-        .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder

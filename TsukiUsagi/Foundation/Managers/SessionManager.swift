@@ -17,12 +17,6 @@ class SessionManager: ObservableObject {
     static let maxNameLength = 30
     static let maxTaskLength = 30
 
-    @available(*, deprecated, message: "Use maxTaskCount instead.")
-    static var maxDescriptionCount: Int { maxTaskCount }
-
-    @available(*, deprecated, message: "Use maxTaskLength instead.")
-    static var maxDescriptionLength: Int { maxTaskLength }
-
     // デフォルトセッション名（順序保持）
     let defaultSessionNames: Set<String> = [
         "Work",
@@ -124,11 +118,6 @@ class SessionManager: ObservableObject {
         return sessionDatabase[key]?.tasks ?? []
     }
 
-    @available(*, deprecated, message: "Use getTasks(for:) instead.")
-    func getDescriptions(for sessionName: String) -> [String] {
-        getTasks(for: sessionName)
-    }
-
     /// セッションエントリの追加または更新
     func addOrUpdateEntry(
         originalKey: String,
@@ -171,15 +160,6 @@ class SessionManager: ObservableObject {
         }
         sessionDatabase[newKey] = entry
         save()
-    }
-
-    @available(*, deprecated, message: "Use addOrUpdateEntry(originalKey:sessionName:tasks:) instead.")
-    func addOrUpdateEntry(
-        originalKey: String,
-        sessionName: String,
-        descriptions: [String]
-    ) throws {
-        try addOrUpdateEntry(originalKey: originalKey, sessionName: sessionName, tasks: descriptions)
     }
 
     /// セッションエントリの削除（デフォルトセッションは削除不可）

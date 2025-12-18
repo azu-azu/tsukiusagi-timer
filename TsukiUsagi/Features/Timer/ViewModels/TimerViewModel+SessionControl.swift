@@ -21,7 +21,6 @@ extension TimerViewModel {
         stateManager.pauseTimer()
         notificationAndHapticManager.triggerLightHaptic()
         // 通知をキャンセル（一時停止中は直近フェーズのみを取り消す）
-        // debug log removed
         let phaseToCancel: PomodoroPhase = isWorkSession ? .breakTime : .focus
         notificationService.cancelSessionEnd(for: phaseToCancel)
 
@@ -78,7 +77,6 @@ extension TimerViewModel {
 
     /// タイマー停止（完全停止 - セッションリセット）
     func stopTimer() async {
-        // debug log removed
         stateManager.stopTimer()
         sessionManager.resetSession()
         // フェーズごとにキャンセル（グローバルCancelを避ける）
@@ -97,7 +95,6 @@ extension TimerViewModel {
 
     /// タイマーリセット（セッション保持の有無を選択）
     func resetTimer(to seconds: Int, keepSession: Bool) async {
-        // debug log removed
         // アニメーション抑制を設定（リセット時の不要なアニメーション発火を防ぐ）
         animationController.setAnimationSuppression(true)
 
@@ -122,7 +119,6 @@ extension TimerViewModel {
 
     /// セッション完了処理
     func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) async {
-        // debug log removed
         let completedWasWorkSession = isWorkSession
         // 保存のSoT（真実）は endAt/セッション情報の endTime を優先
         sessionManager.handleExpiredSession(
@@ -169,7 +165,6 @@ extension TimerViewModel {
     func forceFinish() async {
         guard startTime != nil && !isSessionFinished else { return }
         guard canForceFinish else { return }
-        // debug log removed
 
         let completedWasWorkSession = isWorkSession
         sessionManager.completeSession(
@@ -305,7 +300,6 @@ extension TimerViewModel {
 
     /// 通常のタイマー開始フロー（既存のstartTimer()の内容）
     private func startTimerNormalFlow() async {
-        // debug log removed
         // アイドル時は最新のworkMinutesを採用、進行/一時停止中は残り秒数を尊重
         let targetTime: Int = (runState == .idle) ? workLengthMinutes * 60 : timeRemaining
 
