@@ -7,9 +7,10 @@ protocol HapticServiceable: AnyObject {
 
 final class HapticService: HapticServiceable {
     func heavyImpact() {
-        // HapticManager呼び出し
+        HapticManager.shared.heavyImpact()
     }
+
     func lightImpact() {
-        // HapticManager呼び出し
+        HapticManager.shared.lightImpact()
     }
 }

@@ -50,16 +50,4 @@ struct DailyTimelineGestureHandler {
 
         return nil
     }
-
-    /// バックスワイプジェスチャーを無効化
-    func disableBackSwipeGesture() {
-        // ジェスチャー無効化の実装
-        // 必要に応じて実装
-    }
-
-    /// バックスワイプジェスチャーを有効化
-    func enableBackSwipeGesture() {
-        // ジェスチャー有効化の実装
-        // 必要に応じて実装
-    }
 }
