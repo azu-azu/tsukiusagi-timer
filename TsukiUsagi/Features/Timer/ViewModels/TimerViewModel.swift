@@ -258,22 +258,11 @@ final class TimerViewModel: ObservableObject {
         )
     }
 
-    /// アニメーション抑制を設定
-    func setAnimationSuppression(_ suppress: Bool) {
-        animationController.setAnimationSuppression(suppress)
-        notificationAndHapticManager.setAnimationSuppression(suppress)
-    }
-
-    /// セッション完了アニメーション抑制を設定
-    func setSessionFinishedAnimationSuppression(_ suppress: Bool) {
-        animationController.setSessionFinishedAnimationSuppression(suppress)
-        notificationAndHapticManager.setSessionFinishedAnimationSuppression(suppress)
-    }
-
     /// セッション完了アニメーション抑制フラグをクリア（View用）
     /// animationControllerが管理元のため、直接プロパティを変更せずこのメソッドを使用
     func clearSessionFinishedAnimationSuppression() {
         animationController.setSessionFinishedAnimationSuppression(false)
+        notificationAndHapticManager.setSessionFinishedAnimationSuppression(false)
     }
 
     /// 星点滅フラグをクリア（View用）
