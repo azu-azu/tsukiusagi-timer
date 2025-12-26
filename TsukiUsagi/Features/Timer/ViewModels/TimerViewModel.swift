@@ -48,7 +48,7 @@ final class TimerViewModel: ObservableObject {
     @Published private(set) var startTime: Date?
     @Published var endTime: Date?
     @Published var flashStars = false
-    @Published private(set) var lastBackgroundDate: Date?
+    @Published var lastBackgroundDate: Date?
     @Published var shouldSuppressAnimation = false
     @Published var shouldSuppressSessionFinishedAnimation = false
     @Published private(set) var quietMoonMessage: MoonMessageEntry?
@@ -272,14 +272,7 @@ final class TimerViewModel: ObservableObject {
 
     /// 設定変更後のリフレッシュ
     func refreshAfterSettingsChange() {
-        // 表示系に最新値を反映
-        displayManager.setWorkMinutes(workMinutes)
-        displayManager.setBreakMinutes(breakMinutes)
-
-        // アイドル中は即時に残り時間を最新のworkMinutesに合わせる（初回起動直後の変更も含む）
-        if runState == .idle && !isRunning && !isSessionFinished {
-            stateManager.resetTimer(to: workMinutes * 60)
-        }
+        Task { await send(.settingsChanged) }
     }
 
     /// プレビュー状態を設定（テスト用）
@@ -293,53 +286,12 @@ final class TimerViewModel: ObservableObject {
 
     /// アプリがバックグラウンドに移行
     func appDidEnterBackground() {
-        saveTimerState()
-        let result = lifecycleCoordinator.didEnterBackground(
-            timeRemaining: timeRemaining,
-            isRunning: isRunning
-        )
-        lastBackgroundDate = result.lastBackgroundDate
-        isBackgroundCompleted = result.isBackgroundCompleted
+        Task { await send(.appDidEnterBackground) }
     }
 
     /// アプリがフォアグラウンドに復帰
     func appWillEnterForeground() {
-        let params = TimerForegroundParams(
-            isSessionFinished: isSessionFinished,
-            isBackgroundCompleted: isBackgroundCompleted,
-            timeRemaining: timeRemaining,
-            isRunning: isRunning,
-            isWorkSession: isWorkSession,
-            startTime: startTime
-        )
-        lifecycleCoordinator.willEnterForeground(
-            params: params
-        ) { [weak self] info in
-            Task { @MainActor [weak self] in
-                await self?.handleSessionCompleted(info)
-            }
-        }
-
-        // 復帰直後の1ステップ（サイレント再始動）
-        if runState == .running {
-            // 1) 最初のフレームで正しい残り時間を反映（チラつき抑止）
-            if let endAt = sessionManager.endAt {
-                let now = dateProvider.now()
-                // Match WidgetKit (.timer) rounding: floor to current second
-                let remain = max(0, Int(floor(endAt.timeIntervalSince(now))))
-                stateManager.timeRemaining = remain
-                // remain==0なら絶対に再開しない（終了済み）
-                if remain == 0 {
-                    stateManager.stopTimer()
-                    return
-                }
-            }
-            // 2) アニメーションは発火しない（静かに復帰）
-            // 3) エンジンが止まっている場合のみ再開（重複起動防止）
-            if !stateManager.isRunning {
-                stateManager.resumeTimer()
-            }
-        }
+        Task { await send(.appWillEnterForeground) }
     }
 
     // MARK: - Private Helpers are implemented in TimerViewModel+SessionControl

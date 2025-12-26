@@ -3,6 +3,7 @@
 //  TsukiUsagi
 //
 //  Extracted session control APIs to reduce TimerViewModel size.
+//  Public API uses send(_:) for event-driven architecture.
 //
 
 import Foundation
@@ -11,13 +12,53 @@ import UIKit
 @MainActor
 extension TimerViewModel {
 
+    // MARK: - Public API (Event-driven)
+
     /// タイマー開始
     func startTimer() async {
-        await startTimerFromAnyState()
+        await send(.startTapped)
     }
 
     /// タイマー一時停止
     func pauseTimer() async {
+        await send(.pauseTapped)
+    }
+
+    /// タイマー再開
+    func resumeTimer() async {
+        // resumeはstartTappedと同じ（paused状態からの開始）
+        await send(.startTapped)
+    }
+
+    /// タイマー停止（完全停止 - セッションリセット）
+    func stopTimer() async {
+        await send(.resetRequested(seconds: workMinutes * 60, keepSession: false))
+    }
+
+    /// タイマーリセット
+    func resetTimer(to seconds: Int) async {
+        await send(.resetRequested(seconds: seconds, keepSession: false))
+    }
+
+    /// タイマーリセット（セッション保持の有無を選択）
+    func resetTimer(to seconds: Int, keepSession: Bool) async {
+        await send(.resetRequested(seconds: seconds, keepSession: keepSession))
+    }
+
+    /// 強制終了
+    func forceFinish() async {
+        await send(.forceFinishTapped)
+    }
+
+    /// セッション完了状態をリセット
+    func resetSessionFinished() {
+        Task { await send(.sessionFinishedReset) }
+    }
+
+    // MARK: - Internal Implementation
+
+    /// タイマー一時停止（内部実装）
+    func pauseTimerInternal() async {
         stateManager.pauseTimer()
         notificationAndHapticManager.triggerLightHaptic()
         // 通知をキャンセル（一時停止中は直近フェーズのみを取り消す）
@@ -35,8 +76,8 @@ extension TimerViewModel {
         }
     }
 
-    /// タイマー再開
-    func resumeTimer() async {
+    /// タイマー再開（内部実装）
+    func resumeTimerInternal() async {
         // 再開時はフェーズを強制変更しない（休憩再開を潰さない）
         stateManager.resumeTimer()
         animationController.triggerStartAnimations()
@@ -75,26 +116,8 @@ extension TimerViewModel {
         }
     }
 
-    /// タイマー停止（完全停止 - セッションリセット）
-    func stopTimer() async {
-        stateManager.stopTimer()
-        sessionManager.resetSession()
-        // フェーズごとにキャンセル（グローバルCancelを避ける）
-        notificationService.cancelSessionEnd(for: .focus)
-        notificationService.cancelSessionEnd(for: .breakTime)
-        clearQuietMoonMessage()
-
-        // Live Activity終了
-        await LiveActivityManager.shared.endActivity()
-    }
-
-    /// タイマーリセット
-    func resetTimer(to seconds: Int) async {
-        await resetTimer(to: seconds, keepSession: false)
-    }
-
-    /// タイマーリセット（セッション保持の有無を選択）
-    func resetTimer(to seconds: Int, keepSession: Bool) async {
+    /// タイマーリセット（内部実装）
+    func resetTimerInternal(to seconds: Int, keepSession: Bool) async {
         // アニメーション抑制を設定（リセット時の不要なアニメーション発火を防ぐ）
         animationController.setAnimationSuppression(true)
 
@@ -117,7 +140,7 @@ extension TimerViewModel {
         animationController.setAnimationSuppression(false)
     }
 
-    /// セッション完了処理
+    /// セッション完了処理（内部実装 - send(.sessionCompleted)から呼ばれる）
     func handleSessionCompleted(_ sessionInfo: TimerSessionInfo) async {
         let completedWasWorkSession = isWorkSession
         // 保存のSoT（真実）は endAt/セッション情報の endTime を優先
@@ -161,8 +184,8 @@ extension TimerViewModel {
         }
     }
 
-    /// 強制終了
-    func forceFinish() async {
+    /// 強制終了（内部実装）
+    func forceFinishInternal() async {
         guard startTime != nil && !isSessionFinished else { return }
         guard canForceFinish else { return }
 
@@ -186,11 +209,6 @@ extension TimerViewModel {
 
         // Live Activity終了
         await LiveActivityManager.shared.endActivity()
-    }
-
-    /// セッション完了状態をリセット
-    func resetSessionFinished() {
-        stateManager.resetSessionFinished()
     }
 
     /// 終了時刻を設定（旧API）
