@@ -40,9 +40,9 @@ struct TimerAnimationControllerTests {
 
         #expect(controller.flashStars == true)
 
-        // 再度発火すると反転
+        // 再度発火しても true のまま（常に true を設定）
         controller.triggerStartAnimations()
-        #expect(controller.flashStars == false)
+        #expect(controller.flashStars == true)
     }
 
     @Test func testTriggerStartAnimationsWhenSuppressed() async throws {
