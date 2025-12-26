@@ -77,7 +77,7 @@ final class TimerViewModel: ObservableObject {
     // MARK: - Private Properties
     var cancellables = Set<AnyCancellable>()
 
-    // MARK: - Initialization
+    // MARK: - Computed Properties
     /// 編集・自然完了いずれでも、開始〜終了の分数を丸め規約に従って算出
     /// 近似規約: 最近接、ちょうど0.5は切り上げ（ties away from zero）
     var actualSessionMinutes: Int {

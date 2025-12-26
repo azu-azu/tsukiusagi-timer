@@ -76,55 +76,13 @@ extension TimerViewModel {
         }
     }
 
-    /// タイマー再開（内部実装）
-    func resumeTimerInternal() async {
-        // 再開時はフェーズを強制変更しない（休憩再開を潰さない）
-        stateManager.resumeTimer()
-        animationController.triggerStartAnimations()
-        notificationAndHapticManager.sendStartNotification()
-
-        // 再開時に通知をリスケジューリング
-        if timeRemaining > 0 {
-            // Engineと同じ秒境界にアラインして、SOTを統一
-            let now = dateProvider.now()
-            let alignedStart = Date(timeIntervalSince1970: ceil(now.timeIntervalSince1970))
-            let endAt = alignedStart.addingTimeInterval(TimeInterval(timeRemaining))
-            sessionManager.setEndAt(endAt)
-
-            // Live Activity更新（再開状態を反映）
-            await LiveActivityManager.shared.updateActivity(
-                isPaused: false,
-                newEndsAt: endAt
-            )
-
-            // 現在のフェーズに応じて“次に鳴る1本だけ”を再スケジュール（BG優先度適用）
-            if isWorkSession {
-                // Work中は break のみを張る（break発火時に次FocusはensureFocusAtで張る）
-                let isBG = UIApplication.shared.applicationState != .active
-                notificationService.scheduleSessionEndNotification(
-                    at: endAt,
-                    phase: .breakTime,
-                    timeSensitive: isBG ? false : true
-                )
-            } else {
-                // Break中開始（稀）: Focusのみ冪等予約
-                notificationService.ensureFocusAt(
-                    breakEndAt: endAt,
-                    timeSensitive: true
-                )
-            }
-        }
-    }
-
     /// タイマーリセット（内部実装）
     func resetTimerInternal(to seconds: Int, keepSession: Bool) async {
         // アニメーション抑制を設定（リセット時の不要なアニメーション発火を防ぐ）
         animationController.setAnimationSuppression(true)
 
         stateManager.resetTimer(to: seconds)
-        if keepSession {
-            // セッション情報は保持
-        } else {
+        if !keepSession {
             sessionManager.resetSession()
             clearQuietMoonMessage()
         }
@@ -209,17 +167,6 @@ extension TimerViewModel {
 
         // Live Activity終了
         await LiveActivityManager.shared.endActivity()
-    }
-
-    /// 終了時刻を設定（旧API）
-    /// - Warning: UI更新用途では使用しないこと。代わりに applyEditedEndTime(_:) を使用
-    @available(
-        *,
-        deprecated,
-        message: "Use applyEditedEndTime(_:) for UI updates. This method previously updated endAt only."
-    )
-    func setEndTime(_ endTime: Date?) {
-        if let endTime { applyEditedEndTime(endTime) }
     }
 
     /// 編集確定後の終了時刻をUIに即時反映（Quiet Moon用のSSOT: endTime を更新）
@@ -334,11 +281,6 @@ extension TimerViewModel {
 
         // 時間を設定してからstartTimerを呼ぶ
         stateManager.timeRemaining = targetTime
-        // セッション完了状態をリセット
-        if isSessionFinished {
-            stateManager.resetSessionFinished() // セッション完了状態をリセット
-            isBackgroundCompleted = false // バックグラウンド完了フラグをリセット
-        }
         stateManager.startTimer()
         animationController.triggerStartAnimations()
         notificationAndHapticManager.sendStartNotification()
