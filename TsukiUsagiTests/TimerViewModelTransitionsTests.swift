@@ -8,19 +8,19 @@ final class TimerViewModelTransitionsTests: XCTestCase {
         let vm = mock.timerVM
 
         // Start
-        vm.startTimer(seconds: 5)
+        await vm.startTimer()
         XCTAssertTrue(vm.isRunning)
 
         // Pause
-        vm.pauseTimer()
+        await vm.pauseTimer()
         XCTAssertFalse(vm.isRunning)
 
         // Resume
-        vm.resumeTimer()
+        await vm.resumeTimer()
         XCTAssertTrue(vm.isRunning)
 
         // Stop
-        vm.stopTimer()
+        await vm.stopTimer()
         XCTAssertFalse(vm.isRunning)
     }
 }

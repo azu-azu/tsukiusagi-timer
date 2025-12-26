@@ -5,6 +5,7 @@ import XCTest
 class ContentViewTests: XCTestCase {
     var historyVM: HistoryViewModel!
     var timerVM: TimerViewModel!
+    var sessionManager: SessionManager!
 
     @MainActor
     override func setUp() {
@@ -18,11 +19,13 @@ class ContentViewTests: XCTestCase {
             persistenceManager: DummyPersistenceManager(),
             formatter: DummyFormatter()
         )
+        sessionManager = SessionManager()
     }
 
     override func tearDown() {
         historyVM = nil
         timerVM = nil
+        sessionManager = nil
         super.tearDown()
     }
 
@@ -32,6 +35,7 @@ class ContentViewTests: XCTestCase {
         let view = ContentView()
             .environmentObject(historyVM)
             .environmentObject(timerVM)
+            .environmentObject(sessionManager)
 
         // 実際のテストは View の内部実装に依存するため、
         // ここでは基本的な構造のテストを行う
@@ -51,6 +55,7 @@ class ContentViewTests: XCTestCase {
         let view = ContentView()
             .environmentObject(historyVM)
             .environmentObject(timerVM)
+            .environmentObject(sessionManager)
 
         // アクセシビリティラベルの存在確認
         // 実際のテストは View の内部実装に依存するため、
@@ -62,6 +67,7 @@ class ContentViewTests: XCTestCase {
         let view = ContentView()
             .environmentObject(historyVM)
             .environmentObject(timerVM)
+            .environmentObject(sessionManager)
 
         // アクセシビリティヒントの存在確認
         XCTAssertNotNil(view)
@@ -73,6 +79,7 @@ class ContentViewTests: XCTestCase {
         let view = ContentView()
             .environmentObject(historyVM)
             .environmentObject(timerVM)
+            .environmentObject(sessionManager)
 
         // LayoutPriority の確認
         XCTAssertNotNil(view)
@@ -92,6 +99,7 @@ class ContentViewTests: XCTestCase {
         let view = ContentView()
             .environmentObject(historyVM)
             .environmentObject(timerVM)
+            .environmentObject(sessionManager)
 
         // アニメーション設定の確認
         XCTAssertNotNil(view)
@@ -103,6 +111,7 @@ class ContentViewTests: XCTestCase {
         let view = ContentView()
             .environmentObject(historyVM)
             .environmentObject(timerVM)
+            .environmentObject(sessionManager)
 
         // 向き変更時のパフォーマンステスト
         measure {
@@ -110,22 +119,6 @@ class ContentViewTests: XCTestCase {
             // 基本的な構造の確認のみ
             XCTAssertNotNil(view)
         }
-    }
-}
-
-// MARK: - PreferenceKey Tests
-
-class LandscapePreferenceKeyTests: XCTestCase {
-    func testPreferenceKeyDefaultValue() {
-        XCTAssertFalse(LandscapePreferenceKey.defaultValue)
-    }
-
-    func testPreferenceKeyReduce() {
-        var value = false
-        LandscapePreferenceKey.reduce(value: &value) {
-            true
-        }
-        XCTAssertTrue(value)
     }
 }
 

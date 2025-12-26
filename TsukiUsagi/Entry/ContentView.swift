@@ -120,7 +120,7 @@ private extension ContentView {
     func overlays(for context: LayoutContext, safeAreaInsets: EdgeInsets) -> some View {
         diamondStarsOverlay(showDiamondStars: showDiamondStars, onFinished: {
             showDiamondStars = false
-            timerVM.flashStars = false
+            timerVM.clearFlashStars()
         })
         SideMenuView(isPresented: $showingSideMenu)
             .zIndex(2002)

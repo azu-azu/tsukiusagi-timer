@@ -270,6 +270,18 @@ final class TimerViewModel: ObservableObject {
         notificationAndHapticManager.setSessionFinishedAnimationSuppression(suppress)
     }
 
+    /// セッション完了アニメーション抑制フラグをクリア（View用）
+    /// animationControllerが管理元のため、直接プロパティを変更せずこのメソッドを使用
+    func clearSessionFinishedAnimationSuppression() {
+        animationController.setSessionFinishedAnimationSuppression(false)
+    }
+
+    /// 星点滅フラグをクリア（View用）
+    /// animationControllerが管理元のため、直接プロパティを変更せずこのメソッドを使用
+    func clearFlashStars() {
+        animationController.resetAnimationState()
+    }
+
     /// 設定変更後のリフレッシュ
     func refreshAfterSettingsChange() {
         Task { await send(.settingsChanged) }

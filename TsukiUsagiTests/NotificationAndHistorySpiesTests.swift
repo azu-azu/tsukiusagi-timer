@@ -38,6 +38,12 @@ final class SpyNotificationService: PhaseNotificationServiceable {
     func ensureFocusAt(breakEndAt: Date, timeSensitive: Bool) {
         calls.append(.schedulePhase(.focus))
     }
+    func cancelSessionEndAll() {
+        calls.append(.cancelAll)
+    }
+    func ensureAuthorizationIfNeeded(completion: @escaping (Bool) -> Void) {
+        completion(true)
+    }
 }
 
 final class SpyHistoryService: SessionHistoryServiceable {
@@ -49,7 +55,7 @@ final class SpyHistoryService: SessionHistoryServiceable {
 
 @MainActor
 final class NotificationAndHistorySpiesTests: XCTestCase {
-    func testBackgroundForegroundSchedulingCalls() throws {
+    func testBackgroundForegroundSchedulingCalls() async throws {
         // Given
         let mock = MockDependencyContainer()
         let spyNotification = SpyNotificationService()
@@ -63,7 +69,7 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         )
 
         // When: start and go background immediately
-        vm.startTimer(seconds: 120)
+        await vm.startTimer()
         vm.appDidEnterBackground()
         vm.appWillEnterForeground()
 
@@ -104,7 +110,7 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         )
     }
 
-    func testForceFinishSendsCorrectHistoryParameters() {
+    func testForceFinishSendsCorrectHistoryParameters() async {
         // Given
         let engine = MockTimerEngine()
         let spyNotification = SpyNotificationService()
@@ -127,14 +133,14 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
         vm._setPreviewState(startTime: start, isWorkSession: true, isRunning: true)
 
         // When
-        vm.forceFinishWorkSession()
+        await vm.forceFinish()
 
         // Then
         XCTAssertEqual(spyHistory.added.count, 1)
         guard let params = spyHistory.added.first else { return }
         XCTAssertEqual(params.phase, .focus)
         XCTAssertGreaterThan(params.end, params.start)
-        XCTAssertEqual(params.activity, vm.activityLabel)
-        XCTAssertEqual(params.description ?? "", vm.taskLabel)
+        XCTAssertEqual(params.sessionName, vm.activityLabel)
+        XCTAssertEqual(params.task ?? "", vm.taskLabel)
     }
 }

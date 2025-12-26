@@ -9,6 +9,7 @@ import Testing
 import Combine
 @testable import TsukiUsagi
 
+@MainActor
 struct TimerAnimationControllerTests {
 
     // MARK: - Test Setup

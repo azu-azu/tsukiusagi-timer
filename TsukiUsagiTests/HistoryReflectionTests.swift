@@ -189,7 +189,7 @@ private extension HistoryReflectionTests {
                 end: start.addingTimeInterval(600),
                 phase: .focus,
                 sessionName: "Reflection",
-                description: "",
+                task: "",
                 memo: "First memo",
                 completedSilently: nil
             ),
@@ -199,7 +199,7 @@ private extension HistoryReflectionTests {
                 end: mid.addingTimeInterval(300),
                 phase: .focus,
                 sessionName: "Reflection",
-                description: "",
+                task: "",
                 memo: "Second memo",
                 completedSilently: nil
             ),
@@ -209,7 +209,7 @@ private extension HistoryReflectionTests {
                 end: end.addingTimeInterval(1800),
                 phase: .focus,
                 sessionName: "Work",
-                description: "Deep work",
+                task: "Deep work",
                 memo: nil,
                 completedSilently: nil
             )
@@ -229,7 +229,7 @@ private extension HistoryReflectionTests {
                 end: workMorning.addingTimeInterval(3600),
                 phase: .focus,
                 sessionName: "Work",
-                description: "Initial",
+                task: "Initial",
                 memo: nil,
                 completedSilently: nil
             ),
@@ -239,7 +239,7 @@ private extension HistoryReflectionTests {
                 end: workNoon.addingTimeInterval(5400),
                 phase: .focus,
                 sessionName: "Work",
-                description: "Latest",
+                task: "Latest",
                 memo: nil,
                 completedSilently: nil
             ),
@@ -249,7 +249,7 @@ private extension HistoryReflectionTests {
                 end: study.addingTimeInterval(1200),
                 phase: .focus,
                 sessionName: "Study",
-                description: "Reading",
+                task: "Reading",
                 memo: nil,
                 completedSilently: nil
             )

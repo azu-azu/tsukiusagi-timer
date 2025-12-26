@@ -65,7 +65,7 @@ struct TimerPanel: View {
         // アニメーション抑制フラグをリセット
         .onChange(of: timerVM.isSessionFinished) { _, _ in
             if timerVM.shouldSuppressSessionFinishedAnimation {
-                timerVM.shouldSuppressSessionFinishedAnimation = false
+                timerVM.clearSessionFinishedAnimationSuppression()
             }
         }
 
