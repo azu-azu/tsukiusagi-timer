@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct DailyTimelineView: View {
     let targetDate: Date
@@ -243,40 +242,10 @@ private struct ReflectionErrorBanner: View {
 private extension DailyTimelineView {
     // MARK: - Back Swipe Control
     private func disableBackSwipeGesture() {
-        DispatchQueue.main.async {
-            // NavigationStackのUINavigationControllerを取得してbackスワイプを無効化
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let window = windowScene.windows.first {
-                findNavigationController(in: window.rootViewController)?
-                    .interactivePopGestureRecognizer?
-                    .isEnabled = false
-            }
-        }
+        LegacyNavRouter.shared.setBackSwipeEnabled(false)
     }
 
     private func enableBackSwipeGesture() {
-        DispatchQueue.main.async {
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let window = windowScene.windows.first {
-                let navController = findNavigationController(in: window.rootViewController)
-                // より安全な有効化（visual style警告を避ける）
-                if let gestureRecognizer = navController?.interactivePopGestureRecognizer {
-                    gestureRecognizer.isEnabled = true
-                    // delegateは設定しない（警告回避）
-                }
-            }
-        }
-    }
-
-    private func findNavigationController(in viewController: UIViewController?) -> UINavigationController? {
-        if let navigationController = viewController as? UINavigationController {
-            return navigationController
-        }
-        for child in viewController?.children ?? [] {
-            if let found = findNavigationController(in: child) {
-                return found
-            }
-        }
-        return nil
+        LegacyNavRouter.shared.setBackSwipeEnabled(true)
     }
 }
