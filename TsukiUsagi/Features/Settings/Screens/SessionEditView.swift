@@ -63,13 +63,17 @@ struct SessionEditView: View {
                     .disabled(!isSaveEnabled)
                 }
             }
-            .adaptiveKeyboardCloseButton(
-                isVisible: focusedField != nil,
-                position: .topTrailing,
-                action: {
-                    KeyboardHelper.hideKeyboard { focusedField = nil }
+            .overlay(alignment: .topTrailing) {
+                if focusedField != nil {
+                    KeyboardCloseButton(action: {
+                        KeyboardHelper.hideKeyboard { focusedField = nil }
+                    })
+                    .padding(.trailing, DesignTokens.Padding.large)
+                    .padding(.top, DesignTokens.Padding.large)
+                    .transition(.opacity)
                 }
-            )
+            }
+            .animation(.easeInOut(duration: 0.2), value: focusedField != nil)
         }
         .onAppear {
             loadSessionData()
