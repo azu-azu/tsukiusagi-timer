@@ -225,10 +225,15 @@ struct EditableModal<Content: View, BottomBar: View>: View {
                     }
                 }
             }
-            .keyboardCloseButton(
-                isVisible: isKeyboardCloseVisible && !hasBottomBar,
-                action: onKeyboardClose
-            )
+            .overlay(alignment: .topTrailing) {
+                if isKeyboardCloseVisible && !hasBottomBar {
+                    KeyboardCloseButton(action: onKeyboardClose)
+                        .padding(.trailing, DesignTokens.Padding.large)
+                        .padding(.top, DesignTokens.Padding.large)
+                        .transition(.opacity)
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: isKeyboardCloseVisible)
         }
         .background(DesignTokens.SkyToneColors.nightStart.ignoresSafeArea())
         .interactiveDismissDisabled() // 意図しない閉じ操作を防ぐ
