@@ -9,18 +9,19 @@ final class TimerViewModelTransitionsTests: XCTestCase {
 
         // Start
         await vm.startTimer()
-        XCTAssertTrue(vm.isRunning)
+        // runState を使用（isRunning はbindingの伝播遅延の可能性あり）
+        XCTAssertEqual(vm.runState, .running, "Start failed: runState=\(vm.runState)")
 
         // Pause
         await vm.pauseTimer()
-        XCTAssertFalse(vm.isRunning)
+        XCTAssertEqual(vm.runState, .paused, "Pause failed: runState=\(vm.runState)")
 
         // Resume
         await vm.resumeTimer()
-        XCTAssertTrue(vm.isRunning)
+        XCTAssertEqual(vm.runState, .running, "Resume failed: runState=\(vm.runState)")
 
         // Stop
         await vm.stopTimer()
-        XCTAssertFalse(vm.isRunning)
+        XCTAssertEqual(vm.runState, .idle, "Stop failed: runState=\(vm.runState)")
     }
 }

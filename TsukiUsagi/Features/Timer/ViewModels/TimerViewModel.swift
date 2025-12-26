@@ -278,7 +278,8 @@ final class TimerViewModel: ObservableObject {
 
     /// プレビュー状態を設定（テスト用）
     func _setPreviewState(startTime: Date, isWorkSession: Bool, isRunning: Bool) {
-        self.startTime = startTime
+        // sessionManagerに設定（バインディング経由でself.startTimeも更新される）
+        sessionManager._setPreviewStartTime(startTime)
         self.isWorkSession = isWorkSession
         self.isRunning = isRunning
     }

@@ -15,6 +15,7 @@ final class TimerPersistenceTests: XCTestCase {
         vm.saveTimerState()
 
         // Verify state is in expected condition after stop
-        XCTAssertFalse(vm.isRunning)
+        // runState を使用（isRunning はbindingの伝播遅延の可能性あり）
+        XCTAssertEqual(vm.runState, .idle)
     }
 }

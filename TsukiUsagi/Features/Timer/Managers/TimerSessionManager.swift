@@ -130,4 +130,11 @@ final class TimerSessionManager: ObservableObject {
     }
 
     // subtitleLabel overload removed; use taskLabel API only
+
+    // MARK: - Testing Helpers
+
+    /// テスト用：開始時刻を直接設定（プレビュー・テスト用）
+    func _setPreviewStartTime(_ start: Date) {
+        startTime = start
+    }
 }
