@@ -31,6 +31,109 @@ TsukiUsagi reminds you: *Stay grounded, yet light.*
 
 ---
 
+## 🏗️ Architecture
+
+Clean Architecture with feature-based organization.
+
+### Entry Point & View Hierarchy
+
+```
+TsukiUsagiApp
+└── ContentView
+    └── TabView
+        ├── TimerView (Main Timer)
+        │   ├── MoonAnimationView
+        │   ├── TimerDisplayView
+        │   └── SessionFinishedView (Quiet Moon)
+        ├── HistoryView (Session Records)
+        │   ├── HistoryListView
+        │   └── HistoryDetailView
+        └── SettingsView (Preferences)
+```
+
+### Core Dependencies (TimerViewModel)
+
+```
+TimerViewModel
+├── External Dependencies
+│   ├── TimerEngineable (timer core)
+│   ├── PhaseNotificationServiceable (notifications)
+│   ├── HapticServiceable (haptic feedback)
+│   ├── SessionHistoryServiceable (history storage)
+│   ├── TimerPersistenceManageable (state save)
+│   ├── TimeFormatterUtilable (time formatting)
+│   ├── DateProviding (date abstraction)
+│   └── StreakManager (streak tracking)
+│
+└── Internal Managers
+    ├── TimerAnimationController (animations)
+    ├── TimerStatePersistenceManager (state persistence)
+    ├── TimerNotificationAndHapticManager (notifications/haptics)
+    ├── TimerSessionManager (session lifecycle)
+    ├── TimerStateManager (state management)
+    ├── TimerDisplayManager (display formatting)
+    └── TimerLifecycleCoordinator (app lifecycle)
+```
+
+### Data Flow
+
+```
+[User Action]
+    ↓
+TimerViewModel.send(_:) ─────────────────┐
+    ↓                                    │
+TimerReducer.reduce(state, action)       │
+    ↓                                    │
+(newState, effects[])                    │
+    ↓                                    │
+TimerViewModel.executeEffects()          │
+    ↓                                    │
+[Side Effects] ──────────────────────────┘
+  ├── Notifications
+  ├── Haptics
+  ├── Live Activity
+  ├── History Save
+  └── State Persistence
+```
+
+### Feature Structure
+
+```
+TsukiUsagi/
+├── Entry/
+│   └── TsukiUsagiApp.swift
+├── Foundation/
+│   ├── DesignTokens.swift
+│   ├── Protocols/
+│   └── Managers/
+└── Features/
+    ├── Timer/
+    │   ├── Views/
+    │   ├── ViewModels/
+    │   ├── Managers/
+    │   └── Models/
+    ├── History/
+    │   ├── Views/
+    │   ├── ViewModels/
+    │   └── Models/
+    ├── Settings/
+    │   └── Views/
+    ├── Streak/
+    │   └── Views/
+    └── Common/
+        └── Components/
+```
+
+### Persistence Layer
+
+| Type | Storage | Purpose |
+|------|---------|---------|
+| UserDefaults | `@AppStorage` | Settings (work/break minutes, labels) |
+| File-based | `Documents/history.json` | Session history |
+| Memory | `@Published` | Runtime state |
+
+---
+
 ## 🌸 Story
 
 **Born from a moment I almost cried.**
