@@ -6,13 +6,10 @@ import Foundation
 
 enum Messages {
     enum Reflection {
-        static let placeholder = NSLocalizedString("reflection_placeholder", comment: "Reflection placeholder")
+        static let placeholder = "reflection_placeholder".localized
     }
 
     enum Placeholders {
-        static let addReflection = NSLocalizedString(
-            "history_memo_add_reflection_placeholder",
-            comment: "Add reflection placeholder"
-        )
+        static let addReflection = "history_memo_add_reflection_placeholder".localized
     }
 }

@@ -7,55 +7,46 @@ import Foundation
 
 enum Labels {
     enum Sections {
-        static let sessionManagement = NSLocalizedString("session_management_title", comment: "Session Management")
-        static let defaultSessions = NSLocalizedString("default_sessions_title", comment: "Default Sessions")
-        static let customSessions = NSLocalizedString("custom_sessions_title", comment: "Custom Sessions")
-        static let editTasks = NSLocalizedString("edit_tasks_title", comment: "Edit Tasks")
-        static let editSession = NSLocalizedString("edit_session_title", comment: "Edit Session")
-        static let deleteSession = NSLocalizedString("delete_session_title", comment: "Delete Session")
-        static let newCustomSession = NSLocalizedString("new_custom_session_title", comment: "New Custom Session")
-        static let createCustomSession = NSLocalizedString(
-            "create_custom_session_title",
-            comment: "Create Custom Session"
-        )
-        static let sessionLabel = NSLocalizedString("timer_edit_session_label_section_title", comment: "Session Label")
-        static let finalTime = NSLocalizedString("timer_edit_final_time_title", comment: "Final Time")
-        static let editRecord = NSLocalizedString("timer_edit_record_title", comment: "Edit Record")
-        static let sessionInfo = NSLocalizedString("history_memo_session_info", comment: "Session Info")
-        static let reflection = NSLocalizedString("reflection_title", comment: "Reflection")
-        static let settingsDurationAndSession = NSLocalizedString(
-            "settings_duration_session_settings",
-            comment: "Duration & Session Settings View"
-        )
-        static let addReflection = NSLocalizedString("history_memo_add_reflection", comment: "Add reflection title")
-        static let editReflection = NSLocalizedString("history_memo_edit_reflection", comment: "Edit reflection title")
+        static let sessionManagement = "session_management_title".localized
+        static let defaultSessions = "default_sessions_title".localized
+        static let customSessions = "custom_sessions_title".localized
+        static let editTasks = "edit_tasks_title".localized
+        static let editSession = "edit_session_title".localized
+        static let deleteSession = "delete_session_title".localized
+        static let newCustomSession = "new_custom_session_title".localized
+        static let createCustomSession = "create_custom_session_title".localized
+        static let sessionLabel = "timer_edit_session_label_section_title".localized
+        static let finalTime = "timer_edit_final_time_title".localized
+        static let editRecord = "timer_edit_record_title".localized
+        static let sessionInfo = "history_memo_session_info".localized
+        static let reflection = "reflection_title".localized
+        static let settingsDurationAndSession = "settings_duration_session_settings".localized
+        static let addReflection = "history_memo_add_reflection".localized
+        static let editReflection = "history_memo_edit_reflection".localized
     }
 
     enum InfoRow {
-        static let sessionName = NSLocalizedString("session_name_label", comment: "Session Name")
-        static let tasks = NSLocalizedString("tasks_label", comment: "Tasks")
-        static let defaultSession = NSLocalizedString("default_session_label", comment: "Default Session")
-        static let customSession = NSLocalizedString("custom_session_label", comment: "Custom Session")
-        static let sessionNameRequired = NSLocalizedString("session_name_required_label", comment: "Session Name *")
-        static let tasksOptional = NSLocalizedString("tasks_optional_label", comment: "Tasks (Optional)")
-        static let historyMode = NSLocalizedString("history_picker_label", comment: "History Mode")
-        static let session = NSLocalizedString("history_memo_session", comment: "Session:")
-        static let task = NSLocalizedString("history_memo_task", comment: "Task:")
-        static let duration = NSLocalizedString("history_memo_duration", comment: "Duration:")
-        static let reflection = NSLocalizedString("history_memo_reflection", comment: "Reflection")
+        static let sessionName = "session_name_label".localized
+        static let tasks = "tasks_label".localized
+        static let defaultSession = "default_session_label".localized
+        static let customSession = "custom_session_label".localized
+        static let sessionNameRequired = "session_name_required_label".localized
+        static let tasksOptional = "tasks_optional_label".localized
+        static let historyMode = "history_picker_label".localized
+        static let session = "history_memo_session".localized
+        static let task = "history_memo_task".localized
+        static let duration = "history_memo_duration".localized
+        static let reflection = "history_memo_reflection".localized
     }
 
     enum State {
-        static let noTask = NSLocalizedString("session_task_none", comment: "No task")
-        static let noTasksConfigured = NSLocalizedString("session_task_none_available", comment: "No tasks configured")
-        static let noRecordsForThisDay = NSLocalizedString(
-            "history_detail_no_records",
-            comment: "No records for this day"
-        )
-        static let readOnly = NSLocalizedString("settings_read_only", comment: "READ-ONLY")
+        static let noTask = "session_task_none".localized
+        static let noTasksConfigured = "session_task_none_available".localized
+        static let noRecordsForThisDay = "history_detail_no_records".localized
+        static let readOnly = "settings_read_only".localized
     }
 
     enum Settings {
-        static let manageSessionNames = NSLocalizedString("settings_manage_session_names", comment: "Manage sessions")
+        static let manageSessionNames = "settings_manage_session_names".localized
     }
 }

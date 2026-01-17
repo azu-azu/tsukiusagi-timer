@@ -101,3 +101,7 @@
 // Input Bar Accessibility
 "expand_editor" = "Expand editor";
 "submit" = "Submit";
+
+// Language Settings
+"settings.language.title" = "Language";
+"settings.language.system" = "System";
