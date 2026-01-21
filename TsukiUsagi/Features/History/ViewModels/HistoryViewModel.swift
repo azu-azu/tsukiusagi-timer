@@ -11,7 +11,7 @@ extension Notification.Name {
 }
 
 @MainActor
-class HistoryViewModel: ObservableObject {
+class HistoryViewModel: ObservableObject, SessionHistoryServiceable {
     @Published private(set) var history: [SessionRecord] = []
     @Published internal var reflectionsByDay: [Date: DayReflection] = [:]
     @Published internal var isSavingReflections = false

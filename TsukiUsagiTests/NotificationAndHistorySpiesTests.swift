@@ -63,7 +63,7 @@ final class NotificationAndHistorySpiesTests: XCTestCase {
             engine: mock.timerEngine,
             notificationService: spyNotification,
             hapticService: mock.hapticService,
-            historyService: mock.historyService,
+            historyService: mock.historyVM,
             persistenceManager: mock.persistenceManager,
             formatter: mock.formatter
         )

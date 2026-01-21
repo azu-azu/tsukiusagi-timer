@@ -1,21 +1,15 @@
+//
+//  SessionHistoryService.swift
+//  TsukiUsagi
+//
+//  Protocol for session history operations.
+//  HistoryViewModel conforms to this protocol directly.
+//
+
 import Foundation
 
+/// Protocol for session history service
+/// Implemented by HistoryViewModel to avoid reverse dependency
 protocol SessionHistoryServiceable: AnyObject {
     @MainActor func add(parameters: AddSessionParameters)
-}
-
-final class SessionHistoryService: SessionHistoryServiceable {
-    private let formatter: TimeFormatterUtilable
-    private weak var historyVM: HistoryViewModel?
-
-    init(formatter: TimeFormatterUtilable, historyVM: HistoryViewModel) {
-        self.formatter = formatter
-        self.historyVM = historyVM
-    }
-
-    @MainActor
-    func add(parameters: AddSessionParameters) {
-        // HistoryViewModel に委譲して単一ソース・オブ・トゥルースを保つ
-        historyVM?.add(parameters: parameters)
-    }
 }

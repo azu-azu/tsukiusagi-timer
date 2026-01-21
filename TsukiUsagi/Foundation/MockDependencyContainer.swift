@@ -23,12 +23,11 @@ final class MockTimerEngine: TimerEngineable {
 
 @MainActor
 final class MockDependencyContainer {
-    // Services (必要に応じて他もモック化)
+    // Services
     let timerEngine: TimerEngineable = MockTimerEngine()
     let hapticService = HapticService()
     let formatter = TimeFormatterUtil()
     let notificationService: PhaseNotificationServiceable
-    let historyService: SessionHistoryServiceable
     let persistenceManager = TimerPersistenceManager()
     let dateProvider: DateProviding
 
@@ -40,12 +39,11 @@ final class MockDependencyContainer {
     init(dateProvider: DateProviding = SystemDateProvider()) {
         self.dateProvider = dateProvider
         self.notificationService = PhaseNotificationService(hapticService: hapticService)
-        self.historyService = SessionHistoryService(formatter: formatter, historyVM: historyVM)
         self.timerVM = TimerViewModel(
             engine: timerEngine,
             notificationService: notificationService,
             hapticService: hapticService,
-            historyService: historyService,
+            historyService: historyVM,  // HistoryViewModel as SessionHistoryServiceable
             persistenceManager: persistenceManager,
             formatter: formatter,
             dateProvider: dateProvider
