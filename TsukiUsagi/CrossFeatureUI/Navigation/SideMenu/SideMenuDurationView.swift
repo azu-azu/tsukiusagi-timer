@@ -77,7 +77,7 @@ struct SideMenuDurationView: View {
                 // 鉛筆マークでの編集リンク
                 HStack {
                     Spacer()
-                    NavigationLink(destination: DurationSessionSettingsView()) {
+                    NavigationLink(destination: SessionConfigView()) {
                         PencilIcon(size: .medium)
                             .frame(width: 20, height: 20)
                     }

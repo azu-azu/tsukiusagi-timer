@@ -102,6 +102,10 @@
 "expand_editor" = "Expand editor";
 "submit" = "Submit";
 
+// App Settings
+"settings_title" = "Settings";
+"session_config_title" = "Session Config";
+
 // Language Settings
 "settings.language.title" = "Language";
 "settings.language.system" = "System";

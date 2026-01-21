@@ -84,6 +84,13 @@ struct SideMenuView: View {
                                 destination: HistoryView()
                             )
 
+                            menuItem(
+                                icon: "gearshape.fill",
+                                title: "settings_title".localized,
+                                itemVerticalPadding: itemVerticalPadding,
+                                destination: AppSettingsView()
+                            )
+
                             Divider()
                                 .background(DesignTokens.CosmosColors.cardBackground)
                                 .padding(.top, sectionSpacing)

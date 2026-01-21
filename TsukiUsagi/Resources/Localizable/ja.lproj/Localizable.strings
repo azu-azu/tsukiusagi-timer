@@ -102,6 +102,10 @@
 "expand_editor" = "エディタを拡大";
 "submit" = "送信";
 
+// App Settings
+"settings_title" = "設定";
+"session_config_title" = "セッション設定";
+
 // Language Settings
 "settings.language.title" = "言語";
 "settings.language.system" = "システム設定に従う";
