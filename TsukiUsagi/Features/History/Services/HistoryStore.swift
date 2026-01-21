@@ -61,40 +61,6 @@ struct HistoryStore {
         try encoded.write(to: url, options: [.atomic, .completeFileProtectionUnlessOpen])
     }
 
-    /// 非同期に保存し、結果をコールバックで返す
-    @available(*, deprecated, message: "Use saveSync for critical saves. This async version may lose data on crash.")
-    func save(_ snapshot: HistorySnapshot, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        do {
-            let payload = PersistedHistory(
-                migrationVersion: snapshot.migrationVersion,
-                sessions: snapshot.sessions,
-                reflections: Array(snapshot.reflections.values)
-            )
-            let encoded = try encoder.encode(payload)
-            let fileURL = url // capture for async write
-
-            DispatchQueue.global(qos: .utility).async {
-                do {
-                    try encoded.write(
-                        to: fileURL,
-                        options: [.atomic, .completeFileProtectionUnlessOpen]
-                    )
-                    completion?(.success(()))
-                } catch {
-                    #if DEBUG
-                        print("[history_save_failed] HistoryStore save failed:", error)
-                    #endif
-                    completion?(.failure(error))
-                }
-            }
-        } catch {
-            #if DEBUG
-                print("[history_save_failed] HistoryStore encoding failed:", error)
-            #endif
-            completion?(.failure(error))
-        }
-    }
-
     // MARK: - Load
 
     func load() -> HistorySnapshot {
