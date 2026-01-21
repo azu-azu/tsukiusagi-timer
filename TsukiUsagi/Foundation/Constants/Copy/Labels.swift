@@ -20,7 +20,6 @@ enum Labels {
         static let editRecord = "timer_edit_record_title".localized
         static let sessionInfo = "history_memo_session_info".localized
         static let reflection = "reflection_title".localized
-        static let settingsDurationAndSession = "settings_duration_session_settings".localized
         static let addReflection = "history_memo_add_reflection".localized
         static let editReflection = "history_memo_edit_reflection".localized
     }

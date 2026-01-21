@@ -93,22 +93,23 @@ TsukiUsagi/
 │   │   │   │   │   │   └── SessionRowView.swift
 │   │   │   │   │   └── SettingsHeaderView.swift
 │   │   │   ├── Screens/                          # 画面（Screen）
+│   │   │   │   ├── AppSettingsView.swift         # アプリ設定（言語切替）
 │   │   │   │   ├── NewSessionFormView.swift      # 新規作成シート
 │   │   │   │   ├── SessionEditView.swift         # 編集画面
 │   │   │   │   └── SessionManagementView.swift   # 更新：UI改善
 │   │   │   ├── Sections/
 │   │   │   │   ├── Duration/
 │   │   │   │   │   ├── DurationHelpers.swift
-│   │   │   │   │   └── DurationSessionSettingsView.swift
+│   │   │   │   │   └── SessionConfigView.swift   # セッション設定
 │   │   │   │   ├── Notification/                  # 新規追加
 │   │   │   │   │   └── NotificationSettingsView.swift
 │   │   │   │   ├── ResetStop/
 │   │   │   │   │   └── ResetStopSectionView.swift
 │   │   │   │   ├── SubtitleEdit/
-│   │   │   │   │   ├── DescriptionEditContent.swift
 │   │   │   │   │   ├── FullSessionEditContent.swift
 │   │   │   │   │   ├── SessionEditModal+Preview.swift
-│   │   │   │   │   └── SubtitleEditModels.swift
+│   │   │   │   │   ├── SubtitleEditModels.swift
+│   │   │   │   │   └── TaskEditContent.swift
 │   │   │   │   └── ViewHistory/
 │   │   │   │       └── ViewHistorySectionView.swift
 │   │   │   └── SheetBuilders/

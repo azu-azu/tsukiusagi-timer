@@ -81,7 +81,6 @@
 "settings_add_tasks_description" = "Add tasks for what you'll work on during this session";
 "settings_saved" = "Saved...";
 "settings_manage_session_names" = "Manage sessions";
-"settings_duration_session_settings" = "Duration & Session Settings View";
 "settings_read_only" = "READ-ONLY";
 "settings_delete_session_question" = "Delete Session?";
 "settings_delete_session_message" = "Are you sure you want to delete this session name?";
