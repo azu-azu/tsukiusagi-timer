@@ -125,7 +125,9 @@ class AchievementManager {
                 }
 
                 newlyUnlocked.append(newAchievement)
-                print("🏆 Achievement Unlocked: \\(newAchievement.title)")
+                #if DEBUG
+                print("🏆 Achievement Unlocked: \(newAchievement.title)")
+                #endif
             }
         }
 
@@ -172,9 +174,13 @@ class AchievementManager {
         do {
             let data = try JSONEncoder().encode(achievements)
             userDefaults.set(data, forKey: achievementsKey)
+            #if DEBUG
             print("🏆 Achievements saved successfully")
+            #endif
         } catch {
-            print("🏆 Failed to save achievements - \\(error)")
+            #if DEBUG
+            print("🏆 Failed to save achievements - \(error)")
+            #endif
         }
     }
 
@@ -182,16 +188,22 @@ class AchievementManager {
         guard let data = userDefaults.data(forKey: achievementsKey) else {
             // No existing achievements, create default set
             let defaultAchievements = Achievement.AchievementType.allCases.map { $0.defaultAchievement }
+            #if DEBUG
             print("🏆 Created default achievement set")
+            #endif
             return defaultAchievements
         }
 
         do {
             let achievements = try JSONDecoder().decode([Achievement].self, from: data)
-            print("🏆 Loaded \\(achievements.count) achievements")
+            #if DEBUG
+            print("🏆 Loaded \(achievements.count) achievements")
+            #endif
             return achievements
         } catch {
-            print("🏆 Failed to decode achievements, creating new - \\(error)")
+            #if DEBUG
+            print("🏆 Failed to decode achievements, creating new - \(error)")
+            #endif
             return Achievement.AchievementType.allCases.map { $0.defaultAchievement }
         }
     }

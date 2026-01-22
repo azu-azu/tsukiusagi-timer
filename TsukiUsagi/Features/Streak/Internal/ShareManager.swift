@@ -35,7 +35,9 @@ class ShareManager: ObservableObject {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                 let window = windowScene.windows.first,
                 let rootViewController = window.rootViewController else {
+            #if DEBUG
             print("❌ Could not find root view controller for share sheet")
+            #endif
             return
         }
 
