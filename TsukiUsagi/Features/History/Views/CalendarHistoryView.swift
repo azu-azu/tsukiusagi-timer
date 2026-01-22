@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 struct CalendarHistoryView: View {
     @EnvironmentObject var historyVM: HistoryViewModel

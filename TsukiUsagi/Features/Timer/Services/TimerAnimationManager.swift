@@ -1,5 +1,4 @@
 import Combine
-import Foundation
 import SwiftUI
 
 /// アニメーション関連の処理を担当するManager

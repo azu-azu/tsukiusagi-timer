@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 extension ContentView {
     // MARK: - Layout Calculations

@@ -8,7 +8,6 @@
 import Combine
 import SwiftUI
 import UIKit
-import Foundation
 
 enum TimerRunState: String {
     case idle

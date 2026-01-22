@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 /// 合計表示用カードコンポーネント
 /// History/Settings で使用する統一された合計表示スタイル

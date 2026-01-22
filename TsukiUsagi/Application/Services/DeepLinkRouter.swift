@@ -5,7 +5,6 @@
 //  Created by Kazumi on 2025/01/19.
 //
 
-import Foundation
 import SwiftUI
 
 /// URL Scheme を処理してタイマー画面にナビゲート

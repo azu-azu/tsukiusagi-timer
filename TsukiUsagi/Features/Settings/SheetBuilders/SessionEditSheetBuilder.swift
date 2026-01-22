@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 /// セッション編集モーダル管理コンポーネント
 ///

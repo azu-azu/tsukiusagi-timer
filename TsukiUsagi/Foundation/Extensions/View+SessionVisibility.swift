@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 extension View {
     /// セッション終了時など、一時的なViewの可視性・アクセシビリティ・タッチ制御をまとめて行うmodifier

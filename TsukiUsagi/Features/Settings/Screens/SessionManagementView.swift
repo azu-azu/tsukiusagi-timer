@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 struct SessionManagementView: View {
     @EnvironmentObject var sessionManager: SessionManager

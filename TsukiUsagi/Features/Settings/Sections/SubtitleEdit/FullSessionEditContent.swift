@@ -11,7 +11,6 @@
 //
 
 import SwiftUI
-import Foundation
 import UIKit
 
 /// Custom Session全体編集用のコンテンツView

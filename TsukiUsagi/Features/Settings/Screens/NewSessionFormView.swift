@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 extension String {
     /// Manager/Validatorと完全同一実装

@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 // MARK: - ヘッダーボタンの設定
 struct HeaderButton {

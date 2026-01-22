@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 struct DailyDetailView: View {
     let date: Date

@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 struct BackgroundPurple: View {
     var body: some View {

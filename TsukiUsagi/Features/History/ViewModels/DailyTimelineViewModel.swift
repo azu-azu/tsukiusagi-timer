@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Foundation
 
 /// DailyTimelineViewの状態管理とビジネスロジックを担当するViewModel
 @MainActor

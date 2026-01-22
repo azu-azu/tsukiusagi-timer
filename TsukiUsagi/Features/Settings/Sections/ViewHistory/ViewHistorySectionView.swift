@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 struct ViewHistorySectionView: View {
     @EnvironmentObject private var historyVM: HistoryViewModel

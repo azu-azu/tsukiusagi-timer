@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 struct TimerTextView: View {
     let timeText: String

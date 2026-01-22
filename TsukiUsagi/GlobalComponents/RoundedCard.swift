@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 /// 統一カードスタイルコンポーネント
 /// Asset Catalog からカラーを参照し、Light/Dark モードに対応
