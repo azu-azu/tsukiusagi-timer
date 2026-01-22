@@ -67,7 +67,7 @@ struct AppSettingsView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: languageProvider.language == lang ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 20))
+                    .font(DesignTokens.Fonts.symbolLarge)
                     .foregroundColor(
                         languageProvider.language == lang
                             ? DesignTokens.MoonColors.accentBlue

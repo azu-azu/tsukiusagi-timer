@@ -220,9 +220,18 @@ struct AchievementsSectionView: View {
 
 #Preview("Achievements View") {
     let sampleAchievements = [
-        Achievement(type: .firstDay, title: "First Timer", description: "Complete your first timer session", iconName: "🎯", unlockedAt: Date()),
-        Achievement(type: .weekWarrior, title: "Week Warrior", description: "Use the timer all 7 days in a week", iconName: "🗓️", unlockedAt: nil),
-        Achievement(type: .centurion, title: "Centurion", description: "Achieve a 100-day streak", iconName: "💯", unlockedAt: nil)
+        Achievement(
+            type: .firstDay, title: "First Timer",
+            description: "Complete your first timer session", iconName: "🎯", unlockedAt: Date()
+        ),
+        Achievement(
+            type: .weekWarrior, title: "Week Warrior",
+            description: "Use the timer all 7 days in a week", iconName: "🗓️", unlockedAt: nil
+        ),
+        Achievement(
+            type: .centurion, title: "Centurion",
+            description: "Achieve a 100-day streak", iconName: "💯", unlockedAt: nil
+        )
     ]
     return AchievementsView(achievements: sampleAchievements)
         .background(DesignTokens.CosmosColors.background)

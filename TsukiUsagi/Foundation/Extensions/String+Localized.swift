@@ -3,9 +3,12 @@
 //  TsukiUsagi
 //
 //  String extension for app language-aware localization
+//  Note: This file intentionally uses NSLocalizedString directly as it's the localization helper.
 //
 
 import Foundation
+
+// swiftlint:disable forbid_direct_localized_string
 
 // MARK: - String Extensions for Localization
 
@@ -35,3 +38,5 @@ extension String {
         return NSLocalizedString(self, tableName: nil, bundle: bundle, value: "", comment: "")
     }
 }
+
+// swiftlint:enable forbid_direct_localized_string

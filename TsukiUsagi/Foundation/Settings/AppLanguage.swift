@@ -10,10 +10,13 @@ import SwiftUI
 // MARK: - AppLanguage Enum
 
 /// App language options
+/// Note: Raw values are explicit for UserDefaults persistence stability
 public enum AppLanguage: String, CaseIterable, Identifiable {
+    // swiftlint:disable redundant_string_enum_value
     case system = "system"  // Follow device settings
     case ja = "ja"          // Japanese
     case en = "en"          // English
+    // swiftlint:enable redundant_string_enum_value
 
     public var id: String { rawValue }
 
