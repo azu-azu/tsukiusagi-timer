@@ -37,8 +37,6 @@ final class NotificationPermissionManager {
 
             // リクエスト済みフラグを設定
             userDefaults.set(true, forKey: hasRequestedPermissionKey)
-            _ = granted
-
             return granted
         } catch {
             userDefaults.set(true, forKey: hasRequestedPermissionKey)
