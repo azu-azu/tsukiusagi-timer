@@ -115,7 +115,7 @@ TsukiUsagi/
 │   │   │   └── SheetBuilders/
 │   │   │       └── SessionEditSheetBuilder.swift
 │   │   ├── Streak/
-│   │   │   ├── DevOnly/                          # 開発専用機能
+│   │   │   ├── Internal/                         # 内部機能（実績・XP・通知管理）
 │   │   │   │   ├── AchievementsView.swift
 │   │   │   │   ├── AchievementManager.swift
 │   │   │   │   ├── ShareManager.swift
@@ -252,5 +252,5 @@ TsukiUsagi/
 - Settings の新規作成シートは `NewSessionFormView` を使用し、Edit 画面は `SessionEditView` です。
 - Foundation 層は `DesignTokens` と拡張系ユーティリティを中核に、UIKit 連携は `UIKitSupport` 配下に整理されています。
 - History 機能に `Month.swift` モデルを追加し、TabView の安定したページ管理を実現しています。
-- Streak 機能は開発専用機能を `DevOnly` ディレクトリに分離しています。
+- Streak 機能の内部実装（実績・XP・通知管理）は `Internal` ディレクトリに整理しています。
 - 全148個のSwiftファイルで構成されています。
