@@ -82,13 +82,9 @@ struct ResetStopSectionView: View {
 
 }
 
-#if DEBUG
-struct ResetStopSectionView_Previews: PreviewProvider {
-    static var previews: some View {
-        let vm = PreviewData.MockServices.makeTimerViewModel()
-        vm._setPreviewState(startTime: Date(), isWorkSession: true, isRunning: true)
-        return ResetStopSectionView()
-            .environmentObject(vm)
-    }
+#Preview {
+    let vm = PreviewData.MockServices.makeTimerViewModel()
+    vm._setPreviewState(startTime: Date(), isWorkSession: true, isRunning: true)
+    return ResetStopSectionView()
+        .environmentObject(vm)
 }
-#endif

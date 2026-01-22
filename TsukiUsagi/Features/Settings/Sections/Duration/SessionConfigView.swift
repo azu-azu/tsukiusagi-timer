@@ -252,11 +252,7 @@ struct SessionConfigView: View {
     }
 }
 
-#if DEBUG
-struct SessionConfigView_Previews: PreviewProvider {
-    static var previews: some View {
-        Text("Session Config")
-            .padding()
-    }
+#Preview {
+    Text("Session Config")
+        .padding()
 }
-#endif

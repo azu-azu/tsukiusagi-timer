@@ -88,10 +88,6 @@ struct AppSettingsView: View {
     }
 }
 
-#if DEBUG
-struct AppSettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        AppSettingsView()
-    }
+#Preview {
+    AppSettingsView()
 }
-#endif

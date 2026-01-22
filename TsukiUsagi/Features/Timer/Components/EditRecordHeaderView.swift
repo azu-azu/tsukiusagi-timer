@@ -58,19 +58,15 @@ struct EditRecordHeaderView: View {
 }
 
 // MARK: - プレビュー
-#if DEBUG
-struct EditRecordHeaderView_Previews: PreviewProvider {
-    static var previews: some View {
-        EditRecordHeaderView(
-            editedActivity: "Work",
-            editedTask: "Test task",
-            editedMemo: "Test memo",
-            editedEnd: Date(),
-            isSaveDisabledExtra: false
-        )
-        .environmentObject(HistoryViewModel())
-        .environmentObject(PreviewData.MockServices.makeTimerViewModel())
-        .background(DesignTokens.CosmosColors.background)
-    }
+#Preview {
+    EditRecordHeaderView(
+        editedActivity: "Work",
+        editedTask: "Test task",
+        editedMemo: "Test memo",
+        editedEnd: Date(),
+        isSaveDisabledExtra: false
+    )
+    .environmentObject(HistoryViewModel())
+    .environmentObject(PreviewData.MockServices.makeTimerViewModel())
+    .background(DesignTokens.CosmosColors.background)
 }
-#endif

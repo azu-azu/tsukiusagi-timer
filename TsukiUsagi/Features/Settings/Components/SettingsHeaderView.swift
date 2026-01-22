@@ -37,12 +37,8 @@ struct SettingsHeaderView: View {
 }
 
 // MARK: - プレビュー
-#if DEBUG
-struct SettingsHeaderView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsHeaderView()
-            .environmentObject(PreviewData.MockServices.makeTimerViewModel())
-            .background(DesignTokens.CosmosColors.background)
-    }
+#Preview {
+    SettingsHeaderView()
+        .environmentObject(PreviewData.MockServices.makeTimerViewModel())
+        .background(DesignTokens.CosmosColors.background)
 }
-#endif

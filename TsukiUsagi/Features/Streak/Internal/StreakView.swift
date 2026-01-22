@@ -118,16 +118,11 @@ extension StreakManager {
 
 // MARK: - Preview
 
-#if DEBUG
-struct StreakView_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack(spacing: 20) {
-            StreakView()
-            StreakCardView()
-        }
-        .padding()
-        .background(DesignTokens.CosmosColors.background)
-        .previewDisplayName("Streak Views")
+#Preview("Streak Views") {
+    VStack(spacing: 20) {
+        StreakView()
+        StreakCardView()
     }
+    .padding()
+    .background(DesignTokens.CosmosColors.background)
 }
-#endif

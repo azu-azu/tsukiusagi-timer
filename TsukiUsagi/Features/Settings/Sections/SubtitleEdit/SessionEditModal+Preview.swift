@@ -12,70 +12,62 @@
 
 import SwiftUI
 
-#if DEBUG
-struct SessionEditModal_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            // Task編集のプレビュー
-            EditableModal(
-                title: "Manage Tasks",
-                onSave: { print("Save tapped") },
-                onCancel: { print("Cancel tapped") },
-                isSaveDisabled: false,
-                isKeyboardCloseVisible: false,
-                onKeyboardClose: {},
-                focusedRowID: .constant(nil),
-                content: {
-                    TaskEditContent(
-                        sessionName: "Work",
-                        taskDrafts: [
-                            SessionEditSheetBuilder.TaskDraft(text: "SwiftUI development"),
-                            SessionEditSheetBuilder.TaskDraft(text: "Code review")
-                        ],
-                        duplicateIDs: [],
-                        editingTaskID: nil,
-                        onTaskTap: { _ in print("Task tapped") },
-                        onNewTaskTap: { print("New task tapped") },
-                        onTaskDelete: { _ in print("Task deleted") },
-                        isAddingNewTask: false
-                    )
-                }
+#Preview("Task Edit") {
+    EditableModal(
+        title: "Manage Tasks",
+        onSave: { print("Save tapped") },
+        onCancel: { print("Cancel tapped") },
+        isSaveDisabled: false,
+        isKeyboardCloseVisible: false,
+        onKeyboardClose: {},
+        focusedRowID: .constant(nil),
+        content: {
+            TaskEditContent(
+                sessionName: "Work",
+                taskDrafts: [
+                    SessionEditSheetBuilder.TaskDraft(text: "SwiftUI development"),
+                    SessionEditSheetBuilder.TaskDraft(text: "Code review")
+                ],
+                duplicateIDs: [],
+                editingTaskID: nil,
+                onTaskTap: { _ in print("Task tapped") },
+                onNewTaskTap: { print("New task tapped") },
+                onTaskDelete: { _ in print("Task deleted") },
+                isAddingNewTask: false
             )
-            .presentationDetents([.large])
-            .previewDisplayName("Task Edit")
-
-            // Full Session編集のプレビュー
-            FullSessionEditPreviewWrapper()
-                .presentationDetents([.large])
-                .previewDisplayName("Full Session Edit")
-
-            // EditableModal単体のプレビュー
-            EditableModal(
-                title: "Sample Modal",
-                onSave: { print("Save tapped") },
-                onCancel: { print("Cancel tapped") },
-                isSaveDisabled: false,
-                isKeyboardCloseVisible: true,
-                onKeyboardClose: { print("Keyboard close tapped") },
-                focusedRowID: .constant(nil),
-                content: {
-                    VStack {
-                        Text(LocalizedStringKey("settings_sample_content"))
-                            .font(DesignTokens.Fonts.title)
-                            .padding()
-
-                        Text(LocalizedStringKey("settings_demo_description"))
-                            .font(DesignTokens.Fonts.label)
-                            .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
-                            .multilineTextAlignment(.center)
-                            .padding()
-                    }
-                }
-            )
-            .presentationDetents([.medium])
-            .previewDisplayName("EditableModal Base")
         }
-    }
+    )
+    .presentationDetents([.large])
+}
+
+#Preview("Full Session Edit") {
+    FullSessionEditPreviewWrapper()
+        .presentationDetents([.large])
+}
+
+#Preview("EditableModal Base") {
+    EditableModal(
+        title: "Sample Modal",
+        onSave: { print("Save tapped") },
+        onCancel: { print("Cancel tapped") },
+        isSaveDisabled: false,
+        isKeyboardCloseVisible: true,
+        onKeyboardClose: { print("Keyboard close tapped") },
+        focusedRowID: .constant(nil),
+        content: {
+            VStack {
+                Text(LocalizedStringKey("settings_sample_content"))
+                    .font(DesignTokens.Fonts.title)
+                    .padding()
+                Text(LocalizedStringKey("settings_demo_description"))
+                    .font(DesignTokens.Fonts.label)
+                    .foregroundColor(DesignTokens.SkyToneColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding()
+            }
+        }
+    )
+    .presentationDetents([.medium])
 }
 
 /// FullSessionEditContentのプレビュー用ラッパー（@Stateが必要なため）
@@ -111,4 +103,3 @@ private struct FullSessionEditPreviewWrapper: View {
         )
     }
 }
-#endif

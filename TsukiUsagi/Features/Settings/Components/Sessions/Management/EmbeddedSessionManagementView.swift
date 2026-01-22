@@ -334,16 +334,12 @@ private extension EmbeddedSessionManagementView {
     }
 }
 
-#if DEBUG
-struct EmbeddedSessionManagementView_Previews: PreviewProvider {
-    static var previews: some View {
-        EmbeddedSessionManagementView()
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .tsukiSoundCard(padding: 0)
-            .environmentObject(SessionManager())
-            .padding()
-            .background(DesignTokens.SkyToneColors.backgroundGradient)
-    }
+#Preview {
+    EmbeddedSessionManagementView()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .tsukiSoundCard(padding: 0)
+        .environmentObject(SessionManager())
+        .padding()
+        .background(DesignTokens.SkyToneColors.backgroundGradient)
 }
-#endif

@@ -346,15 +346,11 @@ extension SessionEditView {
     }
 }
 
-#if DEBUG
-struct SessionEditView_Previews: PreviewProvider {
-    static var previews: some View {
-        SessionEditView(session: SessionEntry(
-            sessionName: "Work",
-            tasks: ["Deep focus", "Meeting"],
-            isDefault: true
-        ))
-        .environmentObject(SessionManager())
-    }
+#Preview {
+    SessionEditView(session: SessionEntry(
+        sessionName: "Work",
+        tasks: ["Deep focus", "Meeting"],
+        isDefault: true
+    ))
+    .environmentObject(SessionManager())
 }
-#endif

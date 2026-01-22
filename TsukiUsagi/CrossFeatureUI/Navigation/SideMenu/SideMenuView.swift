@@ -248,23 +248,17 @@ private extension Text {
     }
 }
 
-#if DEBUG
-struct SideMenuView_Previews: PreviewProvider {
-    static var previews: some View {
-        let timerVM = PreviewData.MockServices.makeTimerViewModel()
-        let historyVM = HistoryViewModel()
-        let sessionManager = SessionManager()
-
-        NavigationView {
-            ZStack {
-                DesignTokens.CosmosColors.background.ignoresSafeArea()
-                SideMenuView(isPresented: .constant(true))
-            }
+#Preview(traits: .landscapeLeft) {
+    let timerVM = PreviewData.MockServices.makeTimerViewModel()
+    let historyVM = HistoryViewModel()
+    let sessionManager = SessionManager()
+    return NavigationView {
+        ZStack {
+            DesignTokens.CosmosColors.background.ignoresSafeArea()
+            SideMenuView(isPresented: .constant(true))
         }
-        .environmentObject(timerVM)
-        .environmentObject(historyVM)
-        .environmentObject(sessionManager)
-        .previewInterfaceOrientation(.landscapeLeft)
     }
+    .environmentObject(timerVM)
+    .environmentObject(historyVM)
+    .environmentObject(sessionManager)
 }
-#endif

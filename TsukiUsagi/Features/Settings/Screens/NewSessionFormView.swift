@@ -332,13 +332,9 @@ private extension NewSessionFormView {
     }
 }
 
-#if DEBUG
-struct NewSessionFormView_Previews: PreviewProvider {
-    static var previews: some View {
-        NewSessionFormView()
-            .environmentObject(SessionManager())
-            .padding()
-            .background(DesignTokens.SkyToneColors.nightStart)
-    }
+#Preview {
+    NewSessionFormView()
+        .environmentObject(SessionManager())
+        .padding()
+        .background(DesignTokens.SkyToneColors.nightStart)
 }
-#endif

@@ -378,15 +378,17 @@ private extension ContentView {
 
 // Dummy* は MockDependencyContainer への統一方針により削除
 
-#if DEBUG
-@MainActor
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        let mock = MockDependencyContainer()
-        return ContentView()
+#Preview {
+    ContentViewPreviewWrapper()
+}
+
+private struct ContentViewPreviewWrapper: View {
+    @MainActor private let mock = MockDependencyContainer()
+
+    var body: some View {
+        ContentView()
             .environmentObject(mock.historyVM)
             .environmentObject(mock.timerVM)
             .environmentObject(mock.sessionManager)
     }
 }
-#endif

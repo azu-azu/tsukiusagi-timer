@@ -212,49 +212,24 @@ struct AchievementsSectionView: View {
 
 // MARK: - Preview
 
-#if DEBUG
-struct AchievementsView_Previews: PreviewProvider {
-    static var previews: some View {
-        let sampleAchievements = [
-            Achievement(
-                type: .firstDay,
-                title: "First Timer",
-                description: "Complete your first timer session",
-                iconName: "🎯",
-                unlockedAt: Date()
-            ),
-            Achievement(
-                type: .weekWarrior,
-                title: "Week Warrior",
-                description: "Use the timer all 7 days in a week",
-                iconName: "🗓️",
-                unlockedAt: nil
-            ),
-            Achievement(
-                type: .centurion,
-                title: "Centurion",
-                description: "Achieve a 100-day streak",
-                iconName: "💯",
-                unlockedAt: nil
-            )
-        ]
-
-        Group {
-            // Level View Preview
-            LevelView(level: UserLevel.calculateLevel(from: 250))
-                .padding()
-                .previewDisplayName("Level View - Level 2")
-
-            // Achievements View Preview
-            AchievementsView(achievements: sampleAchievements)
-                .previewDisplayName("Achievements View")
-
-            // High Level Preview
-            LevelView(level: UserLevel.calculateLevel(from: 5000))
-                .padding()
-                .previewDisplayName("Level View - Level 8 Expert")
-        }
+#Preview("Level View - Level 2") {
+    LevelView(level: UserLevel.calculateLevel(from: 250))
+        .padding()
         .background(DesignTokens.CosmosColors.background)
-    }
 }
-#endif
+
+#Preview("Achievements View") {
+    let sampleAchievements = [
+        Achievement(type: .firstDay, title: "First Timer", description: "Complete your first timer session", iconName: "🎯", unlockedAt: Date()),
+        Achievement(type: .weekWarrior, title: "Week Warrior", description: "Use the timer all 7 days in a week", iconName: "🗓️", unlockedAt: nil),
+        Achievement(type: .centurion, title: "Centurion", description: "Achieve a 100-day streak", iconName: "💯", unlockedAt: nil)
+    ]
+    return AchievementsView(achievements: sampleAchievements)
+        .background(DesignTokens.CosmosColors.background)
+}
+
+#Preview("Level View - Level 8 Expert") {
+    LevelView(level: UserLevel.calculateLevel(from: 5000))
+        .padding()
+        .background(DesignTokens.CosmosColors.background)
+}

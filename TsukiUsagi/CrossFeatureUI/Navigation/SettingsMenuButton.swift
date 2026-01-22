@@ -17,15 +17,10 @@ struct SettingsMenuButton: View {
     }
 }
 
-#if DEBUG
-struct SettingsMenuButton_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsMenuButton {
-            print("Menu tapped")
-        }
-        .background(DesignTokens.BlackColors.primary)
-        .previewLayout(.sizeThatFits)
-        .padding()
+#Preview {
+    SettingsMenuButton {
+        print("Menu tapped")
     }
+    .background(DesignTokens.BlackColors.primary)
+    .padding()
 }
-#endif

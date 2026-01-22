@@ -302,13 +302,9 @@ extension SessionManagementView {
     }
 }
 
-#if DEBUG
-struct SessionManagementView_Previews: PreviewProvider {
-    static var previews: some View {
-        SessionManagementView()
-            .environmentObject(SessionManager())
-            .padding()
-            .background(DesignTokens.CosmosColors.background)
-    }
+#Preview {
+    SessionManagementView()
+        .environmentObject(SessionManager())
+        .padding()
+        .background(DesignTokens.CosmosColors.background)
 }
-#endif

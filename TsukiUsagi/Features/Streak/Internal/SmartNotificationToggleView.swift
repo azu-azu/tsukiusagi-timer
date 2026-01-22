@@ -140,15 +140,8 @@ struct UsagePatternInsightsView: View {
     }
 }
 
-#if DEBUG
-struct SmartNotificationToggleView_Previews: PreviewProvider {
-    static var previews: some View {
-        let streakManager = StreakManager()
-
-        SmartNotificationToggleView(streakManager: streakManager)
-            .padding()
-            .background(DesignTokens.CosmosColors.background)
-            .previewDisplayName("Smart Notification Toggle")
-    }
+#Preview("Smart Notification Toggle") {
+    SmartNotificationToggleView(streakManager: StreakManager())
+        .padding()
+        .background(DesignTokens.CosmosColors.background)
 }
-#endif

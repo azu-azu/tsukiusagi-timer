@@ -70,59 +70,30 @@ struct CommonHeaderView: View {
 }
 
 // MARK: - プレビュー
-#if DEBUG
-struct CommonHeaderView_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack(spacing: 20) {
-            // 標準的なClose/Doneパターン
-            CommonHeaderView(
-                configuration: .closeDone(
-                    title: "Settings",
-                    onDone: { print("Done tapped") }
-                )
+#Preview {
+    VStack(spacing: 20) {
+        CommonHeaderView(
+            configuration: .closeDone(
+                title: "Settings",
+                onDone: { print("Done tapped") }
             )
-
-            Divider()
-
-            // Cancel/Saveパターン
-            CommonHeaderView(
-                configuration: .cancelSave(
-                    title: "Edit Record",
-                    onSave: { print("Save tapped") }
-                )
+        )
+        Divider()
+        CommonHeaderView(
+            configuration: .cancelSave(
+                title: "Edit Record",
+                onSave: { print("Save tapped") }
             )
-
-            Divider()
-
-            // 右ボタンのみの例
-            CommonHeaderView(
-                configuration: .rightButtonOnly(
-                    title: "View Only",
-                    rightButtonTitle: "Edit",
-                    rightButtonAction: { print("Edit tapped") }
-                )
+        )
+        Divider()
+        CommonHeaderView(
+            configuration: .rightButtonOnly(
+                title: "View Only",
+                rightButtonTitle: "Edit",
+                rightButtonAction: { print("Edit tapped") }
             )
-
-            Divider()
-
-            // 削除アクションの例
-            CommonHeaderView(
-                configuration: HeaderConfiguration(
-                    title: "Delete Item",
-                    leftButton: HeaderButton(
-                        title: "Cancel",
-                        action: { print("Cancel") }
-                    ),
-                    rightButton: HeaderButton(
-                        title: "Delete",
-                        action: { print("Delete") }
-                    )
-                )
-            )
-
-            Spacer()
-        }
-        .background(DesignTokens.CosmosColors.background)
+        )
+        Spacer()
     }
+    .background(DesignTokens.CosmosColors.background)
 }
-#endif

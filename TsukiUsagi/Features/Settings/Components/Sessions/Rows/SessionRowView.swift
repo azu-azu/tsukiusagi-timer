@@ -42,19 +42,15 @@ struct SessionRowView: View {
     }
 }
 
-#if DEBUG
-struct SessionRowView_Previews: PreviewProvider {
-    static var previews: some View {
-        SessionRowView(
-            session: SessionName(name: "Test Session", tasks: [TaskItem(text: "Test Subtitle")]),
-            editingId: .constant(nil),
-            editingName: .constant(""),
-            editingTasks: .constant([""]),
-            showDeleteAlert: .constant(nil),
-            saveEdit: { _ in },
-            deleteSession: { _ in }
-        )
-        .environmentObject(SessionManager())
-    }
+#Preview {
+    SessionRowView(
+        session: SessionName(name: "Test Session", tasks: [TaskItem(text: "Test Subtitle")]),
+        editingId: .constant(nil),
+        editingName: .constant(""),
+        editingTasks: .constant([""]),
+        showDeleteAlert: .constant(nil),
+        saveEdit: { _ in },
+        deleteSession: { _ in }
+    )
+    .environmentObject(SessionManager())
 }
-#endif

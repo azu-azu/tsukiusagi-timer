@@ -56,11 +56,7 @@ struct ViewHistorySectionView: View {
     }
 }
 
-#if DEBUG
-struct ViewHistorySectionView_Previews: PreviewProvider {
-    static var previews: some View {
-        ViewHistorySectionView()
-            .environmentObject(HistoryViewModel())
-    }
+#Preview {
+    ViewHistorySectionView()
+        .environmentObject(HistoryViewModel())
 }
-#endif
