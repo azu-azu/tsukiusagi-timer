@@ -377,6 +377,7 @@ private extension ContentView {
 
 // Dummy* は MockDependencyContainer への統一方針により削除
 
+#if DEBUG
 #Preview {
     ContentViewPreviewWrapper()
 }
@@ -391,3 +392,4 @@ private struct ContentViewPreviewWrapper: View {
             .environmentObject(mock.sessionManager)
     }
 }
+#endif

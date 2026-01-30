@@ -248,6 +248,7 @@ private extension Text {
     }
 }
 
+#if DEBUG
 #Preview(traits: .landscapeLeft) {
     let timerVM = PreviewData.MockServices.makeTimerViewModel()
     let historyVM = HistoryViewModel()
@@ -262,3 +263,4 @@ private extension Text {
     .environmentObject(historyVM)
     .environmentObject(sessionManager)
 }
+#endif

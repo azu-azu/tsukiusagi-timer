@@ -58,6 +58,7 @@ struct EditRecordHeaderView: View {
 }
 
 // MARK: - プレビュー
+#if DEBUG
 #Preview {
     EditRecordHeaderView(
         editedActivity: "Work",
@@ -70,3 +71,4 @@ struct EditRecordHeaderView: View {
     .environmentObject(PreviewData.MockServices.makeTimerViewModel())
     .background(DesignTokens.CosmosColors.background)
 }
+#endif

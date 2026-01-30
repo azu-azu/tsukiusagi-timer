@@ -37,8 +37,10 @@ struct SettingsHeaderView: View {
 }
 
 // MARK: - プレビュー
+#if DEBUG
 #Preview {
     SettingsHeaderView()
         .environmentObject(PreviewData.MockServices.makeTimerViewModel())
         .background(DesignTokens.CosmosColors.background)
 }
+#endif

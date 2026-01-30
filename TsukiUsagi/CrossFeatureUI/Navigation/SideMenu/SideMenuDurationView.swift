@@ -236,9 +236,11 @@ struct SideMenuDurationRowView: View {
     // durationButton removed - now using PlusMinusButton component
 }
 
+#if DEBUG
 #Preview {
     SideMenuDurationView(isPresented: .constant(true))
         .environmentObject(PreviewData.MockServices.makeTimerViewModel())
         .padding()
         .background(DesignTokens.CosmosColors.background)
 }
+#endif
