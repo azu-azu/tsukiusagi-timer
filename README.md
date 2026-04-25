@@ -154,11 +154,11 @@ Copyright © 2025 TsukiUsagi
 ---
 
 ### ✨ App Store
-- v1.0.0 2025/10/15
-- v1.1.0 2025/10/21 - Design tweaks
-- v1.2.0 2025/11/02 - Live Activity support
-- v1.2.1 2025/11/08 - Bug fixes (Timer display, Animation, Live Activity)
-- v1.3.0 2025/12/08 - UI refresh with TsukiSound-style cards, chat-style Reflection input, emoji prefixes for sessions/tasks
-- v1.4.0 2025/12/17 - BottomInputBar improvements, Live Activity fixes, keyboard behavior fixes
-- v1.4.1 2025/12/18 - Reflection card layout improvements, EditRecordView fixes
 - v1.5.0 2026/01/30 - In-app language switcher, Settings screen, event-driven TimerViewModel, code cleanup and SwiftLint fixes
+- v1.4.1 2025/12/18 - Reflection card layout improvements, EditRecordView fixes
+- v1.4.0 2025/12/17 - BottomInputBar improvements, Live Activity fixes, keyboard behavior fixes
+- v1.3.0 2025/12/08 - UI refresh with TsukiSound-style cards, chat-style Reflection input, emoji prefixes for sessions/tasks
+- v1.2.1 2025/11/08 - Bug fixes (Timer display, Animation, Live Activity)
+- v1.2.0 2025/11/02 - Live Activity support
+- v1.1.0 2025/10/21 - Design tweaks
+- v1.0.0 2025/10/15
